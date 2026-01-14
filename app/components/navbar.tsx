@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { Search, Sun, User, ShoppingBag } from "lucide-react"
+import Link from 'next/link'
 
 export const Navbar = () => {
 
@@ -38,9 +39,9 @@ export const Navbar = () => {
                         </ul>
                     </div>
                     <div className="navbar-center">
-                        <a className="text-2xl font-bold">
+                        <Link href="/" className="text-2xl font-bold">
                             HYPER<span className="text-second">REAL</span>
-                        </a>
+                        </Link>
                     </div>
                     <div className="navbar-end gap-2">
 
