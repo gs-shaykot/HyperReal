@@ -45,8 +45,8 @@ model User {
 
   createdAt DateTime  @default(now())
   addresses Address[]
-  carts     Cart[]
   orders    Order[]
+  cart      Cart?
 
   @@map("user")
 }
@@ -76,12 +76,13 @@ model Category {
 }
 
 model Product {
-  id              String           @id @default(uuid())
-  name            String
-  description     String
-  price           Float
-  isAvailable     Boolean          @default(true)
-  categoryId      String
+  id          String  @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  isAvailable Boolean @default(true)
+  categoryId  String
+
   category        Category         @relation(fields: [categoryId], references: [id])
   productVariants ProductVariant[]
   productImages   ProductImage[]
@@ -102,17 +103,17 @@ model ProductVariant {
 }
 
 model ProductImage {
-  id        String @id @default(uuid())
+  id        String  @id @default(uuid())
   productId String
   imageUrl  String
-
-  product Product @relation(fields: [productId], references: [id])
+  color     String?
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Cart {
   id        String     @id @default(uuid())
-  UserId    String
-  user      User       @relation(fields: [UserId], references: [id])
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
   cartItems CartItem[]
 }
 
