@@ -1,7 +1,69 @@
+'use client';
+import { RegisterType, UserType } from '@/app/types/RegisterState';
+import axios from 'axios';
+import { Eye, EyeClosed, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react'
+import { useActionState, useState } from 'react';
+
+const initialState: RegisterType = {
+    success: false,
+    message: "",
+};
+
+export const RegisterUser = async (prevState: RegisterType, formData: FormData) => {
+    const fullName = formData.get('fullName') as string
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string 
+
+    if (!email || !password) {
+        return {
+            success: false,
+            message: 'Email and password are required.'
+        }
+    }
+
+    try {
+        const profileImage = formData.get('profileImage') as File | null
+        let imageUrl = "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png"
+        if (profileImage && profileImage.size > 0) {
+            const uploadData = new FormData();
+            uploadData.append('file', profileImage);
+
+            const uploadRes = await axios.post('/api/uploadImage', uploadData);
+            imageUrl = uploadRes.data.secure_url || uploadRes.data.url;
+        }
+
+        const UserData: UserType = {
+            name: fullName.toUpperCase(),
+            email,
+            password,
+            role: 'USER',
+            PhotoUrl: imageUrl,
+        } 
+        const registerProfile = await axios.post("/api/register", UserData)  
+
+        return {
+            success: true,
+            message: `Registered with image URL: ${imageUrl}`,
+        }
+
+    } catch (error) {
+        return {
+            success: false,
+            message: 'An error occurred during registration.'
+        }
+    }
+}
 
 export const Register = () => {
+
+    const [ShowPassword, setShowPassword] = useState(false);
+
+    const [state, action, isPending] = useActionState(
+        RegisterUser,
+        initialState
+    );
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-main/95 px-4">
             <div className="relative w-full max-w-md bg-zinc-900/90 backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl">
@@ -22,7 +84,24 @@ export const Register = () => {
                     </div>
 
                     {/* Form */}
-                    <form className="space-y-3"> 
+                    <form action={action} className="space-y-3">
+
+                        <div>
+                            <label className="label">
+                                <span className="label-text text-xs tracking-widest text-zinc-500">
+                                    FULL NAME
+                                </span>
+                            </label>
+                            {/* if anyone type the name should be uppercase */}
+                            <input
+                                required={true}
+                                type="text"
+                                name="fullName"
+                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none uppercase"
+                                placeholder='Enter your full name'
+                            />
+                        </div>
+
                         <div>
                             <label className="label">
                                 <span className="label-text text-xs tracking-widest text-zinc-500">
@@ -30,8 +109,10 @@ export const Register = () => {
                                 </span>
                             </label>
                             <input
+                                required={true}
                                 type="email"
-                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none"
+                                name="email"
+                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none lowercase"
                                 placeholder='Enter your email address'
                             />
                         </div>
@@ -42,14 +123,25 @@ export const Register = () => {
                                     SET PASSCODE
                                 </span>
                             </label>
-                            <input
-                                type="password"
-                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none"
-                                placeholder='Enter your passcode'
-                            />
+
+                            <div className='relative'>
+                                <input
+                                    required={true}
+                                    type={ShowPassword ? "text" : "password"}
+                                    name="password"
+                                    className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none relative"
+                                    placeholder='Enter your passcode'
+                                />
+                                {
+                                    ShowPassword ?
+                                        <Eye size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} /> :
+                                        <EyeOff size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} />
+                                }
+
+                            </div>
                         </div>
 
-                        
+
                         <div>
                             <label className="label">
                                 <span className="label-text text-xs tracking-widest text-zinc-500">
@@ -59,16 +151,28 @@ export const Register = () => {
 
                             <input
                                 type="file"
+                                name="profileImage"
                                 className="file-input file-input-neutral w-full bg-black border-zinc-700 text-zinc-400 focus:border-lime-400"
                             />
                         </div>
 
                         {/* CTA */}
-                        <button className="btn shadow-none w-full bg-white text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
-                            JOIN SYNDICATE
+                        <button
+                            disabled={isPending}
+
+                            className="btn shadow-none w-full bg-white text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
+                            {isPending ? "Creating account..." : "Register"}
                         </button>
                     </form>
-
+                    <p>
+                        {
+                            state.message && (
+                                <span className={`text-sm ${state.success ? 'text-lime-400' : 'text-red-500'}`}>
+                                    {state.message}
+                                </span>
+                            )
+                        }
+                    </p>
                     {/* Footer link */}
                     <div className="text-center pt-2">
                         <Link
@@ -77,7 +181,7 @@ export const Register = () => {
                         >
                             RETURN TO LOGIN
                         </Link>
-                        
+
                     </div>
 
                 </div>
