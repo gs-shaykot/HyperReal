@@ -17,9 +17,9 @@ export const Navbar = () => {
             {/* <div>
                 <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
             </div> */}
-
-            <div className='sticky top-0 z-50'>
-                <div className="navbar bg-main/90 text-white shadow-sm px-6">
+            {/*  */}
+            <div className='border-b border-zinc-800 bg-main/80  backdrop-blur-xs sticky top-0 z-50 transition-colors duration-300'>
+                <div className="navbar text-white shadow-sm px-6">
                     <div className="navbar-start">
                         <div className="dropdown">
                             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -29,7 +29,7 @@ export const Navbar = () => {
                             </div>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-black rounded-box z-1 mt-3 w-52 p-2 shadow">
+                                className="menu menu-sm dropdown-content bg-main/85 rounded-box z-1 mt-3 w-52 p-2 shadow">
                                 {navLinks}
                             </ul>
                         </div>

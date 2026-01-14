@@ -3,7 +3,7 @@
 @plugin "daisyui";
 
 @theme{
-    --color-main: #0a0a0a;
+    --color-main: #18181b;
     --color-second: #ccff00;
     --font-mono: 'Space Mono', monospace;
 }
