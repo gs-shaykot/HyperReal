@@ -16,8 +16,7 @@ export async function POST(req: Request) {
                 role,
                 PhotoUrl
             }
-        })
-        console.log('User creation check:', submitUser);
+        }) 
         return NextResponse.json({ submitUser }, { status: 201 });
 
     } catch (error) {

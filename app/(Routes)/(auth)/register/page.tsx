@@ -13,7 +13,7 @@ const initialState: RegisterType = {
 export const RegisterUser = async (prevState: RegisterType, formData: FormData) => {
     const fullName = formData.get('fullName') as string
     const email = formData.get('email') as string
-    const password = formData.get('password') as string 
+    const password = formData.get('password') as string
 
     if (!email || !password) {
         return {
@@ -39,12 +39,12 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             password,
             role: 'USER',
             PhotoUrl: imageUrl,
-        } 
-        const registerProfile = await axios.post("/api/register", UserData)  
+        }
+        const registerProfile = await axios.post("/api/register", UserData)
 
         return {
             success: true,
-            message: `Registered with image URL: ${imageUrl}`,
+            message: `User Registration Successful. Please Login to continue.`,
         }
 
     } catch (error) {
@@ -164,15 +164,13 @@ export const Register = () => {
                             {isPending ? "Creating account..." : "Register"}
                         </button>
                     </form>
-                    <p>
-                        {
-                            state.message && (
-                                <span className={`text-sm ${state.success ? 'text-lime-400' : 'text-red-500'}`}>
-                                    {state.message}
-                                </span>
-                            )
-                        }
-                    </p>
+                    {
+                        state.message && (
+                            <p className={`text-sm mt-2 text-center ${state.success ? 'text-lime-400' : 'text-red-500'}`}>
+                                User Registration {state.success ? 'Successful' : 'Failed'} : {state.message}
+                            </p>
+                        )
+                    }
                     {/* Footer link */}
                     <div className="text-center pt-2">
                         <Link
