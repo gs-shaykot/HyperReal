@@ -7,8 +7,7 @@ export default async function Home() {
 
   // console.log("SERVER SESSION:", session?.user);
 
-  if (!session) {
-    return <p>Not authenticated</p>;
+  if (!session) { 
   }
 
   return (

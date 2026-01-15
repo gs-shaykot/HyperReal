@@ -36,7 +36,8 @@ export const authOptions: AuthOptions = {
                     email: Fetchuser.email,
                     role: Fetchuser.role,
                     createdAt: Fetchuser.createdAt,
-                    picture: Fetchuser.PhotoUrl
+                    picture: Fetchuser.PhotoUrl ??
+                        "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png",
                 }
                 return user;
             },
@@ -49,12 +50,12 @@ export const authOptions: AuthOptions = {
         secret: process.env.AUTH_SECRET,
     },
     callbacks: {
-        async jwt({ token, user }) { 
+        async jwt({ token, user }) {
 
             if (user && 'role' in user) {
                 token.role = (user as any).role;
                 token.picture = (user as any).picture;
-            } 
+            }
             return token
         },
         async session({ session, token }: any) {

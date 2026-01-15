@@ -31,13 +31,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <div className="fixed inset-0 -z-10 bg-main" />
-        <Navbar />
-        {/* PAGE CONTENT */}
-        <main className="relative">
-          <Providers>
+        <Providers>
+          <Navbar />
+          
+          {/* PAGE CONTENT */}
+          <main className="relative">
             {children}
-          </Providers>
-        </main>
+          </main>
+        </Providers>
 
       </body>
     </html>
