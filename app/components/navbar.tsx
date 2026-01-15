@@ -28,7 +28,7 @@ export const Navbar = () => {
                 </div> */}
 
             {/*  */}
-            <div className={`${theme === 'light' ? 'bg-main/80' : 'bg-white'} border-b border-zinc-800   backdrop-blur-xs sticky top-0 z-50 transition-colors duration-300`}>
+            <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite border-gray-300/85 shadow'} border-b    backdrop-blur-xs sticky top-0 z-50 transition-colors duration-300`}>
                 <div className="navbar text-white shadow-sm px-3 md:px-6">
                     <div className="navbar-start w-[30%] md:w-[50%]">
                         <div className="dropdown">
@@ -103,7 +103,7 @@ export const Navbar = () => {
                                         </div>
                                     ) : (
                                         <Link href="/login" className="btn btn-ghost btn-circle btn-sm">
-                                            <User size={20} strokeWidth={1.2} />
+                                            <User size={20} strokeWidth={1.2} className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'}`} />
                                         </Link>
                                     )
                             }

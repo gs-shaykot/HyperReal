@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 
 type LoginState = {
     success: boolean;
@@ -77,6 +78,7 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 export const Login = () => {
     const router = useRouter();
     const [state, action, isPending] = useActionState(LoginAction, initialState);
+    const theme = useSelector((state: any) => state.themeToggle.mode);
 
     useEffect(() => {
         if (state.success) {
@@ -87,21 +89,21 @@ export const Login = () => {
     }, [state.success, router]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center px-4 bg-black">
+        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-halfWhite'}`}>
             {/* Card */}
-            <div className="w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
+            <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
 
                 {/* LEFT PANEL */}
                 <div className="p-10 flex flex-col justify-center space-y-4">
 
                     {/* Header */}
                     <div>
-                        <h1 className="text-3xl font-extrabold leading-tight">
-                            <span className="text-white">SYSTEM</span><br />
+                        <h1 className={`text-3xl font-extrabold leading-tight`}>
+                            <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>SYSTEM</span><br />
                             <span className="text-second">ACCESS</span>
                         </h1>
 
-                        <p className="mt-3 text-sm text-zinc-400 max-w-sm">
+                        <p className={`mt-3 text-sm ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'} max-w-sm`}>
                             Enter credentials to access the HyperReal mainframe.
                         </p>
                     </div>
@@ -141,9 +143,9 @@ export const Login = () => {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your identity"
-                                className={`input w-full bg-black border ${state.errors?.email
-                                        ? 'border-red-500 focus:border-red-500'
-                                        : 'border-zinc-700 focus:border-second'
+                                className={` ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} input w-full border ${state.errors?.email
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-zinc-700 focus:border-second'
                                     } text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
@@ -164,9 +166,9 @@ export const Login = () => {
                                 type="password"
                                 name="password"
                                 placeholder="Enter passcode"
-                                className={`input w-full bg-black border ${state.errors?.password
-                                        ? 'border-red-500 focus:border-red-500'
-                                        : 'border-zinc-700 focus:border-second'
+                                className={`${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}  input w-full bg-black border ${state.errors?.password
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-zinc-700 focus:border-second'
                                     } text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
@@ -181,8 +183,8 @@ export const Login = () => {
                             type="submit"
                             disabled={isPending}
                             className={`btn w-full tracking-widest font-semibold transition-all ${isPending
-                                    ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                                    : 'bg-second text-black hover:bg-lime-400'
+                                ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
+                                : 'bg-second text-black hover:bg-lime-400'
                                 }`}
                         >
                             {isPending ? (
@@ -201,7 +203,7 @@ export const Login = () => {
                     {/* Footer */}
                     <p className="text-xs text-zinc-500">
                         No identity found?{" "}
-                        <Link href="/register" className="text-second hover:underline cursor-pointer">
+                        <Link href="/register" className={`${theme === 'light' ? 'text-second' : 'text-zinc-900 font-bold'} hover:underline cursor-pointer`}>
                             CREATE OPERATIVE ACCOUNT
                         </Link>
                     </p>
@@ -229,8 +231,8 @@ export const Login = () => {
                             <li className="opacity-80">&gt; SECURE_CONNECTION_ESTABLISHED</li>
                             <li className="opacity-80">&gt; ENCRYPTION_LEVEL_MAX</li>
                             <li className={`transition-all duration-500 ${state.success
-                                    ? 'text-green-400 animate-pulse'
-                                    : 'opacity-80'
+                                ? 'text-green-400 animate-pulse'
+                                : 'opacity-80'
                                 }`}>
                                 &gt; {state.success ? 'ACCESS_GRANTED' : 'AWAITING_CREDENTIALS'}
                             </li>

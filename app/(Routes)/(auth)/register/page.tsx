@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Eye, EyeClosed, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const initialState: RegisterType = {
     success: false,
@@ -58,15 +59,15 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
 export const Register = () => {
 
     const [ShowPassword, setShowPassword] = useState(false);
-
     const [state, action, isPending] = useActionState(
         RegisterUser,
         initialState
     );
+    const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-main/95 px-4">
-            <div className="relative w-full max-w-md bg-zinc-900/90 backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl">
+        <div className={`${theme === 'light' ? 'bg-main/95' : 'bg-halfWhite'} min-h-screen flex items-center justify-center  px-4`}>
+            <div className={`relative w-full max-w-md ${theme === 'light' ? 'bg-zinc-900/90' : 'bg-gray-100/80 border-t-0 border-zinc-800'} backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>
                 {/* Neon top bar */}
                 <div className="absolute top-0 left-0 h-1 w-full bg-second rounded-t-lg" />
 
@@ -74,11 +75,11 @@ export const Register = () => {
                     {/* Header */}
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-wide leading-tight">
-                            <span className="text-white">NEW</span>{" "}
+                            <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>NEW</span>{" "}
                             <span className="text-second italic">OPERATIVE</span>
                         </h1>
 
-                        <p className="mt-2 text-sm text-zinc-400">
+                        <p className={`mt-2 text-sm ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'}`}>
                             Join the syndicate. Early access to drops and exclusive gear.
                         </p>
                     </div>
@@ -97,7 +98,7 @@ export const Register = () => {
                                 required={true}
                                 type="text"
                                 name="fullName"
-                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none uppercase"
+                                className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none uppercase`} 
                                 placeholder='Enter your full name'
                             />
                         </div>
@@ -112,7 +113,7 @@ export const Register = () => {
                                 required={true}
                                 type="email"
                                 name="email"
-                                className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none lowercase"
+                                className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none lowercase`}
                                 placeholder='Enter your email address'
                             />
                         </div>
@@ -129,7 +130,7 @@ export const Register = () => {
                                     required={true}
                                     type={ShowPassword ? "text" : "password"}
                                     name="password"
-                                    className="placeholder:text-zinc-800 text-gray-400 input w-full bg-black border border-zinc-700 focus:border-second focus:outline-none relative"
+                                    className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none relative`}
                                     placeholder='Enter your passcode'
                                 />
                                 {
@@ -152,15 +153,14 @@ export const Register = () => {
                             <input
                                 type="file"
                                 name="profileImage"
-                                className="file-input file-input-neutral w-full bg-black border-zinc-700 text-zinc-400 focus:border-lime-400"
+                                className={`file-input file-input-neutral w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border-zinc-700 text-zinc-400 focus:border-lime-400`}
                             />
                         </div>
 
                         {/* CTA */}
                         <button
-                            disabled={isPending}
-
-                            className="btn shadow-none w-full bg-white text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
+                            disabled={isPending} 
+                            className="btn shadow-none w-full bg-second text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
                             {isPending ? "Creating account..." : "Register"}
                         </button>
                     </form>
