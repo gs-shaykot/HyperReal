@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`font-mono antialiased`}
       >
         <div className="fixed inset-0 -z-10 bg-main" />
         <Providers>
