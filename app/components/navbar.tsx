@@ -16,9 +16,9 @@ export const Navbar = () => {
     console.log(theme)
     const navLinks =
         <>
-            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second`}>Shop All</a></li>
-            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second`}>New Arrivals</a></li>
-            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second`}>LookBook</a></li>
+            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>Shop All</a></li>
+            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>New Arrivals</a></li>
+            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>LookBook</a></li>
         </>
 
     return (

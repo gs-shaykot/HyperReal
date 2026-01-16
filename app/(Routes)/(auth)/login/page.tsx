@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { TriangleAlert, UserRoundCheck } from 'lucide-react';
 
 type LoginState = {
     success: boolean;
@@ -89,14 +90,11 @@ export const Login = () => {
     }, [state.success, router]);
 
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-halfWhite'}`}>
-            {/* Card */}
+        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-halfWhite'}`}> 
             <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
-
-                {/* LEFT PANEL */}
+ 
                 <div className="p-10 flex flex-col justify-center space-y-4">
-
-                    {/* Header */}
+ 
                     <div>
                         <h1 className={`text-3xl font-extrabold leading-tight`}>
                             <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>SYSTEM</span><br />
@@ -108,18 +106,18 @@ export const Login = () => {
                         </p>
                     </div>
 
-                    {/* Cyberpunk Error Alert */}
+                     
                     {state.message && (
                         <div className={`
                             border-l-4 p-3 rounded-r font-mono text-xs
                             ${state.success
-                                ? 'bg-green-950/50 border-green-400 text-green-400'
-                                : 'bg-red-950/50 border-red-500 text-red-400'}
+                                ? 'bg-green-950/50 border-green-400 text-green-700'
+                                : 'bg-red-950/50 border-red-500 text-red-700'}
                             animate-pulse
                         `}>
                             <div className="flex items-start gap-2">
                                 <span className="text-lg">
-                                    {state.success ? '✓' : '⚠'}
+                                    {state.success ? <UserRoundCheck /> : <TriangleAlert />}
                                 </span>
                                 <div>
                                     <p className="font-bold tracking-wider">
