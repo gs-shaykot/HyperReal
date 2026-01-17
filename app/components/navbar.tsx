@@ -7,8 +7,7 @@ import LogoutButton from '@/app/components/LogoutButton'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleTheme } from '@/app/redux/Slices/ThemeSlice'
 
-
-// imeplement theme toggle classes on this component's every required element based on the current theme state from redux & my logic.
+ 
 export const Navbar = () => {
     const { data: session } = useSession();
     const theme = useSelector((state: any) => state.themeToggle.mode);
@@ -29,17 +28,17 @@ export const Navbar = () => {
 
             {/*  */}
             <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite border-gray-300/85 shadow'} border-b    backdrop-blur-xs sticky top-0 z-50 transition-colors duration-300`}>
-                <div className="navbar text-white shadow-sm px-3 md:px-6">
+                <div className={`navbar ${theme === 'light' ? 'text-white' : 'text-zinc-900'} shadow-sm px-3 md:px-6`}>
                     <div className="navbar-start w-[30%] md:w-[50%]">
                         <div className="dropdown">
-                            <div tabIndex={0} role="button" className={`btn btn-ghost lg:hidden ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>
+                            <div tabIndex={0} role="button" className={`btn btn-ghost lg:hidden ${theme === 'light' ? 'text-white hover:bg-zinc-800 border-0 shadow-none' : 'text-zinc-900'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
                                 </svg>
                             </div>
                             <ul
                                 tabIndex={0}
-                                className="menu menu-sm dropdown-content bg-main/95 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                                className={`${theme === 'light' ? 'bg-zinc-900/95 border-zinc-800 border' : 'bg-halfWhite border-gray-300/85'} menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
                                 {navLinks}
                             </ul>
                         </div>
