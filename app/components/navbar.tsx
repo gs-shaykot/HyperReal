@@ -11,24 +11,22 @@ import { toggleTheme } from '@/app/redux/Slices/ThemeSlice'
 export const Navbar = () => {
     const { data: session } = useSession();
     const theme = useSelector((state: any) => state.themeToggle.mode);
-    const dispatch = useDispatch();
-    console.log(theme)
+    const dispatch = useDispatch(); 
+    
     const navLinks =
         <>
-            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>Shop All</a></li>
+            <li><Link href="/products" className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>Shop All</Link></li>
             <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>New Arrivals</a></li>
-            <li><a className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>LookBook</a></li>
+            <li><Link href="/lookbook" className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>LookBook</Link></li>
         </>
 
     return (
         <>
             {/* <div>
                     <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
-                </div> */}
-
-            {/*  */}
-            <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite border-gray-300/85 shadow'} border-b    backdrop-blur-xs sticky top-0 z-50 transition-colors duration-300`}>
-                <div className={`navbar ${theme === 'light' ? 'text-white' : 'text-zinc-900'} shadow-sm px-3 md:px-6`}>
+                </div> */}  
+            <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/70 border-gray-300/85'} border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
+                <div className={`navbar ${theme === 'light' ? 'text-white' : 'text-zinc-900'} px-3 md:px-6`}>
                     <div className="navbar-start w-[30%] md:w-[50%]">
                         <div className="dropdown">
                             <div tabIndex={0} role="button" className={`btn btn-ghost lg:hidden ${theme === 'light' ? 'text-white hover:bg-zinc-800 border-0 shadow-none' : 'text-zinc-900'}`}>

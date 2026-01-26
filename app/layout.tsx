@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import {Space_Mono } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/app/components/navbar";
 import { SessionProvider } from "next-auth/react";
 import Providers from "@/app/providers/Providers";
+import ThemeBackground from "@/app/components/ThemeBackground";
 
 
 export const metadata: Metadata = {
@@ -16,7 +17,6 @@ const spaceMono = Space_Mono({
   subsets: ['latin'],
   variable: '--font-space-mono',
 })
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,16 +25,15 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="light">
       <body className={spaceMono.variable}>
-        <div className="fixed inset-0 -z-10 bg-main" />
         <Providers>
-          <Navbar />
-
-          <main className="relative">
-            {children}
-          </main>
-
+          <div>
+            <ThemeBackground />
+            <Navbar />
+            <main className="relative">
+              {children}
+            </main>
+          </div>
         </Providers>
-
       </body>
     </html>
   );

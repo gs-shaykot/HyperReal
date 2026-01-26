@@ -91,21 +91,17 @@ export const Login = () => {
 
     return (
         <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-halfWhite'}`}> 
-            <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
- 
-                <div className="p-10 flex flex-col justify-center space-y-4">
- 
+            <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}> 
+                <div className="p-10 flex flex-col justify-center space-y-4">  
                     <div>
                         <h1 className={`text-3xl font-extrabold leading-tight`}>
                             <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>SYSTEM</span><br />
                             <span className="text-second">ACCESS</span>
-                        </h1>
-
+                        </h1>   
                         <p className={`mt-3 text-sm ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'} max-w-sm`}>
                             Enter credentials to access the HyperReal mainframe.
                         </p>
-                    </div>
-
+                    </div> 
                      
                     {state.message && (
                         <div className={`
