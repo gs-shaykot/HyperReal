@@ -28,7 +28,7 @@ export const Banner = () => {
                         <span className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} block text-6xl md:text-8xl  italic`}>
                             DEFY THE
                         </span>
-                        <span className="block text-6xl md:text-8xl  italic text-second ">
+                        <span className="block text-6xl md:text-8xl  italic text-second stroke-text">
                             ORDINARY
                         </span>
                     </h1>
