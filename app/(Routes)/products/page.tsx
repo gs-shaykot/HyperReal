@@ -11,8 +11,23 @@ type SeachProps = {
 export const page = async ({ searchParams }: any) => {
     const { category } = await searchParams || null;
     const activeId = category ?? null;
-    
+
     const categories = await prisma.category.findMany();
+    let products = null;
+
+    if (activeId) {
+        products = await prisma.product.findMany({
+            where: {
+                categoryId: activeId ?? undefined
+            }
+        });
+        console.log(products)
+    }
+    else {
+        products = await prisma.product.findMany();
+        console.log(products)
+    }
+    console.log(products);
 
     return (
         <div>
