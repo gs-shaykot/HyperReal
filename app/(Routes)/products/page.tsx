@@ -18,20 +18,38 @@ export const page = async ({ searchParams }: any) => {
     if (activeId) {
         products = await prisma.product.findMany({
             where: {
-                categoryId: activeId ?? undefined
+                categoryId: activeId ?? undefined,
+            },
+            include: {
+                category: {
+                    select: {
+                        name: true
+                    }
+                },
+                productImages: true
             }
         });
-        console.log(products)
     }
     else {
-        products = await prisma.product.findMany();
-        console.log(products)
+        products = await prisma.product.findMany({
+            include: {
+                category: {
+                    select: {
+                        name: true
+                    }
+                },
+                productImages: {
+                    select: {
+                        imageUrl: true
+                    }
+                }
+            }
+        });
     }
-    console.log(products);
-
+    console.log(products)
     return (
         <div>
-            <ProductLayout categories={categories} activeId={activeId} />
+            <ProductLayout categories={categories} activeId={activeId} products={products} />
         </div>
     )
 }
