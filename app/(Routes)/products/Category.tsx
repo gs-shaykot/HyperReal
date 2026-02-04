@@ -1,22 +1,22 @@
-import { CategoryProps } from '@/app/types/Category'
+import { ExtendedCategoryProps } from '@/app/types/Category'
 import { Funnel } from 'lucide-react'
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-export const Category = ({ categories }: CategoryProps) => {
-    const theme = useSelector((state: any) => state.themeToggle.mode);
-    const [activeId, setActiveId] = useState<string | number | null>(null);
-
+export const Category = ({ categories, activeId, setActiveId }: ExtendedCategoryProps) => {
+    const theme = useSelector((state: any) => state.themeToggle.mode);  
+    
     const indentifyClassName = (isActive: boolean) => ` 
-        cursor-pointer hover:underline
+        cursor-pointer underline-offset-4
+        transition-all duration-300 ease-out
         ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-800'} 
-         ${isActive ? `
-                text-blue-600 font-bold
-                before:w-2 before:h-2 before:bg-second
-                before:rounded-full before:inline-block before:mr-2
-                relative left-2
-  ` : ''} 
-    `;
+        ${isActive ? `
+            text-blue-600 font-bold
+            before:w-2 before:h-2 before:bg-second
+            before:rounded-full before:inline-block before:mr-2
+            translate-x-2
+        ` : ''}`;
+
 
     return (
         <div>
@@ -26,10 +26,10 @@ export const Category = ({ categories }: CategoryProps) => {
                     Categories
                 </h2>
             </div>
-            <ul className='flex flex-col gap-3 mt-4'>
+            <ul className='flex flex-col gap-3 mt-4 '>
                 <li
                     onClick={() => setActiveId(null)}
-                    className={`${indentifyClassName(activeId === null)}`}
+                    className={`${indentifyClassName(activeId === null)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
                 >
                     All
                 </li>
@@ -40,7 +40,7 @@ export const Category = ({ categories }: CategoryProps) => {
                         <li
                             key={category.id}
                             onClick={() => setActiveId(category.id)}
-                            className={`${indentifyClassName(activeId === category.id)}  hover:relative hover:left-2`}
+                            className={`${indentifyClassName(activeId === category.id)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
                         >
                             {category.name}
                         </li>
