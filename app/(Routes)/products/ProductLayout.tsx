@@ -4,10 +4,9 @@ import { CategoryProps } from '@/app/types/Category'
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-export const ProductLayout = ({ categories }: CategoryProps) => {
+export const ProductLayout = ({ categories, activeId }: CategoryProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
-    const [activeId, setActiveId] = useState<string | number | null>(null);
-
+    // const [activeId, setActiveId] = useState<string | number | null>(null);
 
     return (
         <main className={`h-screen ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/90 border-gray-300/85'} `}>
@@ -22,7 +21,7 @@ export const ProductLayout = ({ categories }: CategoryProps) => {
                 </div>
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
                     <aside>
-                        <Category categories={categories} activeId={activeId} setActiveId={setActiveId} />
+                        <Category categories={categories} activeId={activeId} />
                     </aside>
                     <section>
                         {/* This is where nested product routes will be rendered */}

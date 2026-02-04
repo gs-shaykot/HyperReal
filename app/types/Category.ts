@@ -4,10 +4,11 @@ export interface CategoryProps {
     name: string
     slug: string
     createdAt: Date
-  }[]
+  }[],
+  activeId?: string | number | null;
 }
 
-export interface ExtendedCategoryProps extends CategoryProps { 
-  activeId: string | number | null;
-  setActiveId: (id: string | number | null) => void;
-}
+// export interface ExtendedCategoryProps extends CategoryProps { 
+//   activeId: string | number | null;
+//   setActiveId: (id: string | number | null) => void;
+// }

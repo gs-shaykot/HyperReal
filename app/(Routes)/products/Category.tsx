@@ -1,11 +1,25 @@
-import { ExtendedCategoryProps } from '@/app/types/Category'
+import { CategoryProps } from '@/app/types/Category';
 import { Funnel } from 'lucide-react'
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import { useSelector } from 'react-redux';
 
-export const Category = ({ categories, activeId, setActiveId }: ExtendedCategoryProps) => {
-    const theme = useSelector((state: any) => state.themeToggle.mode);  
-    
+export const Category = ({ categories, activeId }: CategoryProps) => {
+    const theme = useSelector((state: any) => state.themeToggle.mode);
+
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const setCategory = (categoryId: string | number | null) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (categoryId === null) {
+            params.delete('category');
+        }
+        else {
+            params.set('category', String(categoryId));
+        }
+        router.push(`/products?${params.toString()}`);
+    };
+
     const indentifyClassName = (isActive: boolean) => ` 
         cursor-pointer underline-offset-4
         transition-all duration-300 ease-out
@@ -28,7 +42,7 @@ export const Category = ({ categories, activeId, setActiveId }: ExtendedCategory
             </div>
             <ul className='flex flex-col gap-3 mt-4 '>
                 <li
-                    onClick={() => setActiveId(null)}
+                    onClick={() => setCategory(null)}
                     className={`${indentifyClassName(activeId === null)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
                 >
                     All
@@ -39,7 +53,7 @@ export const Category = ({ categories, activeId, setActiveId }: ExtendedCategory
                     return (
                         <li
                             key={category.id}
-                            onClick={() => setActiveId(category.id)}
+                            onClick={() => setCategory(category.id)}
                             className={`${indentifyClassName(activeId === category.id)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
                         >
                             {category.name}
