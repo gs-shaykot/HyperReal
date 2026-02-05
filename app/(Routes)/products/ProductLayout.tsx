@@ -1,12 +1,11 @@
 'use client'
 import { Category } from '@/app/(Routes)/products/Category';
-import { CategoryProps } from '@/app/types/Category'
-import { useState } from 'react';
+import { ProductCard } from '@/app/(Routes)/products/ProductCard';
+import { ProductLayoutProps } from '@/app/types/Category';
 import { useSelector } from 'react-redux';
 
-export const ProductLayout = ({ categories, activeId }: CategoryProps) => {
+export const ProductLayout = ({ categories, activeId, products }: ProductLayoutProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
-    // const [activeId, setActiveId] = useState<string | number | null>(null);
 
     return (
         <main className={`h-screen ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/90 border-gray-300/85'} `}>
@@ -24,9 +23,8 @@ export const ProductLayout = ({ categories, activeId }: CategoryProps) => {
                         <Category categories={categories} activeId={activeId} />
                     </aside>
                     <section>
-                        {/* This is where nested product routes will be rendered */}
                         <div className="min-h-100">
-                            {/* Nested routes will be rendered here */}
+                            <ProductCard products={products} />
                         </div>
                     </section>
                 </div>

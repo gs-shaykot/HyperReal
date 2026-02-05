@@ -8,7 +8,8 @@ type SeachProps = {
     }
 }
 
-export const page = async ({ searchParams }: any) => {
+export const page = async ({ searchParams }: SeachProps) => {
+
     const { category } = await searchParams || null;
     const activeId = category ?? null;
 
@@ -46,7 +47,9 @@ export const page = async ({ searchParams }: any) => {
             }
         });
     }
+
     console.log(products)
+
     return (
         <div>
             <ProductLayout categories={categories} activeId={activeId} products={products} />

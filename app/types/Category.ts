@@ -1,24 +1,34 @@
-interface Product {
+
+interface Category {
+  id: string
+  name: string 
+}
+
+export interface ProductType {
   id: string;
   name: string;
   description: string;
   price: number;
   isAvailable: boolean;
   categoryId: string;
+
+  category: {    
+    name: string;
+  };              
+
+  productImages: {      
+    imageUrl: string;    
+  }[];                         
+
+  ProductVariants?: any[];
 }
 
-export interface CategoryProps {
-  categories: {
-    id: string
-    name: string
-    slug: string
-    createdAt: Date
-  }[],
-  activeId?: string | number | null;
-  products?: Product[] | null;
+export interface ProductProps {
+  products?: ProductType[];
 }
 
-// export interface ExtendedCategoryProps extends CategoryProps {
-//   activeId: string | number | null;
-//   setActiveId: (id: string | number | null) => void;
-// }
+export interface ProductLayoutProps {
+  categories: Category[];
+  activeId?: string | null;
+  products?: ProductType[];
+}

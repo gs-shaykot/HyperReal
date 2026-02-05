@@ -1,9 +1,9 @@
-import { CategoryProps } from '@/app/types/Category';
+import { ProductLayoutProps } from '@/app/types/Category';
 import { Funnel } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'; 
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector } from 'react-redux';
 
-export const Category = ({ categories, activeId }: CategoryProps) => {
+export const Category = ({ categories, activeId }: ProductLayoutProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     const router = useRouter();
@@ -53,7 +53,7 @@ export const Category = ({ categories, activeId }: CategoryProps) => {
                     return (
                         <li
                             key={category.id}
-                            onClick={() => setCategory(category.id)}
+                            onClick={() => setCategory(category.id ?? null)}
                             className={`${indentifyClassName(activeId === category.id)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
                         >
                             {category.name}
