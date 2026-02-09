@@ -7,12 +7,12 @@ import LogoutButton from '@/app/components/LogoutButton'
 import { useDispatch, useSelector } from 'react-redux'
 import { toggleTheme } from '@/app/redux/Slices/ThemeSlice'
 
- 
+
 export const Navbar = () => {
     const { data: session } = useSession();
     const theme = useSelector((state: any) => state.themeToggle.mode);
-    const dispatch = useDispatch(); 
-    
+    const dispatch = useDispatch();
+
     const navLinks =
         <>
             <li><Link href="/products" className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} hover:text-second bg-transparent!`}>Shop All</Link></li>
@@ -24,7 +24,7 @@ export const Navbar = () => {
         <>
             {/* <div>
                     <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
-                </div> */}  
+                </div> */}
             <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/70 border-gray-300/85'} border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
                 <div className={`max-w-7xl mx-auto navbar ${theme === 'light' ? 'text-white' : 'text-zinc-900'} px-3 md:px-6`}>
                     <div className="navbar-start w-[30%] md:w-[50%]">

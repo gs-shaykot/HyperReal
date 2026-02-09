@@ -11,6 +11,14 @@
     --color-halfWhite: #f3f4f6;
 }
 
+@layer base {
+  [data-theme="dark"] {
+    --color-second: #8fb300;
+    --color-main: #0a0a0a;
+  } 
+}
+
+
 body {
   font-family: var(--font-space-mono), monospace;
 }

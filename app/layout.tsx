@@ -5,6 +5,7 @@ import { Navbar } from "@/app/components/navbar";
 import { SessionProvider } from "next-auth/react";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
+import ThemeConnector from "@/app/components/ThemeConnector";
 
 
 export const metadata: Metadata = {
@@ -23,18 +24,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="light">
+    <html lang="en">
       <body className={spaceMono.variable}>
         <Providers>
-          <div>
-            <ThemeBackground />
-            <Navbar />
-            <main className="relative">
-              {children}
-            </main>
-          </div>
+          <ThemeConnector />   {/* side-effect only */}
+          <ThemeBackground />
+          <Navbar />
+          <main className="relative">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>
   );
+
+
+
 }
