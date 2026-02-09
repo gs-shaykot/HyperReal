@@ -20,7 +20,12 @@ export interface ProductType {
     imageUrl: string;    
   }[];                         
 
-  ProductVariants?: any[];
+  ProductVariants?: {
+    id: string;
+    size: string | number;
+    color: string;
+    stock: number;
+  }[];
 }
 
 export interface ProductProps {
@@ -31,4 +36,8 @@ export interface ProductLayoutProps {
   categories: Category[];
   activeId?: string | null;
   products?: ProductType[];
+}
+
+export interface ProductDetailsProps{
+  product: ProductType;
 }
