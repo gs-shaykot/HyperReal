@@ -7,7 +7,7 @@ export const page = async ({ params }: any) => {
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
-            category: { select: { name: true } },
+            category: { select: { name: true, slug: true } },
             productImages: { select: { imageUrl: true } },
             productVariants: {
                 select: {

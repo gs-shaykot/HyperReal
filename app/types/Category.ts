@@ -14,13 +14,14 @@ export interface ProductType {
 
   category: {    
     name: string;
+    slug: string;
   };              
 
   productImages: {      
     imageUrl: string;    
   }[];                         
 
-  ProductVariants?: {
+  productVariants?: {
     id: string;
     size: string | number;
     color: string;
