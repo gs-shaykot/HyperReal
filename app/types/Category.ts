@@ -23,7 +23,7 @@ export interface ProductType {
 
   productVariants?: {
     id: string;
-    size: string | number;
+    size: string | null;
     color: string;
     stock: number;
   }[];
