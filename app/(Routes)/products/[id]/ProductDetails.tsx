@@ -49,7 +49,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                     {/* VARIANTS */}
                     <div>
-                        <h1 className='font-bold text-base text-white mt-6'>Colors: <span className='text-second'>{selectedColor}</span></h1>
+                        <h1 className='font-bold text-base text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
                         <div className="flex gap-3">
                             {Extractedcolor.map(color => (
                                 <button
@@ -59,7 +59,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         setSelectedSize(null);
                                     }}
                                     className={`w-8 h-8 rounded-full border
-                                    ${selectedColor === color ? "border-lime-400" : "border-gray-600"}`}
+                                    ${selectedColor === color ? "border-lime-400" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
                                     title={color}
                                 />
                             ))}
