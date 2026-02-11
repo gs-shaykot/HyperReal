@@ -105,6 +105,15 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                     <Plus className='text-white' onClick={() => setQuantity((prev) => (prev < 10 ? prev + 1 : prev))} />
                                 </motion.div>
                             </div>
+
+                            {/* ADD TO CART BUTTON */}
+                            <div className='flex-1'>
+                                <motion.button
+                                    whileTap={{ scale: 0.98 }}
+                                    className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold text-black">
+                                    Add to Cart
+                                </motion.button>
+                            </div>
                         </div>
                     </div>
                 </div>
