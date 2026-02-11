@@ -1,8 +1,8 @@
 "use client"
 import { ProductDetailsProps } from '@/app/types/Category'
-import { Minus, Plus } from 'lucide-react';
+import { Check, Minus, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react'
-import {motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
@@ -56,16 +56,23 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <h1 className='font-bold text-sm text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
                             <div className="flex gap-3">
                                 {Extractedcolor.map(color => (
-                                    <button
-                                        key={color}
-                                        onClick={() => {
-                                            setSelectedColor(color);
-                                            setSelectedSize(null);
-                                        }}
-                                        className={`w-8 h-8 rounded-full border
-                                        ${selectedColor === color ? "border-lime-400" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
-                                        title={color}
-                                    />
+                                    <div className='flex justify-center items-center relative' key={color}>
+                                        <button
+                                            key={color}
+                                            onClick={() => {
+                                                setSelectedColor(color);
+                                                setSelectedSize(null);
+                                            }}
+                                            className={`w-8 h-8 rounded-full border
+                                            ${selectedColor === color ? "border-lime-400" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
+                                            title={color}
+                                        />
+                                        {
+                                            selectedColor === color && (
+                                                <Check className={`${color.toLowerCase()==='neon breach' ? 'text-black' : 'text-white'} absolute font-bold`} size={18} strokeWidth={3}/>
+                                            )
+                                        }
+                                    </div>
                                 ))}
                             </div>
                         </div>
