@@ -50,7 +50,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                     </div>
 
                     {/* VARIANTS */}
-                    <div>
+                    <div className='border-b border-zinc-600 pb-10'>
                         {/* COLORS */}
                         <div className='mb-5'>
                             <h1 className='font-bold text-sm text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
@@ -69,7 +69,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         />
                                         {
                                             selectedColor === color && (
-                                                <Check className={`${color.toLowerCase()==='neon breach' ? 'text-black' : 'text-white'} absolute font-bold`} size={18} strokeWidth={3}/>
+                                                <Check className={`${color.toLowerCase() === 'neon breach' ? 'text-black' : 'text-white'} absolute font-bold`} size={18} strokeWidth={3} />
                                             )
                                         }
                                     </div>
@@ -121,6 +121,24 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                     Add to Cart
                                 </motion.button>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* TABS */}
+                    <div className="tabs tabs-border ">
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="DETAILS" />
+                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                            <p>Constructed from premium industrial-grade materials. Reinforced stitching at stress points. Designed in Neo-Tokyo.</p>
+                        </div>
+
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="SHIPPING" defaultChecked />
+                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                            <p>Free worldwide shipping on orders over $150. Standard delivery 5-7 business days. Express available at checkout.</p>
+                        </div>
+
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="RETURNS" />
+                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                            <p>30-day return policy. Items must be unworn with tags attached. Free returns on all domestic orders.</p>
                         </div>
                     </div>
                 </div>

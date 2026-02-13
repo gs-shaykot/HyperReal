@@ -27,4 +27,11 @@ body {
   -webkit-text-stroke: 2px var(--color-second);
   -webkit-text-fill-color: transparent;
   paint-order: stroke fill;
+} 
+
+.tabs-border > .tab:checked::before {
+  border-top: none;
+  background-color: #8fb300 !important;
+  left: -5px;
+  width: 90%;
 }
