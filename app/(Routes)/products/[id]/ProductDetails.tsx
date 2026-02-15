@@ -50,7 +50,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                     </div>
 
                     {/* VARIANTS */}
-                    <div className='border-b border-zinc-600 pb-10'>
+                    <div className='border-b border-zinc-600 pb-10'> 
                         {/* COLORS */}
                         <div className='mb-5'>
                             <h1 className='font-bold text-sm text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>

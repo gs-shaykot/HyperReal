@@ -3,9 +3,12 @@ import { easeOut, motion } from "framer-motion";
 import { ArrowUpRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
 
 
-export const ProductCard = ({ products }: ProductProps) => { 
+export const ProductCard = ({ products }: ProductProps) => {
+
+    const theme = useSelector((state: any) => state.themeToggle.mode);
     return (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' >
             {
@@ -23,7 +26,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                                 boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                                 borderColor: "#8fb300",
                             }}
-                            className="border-2 border-transparent bg-zinc-900 overflow-hidden cursor-pointer group"
+                            className={` ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent"} border-2 overflow-hidden cursor-pointer group` }
                         >
                             {/* IMAGE */}
                             <div className="relative h-80 w-full overflow-hidden">
@@ -45,7 +48,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                             {/* CONTENT */}
                             <div className="px-3 py-2 text-sm">
                                 <div className="flex justify-between items-center">
-                                    <h3 className="font-semibold text-white">
+                                    <h3 className={`font-semibold ${theme === "dark" ? "text-black" : "text-white"}`}>
                                         {product.name}
                                     </h3>
                                     <div className="flex items-center gap-1">
