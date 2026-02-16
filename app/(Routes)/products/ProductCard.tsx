@@ -26,10 +26,10 @@ export const ProductCard = ({ products }: ProductProps) => {
                                 boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                                 borderColor: "#8fb300",
                             }}
-                            className={` ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent"} border-2 overflow-hidden cursor-pointer group` }
+                            className={` ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent"} border-2 overflow-hidden cursor-pointer group`}
                         >
                             {/* IMAGE */}
-                            <div className="relative h-80 w-full overflow-hidden">
+                            <div className="relative group z-10 h-80 w-full overflow-hidden">
                                 <motion.div
                                     whileHover={{ scale: 1.09 }}
                                     transition={{ duration: 0.4, ease: "easeOut" }}
@@ -43,6 +43,8 @@ export const ProductCard = ({ products }: ProductProps) => {
                                         sizes="(max-width: 768px) 100vw, 33vw"
                                     />
                                 </motion.div>
+                                <div className="w-5 h-5 border-b border-r absolute bottom-2 right-2 z-20 group-hover:border-second transition-all" /> 
+                                <div className="w-5 h-5 border-b border-l absolute bottom-2 left-2 z-20 group-hover:border-second transition-all" />  
                             </div>
 
                             {/* CONTENT */}
