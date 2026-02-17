@@ -8,7 +8,7 @@ export const ProductLayout = ({ categories, activeId, products }: ProductLayoutP
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
-        <main className={`h-screen ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/90 border-gray-300/85'} `}>
+        <main className={` ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/90 border-gray-300/85'} `}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
                 <div className="mb-10">
                     <h1 className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} text-4xl font-bold uppercase tracking-wide`}>

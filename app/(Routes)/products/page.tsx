@@ -46,10 +46,8 @@ export const page = async ({ searchParams }: SeachProps) => {
                 }
             }
         });
-    }
-
-    console.log(products)
-
+    } 
+    
     return (
         <div>
             <ProductLayout categories={categories} activeId={activeId} products={products} />
