@@ -1,7 +1,7 @@
 
 interface Category {
   id: string
-  name: string 
+  name: string
 }
 
 export interface ProductType {
@@ -12,14 +12,14 @@ export interface ProductType {
   isAvailable: boolean;
   categoryId: string;
 
-  category: {    
+  category: {
     name: string;
-    slug: string;
-  };              
+    slug?: string;
+  };
 
-  productImages: {      
-    imageUrl: string;    
-  }[];                         
+  productImages: {
+    imageUrl: string;
+  }[];
 
   productVariants?: {
     id: string;
@@ -39,6 +39,6 @@ export interface ProductLayoutProps {
   products?: ProductType[];
 }
 
-export interface ProductDetailsProps{
+export interface ProductDetailsProps {
   product: ProductType;
 }

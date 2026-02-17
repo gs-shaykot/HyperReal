@@ -24,7 +24,7 @@ export const page = async ({ searchParams }: SeachProps) => {
             include: {
                 category: {
                     select: {
-                        name: true
+                        name: true,
                     }
                 },
                 productImages: true
@@ -46,8 +46,8 @@ export const page = async ({ searchParams }: SeachProps) => {
                 }
             }
         });
-    } 
-    
+    }
+    console.log('Product in /product', products)
     return (
         <div>
             <ProductLayout categories={categories} activeId={activeId} products={products} />
