@@ -26,9 +26,10 @@ export const Category = ({ categories, activeId }: ProductLayoutProps) => {
         ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-800'} 
         ${isActive ? `
             text-blue-600 font-bold
-            before:w-2 before:h-2 before:bg-second
-            before:rounded-full before:inline-block before:mr-2
-            translate-x-2
+            lg:before:w-2 lg:before:h-2 lg:before:bg-second
+            lg:before:rounded-full lg:before:inline-block lg:before:mr-2
+            lg:translate-x-2
+            bg-second lg:bg-transparent
         ` : ''}`;
 
 
@@ -40,10 +41,10 @@ export const Category = ({ categories, activeId }: ProductLayoutProps) => {
                     Categories
                 </h2>
             </div>
-            <ul className='flex flex-col gap-3 mt-4 '>
+            <ul className='flex flex-wrap lg:flex-col gap-2 md:gap-3 mt-4 '>
                 <li
                     onClick={() => setCategory(null)}
-                    className={`${indentifyClassName(activeId === null)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
+                    className={`${indentifyClassName(activeId === null)}text-xs sm:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
                 >
                     All
                 </li>
@@ -54,7 +55,7 @@ export const Category = ({ categories, activeId }: ProductLayoutProps) => {
                         <li
                             key={category.id}
                             onClick={() => setCategory(category.id ?? null)}
-                            className={`${indentifyClassName(activeId === category.id)} cursor-pointer hover:text-second hover:translate-x-1 transition-transform duration-200 ease-out`}
+                            className={`${indentifyClassName(activeId === category.id)}text-xs md:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
                         >
                             {category.name}
                         </li>
