@@ -2,18 +2,18 @@ import { PrismaClient } from "@/app/generated/prisma/client";
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const adapter = new PrismaPg({
-    connectionString: process.env.DATABASE_URL!,
+  connectionString: process.env.DATABASE_URL!,
 });
 
 const prisma = new PrismaClient({ adapter });
 
 
 const COLOR_MAP = {
-    neon: 'Neon Breach',
-    black: 'Carbon Void',
+  neon: 'Neon Breach',
+  black: 'Carbon Void',
 };
 
- 
+
 const IMAGE_MAP: Record<
   string,
   { neon?: string; black?: string }
@@ -498,82 +498,79 @@ const PRODUCTS = [
 
 
 async function main() {
-    for (const item of PRODUCTS) {
-        const category = await prisma.category.findUnique({
-            where: { slug: item.categorySlug },
-        });
+  for (const item of PRODUCTS) {
+    const category = await prisma.category.findUnique({
+      where: { slug: item.categorySlug },
+    });
 
-        if (!category) {
-            console.warn(`Category not found: ${item.categorySlug}`);
-            continue;
-        }
-
-        const existing = await prisma.product.findFirst({
-            where: { name: item.name },
-        });
-
-        if (existing) {
-            console.log(`Skipping existing product: ${item.name}`);
-            continue;
-        }
-
-        const product = await prisma.product.create({
-            data: {
-                name: item.name,
-                description: item.description,
-                price: item.price,
-                categoryId: category.id,
-            },
-        });
-
-        const imageSet = IMAGE_MAP[item.slug];
-
-        if (imageSet?.neon) {
-            await prisma.productImage.create({
-                data: {
-                    productId: product.id,
-                    imageUrl: imageSet.neon,
-                    color: COLOR_MAP.neon,
-                },
-            });
-        }
-
-        if (imageSet?.black) {
-            await prisma.productImage.create({
-                data: {
-                    productId: product.id,
-                    imageUrl: imageSet.black,
-                    color: COLOR_MAP.black,
-                },
-            });
-        }
-
-        for (const size of item.sizes) {
-            await prisma.productVariant.createMany({
-                data: [
-                    {
-                        productId: product.id,
-                        size,
-                        color: COLOR_MAP.neon,
-                        stock: Math.floor(Math.random() * 20) + 10,
-                    },
-                    {
-                        productId: product.id,
-                        size,
-                        color: COLOR_MAP.black,
-                        stock: Math.floor(Math.random() * 20) + 10,
-                    },
-                ],
-            });
-        }
-
-        console.log(`Created: ${item.name}`);
+    if (!category) {
+      continue;
     }
+
+    const existing = await prisma.product.findFirst({
+      where: { name: item.name },
+    });
+
+    if (existing) {
+      continue;
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        categoryId: category.id,
+      },
+    });
+
+    const imageSet = IMAGE_MAP[item.slug];
+
+    if (imageSet?.neon) {
+      await prisma.productImage.create({
+        data: {
+          productId: product.id,
+          imageUrl: imageSet.neon,
+          color: COLOR_MAP.neon,
+        },
+      });
+    }
+
+    if (imageSet?.black) {
+      await prisma.productImage.create({
+        data: {
+          productId: product.id,
+          imageUrl: imageSet.black,
+          color: COLOR_MAP.black,
+        },
+      });
+    }
+
+    for (const size of item.sizes) {
+      await prisma.productVariant.createMany({
+        data: [
+          {
+            productId: product.id,
+            size,
+            color: COLOR_MAP.neon,
+            stock: Math.floor(Math.random() * 20) + 10,
+          },
+          {
+            productId: product.id,
+            size,
+            color: COLOR_MAP.black,
+            stock: Math.floor(Math.random() * 20) + 10,
+          },
+        ],
+      });
+    }
+
+  }
 }
 
 main()
-    .then(() => prisma.$disconnect())
-    .catch((e) => {
-        console.error(e);
-        prisma.$disconnect();
-    });
+  .then(() => prisma.$disconnect())
+  .catch((e) => {
+    console.error(e);
+    prisma.$disconnect();
+  });
