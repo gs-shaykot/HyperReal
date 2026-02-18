@@ -17,7 +17,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: false, amount: 0.3 }}
                         transition={{
-                            duration: 0.5,
+                            duration: 0.3,
                             ease: easeOut,
                             delay: index * 0.08,
                         }}

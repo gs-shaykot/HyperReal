@@ -78,9 +78,10 @@ model Product {
   isAvailable Boolean @default(true)
   categoryId  String
 
-  totalLikes  Int     @default(0)
-  totalSold   Int     @default(0)
-  
+  createdAt  DateTime @default(now())
+  totalLikes Int      @default(0)
+  totalSold  Int      @default(0)
+
   category        Category         @relation(fields: [categoryId], references: [id])
   productVariants ProductVariant[]
   productImages   ProductImage[]
