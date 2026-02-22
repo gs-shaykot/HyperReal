@@ -9,19 +9,22 @@ export const HeatProduct = async () => {
             totalSold: 'desc'
         },
         include: {
-            productImages: true
+            productImages: true,
+            category: {
+                select: {
+                    name: true, 
+                }
+            }
         },
         take: 4
     })
-
-    // find most recent product
+ 
     const newestProduct = heatProduct.reduce((latest, current) => {
         return new Date(current.createdAt) > new Date(latest.createdAt)
             ? current
             : latest
     })
-
-    // attach tags
+ 
     const productsWithTags = heatProduct.map((product, index) => {
         const tags: string[] = []
 
@@ -30,9 +33,9 @@ export const HeatProduct = async () => {
 
         return { ...product, tags }
     })
-    productsWithTags.map((product) => console.log('Product with tags: ', product))
+    
     return (
-        <div className="max-w-7xl mx-auto py-10">
+        <div className="max-w-7xl px-4 mx-auto py-10">
             <h2 className='text-4xl italic font-bold'>TRENDING<span className='text-second'> HEAT</span></h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-5">
                 {

@@ -4,9 +4,10 @@ import { easeOut, motion } from "framer-motion";
 import { useSelector } from 'react-redux';
 import Image from 'next/image';
 import Link from 'next/link';
+import { div } from 'framer-motion/client';
 
 export const HeatProductCard = ({ product }: any) => {
-
+    console.log('Product with tags: ', product)
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
@@ -28,13 +29,13 @@ export const HeatProductCard = ({ product }: any) => {
                     className={`${theme === "dark"
                         ? "bg-white border-zinc-200 shadow-xs"
                         : "bg-zinc-900 border-transparent"
-                        } border-2 overflow-hidden cursor-pointer group`}
+                        } border-2 overflow-hidden cursor-pointer group relative z-2`}
                 >
                     {/* IMAGE */}
                     <div className="relative z-10 h-80 w-full overflow-hidden">
                         <div
                             className="h-full w-full"
-                        > 
+                        >
                             <Image
                                 src={product.productImages?.[0]?.imageUrl || "/placeholder.png"}
                                 alt={product.name}
@@ -70,9 +71,18 @@ export const HeatProductCard = ({ product }: any) => {
                         </div>
 
                         <p className="mt-1 text-sm text-gray-500">
-
+                            {product.category?.name}
                         </p>
                     </div>
+                    {/* make the span look like the image i attached.. */}
+                    {
+                        product.tags.map((tag: string, index: number) => (
+                            <span
+                                key={index} className=" bg-second text-zinc-900 text-xs p-2 absolute top-2 left-2 z-10 font-bold">
+                                {tag}
+                            </span>
+                        ))
+                    }
                 </motion.div>
             </Link>
         </div>
