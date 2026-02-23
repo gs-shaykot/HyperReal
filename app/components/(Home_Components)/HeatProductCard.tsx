@@ -74,7 +74,7 @@ export const HeatProductCard = ({ product }: any) => {
                             {product.category?.name}
                         </p>
                     </div>
-                    {/* make the span look like the image i attached.. */}
+                    
                     {
                         product.tags.map((tag: string, index: number) => (
                             <span
