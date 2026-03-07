@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { div } from 'framer-motion/client';
 
 export const HeatProductCard = ({ product }: any) => {
-    console.log('Product with tags: ', product)
+ 
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
