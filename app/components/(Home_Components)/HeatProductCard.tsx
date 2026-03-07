@@ -6,8 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { div } from 'framer-motion/client';
 
-export const HeatProductCard = ({ product }: any) => {
- 
+export const HeatProductCard = ({ product }: { product: any }) => {
+
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
@@ -74,7 +74,7 @@ export const HeatProductCard = ({ product }: any) => {
                             {product.category?.name}
                         </p>
                     </div>
-                    
+
                     {
                         product.tags.map((tag: string, index: number) => (
                             <span

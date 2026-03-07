@@ -15,8 +15,7 @@ export const Banner = () => {
                     backgroundImage: ` linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px) `,
                     backgroundSize: '40px 40px'
                 }}
-            />
-
+            /> 
 
             <div className="relative z-10 flex flex-col items-center justify-center px-4 py-8">
                 <p className={`border p-2 text-sm font-mono mb-8 tracking-wider ${theme === 'light' ? 'text-second border-zinc-800' : 'text-zinc-900 border-second'}`}>
