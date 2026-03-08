@@ -8,7 +8,11 @@ export const LatestProduct = async () => {
             createdAt: 'desc'
         },
         include: {
-            productImages: true,
+            productImages: {
+                select: {
+                    imageUrl: true
+                }
+            },
             category: {
                 select: {
                     name: true,
