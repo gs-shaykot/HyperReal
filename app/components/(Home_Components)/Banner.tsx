@@ -8,7 +8,7 @@ export const Banner = () => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
-        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite'} relative overflow-hidden border-b border-zinc-800`}>
+        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite'} relative overflow-hidden border-b border-zinc-800 `}>
             <div
                 className="absolute inset-0 opacity-20"
                 style={{
@@ -17,7 +17,7 @@ export const Banner = () => {
                 }}
             /> 
 
-            <div className="relative z-10 flex flex-col items-center justify-center px-4 py-8">
+            <div className="relative z-10 flex flex-col items-center justify-center px-4 py-24">
                 <p className={`border p-2 text-sm font-mono mb-8 tracking-wider ${theme === 'light' ? 'text-second border-zinc-800' : 'text-zinc-900 border-second'}`}>
                     • SYSTEM ONLINE // V.4.0
                 </p>
