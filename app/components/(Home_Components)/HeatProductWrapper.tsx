@@ -32,7 +32,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                                         borderColor: "#8fb300",
                                     }}
                                     className={`${theme === "dark"
-                                        ? "bg-white border-zinc-200 shadow-xs"
+                                        ? "bg-white shadow-xs"
                                         : "bg-zinc-900 border-transparent"
                                         } border-2 overflow-hidden cursor-pointer group relative z-2`}
                                 >
