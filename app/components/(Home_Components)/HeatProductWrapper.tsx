@@ -16,26 +16,20 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                 {
                     productsWithTags.map((product) => (
                         // CARDS
-                        <div key={product.id} >
+                        <div key={product.id} > 
                             <Link href={`/products/${product.id}`}>
                                 <motion.div
                                     initial={{ opacity: 0, y: 40 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: false, amount: 0.3 }}
-                                    transition={{
-                                        duration: 0.3,
-                                        ease: easeOut,
-                                    }}
                                     whileHover={{
                                         y: -6,
                                         boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                                         borderColor: "#8fb300",
                                     }}
-                                    className={`${theme === "dark"
-                                        ? "bg-white shadow-xs"
-                                        : "bg-zinc-900 border-transparent"
-                                        } border-2 overflow-hidden cursor-pointer group relative z-2`}
+                                    className={`${theme === "dark" ? "bg-white" : "bg-zinc-900"} border-2 border-transparent shadow-md overflow-hidden relative z-2 group cursor-pointer`}
                                 >
+
                                     {/* IMAGE */}
                                     <div className="relative z-10 h-80 w-full overflow-hidden">
                                         <div
@@ -83,11 +77,12 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                                     {
                                         product.tags.map((tag: string, index: number) => (
                                             <span
-                                                key={index} className=" bg-second text-zinc-900 text-xs p-2 absolute top-2 left-2 z-10 font-bold">
+                                                key={index} className=" bg-second text-black text-xs p-2 absolute top-2 left-2 z-10 font-bold">
                                                 {tag}
                                             </span>
                                         ))
                                     }
+
                                 </motion.div>
                             </Link>
                         </div>

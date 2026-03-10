@@ -25,8 +25,8 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
 
                 {/* Heading */}
                 <div className="flex justify-between items-center mb-10">
-                    <h2 className="text-4xl font-extrabold tracking-widest italic">
-                        LATEST <span className="text-lime-400">RELEASES</span>
+                    <h2 className={`${theme === "dark" ? "text-zinc-900" : "text-white"} text-4xl font-extrabold tracking-widest italic`}>
+                        LATEST <span className="text-second">RELEASES</span>
                     </h2>
 
                     <Link href="/products" className="text-sm text-gray-400 group hover:text-second transition-colors duration-200 relative right-2">
@@ -75,11 +75,11 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                                         />
 
                                         {/* NEW badge */}
-                                        <span className="absolute top-2 left-2 text-xs bg-lime-400 text-black px-2 py-1 z-20">
+                                        <span className="absolute top-2 left-2 text-xs bg-second text-black px-2 py-1 z-20">
                                             NEW
                                         </span>
                                         <div className="absolute bottom-2 left-2 z-20">
-                                            <p className="text-xs text-lime-400 uppercase">
+                                            <p className="text-xs text-second uppercase">
                                                 {product.category.name}
                                             </p>
                                             <h3 className="font-semibold group-hover:text-second">
