@@ -1,3 +1,4 @@
+// still showing ⚠ Blocked cross-origin request from 192.168.0.100 to /_next/* resource. To allow this, configure "allowedDevOrigins" in next.config
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -12,6 +13,7 @@ const nextConfig: NextConfig = {
       }
     ]
   },
+  allowedDevOrigins: ['http://192.168.0.100:3000']
 };
 
 export default nextConfig;

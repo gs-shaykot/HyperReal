@@ -8,7 +8,7 @@ export const Banner = () => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
-        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite'} relative overflow-hidden border-b border-zinc-800 `}>
+        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white'} relative overflow-hidden border-b border-zinc-800 `}>
             <div
                 className="absolute inset-0 opacity-20"
                 style={{

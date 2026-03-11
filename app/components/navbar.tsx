@@ -25,7 +25,7 @@ export const Navbar = () => {
             {/* <div>
                     <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
                 </div> */}
-            <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite/70 border-gray-300/85'} border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
+            <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white/70 border-gray-300/85'} border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
                 <div className={`max-w-7xl mx-auto navbar ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>
                     <div className="navbar-start w-[30%] md:w-[50%]">
                         <div className="dropdown">
@@ -36,7 +36,7 @@ export const Navbar = () => {
                             </div>
                             <ul
                                 tabIndex={0}
-                                className={`${theme === 'light' ? 'bg-zinc-900/95 border-zinc-800 border' : 'bg-halfWhite border-gray-300/85'} menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
+                                className={`${theme === 'light' ? 'bg-zinc-900/95 border-zinc-800 border' : 'bg-white/70 border-gray-300/85'} backdrop-blur-xs menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
                                 {navLinks}
                             </ul>
                         </div>

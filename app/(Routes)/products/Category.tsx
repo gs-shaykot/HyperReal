@@ -34,7 +34,7 @@ export const Category = ({ categories, activeId }: ProductLayoutProps) => {
 
 
     return (
-        <div>
+        <div className=''>
             <div className={`border-b ${theme === 'light' ? 'border-zinc-800' : 'border-gray-300/85'} `}>
                 <h2 className={`font-semibold mb-4 flex items-center text-second`}>
                     <Funnel />

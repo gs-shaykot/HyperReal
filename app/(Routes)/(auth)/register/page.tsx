@@ -66,7 +66,7 @@ export const Register = () => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
-        <div className={`${theme === 'light' ? 'bg-main/95' : 'bg-halfWhite'} min-h-screen flex items-center justify-center  px-4`}>
+        <div className={`${theme === 'light' ? 'bg-main/95' : 'bg-white'} min-h-screen flex items-center justify-center  px-4`}>
             <div className={`relative w-full max-w-md ${theme === 'light' ? 'bg-zinc-900/90' : 'bg-gray-100/80 border-t-0 border-zinc-800'} backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>
                 {/* Neon top bar */}
                 <div className="absolute top-0 left-0 h-1 w-full bg-second rounded-t-lg" />

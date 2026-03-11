@@ -90,7 +90,7 @@ export const Login = () => {
     }, [state.success, router]);
 
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-halfWhite'}`}> 
+        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-white'}`}> 
             <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}> 
                 <div className="p-10 flex flex-col justify-center space-y-4">  
                     <div>

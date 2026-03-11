@@ -35,6 +35,8 @@ export const HeatProduct = async () => {
     })
 
     return (
-        <HeatProductWrapper productsWithTags={productsWithTags} />
+        <div className=''>
+            <HeatProductWrapper productsWithTags={productsWithTags} />
+        </div>
     )
 }

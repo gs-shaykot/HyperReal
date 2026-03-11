@@ -4,16 +4,16 @@ import Link from 'next/link';
 import { useSelector } from 'react-redux';
 
 export const LatestProductCard = ({ products }: { products: any[] }) => {
-    console.log(products)
+    // console.log(products)
 
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     const featured = products[0];
     const others = products.slice(1, 5);
-    console.log(others)
+    // console.log(others)
 
     return (
-        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-halfWhite'} relative overflow-hidden border-b border-zinc-800 py-5`}>
+        <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white'} relative overflow-hidden border-b border-zinc-800 py-5`}>
             <div
                 className="absolute inset-0 opacity-20"
                 style={{
