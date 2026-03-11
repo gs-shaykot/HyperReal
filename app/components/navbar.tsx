@@ -36,7 +36,7 @@ export const Navbar = () => {
                             </div>
                             <ul
                                 tabIndex={0}
-                                className={`${theme === 'light' ? 'bg-zinc-900/95 border-zinc-800 border' : 'bg-white/70 border-gray-300/85'} backdrop-blur-xs menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
+                                className={`${theme === 'light' ? 'bg-zinc-900/95 border-zinc-800 border' : 'bg-white/95 border-gray-300/85'} backdrop-blur-xs menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
                                 {navLinks}
                             </ul>
                         </div>
