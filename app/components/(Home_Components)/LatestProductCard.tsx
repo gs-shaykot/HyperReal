@@ -24,12 +24,12 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
             <section className="max-w-7xl mx-auto px-6 py-16 text-white relative z-10">
 
                 {/* Heading */}
-                <div className="flex justify-between items-center mb-10">
-                    <h2 className={`${theme === "dark" ? "text-zinc-900" : "text-white"} text-4xl font-extrabold tracking-widest italic`}>
+                <div className="flex justify-between items-center mb-7 md:mb-10">
+                    <h2 className={`${theme === "dark" ? "text-zinc-900" : "text-white"} text-2xl md:text-4xl font-extrabold tracking-widest italic`}>
                         LATEST <span className="text-second">RELEASES</span>
                     </h2>
 
-                    <Link href="/products" className="text-sm text-gray-400 group hover:text-second transition-colors duration-200 relative right-2">
+                    <Link href="/products" className="text-sm hidden md:block text-gray-400 group hover:text-second transition-colors duration-200 relative right-2">
                         VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                     </Link>
                 </div>
@@ -59,7 +59,7 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                     </div>
 
                     {/* Right Grid Products */}
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-2 gap-3 md:gap-6">
                         {others.map((product) => (
                             <div key={product.id} className="relative w-full h-64 border group hover:border-second border-neutral-800 overflow-hidden">
                                 <Link href={`/products/${product.id}`} className="absolute inset-0 z-10">
@@ -95,6 +95,10 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                         ))}
                     </div>
                 </div >
+
+                <Link href="/products" className={`${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
+                    VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
+                </Link>
             </section >
         </div >
     )

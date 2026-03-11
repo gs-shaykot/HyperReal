@@ -11,14 +11,14 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
 
     return (
         <div className="max-w-7xl px-4 mx-auto py-10">
-            <div className='flex justify-between'>
-                <h2 className={`text-4xl italic font-bold ${theme === "dark" ? "text-zinc-900" : "text-white"}`}>TRENDING<span className='text-second'> HEAT</span></h2>
+            <div className='flex justify-between items-center  mb-7 md:mb-10'>
+                <h2 className={`text-2xl md:text-4xl italic font-bold ${theme === "dark" ? "text-zinc-900" : "text-white"}`}>TRENDING<span className='text-second'> HEAT</span></h2>
 
                 <Link href="/products" className="text-sm hidden md:block text-gray-400 group hover:text-second transition-colors duration-200 relative right-2">
                     VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                 </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-5">
+            <div className="grid griwd-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-5">
                 {
                     productsWithTags.map((product) => (
                         // CARDS
@@ -96,7 +96,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                 }
             </div>
 
-            <Link href="/products" className="text-sm block md:hidden group hover:text-second transition-colors duration-200 relative md:right-2 border border-second py-2 text-center mt-3 hover:border-second text-second">
+            <Link href="/products" className={`${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
                 VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
             </Link>
         </div>
