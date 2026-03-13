@@ -1,4 +1,4 @@
-import { HeatProductWrapper } from '@/app/components/(Home_Components)/HeatProductWrapper'
+import { HeatProductWrapper } from '@/app/components/(Home_Components)/Trending/HeatProductWrapper'
 import prisma from '@/lib/prisma'
 
 

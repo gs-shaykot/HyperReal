@@ -1,4 +1,4 @@
-import { LatestProductCard } from '@/app/components/(Home_Components)/LatestProductCard';
+import { LatestProductCard } from '@/app/components/(Home_Components)/Latest/LatestProductCard';
 import prisma from '@/lib/prisma';
 import { useSelector } from 'react-redux';
 

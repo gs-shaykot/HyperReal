@@ -103,3 +103,4 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
         </div >
     )
 }
+ 
