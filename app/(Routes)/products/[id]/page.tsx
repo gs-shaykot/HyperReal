@@ -21,7 +21,7 @@ export const page = async ({ params }: any) => {
                 },
                 orderBy: [
                     { color: 'desc' },
-                    { size: 'desc' },
+                    { size: 'asc' },
                 ]
             },
         },
