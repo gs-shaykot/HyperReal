@@ -2,12 +2,13 @@
   "name": "web",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
+  "type": "module", 
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
