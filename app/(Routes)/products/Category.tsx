@@ -3,7 +3,7 @@ import { Funnel } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector } from 'react-redux';
 
-export const Category = ({ categories, activeId }: ProductLayoutProps) => {
+export const Category = ({ categories, categoryId }: ProductLayoutProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     const router = useRouter();
@@ -42,18 +42,18 @@ export const Category = ({ categories, activeId }: ProductLayoutProps) => {
             <ul className='flex flex-wrap lg:flex-col gap-2 md:gap-3 mt-4 '>
                 <li
                     onClick={() => setCategory(null)}
-                    className={`${activeCategoryClass(activeId === null)}text-xs sm:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
+                    className={`${activeCategoryClass(categoryId === null)}text-xs sm:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
                 >
                     All
                 </li>
                 {categories.map((category) => {
-                    const isActive = activeId === category.id;
+                    const isActive = categoryId === category.id;
 
                     return (
                         <li
                             key={category.id}
                             onClick={() => setCategory(category.id ?? null)}
-                            className={`${activeCategoryClass(activeId === category.id)}text-xs md:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
+                            className={`${activeCategoryClass(categoryId === category.id)}text-xs md:text-base border lg:border-0 p-1 lg:p-0 cursor-pointer hover:text-second lg:hover:translate-x-1 transition-transform duration-200 ease-out`}
                         >
                             {category.name}
                         </li>

@@ -4,7 +4,7 @@ import { ProductCard } from '@/app/(Routes)/products/ProductCard';
 import { ProductLayoutProps } from '@/app/types/Category';
 import { useSelector } from 'react-redux';
 
-export const ProductLayout = ({ categories, activeId, products }: ProductLayoutProps) => {
+export const ProductLayout = ({ categories, categoryId, products }: ProductLayoutProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
@@ -20,7 +20,7 @@ export const ProductLayout = ({ categories, activeId, products }: ProductLayoutP
                 </div>
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
                     <aside>
-                        <Category categories={categories} activeId={activeId} />
+                        <Category categories={categories} categoryId={categoryId} />
                     </aside>
                     <section>
                         <div className="min-h-100">
