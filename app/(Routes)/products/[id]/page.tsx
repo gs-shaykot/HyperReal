@@ -8,14 +8,21 @@ export const page = async ({ params }: any) => {
         where: { id },
         include: {
             category: { select: { name: true, slug: true } },
-            productImages: { select: { imageUrl: true } },
+            productImages: {
+                select: { imageUrl: true },
+                orderBy: {id: 'asc'}
+            },
             productVariants: {
                 select: {
                     id: true,
                     size: true,
                     color: true,
                     stock: true,
-                }
+                },
+                orderBy: [
+                    { color: 'asc' },
+                    { size: 'asc' },
+                ]
             },
         },
     });
