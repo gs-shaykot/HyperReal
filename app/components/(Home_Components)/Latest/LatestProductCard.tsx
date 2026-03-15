@@ -1,16 +1,16 @@
 'use client'
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 
 export const LatestProductCard = ({ products }: { products: any[] }) => {
-    // console.log(products)
 
     const theme = useSelector((state: any) => state.themeToggle.mode);
+    const router = useRouter()
 
     const featured = products[0];
     const others = products.slice(1, 5);
-    // console.log(others)
 
     return (
         <div className={`${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white'} relative overflow-hidden border-b border-zinc-800 py-5`}>
@@ -96,11 +96,10 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                     </div>
                 </div >
 
-                <Link href="/products" className={`${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
+                <Link onMouseEnter={() => router.prefetch("/products")} href="/products" className={`${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
                     VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                 </Link>
             </section >
         </div >
     )
 }
- 
