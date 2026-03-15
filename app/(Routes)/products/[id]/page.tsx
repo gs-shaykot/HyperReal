@@ -10,7 +10,7 @@ export const page = async ({ params }: any) => {
             category: { select: { name: true, slug: true } },
             productImages: {
                 select: { imageUrl: true },
-                orderBy: {id: 'asc'}
+                orderBy: {id: 'desc'}
             },
             productVariants: {
                 select: {
@@ -20,8 +20,8 @@ export const page = async ({ params }: any) => {
                     stock: true,
                 },
                 orderBy: [
-                    { color: 'asc' },
-                    { size: 'asc' },
+                    { color: 'desc' },
+                    { size: 'desc' },
                 ]
             },
         },
