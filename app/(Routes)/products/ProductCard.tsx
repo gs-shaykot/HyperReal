@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 
+
 export const ProductCard = ({ products }: ProductProps) => {
     const theme = useSelector((state: any) => state.themeToggle.mode);
 
