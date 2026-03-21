@@ -4,6 +4,7 @@ import { Check, Minus, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 
+// make skeleton loading for this page. i will add this in /products/[id]/loading.tsx:
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     // !EXTRACTED UNIQUE COLORS
