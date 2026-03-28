@@ -35,3 +35,8 @@ body {
   left: -5px;
   width: 90%;
 }
+
+::selection{
+  background-color: #8fb300;
+  color: #0a0a0a;
+}
