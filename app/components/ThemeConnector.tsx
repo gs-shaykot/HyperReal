@@ -8,7 +8,7 @@ export default function ThemeConnector() {
     const { theme, setTheme } = useTheme();
 
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
+        document.documentElement.setAttribute("data-theme", theme ?? "light");
     }, [theme]);
 
     return null;
