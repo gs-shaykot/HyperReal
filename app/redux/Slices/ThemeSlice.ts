@@ -7,7 +7,7 @@ interface ThemeState {
 }
 
 const initialState: ThemeState = {
-    mode: 'light', // Safe server-side default — always 'light' on first render
+    mode: 'light', 
 };
 
 const ThemeSlice = createSlice({
@@ -16,8 +16,7 @@ const ThemeSlice = createSlice({
     reducers: {
         toggleTheme: (state) => {
             const next = state.mode === 'light' ? 'dark' : 'light';
-            state.mode = next;
-            // Persist to localStorage on every toggle
+            state.mode = next; 
             if (typeof window !== 'undefined') {
                 localStorage.setItem('theme', next);
             }
