@@ -1,6 +1,5 @@
 'use client'
-import React from 'react'
-import { Search, Sun, User, ShoppingBag, Moon } from "lucide-react"
+import { Sun, User, ShoppingBag, Moon } from "lucide-react"
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
@@ -12,6 +11,8 @@ export const Navbar = () => {
     const { data: session } = useSession();
     const theme = useSelector((state: any) => state.themeToggle.mode);
     const dispatch = useDispatch();
+    const isDark = theme === 'dark';
+    console.log(theme)
 
     const navLinks =
         <>
@@ -53,17 +54,17 @@ export const Navbar = () => {
                         <button className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>
                             <label className="swap swap-rotate">
                                 {/* this hidden checkbox controls the state */}
-                                <input type="checkbox" className="theme-controller" value="synthwave" />
+                                <input type="checkbox" checked={isDark} className="theme-controller" value="synthwave" readOnly />
 
                                 {/* sun icon */}
                                 <Sun
                                     onClick={() => dispatch(toggleTheme())}
-                                    size={20} strokeWidth={1.2} className='swap-off fill-current' />
+                                    size={20} strokeWidth={1.2} className='swap-on fill-current' />
 
                                 {/* moon icon */}
                                 <Moon
                                     onClick={() => dispatch(toggleTheme())}
-                                    size={20} strokeWidth={1.2} className='swap-on fill-current' />
+                                    size={20} strokeWidth={1.2} className='swap-off fill-current' />
                             </label>
                         </button>
                         <div tabIndex={0} role="button" className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!`}>

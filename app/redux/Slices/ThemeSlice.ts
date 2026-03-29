@@ -1,22 +1,32 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState = {
-    mode: 'light',
-    categoryId: null,
+type ThemeMode = 'light' | 'dark';
+
+interface ThemeState {
+    mode: ThemeMode;
 }
+
+const initialState: ThemeState = {
+    mode: 'light', // Safe server-side default — always 'light' on first render
+};
 
 const ThemeSlice = createSlice({
     name: 'themeToggle',
     initialState,
     reducers: {
         toggleTheme: (state) => {
-            state.mode = state.mode === 'light' ? 'dark' : 'light'
+            const next = state.mode === 'light' ? 'dark' : 'light';
+            state.mode = next;
+            // Persist to localStorage on every toggle
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('theme', next);
+            }
         },
-        setCategoryId: (state, action) => {
-            state.categoryId = action.payload;
-        }
-    }
-})
+        setTheme: (state, action: PayloadAction<ThemeMode>) => {
+            state.mode = action.payload;
+        },
+    },
+});
 
-export const { toggleTheme, setCategoryId } = ThemeSlice.actions
-export default ThemeSlice.reducer
+export const { toggleTheme, setTheme } = ThemeSlice.actions;
+export default ThemeSlice.reducer;

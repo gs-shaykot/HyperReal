@@ -22,12 +22,11 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
                 </div>
 
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
-                    {/* Sticky Sidebar - stays below header */}
                     <aside className="lg:sticky lg:top-19.5 lg:self-start ">
                         <Category categories={categories} categoryId={categoryId} />
                     </aside>
 
-                    {/* Product Cards scroll underneath */}
+                    
                     <section>
                         <div className="min-h-100">
                             <ProductCard products={products} />
