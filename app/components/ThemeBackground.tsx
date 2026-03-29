@@ -1,14 +1,13 @@
-"use client";
-
-import { useSelector } from "react-redux";
-
+"use client"; 
+import { useTheme } from "next-themes"; 
 export default function ThemeBackground() {
 
-    const themeMode = useSelector((state: any) => state.themeToggle.mode);
+    const { theme, setTheme } = useTheme();
+
 
     return (
         <div
-            className={`fixed inset-0 -z-10 transition-colors duration-300 ${themeMode === "light" ? "bg-main" : "bg-white"}`}
+            className={`fixed inset-0 -z-10 transition-colors duration-300 ${theme === "dark" ? "bg-main" : "bg-white"}`}
         />
     );
 }

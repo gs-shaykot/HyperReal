@@ -1,5 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
+@variant light (&:where([data-theme="light"], [data-theme="light"] *)); 
 @plugin "daisyui";
 
 @theme{
@@ -12,7 +13,7 @@
 }
 
 @layer base {
-  [data-theme="dark"] {
+  [data-theme="light"] {
     --color-second: #8fb300;
     --color-main: #0a0a0a;
   } 

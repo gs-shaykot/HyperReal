@@ -62,12 +62,13 @@ export const Register = () => {
     const [state, action, isPending] = useActionState(
         RegisterUser,
         initialState
-    );
-    const theme = useSelector((state: any) => state.themeToggle.mode);
+    ); 
 
     return (
-        <div className={`${theme === 'light' ? 'bg-main/95' : 'bg-white'} min-h-screen flex items-center justify-center  px-4`}>
-            <div className={`relative w-full max-w-md ${theme === 'light' ? 'bg-zinc-900/90' : 'bg-gray-100/80 border-t-0 border-zinc-800'} backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>
+        // ${theme === 'light' ? 'bg-main/95' : 'bg-white'}
+        <div className={`min-h-screen flex items-center justify-center  px-4`}>
+            {/* ${theme === 'light' ? 'bg-zinc-900/90' : 'bg-gray-100/80 border-t-0 border-zinc-800'} */}
+            <div className={`relative w-full max-w-md backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>
                 {/* Neon top bar */}
                 <div className="absolute top-0 left-0 h-1 w-full bg-second rounded-t-lg" />
 
@@ -75,11 +76,12 @@ export const Register = () => {
                     {/* Header */}
                     <div>
                         <h1 className="text-3xl font-extrabold tracking-wide leading-tight">
-                            <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>NEW</span>{" "}
+                            {/* ${theme === 'light' ? 'text-white' : 'text-zinc-900'} */}
+                            <span className={` `}>NEW</span>{" "}
                             <span className="text-second italic">OPERATIVE</span>
                         </h1>
-
-                        <p className={`mt-2 text-sm ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                        {/* ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'} */}
+                        <p className={`mt-2 text-sm `}>
                             Join the syndicate. Early access to drops and exclusive gear.
                         </p>
                     </div>
@@ -98,7 +100,8 @@ export const Register = () => {
                                 required={true}
                                 type="text"
                                 name="fullName"
-                                className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none uppercase`} 
+                                // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                className={`placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none uppercase`}
                                 placeholder='Enter your full name'
                             />
                         </div>
@@ -113,7 +116,8 @@ export const Register = () => {
                                 required={true}
                                 type="email"
                                 name="email"
-                                className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none lowercase`}
+                                // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} 
+                                className={`placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none lowercase`}
                                 placeholder='Enter your email address'
                             />
                         </div>
@@ -130,7 +134,8 @@ export const Register = () => {
                                     required={true}
                                     type={ShowPassword ? "text" : "password"}
                                     name="password"
-                                    className={`placeholder:text-zinc-800 text-gray-400 input w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border border-zinc-700 focus:border-second focus:outline-none relative`}
+                                    // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                    className={`placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none relative`}
                                     placeholder='Enter your passcode'
                                 />
                                 {
@@ -153,13 +158,14 @@ export const Register = () => {
                             <input
                                 type="file"
                                 name="profileImage"
-                                className={`file-input file-input-neutral w-full ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} border-zinc-700 text-zinc-400 focus:border-lime-400`}
+                                // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                className={`file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
                             />
                         </div>
 
                         {/* CTA */}
                         <button
-                            disabled={isPending} 
+                            disabled={isPending}
                             className="btn shadow-none w-full bg-second text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
                             {isPending ? "Creating account..." : "Register"}
                         </button>

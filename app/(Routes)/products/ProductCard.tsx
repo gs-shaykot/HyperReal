@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux';
 
 
 export const ProductCard = ({ products }: ProductProps) => {
-    const theme = useSelector((state: any) => state.themeToggle.mode);
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -27,10 +26,8 @@ export const ProductCard = ({ products }: ProductProps) => {
                             boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                             borderColor: "#8fb300",
                         }}
-                        className={`${theme === "dark"
-                            ? "bg-white border-zinc-200 shadow-xs"
-                            : "bg-zinc-900 border-transparent"
-                            } border-2 overflow-hidden cursor-pointer group`}
+                        // ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent" }
+                        className={`border-2 overflow-hidden cursor-pointer group`}
                     >
                         {/* IMAGE */}
                         <div className="relative z-10 h-80 w-full overflow-hidden">
@@ -58,9 +55,9 @@ export const ProductCard = ({ products }: ProductProps) => {
                         {/* CONTENT */}
                         <div className="px-3 py-2 text-sm">
                             <div className="flex justify-between items-center">
+                                {/* ${theme === "dark" ? "text-black" : "text-white"} */}
                                 <h3
-                                    className={`font-semibold ${theme === "dark" ? "text-black" : "text-white"
-                                        }`}
+                                    className={`font-semibold `}
                                 >
                                     {product.name}
                                 </h3>

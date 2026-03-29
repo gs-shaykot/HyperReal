@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/app/components/navbar";
-import { SessionProvider } from "next-auth/react";
+import { Navbar } from "@/app/components/navbar"; 
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -18,16 +16,31 @@ const spaceMono = Space_Mono({
   subsets: ['latin'],
   variable: '--font-space-mono',
 })
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'light';
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={spaceMono.variable}>
         <Providers>
-          <ThemeConnector />   {/* side-effect only */}
+          <ThemeConnector />
           <ThemeBackground />
           <Navbar />
           <main className="relative">
@@ -37,7 +50,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-
-
-
 }

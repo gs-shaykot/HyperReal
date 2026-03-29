@@ -3,8 +3,7 @@ import { Funnel } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSelector } from 'react-redux';
 
-export const Category = ({ categories, categoryId }: ProductLayoutProps) => {
-    const theme = useSelector((state: any) => state.themeToggle.mode);
+export const Category = ({ categories, categoryId }: ProductLayoutProps) => { 
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -20,10 +19,10 @@ export const Category = ({ categories, categoryId }: ProductLayoutProps) => {
         router.push(`/products?${params.toString()}`);
     };
 
+    // ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-800'} 
     const activeCategoryClass = (isActive: boolean) => ` 
         cursor-pointer 
-        transition-all duration-300 ease-out
-        ${theme === 'light' ? 'text-zinc-500' : 'text-zinc-800'} 
+        transition-all duration-300 ease-out 
         ${isActive ? ` 
             lg:before:w-2 lg:before:h-2 lg:before:bg-second
             lg:before:rounded-full lg:before:inline-block lg:before:mr-2
@@ -33,7 +32,8 @@ export const Category = ({ categories, categoryId }: ProductLayoutProps) => {
 
     return (
         <div className=''>
-            <div className={`border-b ${theme === 'light' ? 'border-zinc-800' : 'border-gray-300/85'} `}>
+            {/* ${theme === 'light' ? 'border-zinc-800' : 'border-gray-300/85'} */}
+            <div className={`border-b `}>
                 <h2 className={`font-semibold mb-4 flex items-center text-second`}>
                     <Funnel />
                     Categories

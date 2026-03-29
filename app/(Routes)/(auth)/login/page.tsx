@@ -78,8 +78,7 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 
 export const Login = () => {
     const router = useRouter();
-    const [state, action, isPending] = useActionState(LoginAction, initialState);
-    const theme = useSelector((state: any) => state.themeToggle.mode);
+    const [state, action, isPending] = useActionState(LoginAction, initialState); 
 
     useEffect(() => {
         if (state.success) {
@@ -88,21 +87,24 @@ export const Login = () => {
             }, 1000);
         }
     }, [state.success, router]);
-
+    // bg-main/80
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4 ${theme === 'light' ? 'bg-main/80' : 'bg-white'}`}> 
-            <div className={`${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}> 
-                <div className="p-10 flex flex-col justify-center space-y-4">  
+        <div className={`min-h-screen flex items-center justify-center px-4`}>
+            {/* ${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} */}
+            <div className={`w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
+                <div className="p-10 flex flex-col justify-center space-y-4">
                     <div>
                         <h1 className={`text-3xl font-extrabold leading-tight`}>
-                            <span className={` ${theme === 'light' ? 'text-white' : 'text-zinc-900'}`}>SYSTEM</span><br />
+                            {/* ${theme === 'light' ? 'text-white' : 'text-zinc-900'} */}
+                            <span className={``}>SYSTEM</span><br />
                             <span className="text-second">ACCESS</span>
-                        </h1>   
-                        <p className={`mt-3 text-sm ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'} max-w-sm`}>
+                        </h1>
+                        {/* ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'}  */}
+                        <p className={`mt-3 text-sm  max-w-sm`}>
                             Enter credentials to access the HyperReal mainframe.
                         </p>
-                    </div> 
-                     
+                    </div>
+
                     {state.message && (
                         <div className={`
                             border-l-4 p-3 rounded-r font-mono text-xs
@@ -137,7 +139,8 @@ export const Login = () => {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your identity"
-                                className={` ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'} input w-full border ${state.errors?.email
+                                //  ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                className={`  input w-full border ${state.errors?.email
                                     ? 'border-red-500 focus:border-red-500'
                                     : 'border-zinc-700 focus:border-second'
                                     } text-gray-400 placeholder:text-zinc-700`}
@@ -160,7 +163,8 @@ export const Login = () => {
                                 type="password"
                                 name="password"
                                 placeholder="Enter passcode"
-                                className={`${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}  input w-full bg-black border ${state.errors?.password
+                                // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                className={`input w-full bg-black border ${state.errors?.password
                                     ? 'border-red-500 focus:border-red-500'
                                     : 'border-zinc-700 focus:border-second'
                                     } text-gray-400 placeholder:text-zinc-700`}
@@ -197,7 +201,8 @@ export const Login = () => {
                     {/* Footer */}
                     <p className="text-xs text-zinc-500">
                         No identity found?{" "}
-                        <Link href="/register" className={`${theme === 'light' ? 'text-second' : 'text-zinc-900 font-bold'} hover:underline cursor-pointer`}>
+                        {/* ${theme === 'light' ? 'text-second' : 'text-zinc-900 font-bold'} */}
+                        <Link href="/register" className={`hover:underline cursor-pointer`}>
                             CREATE OPERATIVE ACCOUNT
                         </Link>
                     </p>

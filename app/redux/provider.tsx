@@ -9,18 +9,6 @@ function ThemeInitializer({ children }: { children: ReactNode }) {
     const dispatch = useDispatch<AppDispatchType>();
     const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
-        if (saved === 'light' || saved === 'dark') {
-            dispatch(setTheme(saved));
-        }
-        setMounted(true);
-    }, [dispatch]);
-
-    if (!mounted) {
-        return <div style={{ visibility: 'hidden' }}>{children}</div>;
-    }
-
     return <>{children}</>;
 }
 

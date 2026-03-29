@@ -4,16 +4,17 @@ import { ProductCard } from '@/app/(Routes)/products/ProductCard';
 import { ProductLayoutProps } from '@/app/types/Category';
 import { useSelector } from 'react-redux';
 
-export const ProductLayout = ({ categories, categoryId, products }: ProductLayoutProps) => {
-    const theme = useSelector((state: any) => state.themeToggle.mode);
+export const ProductLayout = ({ categories, categoryId, products }: ProductLayoutProps) => { 
 
     return (
-        <main className={`${theme === 'light' ? 'bg-main/80' : 'bg-white/90'}`}>
+        // ${theme === 'light' ? 'bg-main/80' : 'bg-white/90'}
+        <main className={``}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
 
                 {/* Sticky Red Header - stays below navbar */}
                 <div className=" -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-5 bg-zinc-950/90 mb-10">
-                    <h1 className={`${theme === 'light' ? 'text-white' : 'text-zinc-900'} text-4xl font-bold uppercase tracking-wide`}>
+                    {/* ${theme === 'light' ? 'text-white' : 'text-zinc-900'} */}
+                    <h1 className={` text-4xl font-bold uppercase tracking-wide`}>
                         All <span className="text-second">Products</span>
                     </h1>
                     <p className="mt-2 text-gray-200">
