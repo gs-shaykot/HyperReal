@@ -54,8 +54,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
 
                                     {/* CONTENT */}
                                     <div className="px-3 py-2 text-sm">
-                                        <div className="flex justify-between items-center">
-                                            {/* ${theme === "dark" ? "text-zinc-900" : "text-white"} */}
+                                        <div className="flex justify-between items-center"> 
                                             <h3
                                                 className={`font-semibold light:text-zinc-900 text-white group-hover:text-second `}
                                             >
@@ -94,7 +93,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                 }
             </div>
             {/* ${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} */}
-            <Link href="/products" className={`text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
+            <Link href="/products" className={`light:text-zinc-900 light:border-zinc-900 border text-second border-second block md:hidden group transition-colors duration-200 relative md:right-2 py-2 text-center mt-3 `}>
                 VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
             </Link>
         </div>
