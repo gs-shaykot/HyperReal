@@ -12,7 +12,7 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
 
     return (
         // ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white'}
-        <div className={`relative overflow-hidden border-b border-zinc-800 py-5`}>
+        <div className={`light:bg-white border-zinc-800 bg-main/80 relative overflow-hidden border-b py-5`}>
             <div
                 className="absolute inset-0 opacity-20"
                 style={{
@@ -24,12 +24,11 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
 
                 {/* Heading */}
                 <div className="flex justify-between items-center mb-7 md:mb-10">
-                    {/* ${theme === "dark" ? "text-zinc-900" : "text-white"} */}
-                    <h2 className={`text-2xl md:text-4xl font-extrabold tracking-widest italic`}>
+                    <h2 className={`light:text-zinc-900 text-white text-2xl md:text-4xl font-extrabold tracking-widest italic`}>
                         LATEST <span className="text-second">RELEASES</span>
                     </h2>
 
-                    <Link href="/products" className="text-sm hidden md:block text-gray-400 group hover:text-second transition-colors duration-200 relative right-2">
+                    <Link href="/products" className="text-sm hidden md:block light:text-zinc-800 group hover:text-second transition-colors duration-200 relative right-2">
                         VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                     </Link>
                 </div>
@@ -96,8 +95,7 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                     </div>
                 </div >
 
-                {/* ${theme === "dark" ? "text-zinc-900 border-zinc-800" : "text-second border-second"} */}
-                <Link onMouseEnter={() => router.prefetch("/products")} href="/products" className={`text-sm block md:hidden group transition-colors duration-200 relative md:right-2 border py-2 text-center mt-3 `}>
+                <Link href="/products" className={`light:text-zinc-900 light:border-zinc-900 border text-second border-second block md:hidden group transition-colors duration-200 relative md:right-2 py-2 text-center mt-3 `}>
                     VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                 </Link>
             </section >
