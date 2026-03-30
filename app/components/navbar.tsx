@@ -14,9 +14,9 @@ export const Navbar = () => {
 
     const navLinks =
         <>
-            <li><Link href="/products" className={`light:text-zinc-900 text-white  hover:text-second bg-transparent!`}>Shop All</Link></li>
-            <li><a className={`light:text-zinc-900 text-white  hover:text-second bg-transparent!`}>New Arrivals</a></li>
-            <li><Link href="/lookbook" className={`light:text-zinc-900 text-white  hover:text-second bg-transparent!`}>LookBook</Link></li> 
+            <li><Link href="/products" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>Shop All</Link></li>
+            <li><a className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>New Arrivals</a></li>
+            <li><Link href="/lookbook" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>LookBook</Link></li> 
         </>
 
     return (

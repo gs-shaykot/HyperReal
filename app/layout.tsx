@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Mono } from "next/font/google";
+import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
@@ -16,6 +16,11 @@ const spaceMono = Space_Mono({
   subsets: ['latin'],
   variable: '--font-space-mono',
 })
+const inter = Inter({
+  weight: ['400', '800'],
+  subsets: ['latin'],
+  variable: '--font-inter',
+})
 
 export default function RootLayout({
   children,
@@ -24,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning> 
-      <body className={spaceMono.variable}>
+      <body className={`${spaceMono.variable} ${inter.variable}`}>
         <Providers>
           <ThemeConnector />
           <ThemeBackground />
