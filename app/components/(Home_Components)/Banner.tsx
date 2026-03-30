@@ -47,11 +47,6 @@ export const Banner = () => {
                         <ArrowRight />
                     </button>
 
-                    {/* <button className={`light:text-zinc-900 light:hover:text-white light:hover:bg-black light:border-zinc--900 text-white hover:bg-white border-white btn shadow-none rounded-none bg-transparent hover:text-black border-2 hover:scale-105 transition-all duration-500`}>
-                        VIEW LOOKBOOK
-                        <ArrowRight />
-                    </button> */}
-
                 </div>
             </div>
 

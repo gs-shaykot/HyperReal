@@ -8,8 +8,8 @@ export default function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="dark"
+      enableSystem={false}
       enableColorScheme={false}
     >
       <SessionProvider>

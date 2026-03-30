@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/app/components/navbar"; 
+import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
@@ -30,7 +30,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('theme') || 'light';
+                  var theme = localStorage.getItem('theme') || 'dark';
                   document.documentElement.setAttribute('data-theme', theme);
                 } catch(e) {}
               })();
