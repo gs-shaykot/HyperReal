@@ -18,8 +18,8 @@ export default async function Home() {
     <div className=" shadow-gray-300  text-white">
       <Banner />
       <HeatProduct />
-      <LatestProduct />
       <Category_Count />
+      <LatestProduct />
     </div>
   );
 }

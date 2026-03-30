@@ -20,11 +20,11 @@ export const Category_Count = async () => {
         take: 4
     })
     return (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-10'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 '>
             {categories.map((category, idx) => (
                 <Link href={`/products?category=${category.id}`} key={category.id}>
                     <div
-                        className="relative group h-48 border-b px-6 py-2 border-r border-[#2a2a2e] overflow-hidden cursor-pointer"
+                        className="relative group h-48 border-b border-t px-6 py-2 border-r border-[#2a2a2e] overflow-hidden cursor-pointer"
                     >
                         <div className="absolute inset-0 light:bg-zinc-200 bg-zinc-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out z-0" />
 
