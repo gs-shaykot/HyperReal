@@ -2,9 +2,9 @@ import LaunchCountdown from '@/app/components/(Home_Components)/Upcoming/CustomC
 import React from 'react'
 
 export const Upcoming = () => {
-    let product_name = "VOID RUNNER v3";
+    let product_name = "VOID RUNNER V3";
     return (
-        <div className='w-full h-140 bg-second flex items-center justify-center'>
+        <div className='w-full py-10 bg-second flex items-center justify-center'>
             <div className='max-w-7xl h-full mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-5 '>
                 <div className='flex flex-col items-start justify-center space-y-3'>
                     <div className='w-36 px-2 bg-black text-white text-xs flex items-center justify-between'>
@@ -22,7 +22,7 @@ export const Upcoming = () => {
                                         </span>
                                     )
                                     : (
-                                        <span key={idx} className="block text-zinc-900">
+                                        <span key={idx} className={`block text-zinc-900`}>
                                             {word.toUpperCase()}
                                         </span>
                                     )

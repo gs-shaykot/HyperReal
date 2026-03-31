@@ -1,13 +1,11 @@
-"use client";
-
+"use client"; 
 import Countdown from "react-countdown";
 
+// here i want to persist the countdown. the countdown should not reset if the user leaves the page and comes back. it should continue counting down from where it left off. The admin will set a target date for the countdown.
 export default function LaunchCountdown() {
-
-    // Target date (example: 2 days from now)
+ 
     const targetDate = Date.now() + 1000 * 60 * 60 * 24 * 5;
-
-    // Custom UI renderer
+ 
     const renderer = ({ days, hours, minutes, seconds }: { days: number; hours: number; minutes: number; seconds: number }) => {
         return (
             <div className="flex gap-6">

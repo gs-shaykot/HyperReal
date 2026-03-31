@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Inter, Space_Mono } from "next/font/google";
 import "./globals.css";
@@ -5,6 +6,7 @@ import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
+import CyberpunkLoader from "@/app/components/CyberpunkLoader";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -28,9 +30,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning> 
+    <html lang="en" suppressHydrationWarning>
       <body className={`${spaceMono.variable} ${inter.variable}`}>
         <Providers>
+          <CyberpunkLoader />
+
           <ThemeConnector />
           <ThemeBackground />
           <Navbar />
