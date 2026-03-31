@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 export const Banner = () => {
 
     return (
-        <div className={`light:bg-white light:border-zinc-400 bg-main/80 border-zinc-800 relative overflow-hidden border-b`}>
+        <section className={`light:bg-white light:border-zinc-400 bg-main/80 border-zinc-800 relative overflow-hidden border-b`}>
             <div
                 className={`absolute inset-0 light:opacity-10 opacity-20`}
                 style={{
@@ -50,6 +50,6 @@ export const Banner = () => {
                 </div>
             </div>
 
-        </div>
+        </section>
     )
 }

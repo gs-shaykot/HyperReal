@@ -20,7 +20,7 @@ export const Category_Count = async () => {
         take: 4
     })
     return (
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 '>
+        <section className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 '>
             {categories.map((category, idx) => (
                 <Link href={`/products?category=${category.id}`} key={category.id}>
                     <div
@@ -41,6 +41,6 @@ export const Category_Count = async () => {
                     </div>
                 </Link>
             ))}
-        </div>
+        </section>
     )
 }

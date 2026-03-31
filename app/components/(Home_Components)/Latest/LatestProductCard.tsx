@@ -10,9 +10,8 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
     const featured = products[0];
     const others = products.slice(1, 5);
 
-    return (
-        // ${theme === 'light' ? 'bg-main/80 border-zinc-800' : 'bg-white'}
-        <div className={`light:bg-white border-zinc-800 bg-main/80 relative overflow-hidden border-b py-5`}>
+    return ( 
+        <section className={`light:bg-white border-zinc-800 bg-main/80 relative overflow-hidden border-b py-5`}>
             <div
                 className="absolute inset-0 opacity-20"
                 style={{
@@ -99,6 +98,6 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
                     VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
                 </Link>
             </section >
-        </div >
+        </section >
     )
 }

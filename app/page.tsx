@@ -5,8 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import { Category_Count } from "@/app/components/(Home_Components)/Category/Category_Count";
 import { Upcoming } from "@/app/components/(Home_Components)/Upcoming/Upcoming";
+import { ComboPack } from "@/app/components/(Home_Components)/ComboPack/ComboPack";
 
-export default async function Home() { 
+export default async function Home() {
   return (
     <div className=" shadow-gray-300  text-white">
       <Banner />
@@ -14,6 +15,7 @@ export default async function Home() {
       <Category_Count />
       <Upcoming />
       <LatestProduct />
+      <ComboPack />
     </div>
   );
 }

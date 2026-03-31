@@ -7,7 +7,7 @@ import Link from 'next/link';
 export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any[] }) => {
 
     return (
-        <div className="max-w-7xl px-4 mx-auto py-10">
+        <section className="max-w-7xl px-4 mx-auto py-10">
             <div className='flex justify-between items-center  mb-7 md:mb-10'> 
                 <h2 className={`light:text-zinc-900 text-white text-2xl md:text-4xl italic font-bold transition-colors duration-200`}>TRENDING<span className='text-second'> HEAT</span></h2>
 
@@ -95,6 +95,6 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
             <Link href="/products" className={`light:text-zinc-900 light:border-zinc-900 border text-second border-second block md:hidden group transition-colors duration-200 relative md:right-2 py-2 text-center mt-3 `}>
                 VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
             </Link>
-        </div>
+        </section>
     )
 }
