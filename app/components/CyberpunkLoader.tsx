@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+// perfectly working. but i want the interval to be dynamic & more realistic.
 export default function CyberpunkLoader() {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
