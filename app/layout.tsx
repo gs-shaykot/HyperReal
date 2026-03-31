@@ -6,7 +6,8 @@ import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
-import CyberpunkLoader from "@/app/components/CyberpunkLoader";
+import CyberpunkLoader from "@/app/components/CyberpunkLoader"; 
+import Footer from "@/app/components/Footer";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -41,6 +42,7 @@ export default function RootLayout({
           <main className="relative">
             {children}
           </main>
+          <Footer />
         </Providers>
       </body>
     </html>
