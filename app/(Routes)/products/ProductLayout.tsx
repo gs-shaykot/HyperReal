@@ -8,7 +8,7 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
 
     return (
         // ${theme === 'light' ? 'bg-main/80' : 'bg-white/90'}
-        <main className={``}>
+        <main className={`light:bg-white/90 bg-main/80`}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
 
                 {/* Sticky Red Header - stays below navbar */}

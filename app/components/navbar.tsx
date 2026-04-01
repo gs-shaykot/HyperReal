@@ -3,8 +3,7 @@ import { Sun, User, ShoppingBag, Moon } from "lucide-react"
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
-import { useTheme } from "next-themes"
-import { useEffect, useState } from "react"
+import { useTheme } from "next-themes" 
 
 
 export const Navbar = () => {

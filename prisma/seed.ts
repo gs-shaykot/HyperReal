@@ -1,17 +1,32 @@
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '@prisma/client';
+// this is the fixed file, but still having "No Rows" issue
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-const adapter = new PrismaPg({
+// ✅ Use SAME pattern as /lib/prisma.ts
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL!,
 });
 
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-
 const COLOR_MAP = {
-  neon: 'Neon Breach',
-  black: 'Carbon Void',
+  neon: "Neon Breach",
+  black: "Carbon Void",
 };
+
+// ✅ ADD THIS (CRITICAL FIX)
+const CATEGORIES = [
+  { name: "Footwear", slug: "footwear" },
+  { name: "Tops", slug: "tops" },
+  { name: "Bottoms", slug: "bottoms" },
+  { name: "Outerwear", slug: "outerwear" },
+  { name: "Accessories", slug: "accessories" },
+  { name: "Bags", slug: "bags" },
+  { name: "Layering", slug: "layering" },
+  { name: "Tech Gear", slug: "techgear" },
+];
 
 
 const IMAGE_MAP: Record<
@@ -498,22 +513,31 @@ const PRODUCTS = [
 
 
 async function main() {
+  console.log("🌱 Seeding started...");
+
+  // ✅ STEP 1: Seed categories FIRST
+  await prisma.category.createMany({
+    data: CATEGORIES,
+    skipDuplicates: true,
+  });
+
+  console.log("✅ Categories seeded");
+
   for (const item of PRODUCTS) {
     const category = await prisma.category.findUnique({
       where: { slug: item.categorySlug },
     });
 
+    // ❗ FAIL FAST (no silent skip)
     if (!category) {
-      continue;
+      throw new Error(`❌ Category not found: ${item.categorySlug}`);
     }
 
     const existing = await prisma.product.findFirst({
       where: { name: item.name },
     });
 
-    if (existing) {
-      continue;
-    }
+    if (existing) continue;
 
     const product = await prisma.product.create({
       data: {
@@ -546,31 +570,38 @@ async function main() {
       });
     }
 
-    for (const size of item.sizes) {
-      await prisma.productVariant.createMany({
-        data: [
-          {
-            productId: product.id,
-            size,
-            color: COLOR_MAP.neon,
-            stock: Math.floor(Math.random() * 20) + 10,
-          },
-          {
-            productId: product.id,
-            size,
-            color: COLOR_MAP.black,
-            stock: Math.floor(Math.random() * 20) + 10,
-          },
-        ],
-      });
-    }
+    // ✅ Better: batch insert once per product
+    const variants = item.sizes.flatMap((size) => [
+      {
+        productId: product.id,
+        size,
+        color: COLOR_MAP.neon,
+        stock: Math.floor(Math.random() * 20) + 10,
+      },
+      {
+        productId: product.id,
+        size,
+        color: COLOR_MAP.black,
+        stock: Math.floor(Math.random() * 20) + 10,
+      },
+    ]);
 
+    await prisma.productVariant.createMany({
+      data: variants,
+    });
   }
+
+  console.log("✅ Seeding completed");
 }
 
 main()
-  .then(() => prisma.$disconnect())
-  .catch((e) => {
+  .then(async () => {
+    await prisma.$disconnect();
+    await pool.end();
+  })
+  .catch(async (e) => {
     console.error(e);
-    prisma.$disconnect();
+    await prisma.$disconnect();
+    await pool.end();
+    process.exit(1);
   });

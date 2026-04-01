@@ -41,6 +41,7 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             role: 'USER',
             PhotoUrl: imageUrl,
         }
+        
         const registerProfile = await axios.post("/api/register", UserData)
 
         return {
@@ -62,7 +63,7 @@ export const Register = () => {
     const [state, action, isPending] = useActionState(
         RegisterUser,
         initialState
-    ); 
+    );
 
     return (
         // ${theme === 'light' ? 'bg-main/95' : 'bg-white'}
