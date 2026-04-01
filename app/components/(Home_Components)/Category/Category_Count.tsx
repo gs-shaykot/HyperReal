@@ -26,7 +26,7 @@ export const Category_Count = async () => {
                     <div
                         className="relative group h-48 border-b border-t px-6 py-2 border-r border-[#2a2a2e] overflow-hidden cursor-pointer"
                     >
-                        <div className="absolute inset-0 light:bg-zinc-200 bg-zinc-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out z-0" />
+                        <div className="absolute inset-0 light:bg-zinc-100 bg-zinc-900 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out z-0" />
 
                         <div className="relative z-10 flex flex-col justify-between h-full">
                             <h3 className='light:text-zinc-900 text-white'>
