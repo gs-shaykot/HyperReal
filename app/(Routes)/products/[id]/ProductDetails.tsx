@@ -45,16 +45,16 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                         <h1 className='text-xl text-second font-bold uppercase tracking-wide'>
                             {product.category.name} <span className='text-sm'>// {product.category.slug}</span>
                         </h1>
-                        <h1 className='text-white mt-3 text-3xl md:text-4xl font-bold uppercase italic mb-4'>{product.name}</h1>
-                        <h2 className='text-white text-2xl'>&#x24;{product.price}</h2>
-                        <p className='text-zinc-500 mt-2'>{product.description}</p>
+                        <h1 className='light:text-zinc-900 text-white mt-3 text-3xl md:text-4xl font-bold uppercase italic mb-4'>{product.name}</h1>
+                        <h2 className='light:text-zinc-900 font-bold text-white text-2xl'>&#x24;{product.price}</h2>
+                        <p className='light:text-zinc-800 text-zinc-200 mt-2'>{product.description}</p>
                     </div>
 
                     {/* VARIANTS */}
                     <div className='border-b border-zinc-600 pb-10'> 
                         {/* COLORS */}
                         <div className='mb-5'>
-                            <h1 className='font-bold text-sm text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
+                            <h1 className='font-bold text-sm light:text-zinc-900 text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
                             <div className="flex gap-3">
                                 {Extractedcolor.map(color => (
                                     <div className='flex justify-center items-center relative' key={color}>
@@ -80,13 +80,13 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                         {/* SIZES */}
                         <div className='mb-5'>
-                            <h1 className='font-bold text-sm text-white mb-2'>SELECT SIZE:</h1>
+                            <h1 className='font-bold text-sm light:text-zinc-900 text-white mb-2'>SELECT SIZE:</h1>
                             <div>
                                 {
                                     ExtractedSize.map(variant => (
                                         <button key={variant.id}
                                             onClick={() => setSelectedSize(variant.size)}
-                                            className={`border border-zinc-500 px-3 py-1.5 mr-2 ${selectedSize === variant.size ? 'bg-second text-black' : 'text-white'}`}
+                                            className={`border border-zinc-500 px-3 py-1.5 mr-2 ${selectedSize === variant.size ? 'bg-second light:text-white text-black' : 'light:text-black text-white'}`}
                                         >
                                             {variant.size || "One Size"}
                                         </button>
@@ -100,17 +100,17 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             {/* Quantity */}
                             <div className='flex items-center gap-4 border border-zinc-600 '>
                                 <motion.div
-                                    className='hover:bg-zinc-700 p-1.5 cursor-pointer'
+                                    className='hover:bg-second group p-1.5 cursor-pointer'
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    <Minus className='text-white' onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : prev))} />
+                                    <Minus className='light:text-black text-white group-hover:light:text-white group-hover:text-black' onClick={() => setQuantity((prev) => (prev > 1 ? prev - 1 : prev))} />
                                 </motion.div>
-                                <span className="text-white">{quantity}</span>
+                                <span className="light:text-black text-white">{quantity}</span>
                                 <motion.div
-                                    className='hover:bg-zinc-700 p-1.5 cursor-pointer'
+                                    className='hover:bg-second group p-1.5 cursor-pointer'
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    <Plus className='text-white' onClick={() => setQuantity((prev) => (prev < 10 ? prev + 1 : prev))} />
+                                    <Plus className='light:text-black text-white group-hover:light:text-white group-hover:text-black' onClick={() => setQuantity((prev) => (prev < 10 ? prev + 1 : prev))} />
                                 </motion.div>
                             </div>
 
@@ -118,7 +118,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <div className='flex-1'>
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
-                                    className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold text-black">
+                                    className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold light:text-white text-black">
                                     Add to Cart
                                 </motion.button>
                             </div>
@@ -127,18 +127,18 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                     {/* TABS */}
                     <div className="tabs tabs-border ">
-                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="DETAILS" />
-                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 light:text-zinc-900 text-white/90" aria-label="DETAILS" />
+                        <div className="tab-content light:text-zinc-900 text-white/70 font-light mt-3 text-sm">
                             <p>Constructed from premium industrial-grade materials. Reinforced stitching at stress points. Designed in Neo-Tokyo.</p>
                         </div>
 
-                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="SHIPPING" defaultChecked />
-                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 light:text-zinc-900 text-white/90" aria-label="SHIPPING" defaultChecked />
+                        <div className="tab-content light:text-zinc-900 text-white/70 font-light mt-3 text-sm">
                             <p>Free worldwide shipping on orders over $150. Standard delivery 5-7 business days. Express available at checkout.</p>
                         </div>
 
-                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 text-white/90" aria-label="RETURNS" />
-                        <div className="tab-content text-white/70 font-light mt-3 text-sm">
+                        <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 light:text-zinc-900 text-white/90" aria-label="RETURNS" />
+                        <div className="tab-content light:text-zinc-900 text-white/70 font-light mt-3 text-sm">
                             <p>30-day return policy. Items must be unworn with tags attached. Free returns on all domestic orders.</p>
                         </div>
                     </div>

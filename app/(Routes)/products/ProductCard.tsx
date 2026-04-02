@@ -25,8 +25,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                             y: -6,
                             boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                             borderColor: "#8fb300",
-                        }}
-                        // ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent" }
+                        }} 
                         className={`bg-zinc-900 border-transparent light:bg-white light:border-zinc-200 light:shadow-xs border-2 overflow-hidden cursor-pointer group`}
                     >
                         {/* IMAGE */}
@@ -54,8 +53,7 @@ export const ProductCard = ({ products }: ProductProps) => {
 
                         {/* CONTENT */}
                         <div className="px-3 py-2 text-sm">
-                            <div className="flex justify-between items-center">
-                                {/* ${theme === "dark" ? "text-black" : "text-white"} */}
+                            <div className="flex justify-between items-center"> 
                                 <h3
                                     className={`font-semibold `}
                                 >
