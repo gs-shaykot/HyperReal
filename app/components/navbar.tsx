@@ -97,7 +97,7 @@ export const Navbar = () => {
                                             </div>
                                             <ul
                                                 tabIndex={-1}
-                                                className="menu menu-sm dropdown-content bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1">
+                                                className="menu menu-sm dropdown-content light:bg-white bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1">
                                                 <li><a>{session?.user?.name}</a></li>
                                                 <li>
                                                     {
