@@ -87,20 +87,18 @@ export const Login = () => {
             }, 1000);
         }
     }, [state.success, router]);
-    // bg-main/80
+    
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4`}>
-            {/* ${theme === 'light' ? 'bg-zinc-900/80' : 'bg-gray-100/80'} */}
-            <div className={`w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
+        <div className={`min-h-screen flex items-center justify-center px-4`}> 
+            <div className={`light:bg-gray-100/80 bg-zinc-900/80 w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
                 <div className="p-10 flex flex-col justify-center space-y-4">
                     <div>
-                        <h1 className={`text-3xl font-extrabold leading-tight`}>
-                            {/* ${theme === 'light' ? 'text-white' : 'text-zinc-900'} */}
-                            <span className={``}>SYSTEM</span><br />
+                        <h1 className={`text-3xl font-extrabold leading-tight`}> 
+                            <span className={`light:text-zinc-900 text-white`}>SYSTEM</span><br />
                             <span className="text-second">ACCESS</span>
                         </h1>
-                        {/* ${theme === 'light' ? 'text-zinc-400' : 'text-zinc-700'}  */}
-                        <p className={`mt-3 text-sm  max-w-sm`}>
+                        
+                        <p className={`light:text-zinc-700 text-zinc-400 mt-3 text-sm  max-w-sm`}>
                             Enter credentials to access the HyperReal mainframe.
                         </p>
                     </div>
@@ -140,9 +138,9 @@ export const Login = () => {
                                 name="email"
                                 placeholder="Enter your identity"
                                 //  ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
-                                className={`  input w-full border ${state.errors?.email
+                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email
                                     ? 'border-red-500 focus:border-red-500'
-                                    : 'border-zinc-700 focus:border-second'
+                                    : 'border-zinc-700 '
                                     } text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
@@ -162,11 +160,10 @@ export const Login = () => {
                             <input
                                 type="password"
                                 name="password"
-                                placeholder="Enter passcode"
-                                // ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
-                                className={`input w-full bg-black border ${state.errors?.password
+                                placeholder="Enter passcode" 
+                                className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password
                                     ? 'border-red-500 focus:border-red-500'
-                                    : 'border-zinc-700 focus:border-second'
+                                    : 'border-zinc-700 '
                                     } text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
@@ -199,10 +196,10 @@ export const Login = () => {
                     </form>
 
                     {/* Footer */}
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs light:text-zinc-900 text-zinc-500 font-medium">
                         No identity found?{" "}
                         {/* ${theme === 'light' ? 'text-second' : 'text-zinc-900 font-bold'} */}
-                        <Link href="/register" className={`hover:underline cursor-pointer`}>
+                        <Link href="/register" className={`light:text-zinc-900 text-second font-bold hover:underline cursor-pointer`}>
                             CREATE OPERATIVE ACCOUNT
                         </Link>
                     </p>
