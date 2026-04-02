@@ -27,7 +27,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                             borderColor: "#8fb300",
                         }}
                         // ${theme === "dark" ? "bg-white border-zinc-200 shadow-xs" : "bg-zinc-900 border-transparent" }
-                        className={`border-2 overflow-hidden cursor-pointer group`}
+                        className={`bg-zinc-900 border-transparent light:bg-white light:border-zinc-200 light:shadow-xs border-2 overflow-hidden cursor-pointer group`}
                     >
                         {/* IMAGE */}
                         <div className="relative z-10 h-80 w-full overflow-hidden">
