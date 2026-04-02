@@ -30,7 +30,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* IMAGES CONTAINER */}
                 <div
-                    className="aspect-square bg-dark-surface border border-border overflow-hidden relative">
+                    className="aspect-square bg-dark-surface border border-zinc-700 overflow-hidden relative">
                     <img
                         src={SelectedImage || "/placeholder.png"}
                         alt={product.name}
