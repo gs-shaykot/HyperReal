@@ -136,8 +136,7 @@ export const Login = () => {
                             <input
                                 type="email"
                                 name="email"
-                                placeholder="Enter your identity"
-                                //  ${theme === 'light' ? 'bg-black' : 'bg-white outline-0'}
+                                placeholder="Enter your identity" 
                                 className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email
                                     ? 'border-red-500 focus:border-red-500'
                                     : 'border-zinc-700 '
@@ -197,8 +196,7 @@ export const Login = () => {
 
                     {/* Footer */}
                     <p className="text-xs light:text-zinc-900 text-zinc-500 font-medium">
-                        No identity found?{" "}
-                        {/* ${theme === 'light' ? 'text-second' : 'text-zinc-900 font-bold'} */}
+                        No identity found?{" "} 
                         <Link href="/register" className={`light:text-zinc-900 text-second font-bold hover:underline cursor-pointer`}>
                             CREATE OPERATIVE ACCOUNT
                         </Link>
