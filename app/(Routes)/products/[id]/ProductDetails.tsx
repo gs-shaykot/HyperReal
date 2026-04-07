@@ -4,26 +4,35 @@ import { Check, Minus, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 
-// make skeleton loading for this page. i will add this in /products/[id]/loading.tsx:
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
+    useMemo(() => { console.log(product) }, [product])
 
-    // !EXTRACTED UNIQUE COLORS
+    //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
         () => [...new Set(product.productVariants?.map(variant => variant.color))],
         [product.productVariants]
     );
 
-    const [selectedColor, setSelectedColor] = useState(Extractedcolor[0]);
+    const [selectedColor, setSelectedColor] = useState(
+        Extractedcolor.find((color) => color.toLowerCase() === 'neon breach') ?? Extractedcolor[0]
+    );
+
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
 
-    // !EXTRACTED SIZES BASED ON SELECTED COLOR 
+    //EXTRACTED SIZES BASED ON SELECTED COLOR
     let ExtractedSize = useMemo(
         () => [...new Set(product.productVariants?.filter(variant => variant.color === selectedColor))],
         [product.productVariants, selectedColor]
     );
-    // !SELECTED IMAGES BASED ON SELECTED COLOR
-    let SelectedImage = product.productImages[Extractedcolor.indexOf(selectedColor)]?.imageUrl || product.productImages[0]?.imageUrl
+
+    //SELECTED IMAGES BASED ON SELECTED COLOR
+    
+    let SelectedImage = useMemo(() => {
+        return (
+            product.productImages?.find((img) => img.color === selectedColor)?.imageUrl ?? product.productImages[1]?.imageUrl
+        );
+    }, [product.productImages, selectedColor])
 
     return (
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
@@ -39,7 +48,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                 </div>
 
                 {/* PRODUCT DETAILS */}
-                <div className=''>
+                <div>
                     {/* Basic Informations */}
                     <div>
                         <h1 className='text-xl text-second font-bold uppercase tracking-wide'>
@@ -51,7 +60,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                     </div>
 
                     {/* VARIANTS */}
-                    <div className='border-b border-zinc-600 pb-10'> 
+                    <div className='border-b border-zinc-600 pb-10'>
                         {/* COLORS */}
                         <div className='mb-5'>
                             <h1 className='font-bold text-sm light:text-zinc-900 text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>

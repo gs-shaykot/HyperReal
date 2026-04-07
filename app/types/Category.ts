@@ -19,6 +19,7 @@ export interface ProductType {
 
   productImages: {
     imageUrl: string;
+    color?: string;
   }[];
 
   productVariants?: {

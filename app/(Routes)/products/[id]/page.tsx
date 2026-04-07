@@ -9,7 +9,7 @@ export const page = async ({ params }: any) => {
         include: {
             category: { select: { name: true, slug: true } },
             productImages: {
-                select: { imageUrl: true },
+                select: { imageUrl: true, color: true    },
                 orderBy: {id: 'desc'}
             },
             productVariants: {
