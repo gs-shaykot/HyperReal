@@ -8,6 +8,7 @@ import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
 import CyberpunkLoader from "@/app/components/CyberpunkLoader"; 
 import Footer from "@/app/components/Footer";
+import { Toaster } from 'react-hot-toast';
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -41,6 +42,7 @@ export default function RootLayout({
           <Navbar />
           <main className="relative">
             {children}
+            <Toaster position="top-center" />
           </main>
           <Footer />
         </Providers>

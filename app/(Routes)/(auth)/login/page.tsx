@@ -1,12 +1,11 @@
 'use client'
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { TriangleAlert, UserRoundCheck } from 'lucide-react';
+import { useEffect } from 'react'; 
+import { Eye, EyeOff, TriangleAlert, UserRoundCheck } from 'lucide-react';
 
 type LoginState = {
     success: boolean;
@@ -78,8 +77,9 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 
 export const Login = () => {
     const router = useRouter();
-    const [state, action, isPending] = useActionState(LoginAction, initialState); 
-
+    const [state, action, isPending] = useActionState(LoginAction, initialState);  
+    const [ShowPassword, setShowPassword] = useState(false);
+    
     useEffect(() => {
         if (state.success) {
             setTimeout(() => {
@@ -156,21 +156,28 @@ export const Login = () => {
                                     PASSCODE
                                 </span>
                             </label>
-                            <input
-                                type="password"
-                                name="password"
-                                placeholder="Enter passcode" 
-                                className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-zinc-700 '
-                                    } text-gray-400 placeholder:text-zinc-700`}
-                                disabled={isPending}
-                            />
-                            {state.errors?.password && (
-                                <p className="text-xs text-red-400 mt-1 font-mono">
-                                    &gt; {state.errors.password}
-                                </p>
-                            )}
+                            <div className='relative'>
+                                <input
+                                    type={ShowPassword ? "text" : "password"}
+                                    name="password"
+                                    placeholder="Enter passcode"
+                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password
+                                        ? 'border-red-500 focus:border-red-500'
+                                        : 'border-zinc-700 '
+                                        } text-gray-400 placeholder:text-zinc-700`}
+                                    disabled={isPending}
+                                />
+                                {
+                                    ShowPassword ?
+                                        <Eye size={20} className='text-second cursor-pointer absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} /> :
+                                        <EyeOff size={20} className='text-second cursor-pointer  absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} />
+                                }
+                                {state.errors?.password && (
+                                    <p className="text-xs text-red-400 mt-1 font-mono">
+                                        &gt; {state.errors.password}
+                                    </p>
+                                )}
+                            </div>
                         </div>
 
                         <button

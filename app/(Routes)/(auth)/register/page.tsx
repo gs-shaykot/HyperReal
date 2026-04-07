@@ -3,8 +3,10 @@ import { RegisterType, UserType } from '@/app/types/RegisterState';
 import axios from 'axios';
 import { Eye, EyeClosed, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useActionState, useState } from 'react';
-import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 const initialState: RegisterType = {
     success: false,
@@ -46,7 +48,7 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
 
         return {
             success: true,
-            message: `User Registration Successful. Please Login to continue.`,
+            message: `User Registration Successful. Please Login to continue.`
         }
 
     } catch (error) {
@@ -64,6 +66,48 @@ export const Register = () => {
         RegisterUser,
         initialState
     );
+    const router = useRouter();
+
+    useEffect(() => {
+        if (state.success) {
+            let count = 2;
+
+            const toastId = toast.custom((t) => (
+                <div className="bg-black border border-lime-400 shadow-[0_0_20px_#00ff9c] text-lime-400 px-6 py-4 rounded-lg font-mono tracking-wider">
+                    <p className="text-sm">
+                        ✅ REGISTRATION SUCCESSFUL
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-1">
+                        Redirecting in {count}s...
+                    </p>
+                </div>
+            ), { duration: 3000 });
+
+            const interval = setInterval(() => {
+                count--;
+
+                toast.custom((t) => (
+                    <div className="bg-black border border-lime-400 shadow-[0_0_20px_#00ff9c] text-lime-400 px-6 py-4 rounded-lg font-mono tracking-wider">
+                        <p className="text-sm">
+                            ✅ REGISTRATION SUCCESSFUL
+                        </p>
+                        <p className="text-xs text-zinc-400 mt-1">
+                            Redirecting in {count}s...
+                        </p>
+                    </div>
+                ), { id: toastId });
+
+                if (count === 0) {
+                    clearInterval(interval);
+                    router.push('/login');
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [state.success]);
+
+
 
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
@@ -77,7 +121,7 @@ export const Register = () => {
                         <h1 className="text-3xl font-extrabold tracking-wide leading-tight">
                             <span className={`light:text-zinc-900 text-white `}>NEW</span>{" "}
                             <span className="text-second italic">OPERATIVE</span>
-                        </h1> 
+                        </h1>
                         <p className={`light:text-zinc-700 text-zinc-400 mt-2 text-sm `}>
                             Join the syndicate. Early access to drops and exclusive gear.
                         </p>
@@ -92,11 +136,11 @@ export const Register = () => {
                                     FULL NAME
                                 </span>
                             </label>
-                            
+
                             <input
                                 required={true}
                                 type="text"
-                                name="fullName" 
+                                name="fullName"
                                 className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 uppercase`}
                                 placeholder='Enter your full name'
                             />
@@ -111,7 +155,7 @@ export const Register = () => {
                             <input
                                 required={true}
                                 type="email"
-                                name="email" 
+                                name="email"
                                 className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 lowercase`}
                                 placeholder='Enter your email address'
                             />
@@ -128,7 +172,7 @@ export const Register = () => {
                                 <input
                                     required={true}
                                     type={ShowPassword ? "text" : "password"}
-                                    name="password" 
+                                    name="password"
                                     className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none relative`}
                                     placeholder='Enter your passcode'
                                 />
@@ -151,7 +195,7 @@ export const Register = () => {
 
                             <input
                                 type="file"
-                                name="profileImage" 
+                                name="profileImage"
                                 className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
                             />
                         </div>
