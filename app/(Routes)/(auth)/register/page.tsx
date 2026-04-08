@@ -1,13 +1,14 @@
 'use client';
 import { RegisterType, UserType } from '@/app/types/RegisterState';
 import axios from 'axios';
-import { Eye, EyeClosed, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useActionState, useState } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
+
 
 const initialState: RegisterType = {
     success: false,
@@ -65,7 +66,7 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             PhotoUrl: imageUrl,
         }
 
-        const registerProfile = await axios.post("/api/register", UserData) 
+        const registerProfile = await axios.post("/api/register", UserData)
 
         if (registerProfile.status === 400) {
             return {
@@ -162,7 +163,21 @@ export const Register = () => {
                     </div>
 
                     {/* Form */}
-                    <form action={action} className="space-y-3">
+                    <form action={action} className="space-y-3">  
+
+                        <div>
+                            <label className="label">
+                                <span className="label-text text-xs tracking-widest text-zinc-500">
+                                    PROFILE IMAGE (OPTIONAL)
+                                </span>
+                            </label>
+
+                            <input
+                                type="file"
+                                name="profileImage"
+                                className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
+                            />
+                        </div>
 
                         <div>
                             <label className="label">
@@ -219,20 +234,6 @@ export const Register = () => {
                             </div>
                         </div>
 
-
-                        <div>
-                            <label className="label">
-                                <span className="label-text text-xs tracking-widest text-zinc-500">
-                                    PROFILE IMAGE
-                                </span>
-                            </label>
-
-                            <input
-                                type="file"
-                                name="profileImage"
-                                className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
-                            />
-                        </div>
 
                         {/* CTA */}
                         <button
