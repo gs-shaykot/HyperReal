@@ -24,7 +24,7 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             success: false,
             message: 'Email and password are required.'
         }
-    } 
+    }
 
     if (!validator.isEmail(email)) {
         return {
@@ -66,15 +66,28 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
         }
 
         const registerProfile = await axios.post("/api/register", UserData)
-
         console.log(registerProfile);
+
+        if (registerProfile.status === 400) {
+            return {
+                success: false,
+                message: "User already exists. Please login instead."
+            }
+        }
 
         return {
             success: true,
             message: `User Registration Successful. Please Login to continue.`
         }
 
-    } catch (error) {
+    } catch (error: any) {
+        if (error.response) {
+            console.log(error.response);
+            return {
+                success: false,
+                message: error.response.data.message || "Request failed"
+            };
+        }
         return {
             success: false,
             message: 'An error occurred during registration.'
@@ -233,7 +246,7 @@ export const Register = () => {
                     {
                         state.message && (
                             <p className={`text-sm mt-2 text-center ${state.success ? 'text-lime-400' : 'text-red-500'}`}>
-                                User Registration {state.success ? 'Successful' : 'Failed'} : {state.message}
+                                User Registration {state.success ? 'Successful' : 'Failed'} : <span className='font-extrabold'>{state.message}</span>
                             </p>
                         )
                     }
