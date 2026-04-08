@@ -65,8 +65,7 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             PhotoUrl: imageUrl,
         }
 
-        const registerProfile = await axios.post("/api/register", UserData)
-        console.log(registerProfile);
+        const registerProfile = await axios.post("/api/register", UserData) 
 
         if (registerProfile.status === 400) {
             return {
@@ -82,7 +81,6 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
 
     } catch (error: any) {
         if (error.response) {
-            console.log(error.response);
             return {
                 success: false,
                 message: error.response.data.message || "Request failed"

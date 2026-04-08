@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
-    useMemo(() => { console.log(product) }, [product])
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(

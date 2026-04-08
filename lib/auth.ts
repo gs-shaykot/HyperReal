@@ -28,7 +28,6 @@ export const authOptions: AuthOptions = {
                 if (!Fetchuser) throw new Error("User not found");
 
                 const isValid = await argon2.verify(Fetchuser.password, password);
-                console.log('Validity proved:', isValid);
                 
                 if (!isValid) throw new Error("Invalid password");
 
