@@ -1,11 +1,11 @@
 'use client';
 import { RegisterType, UserType } from '@/app/types/RegisterState';
+import { uploadImage } from '@/utils/uploadImage';
 import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { useActionState, useState } from 'react';
+import React, { useState, ChangeEvent, FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
 
@@ -15,134 +15,116 @@ const initialState: RegisterType = {
     message: "",
 };
 
-export const RegisterUser = async (prevState: RegisterType, formData: FormData) => {
-    const fullName = formData.get('fullName') as string
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-
-    if (!email || !password) {
-        return {
-            success: false,
-            message: 'Email and password are required.'
-        }
-    }
-
-    if (!validator.isEmail(email)) {
-        return {
-            success: false,
-            message: "Invalid email format"
-        };
-    }
-
-    if (!validator.isStrongPassword(password, {
-        minLength: 6,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-    })) {
-        return {
-            success: false,
-            message: "Password must be strong (8+ chars, uppercase, lowercase, number, symbol)"
-        };
-    }
-
-    try {
-        const profileImage = formData.get('profileImage') as File | null
-        let imageUrl = "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png"
-        if (profileImage && profileImage.size > 0) {
-            const uploadData = new FormData();
-            uploadData.append('file', profileImage);
-
-            const uploadRes = await axios.post('/api/uploadImage', uploadData);
-            imageUrl = uploadRes.data.secure_url || uploadRes.data.url;
-        }
-
-        const UserData: UserType = {
-            name: fullName.toUpperCase(),
-            email,
-            password,
-            role: 'USER',
-            PhotoUrl: imageUrl,
-        }
-
-        const registerProfile = await axios.post("/api/register", UserData)
-
-        if (registerProfile.status === 400) {
-            return {
-                success: false,
-                message: "User already exists. Please login instead."
-            }
-        }
-
-        return {
-            success: true,
-            message: `User Registration Successful. Please Login to continue.`
-        }
-
-    } catch (error: any) {
-        if (error.response) {
-            return {
-                success: false,
-                message: error.response.data.message || "Request failed"
-            };
-        }
-        return {
-            success: false,
-            message: 'An error occurred during registration.'
-        }
-    }
-}
-
 export const Register = () => {
-
-    const [ShowPassword, setShowPassword] = useState(false);
-    const [state, action, isPending] = useActionState(
-        RegisterUser,
-        initialState
-    );
     const router = useRouter();
 
-    useEffect(() => {
-        if (state.success) {
-            let count = 2;
+    const [showPassword, setShowPassword] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [imageUrl, setImageUrl] = useState("");
+    const [loading, setLoading] = useState(false);
 
-            const toastId = toast.custom((t) => (
-                <div className="bg-black border border-lime-400 shadow-[0_0_20px_#00ff9c] text-lime-400 px-6 py-4 rounded-lg font-mono tracking-wider">
-                    <p className="text-sm">
-                        ✅ REGISTRATION SUCCESSFUL
-                    </p>
-                    <p className="text-xs text-zinc-400 mt-1">
-                        Redirecting in {count}s...
-                    </p>
-                </div>
-            ), { duration: 3000 });
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-            const interval = setInterval(() => {
-                count--;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Only image files allowed");
+            return;
+        }
+  
+        setUploading(true);
 
-                toast.custom((t) => (
-                    <div className="bg-black border border-lime-400 shadow-[0_0_20px_#00ff9c] text-lime-400 px-6 py-4 rounded-lg font-mono tracking-wider">
-                        <p className="text-sm">
-                            ✅ REGISTRATION SUCCESSFUL
-                        </p>
-                        <p className="text-xs text-zinc-400 mt-1">
+        const url = await uploadImage(file);
+        setImageUrl(url);
+
+        setUploading(false);
+    };
+
+    const handleRegister = async (e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        const fullName = formData.get('fullName') as string;
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+
+        // validations
+        if (!email || !password) {
+            return toast.error("Email & password required");
+        }
+
+        if (!validator.isEmail(email)) {
+            return toast.error("Invalid email");
+        }
+
+        if (!validator.isStrongPassword(password, {
+            minLength: 6,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+        })) {
+            return toast.error("Password must be strong (8+ chars, uppercase, lowercase, number, symbol)");
+        }
+
+        if (uploading) {
+            return toast.error("Wait for image upload");
+        }
+
+        try {
+            setLoading(true);
+
+            const userData = {
+                name: fullName.toUpperCase(),
+                email,
+                password,
+                role: 'USER',
+                PhotoUrl: imageUrl, 
+            };
+
+            const res = await axios.post("/api/register", userData);
+
+            if (res.status === 200 || res.status === 201) {
+                let count = 2;
+
+                const toastId = toast.custom(() => (
+                    <div className="bg-black border border-lime-400 text-lime-400 px-6 py-4 rounded-lg font-mono">
+                        <p>✅ REGISTRATION SUCCESSFUL</p>
+                        <p className="text-xs text-zinc-400">
                             Redirecting in {count}s...
                         </p>
                     </div>
-                ), { id: toastId });
+                ));
 
-                if (count === 0) {
-                    clearInterval(interval);
-                    router.push('/login');
-                }
-            }, 1000);
+                const interval = setInterval(() => {
+                    count--;
 
-            return () => clearInterval(interval);
+                    toast.custom(() => (
+                        <div className="bg-black border border-lime-400 text-lime-400 px-6 py-4 rounded-lg font-mono">
+                            <p>✅ REGISTRATION SUCCESSFUL</p>
+                            <p className="text-xs text-zinc-400">
+                                Redirecting in {count}s...
+                            </p>
+                        </div>
+                    ), { id: toastId });
+
+                    if (count === 0) {
+                        clearInterval(interval);
+                        router.push('/login');
+                    }
+                }, 1000);
+            }
+
+        } catch (error: any) {
+            toast.error(
+                error.response?.data?.message || "Registration failed"
+            );
+        } finally {
+            setLoading(false);
         }
-    }, [state.success]);
-
-
+    };
 
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
@@ -163,7 +145,7 @@ export const Register = () => {
                     </div>
 
                     {/* Form */}
-                    <form action={action} className="space-y-3">  
+                    <form onSubmit={handleRegister} className="space-y-3">
 
                         <div>
                             <label className="label">
@@ -175,6 +157,7 @@ export const Register = () => {
                             <input
                                 type="file"
                                 name="profileImage"
+                                onChange={handleImageUpload}
                                 className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
                             />
                         </div>
@@ -220,35 +203,33 @@ export const Register = () => {
                             <div className='relative'>
                                 <input
                                     required={true}
-                                    type={ShowPassword ? "text" : "password"}
+                                    type={showPassword ? "text" : "password"}
                                     name="password"
                                     className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none relative`}
                                     placeholder='Enter your passcode'
                                 />
                                 {
-                                    ShowPassword ?
-                                        <Eye size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} /> :
-                                        <EyeOff size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!ShowPassword)} />
+                                    showPassword ?
+                                        <Eye size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!showPassword)} /> :
+                                        <EyeOff size={20} className='text-second absolute top-2.5 right-2' onClick={() => setShowPassword(!showPassword)} />
                                 }
 
                             </div>
                         </div>
 
 
-                        {/* CTA */}
                         <button
-                            disabled={isPending}
-                            className="btn shadow-none w-full bg-second text-black hover:bg-zinc-200 tracking-widest font-semibold mt-2">
-                            {isPending ? "Creating account..." : "Register"}
+                            disabled={loading || uploading}
+                            className="btn w-full bg-second text-black"
+                        >
+                            {uploading
+                                ? "Uploading image..."
+                                : loading
+                                    ? "Creating account..."
+                                    : "Register"}
                         </button>
                     </form>
-                    {
-                        state.message && (
-                            <p className={`text-sm mt-2 text-center ${state.success ? 'text-lime-400' : 'text-red-500'}`}>
-                                User Registration {state.success ? 'Successful' : 'Failed'} : <span className='font-extrabold'>{state.message}</span>
-                            </p>
-                        )
-                    }
+
                     {/* Footer link */}
                     <div className="text-center pt-2">
                         <Link

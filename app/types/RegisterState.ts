@@ -8,5 +8,5 @@ export type UserType = {
   email: string;
   password: string;
   role: 'USER' | 'ADMIN';
-  PhotoUrl: string;
+  PhotoUrl?: string;
 }
