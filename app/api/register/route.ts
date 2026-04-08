@@ -4,12 +4,19 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password, role, PhotoUrl } = await req.json(); 
+        const { name, email, password, role, PhotoUrl } = await req.json();
 
+        const isUserExist = await prisma.user.findUnique({
+            where: { email }
+        })
 
-        const hashPassword = await argon2.hash(password); 
+        if (isUserExist) {
+            return NextResponse.json({ success: false, message: 'User already exists.' }, { status: 400 });
+        }
 
-        const submitUser = await prisma.user.create({
+        const hashPassword = await argon2.hash(password);
+
+        const newUser = await prisma.user.create({
             data: {
                 name,
                 email,
@@ -19,7 +26,7 @@ export async function POST(req: Request) {
             }
         })
 
-        return NextResponse.json({ submitUser }, { status: 201 });
+        return NextResponse.json({ success: true, message: 'User registered successfully.'}, { status: 201 });
 
     } catch (error) {
         return NextResponse.json({ success: false, message: 'Registration failed.' }, { status: 500 });

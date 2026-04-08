@@ -1,5 +1,6 @@
 'use client';
 import { RegisterType, UserType } from '@/app/types/RegisterState';
+import prisma from '@/lib/prisma';
 import axios from 'axios';
 import { Eye, EyeClosed, EyeOff } from 'lucide-react';
 import Link from 'next/link';
@@ -7,11 +8,20 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useActionState, useState } from 'react';
 import toast from 'react-hot-toast';
+import validator from 'validator';
 
 const initialState: RegisterType = {
     success: false,
     message: "",
 };
+
+const CheckUserExists = async (email: string) => {
+    const res = await prisma.user.findUnique({
+        where: { email }
+    })
+    console.log(res?.id ?? "User found with email:", res?.name);
+ 
+}
 
 export const RegisterUser = async (prevState: RegisterType, formData: FormData) => {
     const fullName = formData.get('fullName') as string
@@ -23,6 +33,26 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
             success: false,
             message: 'Email and password are required.'
         }
+    } 
+
+    if (!validator.isEmail(email)) {
+        return {
+            success: false,
+            message: "Invalid email format"
+        };
+    }
+
+    if (!validator.isStrongPassword(password, {
+        minLength: 6,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+    })) {
+        return {
+            success: false,
+            message: "Password must be strong (8+ chars, uppercase, lowercase, number, symbol)"
+        };
     }
 
     try {
@@ -45,6 +75,8 @@ export const RegisterUser = async (prevState: RegisterType, formData: FormData) 
         }
 
         const registerProfile = await axios.post("/api/register", UserData)
+
+        console.log(registerProfile);
 
         return {
             success: true,
