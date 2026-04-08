@@ -1,6 +1,5 @@
 'use client';
 import { RegisterType, UserType } from '@/app/types/RegisterState';
-import prisma from '@/lib/prisma';
 import axios from 'axios';
 import { Eye, EyeClosed, EyeOff } from 'lucide-react';
 import Link from 'next/link';
@@ -14,14 +13,6 @@ const initialState: RegisterType = {
     success: false,
     message: "",
 };
-
-const CheckUserExists = async (email: string) => {
-    const res = await prisma.user.findUnique({
-        where: { email }
-    })
-    console.log(res?.id ?? "User found with email:", res?.name);
- 
-}
 
 export const RegisterUser = async (prevState: RegisterType, formData: FormData) => {
     const fullName = formData.get('fullName') as string
