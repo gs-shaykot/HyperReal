@@ -9,12 +9,6 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
 
-
-const initialState: RegisterType = {
-    success: false,
-    message: "",
-};
-
 export const Register = () => {
     const router = useRouter();
 
@@ -22,6 +16,7 @@ export const Register = () => {
     const [uploading, setUploading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
     const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -31,13 +26,17 @@ export const Register = () => {
             toast.error("Only image files allowed");
             return;
         }
-  
+
         setUploading(true);
-
-        const url = await uploadImage(file);
-        setImageUrl(url);
-
-        setUploading(false);
+        setProgress(0);
+        try {
+            const url = await uploadImage(file, setProgress);
+            setImageUrl(url);
+        } catch (err) {
+            toast.error("Upload failed");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleRegister = async (e: React.SubmitEvent<HTMLFormElement>) => {
@@ -81,7 +80,7 @@ export const Register = () => {
                 email,
                 password,
                 role: 'USER',
-                PhotoUrl: imageUrl, 
+                PhotoUrl: imageUrl,
             };
 
             const res = await axios.post("/api/register", userData);
@@ -160,6 +159,19 @@ export const Register = () => {
                                 onChange={handleImageUpload}
                                 className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
                             />
+                            {uploading && (
+                                <div className="mt-2">
+                                    <div className="h-2 w-full bg-zinc-800 rounded overflow-hidden">
+                                        <div
+                                            className="h-full bg-lime-400 shadow-[0_0_10px_#00ff9c] transition-all duration-300"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-lime-400 mt-1 font-mono">
+                                        Uploading... {progress}%
+                                    </p>
+                                </div>
+                            )}
                         </div>
 
                         <div>
