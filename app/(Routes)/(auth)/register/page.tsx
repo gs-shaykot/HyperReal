@@ -84,7 +84,7 @@ export const Register = () => {
             };
 
             const res = await axios.post("/api/register", userData);
-
+            
             if (res.status === 200 || res.status === 201) {
                 let count = 2;
 
@@ -96,7 +96,7 @@ export const Register = () => {
                         </p>
                     </div>
                 ));
-
+                
                 const interval = setInterval(() => {
                     count--;
 
