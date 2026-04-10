@@ -1,6 +1,6 @@
 import { LatestProductCard } from '@/app/components/(Home_Components)/Latest/LatestProductCard';
 import prisma from '@/lib/prisma';
-import { useSelector } from 'react-redux';
+
 
 export const LatestProduct = async () => {
     const latestProduct = await prisma.product.findMany({

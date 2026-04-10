@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js" 
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -30,12 +30,15 @@ enum PaymentStatus {
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  role     Role    @default(USER)
-  PhotoUrl String?
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  password   String
+  role       Role      @default(USER)
+  PhotoUrl   String?
+  otp        String?
+  otpExpiry  DateTime?
+  isVerified Boolean   @default(false)
 
   createdAt DateTime  @default(now())
   addresses Address[]

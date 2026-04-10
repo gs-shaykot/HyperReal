@@ -11,12 +11,13 @@ import validator from 'validator';
 
 export const Register = () => {
     const router = useRouter();
-
     const [showPassword, setShowPassword] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [otp, setOtp] = useState("");
+    const [otpSent, setOtpSent] = useState(false);
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -49,7 +50,6 @@ export const Register = () => {
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
 
-        // validations
         if (!email || !password) {
             return toast.error("Email & password required");
         }
@@ -72,6 +72,14 @@ export const Register = () => {
             return toast.error("Wait for image upload");
         }
 
+        if (!otpSent) {
+            return toast.error("Please verify your email first ");
+        }
+
+        if (!otp || otp.length !== 6) {
+            return toast.error("Enter valid OTP");
+        }
+
         try {
             setLoading(true);
 
@@ -84,7 +92,7 @@ export const Register = () => {
             };
 
             const res = await axios.post("/api/register", userData);
-            
+
             if (res.status === 200 || res.status === 201) {
                 let count = 2;
 
@@ -96,7 +104,7 @@ export const Register = () => {
                         </p>
                     </div>
                 ));
-                
+
                 const interval = setInterval(() => {
                     count--;
 
@@ -124,6 +132,26 @@ export const Register = () => {
             setLoading(false);
         }
     };
+
+    const handleSendOtp = async () => {
+        const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
+        const password = (document.querySelector('[name="password"]') as HTMLInputElement)?.value;
+
+        if (!email || !password) {
+            return toast.error("Email & password required to send OTP");
+        }
+
+        try {
+            await axios.post("/api/sendOtp", { email, password });
+            setOtpSent(true);
+            toast.success("OTP sent to your email");
+        } catch (error: any) {
+            toast.error(
+                error.response?.data?.message || "Failed to send OTP"
+            );
+        }
+
+    }
 
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
@@ -229,6 +257,39 @@ export const Register = () => {
                             </div>
                         </div>
 
+                        {/* OTP SECTION */}
+                        <div className="space-y-2">
+                            <label className="label">
+                                <span className="label-text text-xs tracking-widest text-zinc-500">
+                                    EMAIL VERIFICATION CODE
+                                </span>
+                            </label>
+
+                            <div className="flex gap-2">
+                                {/* OTP Input */}
+                                <input
+                                    type="text"
+                                    maxLength={6}
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    placeholder="Enter 6-digit OTP"
+                                    className="flex-1 bg-black border border-zinc-700 text-lime-400 placeholder:text-zinc-700 input focus:border-lime-400 focus:outline-none tracking-[0.5em] text-center font-mono"
+                                />
+
+                                {/* Send OTP Button */}
+                                <button
+                                    type="button"
+                                    onClick={handleSendOtp}
+                                    className="px-4 bg-transparent cursor-pointer border border-lime-400 text-lime-400 text-xs tracking-widest rounded-md hover:bg-lime-400 hover:text-black transition-all duration-200 font-mono"
+                                >
+                                    SEND
+                                </button>
+                            </div>
+
+                            <p className="text-[10px] text-zinc-500 font-mono tracking-wider">
+                                WE WILL SEND A VERIFICATION CODE TO YOUR EMAIL
+                            </p>
+                        </div>
 
                         <button
                             disabled={loading || uploading}
