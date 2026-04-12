@@ -11,7 +11,7 @@ import validator from 'validator';
 
 export const Register = () => {
     const router = useRouter();
-    
+
     const [showPassword, setShowPassword] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
@@ -41,6 +41,29 @@ export const Register = () => {
         }
     };
 
+
+    const handleSendOtp = async () => {
+        const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
+        const password = (document.querySelector('[name="password"]') as HTMLInputElement)?.value;
+
+        if (!email || !password) {
+            return toast.error("Email & password required to send OTP");
+        }
+
+        try {
+            const res = await axios.post("/api/sendOtp", { email, password });
+            setOtpSent(true);
+            if (res.status === 200) {
+                toast.success(res.data.message || "OTP sent successfully. Please check your email.");
+            }
+        } catch (error: any) {
+            toast.error(
+                error.response?.data?.message || "Failed to send OTP"
+            );
+        }
+
+    }
+
     const handleRegister = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
@@ -60,7 +83,7 @@ export const Register = () => {
         }
 
         if (!validator.isStrongPassword(password, {
-            minLength: 6,
+            minLength: 8,
             minLowercase: 1,
             minUppercase: 1,
             minNumbers: 1,
@@ -90,6 +113,7 @@ export const Register = () => {
                 password,
                 role: 'USER',
                 PhotoUrl: imageUrl,
+                otp
             };
 
             const res = await axios.post("/api/register", userData);
@@ -133,27 +157,6 @@ export const Register = () => {
             setLoading(false);
         }
     };
-
-    const handleSendOtp = async () => {
-        const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
-        const password = (document.querySelector('[name="password"]') as HTMLInputElement)?.value;
-
-        if (!email || !password) {
-            return toast.error("Email & password required to send OTP");
-        }
-
-        try {
-            await axios.post("/api/sendOtp", { email, password });
-            setOtpSent(true);
-            toast.success("OTP sent to your email");
-        } catch (error: any) {
-            toast.error(
-                error.response?.data?.message || "Failed to send OTP"
-            );
-        }
-
-    }
-
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
             <div className={`light:bg-gray-100/80 light:border-t-0 light:border-zinc-800 bg-zinc-900/90 relative w-full max-w-md backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>

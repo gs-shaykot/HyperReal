@@ -9,4 +9,7 @@ export type UserType = {
   password: string;
   role: 'USER' | 'ADMIN';
   PhotoUrl?: string;
+  otp: string;
+  otpExpiry: Date;
+  isVerified?: boolean;
 }

@@ -4,31 +4,41 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password, role, PhotoUrl } = await req.json();
+        const { name, email, password, role, PhotoUrl, otp } = await req.json();
 
         const isUserExist = await prisma.user.findUnique({
             where: { email }
         })
 
-        if (isUserExist) {
-            return NextResponse.json({ success: false, message: 'User already exists.' }, { status: 400 });
+        if (!isUserExist || !isUserExist.otp) {
+            return NextResponse.json({ success: false, message: 'OTP not found. Please request a new OTP.' }, { status: 400 });
+        }
+        if (isUserExist.otp !== otp) {
+            return NextResponse.json({ success: false, message: 'Invalid OTP. Please try again.' }, { status: 400 });
+        }
+        if (!isUserExist.otpExpiry || new Date() > isUserExist.otpExpiry) {
+            return NextResponse.json({ success: false, message: 'OTP has expired. Please request a new OTP.' }, { status: 400 });
         }
 
         const hashPassword = await argon2.hash(password);
 
-        const newUser = await prisma.user.create({
+        const newUser = await prisma.user.update({
+            where: { email },
             data: {
                 name,
                 email,
                 password: hashPassword,
                 role,
-                PhotoUrl
+                PhotoUrl,
+                otp : null,
+                otpExpiry: null
             }
-        })
+        });
 
-        return NextResponse.json({ success: true, message: 'User registered successfully.'}, { status: 201 });
+        return NextResponse.json({ success: true, message: 'User registered successfully.' }, { status: 201 });
 
     } catch (error) {
+        console.log(error)
         return NextResponse.json({ success: false, message: 'Registration failed.' }, { status: 500 });
     }
 }

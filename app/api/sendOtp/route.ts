@@ -12,7 +12,10 @@ export const POST = async (req: Request) => {
         const isUserExist = await prisma.user.findUnique({
             where: { email }
         })
-        if (!isUserExist) {
+
+        console.log('Dhing: ',isUserExist);
+
+        if (isUserExist) {
             return NextResponse.json({ success: false, message: 'User already exists. Please login.' }, { status: 404 });
         }
 
@@ -53,7 +56,7 @@ export const POST = async (req: Request) => {
             `
         })
 
-        return NextResponse.json({success:true, message: 'OTP sent successfully.'}, {status: 200});
+        return NextResponse.json({success:true, message: 'OTP sent successfully. Please check your email.'}, {status: 200});
     }
     catch (error) {
         return NextResponse.json({ success: false, message: 'Failed to send OTP.' }, { status: 500 });
