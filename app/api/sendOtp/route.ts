@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export const POST = async (req: Request) => {
     try {
-        const { email, password } = await req.json();
+        const { email } = await req.json();
         if (!email) {
             return NextResponse.json({ success: false, message: 'Email is required.' }, { status: 400 });
         }
@@ -13,17 +13,18 @@ export const POST = async (req: Request) => {
             where: { email }
         })
 
-        console.log('Dhing: ',isUserExist);
-
-        if (isUserExist) {
-            return NextResponse.json({ success: false, message: 'User already exists. Please login.' }, { status: 404 });
+        if (isUserExist && isUserExist.password) {
+            return NextResponse.json({ message: 'User already exists. Login instead.' }, { status: 409 });
         }
 
         const otp = randomInt(100000, 999999).toString();
 
         await prisma.user.upsert({
             where: { email },
-            update: { otp },
+            update: {
+                otp,
+                otpExpiry: new Date(Date.now() + 2 * 60 * 1000)
+            },
             create: {
                 name: "",
                 email,
@@ -56,7 +57,7 @@ export const POST = async (req: Request) => {
             `
         })
 
-        return NextResponse.json({success:true, message: 'OTP sent successfully. Please check your email.'}, {status: 200});
+        return NextResponse.json({ success: true, message: 'OTP sent successfully. Please check your email.' }, { status: 200 });
     }
     catch (error) {
         return NextResponse.json({ success: false, message: 'Failed to send OTP.' }, { status: 500 });

@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
 
@@ -19,6 +19,26 @@ export const Register = () => {
     const [progress, setProgress] = useState(0);
     const [otp, setOtp] = useState("");
     const [otpSent, setOtpSent] = useState(false);
+
+    const [cooldown, setCooldown] = useState(0);
+    const [sendingOtp, setSendingOtp] = useState(false);
+
+    useEffect(() => {
+        if (cooldown <= 0) return;
+
+        const interval = setInterval(() => {
+            setCooldown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [cooldown]);
+
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -41,28 +61,32 @@ export const Register = () => {
         }
     };
 
-
     const handleSendOtp = async () => {
-        const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
-        const password = (document.querySelector('[name="password"]') as HTMLInputElement)?.value;
+        if (cooldown > 0) return;
 
-        if (!email || !password) {
+        const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
+
+        if (!email || !validator.isEmail(email)) {
             return toast.error("Email & password required to send OTP");
         }
 
         try {
-            const res = await axios.post("/api/sendOtp", { email, password });
-            setOtpSent(true);
-            if (res.status === 200) {
-                toast.success(res.data.message || "OTP sent successfully. Please check your email.");
-            }
-        } catch (error: any) {
-            toast.error(
-                error.response?.data?.message || "Failed to send OTP"
-            );
-        }
+            setSendingOtp(true);
 
-    }
+            const res = await axios.post("/api/sendOtp", { email });
+
+            if (res.status === 200) {
+                setOtpSent(true);
+                setCooldown(120); 
+                toast.success(res.data.message);
+            }
+
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || "Failed to send OTP");
+        } finally {
+            setSendingOtp(false);
+        }
+    };
 
     const handleRegister = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -284,12 +308,22 @@ export const Register = () => {
                                 <button
                                     type="button"
                                     onClick={handleSendOtp}
-                                    className="px-4 bg-transparent cursor-pointer border border-lime-400 text-lime-400 text-xs tracking-widest rounded-md hover:bg-lime-400 hover:text-black transition-all duration-200 font-mono"
-                                >
-                                    SEND
-                                </button>
-                            </div>
+                                    disabled={sendingOtp || cooldown > 0}
+                                    className={`px-4 bg-transparent cursor-pointer border border-lime-400 text-lime-400 text-xs tracking-widest rounded-md hover:bg-lime-400 hover:text-black transition-all duration-200 font-mono ${cooldown > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
 
+                                >
+                                    {
+                                        sendingOtp ? "SENDING..."
+                                            : cooldown > 0
+                                                ? `RESEND (${cooldown}s)`
+                                                : otpSent
+                                                    ? "RESEND"
+                                                    : "SEND"
+
+                                    }
+                                </button>
+                            </div> 
+                            
                             <p className="text-[10px] text-zinc-500 font-mono tracking-wider">
                                 WE WILL SEND A VERIFICATION CODE TO YOUR EMAIL
                             </p>

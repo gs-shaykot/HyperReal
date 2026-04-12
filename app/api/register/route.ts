@@ -11,8 +11,9 @@ export async function POST(req: Request) {
         })
 
         if (!isUserExist || !isUserExist.otp) {
-            return NextResponse.json({ success: false, message: 'OTP not found. Please request a new OTP.' }, { status: 400 });
+            return NextResponse.json({ message: 'Request OTP first' }, { status: 400 });
         }
+
         if (isUserExist.otp !== otp) {
             return NextResponse.json({ success: false, message: 'Invalid OTP. Please try again.' }, { status: 400 });
         }
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
                 password: hashPassword,
                 role,
                 PhotoUrl,
-                otp : null,
+                otp: null,
                 otpExpiry: null
             }
         });
