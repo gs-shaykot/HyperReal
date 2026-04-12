@@ -11,6 +11,7 @@ import validator from 'validator';
 
 export const Register = () => {
     const router = useRouter();
+    
     const [showPassword, setShowPassword] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [imageUrl, setImageUrl] = useState("");
