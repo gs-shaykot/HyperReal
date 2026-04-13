@@ -67,14 +67,14 @@ export const Register = () => {
         const email = (document.querySelector('[name="email"]') as HTMLInputElement)?.value;
 
         if (!email || !validator.isEmail(email)) {
-            return toast.error("Email & password required to send OTP");
+            return toast.error("Email required to send OTP");
         }
 
         try {
             setSendingOtp(true);
 
             const res = await axios.post("/api/sendOtp", { email });
-
+            
             if (res.status === 200) {
                 setOtpSent(true);
                 setCooldown(120); 

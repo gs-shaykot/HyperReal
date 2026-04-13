@@ -32,7 +32,8 @@ export async function POST(req: Request) {
                 role,
                 PhotoUrl,
                 otp: null,
-                otpExpiry: null
+                otpExpiry: null,
+                isVerified: true
             }
         });
 

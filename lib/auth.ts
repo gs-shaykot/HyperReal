@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import argon2 from 'argon2';
 
 type UserRole = "USER" | "ADMIN";
@@ -24,11 +25,10 @@ export const authOptions: AuthOptions = {
                     where: { email },
                 });
 
-
-                if (!Fetchuser) throw new Error("User not found");
+                if (!Fetchuser || !Fetchuser.password) return null;
 
                 const isValid = await argon2.verify(Fetchuser.password, password);
-                
+
                 if (!isValid) throw new Error("Invalid password");
 
                 const user = {
@@ -42,6 +42,10 @@ export const authOptions: AuthOptions = {
                 }
                 return user;
             },
+        }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
         })
     ],
     session: {
@@ -51,6 +55,28 @@ export const authOptions: AuthOptions = {
         secret: process.env.AUTH_SECRET,
     },
     callbacks: {
+        async signIn({ user, account }) {
+            if (account?.provider === 'google') {
+                const isUserExis = await prisma.user.findUnique({
+                    where: { email: user.email! },
+                });
+                if (!isUserExis) {
+                    await prisma.user.create({
+                        data: {
+                            email: user.email as string,
+                            name: user.name as string,
+                            PhotoUrl: user.image as string,
+                            role: "USER",
+                            password: "",
+                            isVerified: true,
+                        }
+                    })
+                }
+            }
+
+
+            return true;
+        },
         async jwt({ token, user }) {
 
             if (user && 'role' in user) {
@@ -67,5 +93,8 @@ export const authOptions: AuthOptions = {
             }
             return session;
         }
-    }
+    },
+    pages: {
+        signIn: "/login",
+    },
 };

@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react'; 
+import { useEffect } from 'react';
 import { Eye, EyeOff, TriangleAlert, UserRoundCheck } from 'lucide-react';
 
 type LoginState = {
@@ -77,9 +77,9 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 
 export const Login = () => {
     const router = useRouter();
-    const [state, action, isPending] = useActionState(LoginAction, initialState);  
+    const [state, action, isPending] = useActionState(LoginAction, initialState);
     const [ShowPassword, setShowPassword] = useState(false);
-    
+
     useEffect(() => {
         if (state.success) {
             setTimeout(() => {
@@ -87,17 +87,17 @@ export const Login = () => {
             }, 1000);
         }
     }, [state.success, router]);
-    
+
     return (
-        <div className={`min-h-screen flex items-center justify-center px-4`}> 
+        <div className={`min-h-screen flex items-center justify-center px-4`}>
             <div className={`light:bg-gray-100/80 bg-zinc-900/80 w-full max-w-3xl grid grid-cols-1 lg:grid-cols-2 backdrop-blur-md border border-zinc-800 rounded-md overflow-hidden shadow-2xl`}>
                 <div className="p-10 flex flex-col justify-center space-y-4">
                     <div>
-                        <h1 className={`text-3xl font-extrabold leading-tight`}> 
+                        <h1 className={`text-3xl font-extrabold leading-tight`}>
                             <span className={`light:text-zinc-900 text-white`}>SYSTEM</span><br />
                             <span className="text-second">ACCESS</span>
                         </h1>
-                        
+
                         <p className={`light:text-zinc-700 text-zinc-400 mt-3 text-sm  max-w-sm`}>
                             Enter credentials to access the HyperReal mainframe.
                         </p>
@@ -136,7 +136,7 @@ export const Login = () => {
                             <input
                                 type="email"
                                 name="email"
-                                placeholder="Enter your identity" 
+                                placeholder="Enter your identity"
                                 className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email
                                     ? 'border-red-500 focus:border-red-500'
                                     : 'border-zinc-700 '
@@ -199,11 +199,14 @@ export const Login = () => {
                                 'INITIALIZE SESSION'
                             )}
                         </button>
+                        <button type='button' className='btn w-full shadow-none border-second bg-transparent hover:bg-second hover:text-zinc-900' onClick={() => signIn("google", { callbackUrl: "/" })}>
+                            SIGN IN WITH GOOGLE
+                        </button>
                     </form>
 
                     {/* Footer */}
                     <p className="text-xs light:text-zinc-900 text-zinc-500 font-medium">
-                        No identity found?{" "} 
+                        No identity found?{" "}
                         <Link href="/register" className={`light:text-zinc-900 text-second font-bold hover:underline cursor-pointer`}>
                             CREATE OPERATIVE ACCOUNT
                         </Link>
