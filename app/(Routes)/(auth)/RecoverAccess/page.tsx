@@ -133,7 +133,7 @@ const RecoverAccess = () => {
             <span className="text-[#b4ff39] text-[10px] font-mono tracking-widest uppercase">
               access_key_reset
             </span>
-            <Terminal size={18} className="text-[#444] opacity-50" />
+            <Terminal size={18} className="text-second dur animate-pulse " />
           </div>
         </div>
 
