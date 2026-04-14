@@ -226,10 +226,10 @@ export const Login = () => {
                     />
 
                     {/* Terminal Box */}
-                    <div className="relative z-10 bg-white/10 backdrop-blur-md border border-second/60 rounded-lg p-4 w-64 text-sm font-mono text-second">
+                    <div className="relative z-10 bg-white/10 backdrop-blur-md border border-second/60 rounded-lg p-2 w-64 text-sm font-mono text-second">
                         <div className="mb-4 text-lg flex items-center gap-2">
                             &gt;_
-                            <span className="w-2 h-4 bg-second animate-pulse"></span>
+                            <span className="w-2 h-4 bg-second animate-pulse duration-100"></span>
                         </div>
                         <ul className="space-y-2 text-xs">
                             <li className="opacity-80">&gt; SECURE_CONNECTION_ESTABLISHED</li>
