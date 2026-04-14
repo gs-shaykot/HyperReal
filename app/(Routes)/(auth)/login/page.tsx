@@ -151,10 +151,15 @@ export const Login = () => {
                         </div>
 
                         <div>
-                            <label className="label">
-                                <span className="label-text text-xs tracking-widest text-zinc-500">
-                                    PASSCODE
-                                </span>
+                            <label className="label w-full">
+                                <div className='flex justify-between w-full items-center'>
+                                    <span className="label-text text-xs tracking-widest text-zinc-500">
+                                        PASSCODE
+                                    </span>
+                                    <Link href='/RecoverAccess' className="text-xs text-lime-400 hover:text-lime-300">
+                                        Forgot your passcode?
+                                    </Link>
+                                </div>
                             </label>
                             <div className='relative'>
                                 <input
