@@ -49,8 +49,10 @@ export const POST = async (req: Request) => {
             to: email,
             subject: 'Your OTP for Hyperreal Login',
             html: `
-                <div style="font-family: monospace;">
-                    <h2>Your OTP Code</h2>
+                <div style="font-family:monospace;background:#09090b;color:#a3e635;padding:32px;border-radius:8px">
+                 <h2 style="letter-spacing:4px">&gt;_ SYSTEM MESSAGE</h2>
+                 <p style="color:#a1a1aa">&gt; OTP YOU_REQUESTED</p>
+                 <p>Use the verification code below to verify your account.</p>
                     <h1 style="letter-spacing: 5px;">${otp}</h1>
                     <p>This code expires in 2 minutes.</p>
                 </div>
