@@ -18,13 +18,13 @@ export const POST = async (req: Request) => {
             return NextResponse.json({ success: false, message: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
-        const emailLimit = await otpLimiter.limit(`sendOtp:${email}`);
+        const emailLimit = await otpLimiter.limit(`sendOtp:${email.toLowerCase()}`);
         if (!emailLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many requests for this email.' }, { status: 429 });
         }
 
         const isUserExist = await prisma.user.findUnique({
-            where: { email }
+            where: { email: email.toLowerCase() }
         })
 
         if (isUserExist && isUserExist.password) {
@@ -34,14 +34,14 @@ export const POST = async (req: Request) => {
         const otp = randomInt(100000, 999999).toString();
 
         await prisma.user.upsert({
-            where: { email },
+            where: { email: email.toLowerCase() },
             update: {
                 otp,
                 otpExpiry: new Date(Date.now() + 2 * 60 * 1000)
             },
             create: {
                 name: "",
-                email,
+                email: email.toLowerCase(),
                 password: "",
                 role: "USER",
                 PhotoUrl: "",

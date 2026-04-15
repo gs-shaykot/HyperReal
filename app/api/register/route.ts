@@ -11,13 +11,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, message: 'Name, email and password are required.' }, { status: 400 });
         }
 
-        const verifyLimit = await otpVerifyLimiter.limit(`register:${email}`);
+        const verifyLimit = await otpVerifyLimiter.limit(`register:${email.toLowerCase()}`);
         if (!verifyLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many OTP verification attempts. Please try again later.' }, { status: 429 });
         }
 
         const isUserExist = await prisma.user.findUnique({
-            where: { email }
+            where: { email: email.toLowerCase() }
         })
 
         if (!isUserExist || !isUserExist.otp) {
@@ -34,10 +34,10 @@ export async function POST(req: Request) {
         const hashPassword = await argon2.hash(password);
 
         const newUser = await prisma.user.update({
-            where: { email },
+            where: { email: email.toLowerCase() },
             data: {
                 name,
-                email,
+                email: email.toLowerCase(),
                 password: hashPassword,
                 role,
                 PhotoUrl,

@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
             return NextResponse.json({ message: "Too many requests." }, { status: 429 });
         }
  
-        const emailLimit = await otpLimiter.limit(`reset:${email}`);
+        const emailLimit = await otpLimiter.limit(`reset:${email.toLowerCase()}`);
         if (!emailLimit.success) {
             return NextResponse.json({ message: "Too many reset attempts." }, { status: 429 });
         }

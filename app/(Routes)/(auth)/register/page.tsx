@@ -134,7 +134,7 @@ export const Register = () => {
 
             const userData = {
                 name: fullName.toUpperCase(),
-                email,
+                email: email.toLowerCase(),
                 password,
                 role: 'USER',
                 PhotoUrl: imageUrl,

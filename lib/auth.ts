@@ -34,7 +34,7 @@ export const authOptions: AuthOptions = {
                 const user = {
                     id: Fetchuser.id,
                     name: Fetchuser.name,
-                    email: Fetchuser.email,
+                    email: Fetchuser.email.toLowerCase(),
                     role: Fetchuser.role,
                     createdAt: Fetchuser.createdAt,
                     picture: Fetchuser.PhotoUrl ??
@@ -58,12 +58,12 @@ export const authOptions: AuthOptions = {
         async signIn({ user, account }) {
             if (account?.provider === 'google') {
                 const isUserExis = await prisma.user.findUnique({
-                    where: { email: user.email! },
+                    where: { email: user.email?.toLowerCase() },
                 });
                 if (!isUserExis) {
                     await prisma.user.create({
                         data: {
-                            email: user.email as string,
+                            email: user.email?.toLowerCase() as string,
                             name: user.name as string,
                             PhotoUrl: user.image as string,
                             role: "USER",

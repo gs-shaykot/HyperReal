@@ -25,8 +25,7 @@ const initialState: LoginState = {
 const LoginAction = async (prevState: LoginState, formData: FormData): Promise<LoginState> => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
-
-    // Validation
+ 
     if (!email || !password) {
         return {
             success: false,
@@ -40,7 +39,7 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 
     try {
         const res = await signIn('credentials', {
-            email,
+            email: email.toLowerCase(),
             password,
             redirect: false,
         });

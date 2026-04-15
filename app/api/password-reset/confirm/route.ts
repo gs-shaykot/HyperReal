@@ -15,7 +15,7 @@ export const POST = async (req: Request) => {
             );
         }
 
-        const limit = await otpVerifyLimiter.limit(`reset-confirm:${email}`);
+        const limit = await otpVerifyLimiter.limit(`reset-confirm:${email.toLowerCase()}`);
 
         if (!limit.success) {
             return NextResponse.json(
