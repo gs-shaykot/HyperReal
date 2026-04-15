@@ -147,7 +147,7 @@ export const Register = () => {
                 let count = 2;
 
                 const toastId = toast.custom(() => (
-                    <div className="bg-black border border-lime-400 text-lime-400 px-6 py-4 rounded-lg font-mono">
+                    <div className="bg-black border border-second text-second px-6 py-4 rounded-lg font-mono">
                         <p>✅ REGISTRATION SUCCESSFUL</p>
                         <p className="text-xs text-zinc-400">
                             Redirecting in {count}s...
@@ -159,7 +159,7 @@ export const Register = () => {
                     count--;
 
                     toast.custom(() => (
-                        <div className="bg-black border border-lime-400 text-lime-400 px-6 py-4 rounded-lg font-mono">
+                        <div className="bg-black border border-second text-second px-6 py-4 rounded-lg font-mono">
                             <p>✅ REGISTRATION SUCCESSFUL</p>
                             <p className="text-xs text-zinc-400">
                                 Redirecting in {count}s...
@@ -214,17 +214,17 @@ export const Register = () => {
                                 type="file"
                                 name="profileImage"
                                 onChange={handleImageUpload}
-                                className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-lime-400`}
+                                className={`light:bg-white bg-black focus-within:outline-second file-input file-input-neutral w-full border-zinc-700 text-zinc-400 focus:border-second`}
                             />
                             {uploading && (
                                 <div className="mt-2">
                                     <div className="h-2 w-full bg-zinc-800 rounded overflow-hidden">
                                         <div
-                                            className="h-full bg-lime-400 shadow-[0_0_10px_#00ff9c] transition-all duration-300"
+                                            className="h-full bg-second shadow-[0_0_10px_#00ff9c] transition-all duration-300"
                                             style={{ width: `${progress}%` }}
                                         />
                                     </div>
-                                    <p className="text-xs text-lime-400 mt-1 font-mono">
+                                    <p className="text-xs light:text-zinc-800 text-second mt-1 font-medium font-mono">
                                         Uploading... {progress}%
                                     </p>
                                 </div>
@@ -242,7 +242,7 @@ export const Register = () => {
                                 required={true}
                                 type="text"
                                 name="fullName"
-                                className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 uppercase`}
+                                className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 uppercase`}
                                 placeholder='Enter your full name'
                             />
                         </div>
@@ -257,7 +257,7 @@ export const Register = () => {
                                 required={true}
                                 type="email"
                                 name="email"
-                                className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 lowercase`}
+                                className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
                                 placeholder='Enter your email address'
                             />
                         </div>
@@ -274,7 +274,7 @@ export const Register = () => {
                                     required={true}
                                     type={showPassword ? "text" : "password"}
                                     name="password"
-                                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-800 text-gray-400 input w-full border border-zinc-700 focus:border-second focus:outline-none relative`}
+                                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 focus:border-second focus:outline-none relative`}
                                     placeholder='Enter your passcode'
                                 />
                                 {
@@ -302,7 +302,7 @@ export const Register = () => {
                                     value={otp}
                                     onChange={(e) => setOtp(e.target.value)}
                                     placeholder="Enter 6-digit OTP"
-                                    className="flex-1 bg-black border border-zinc-700 text-lime-400 placeholder:text-zinc-700 input focus:border-lime-400 focus:outline-none tracking-[0.5em] text-center font-mono"
+                                    className="flex-1 light:bg-white bg-black border border-zinc-700 placeholder:text-zinc-700  placeholder:font-normal light:text-zinc-800 text-second light:font-bold  input focus:border-second focus:outline-none tracking-[0.5em] text-center font-mono"
                                 />
 
                                 {/* Send OTP Button */}
@@ -310,7 +310,7 @@ export const Register = () => {
                                     type="button"
                                     onClick={handleSendOtp}
                                     disabled={sendingOtp || cooldown > 0}
-                                    className={`px-4 bg-transparent cursor-pointer border border-lime-400 text-lime-400 text-xs tracking-widest rounded-md hover:bg-lime-400 hover:text-black transition-all duration-200 font-mono ${cooldown > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-4 bg-transparent hover:bg-second light:hover:bg-zinc-900 cursor-pointer border light:border-zinc-900 border-second light:text-zinc-900 light:hover:text-white text-second text-xs tracking-widest rounded-md hover:text-black transition-all duration-200 font-mono ${cooldown > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
 
                                 >
                                     {
@@ -346,7 +346,7 @@ export const Register = () => {
                     <div className="text-center pt-2">
                         <Link
                             href="/login"
-                            className="text-xs text-zinc-500 hover:text-lime-400 tracking-wide"
+                            className="text-xs text-zinc-500 hover:text-second tracking-wide"
                         >
                             RETURN TO LOGIN
                         </Link>

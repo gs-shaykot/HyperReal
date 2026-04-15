@@ -125,12 +125,12 @@ const RecoverAccess = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 text-white">
       <div className="relative w-full max-w-md overflow-hidden border border-[#1a1f1c]  p-8 shadow-2xl">
-        <div className="absolute left-0 top-0 h-full w-1 bg-lime-400" />
+        <div className="absolute left-0 top-0 h-full w-1 bg-second" />
         {/* HEADER */}
         <div className="flex justify-between items-center mb-5">
           <div className="h-px bg-zinc-800 grow mr-4"></div>
           <div className="flex items-center gap-2">
-            <span className="text-[#b4ff39] text-[10px] font-mono tracking-widest uppercase">
+            <span className="light:text-zinc-900 text-second text-[10px] font-mono tracking-widest uppercase">
               access_key_reset
             </span>
             <Terminal size={18} className="text-second dur animate-pulse " />
@@ -139,7 +139,7 @@ const RecoverAccess = () => {
 
         {/* Title */}
         <div className="mb-8">
-          <h1 className="text-white text-4xl font-black italic tracking-tighter uppercase leading-none">
+          <h1 className="light:text-zinc-800 text-white text-4xl font-black italic tracking-tighter uppercase leading-none">
             Recover Access
           </h1>
           <p className="text-zinc-500 mt-3 text-sm font-medium">
@@ -149,7 +149,7 @@ const RecoverAccess = () => {
 
         <form onSubmit={handleResetPassword} className="space-y-4">
           <div>
-            <label className="mb-2 block text-xs uppercase tracking-[3px] text-lime-400">
+            <label className="mb-2 block text-xs uppercase tracking-[3px]  light:text-zinc-700 text-second">
               Recovery Email
             </label>
             <input
@@ -157,13 +157,15 @@ const RecoverAccess = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@gmail.com"
-              className="w-full bg-[#1a1f1c] px-4 py-3 text-gray-300 outline-none placeholder:text-gray-600"
+
+              className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
+              // className="w-full light:bg-white input bg-main px-4 py-3 text-gray-300 outline-none placeholder:text-gray-600"
               disabled={resettingPassword}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs uppercase tracking-[3px] text-lime-400">
+            <label className="block text-xs uppercase tracking-[3px] light:text-zinc-700 text-second">
               Reset Code
             </label>
             <div className="flex gap-2">
@@ -173,7 +175,8 @@ const RecoverAccess = () => {
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                 placeholder="6-DIGIT CODE"
-                className="flex-1 bg-[#1a1f1c] px-4 py-3 font-mono tracking-[0.4em] text-gray-300 outline-none placeholder:tracking-[0.2em] placeholder:text-gray-600"
+                // className="flex-1 light:bg-white input bg-main px-4 py-3 font-mono tracking-[0.4em] text-gray-300 outline-none placeholder:tracking-[0.2em] placeholder:text-gray-600"
+                className="flex-1 light:bg-white bg-black border border-zinc-700 placeholder:text-zinc-700  placeholder:font-normal light:text-zinc-800 text-second light:font-bold  input focus:border-second focus:outline-none tracking-[0.5em] text-center font-mono"
                 disabled={resettingPassword}
               />
 
@@ -181,9 +184,10 @@ const RecoverAccess = () => {
                 type="button"
                 onClick={handleSendCode}
                 disabled={sendingCode || cooldown > 0 || resettingPassword}
-                className={`min-w-28 border cursor-pointer border-lime-400 px-3 py-3 text-xs font-semibold uppercase tracking-[2px] transition ${sendingCode || cooldown > 0 || resettingPassword
+                // className={`px-4 bg-transparent hover:bg-second light:hover:bg-zinc-900 cursor-pointer border light:border-zinc-900 border-second light:text-zinc-900 light:hover:text-white text-second text-xs tracking-widest rounded-md hover:text-black transition-all duration-200 font-mono ${cooldown > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`px-4 bg-transparent hover:bg-second light:hover:bg-zinc-900 cursor-pointer border light:border-zinc-900 border-second light:text-zinc-900 light:hover:text-white text-second text-xs tracking-widest rounded-md hover:text-black transition-all duration-200 font-mono  ${sendingCode || cooldown > 0 || resettingPassword
                   ? "cursor-not-allowed opacity-60"
-                  : "hover:bg-lime-400 hover:text-black"
+                  : "hover:bg-second hover:text-black"
                   }`}
               >
                 {sendingCode
@@ -204,7 +208,7 @@ const RecoverAccess = () => {
           {otpSent && (
             <>
               <div>
-                <label className="mb-2 block text-xs uppercase tracking-[3px] text-lime-400">
+                <label className="mb-2 block text-xs uppercase tracking-[3px] light:text-zinc-700 text-second">
                   New Password
                 </label>
                 <div className="relative">
@@ -213,13 +217,14 @@ const RecoverAccess = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="ENTER NEW PASSCODE"
-                    className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
+                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
+                    // className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
                     disabled={resettingPassword}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-lime-400"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 light:text-zinc-700 cursor-pointer text-second"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {/* FIX: EyeOff when visible, Eye when hidden */}
@@ -229,7 +234,7 @@ const RecoverAccess = () => {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs uppercase tracking-[3px] text-lime-400">
+                <label className="mb-2 block text-xs uppercase tracking-[3px] light:text-zinc-700 text-second">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -238,15 +243,16 @@ const RecoverAccess = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="RE-ENTER PASSCODE"
-                    className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
+                    // className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
+                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
                     disabled={resettingPassword}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-lime-400"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 light:text-zinc-700 cursor-pointer text-second"
                     aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
-                  > 
+                  >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -259,14 +265,14 @@ const RecoverAccess = () => {
             disabled={resettingPassword}
             className={`w-full py-3 font-semibold uppercase tracking-[2px] transition ${resettingPassword
               ? "cursor-not-allowed bg-lime-200 text-black/60"
-              : "bg-lime-400 text-black hover:bg-lime-300"
+              : "bg-second text-black hover:bg-lime-300"
               }`}
           >
             {resettingPassword ? "Updating..." : "Reset Password"}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs tracking-[2px] text-gray-500 transition hover:text-gray-300">
+        <div className="mt-6 text-center text-xs tracking-[2px] text-zinc-700 transition hover:text-zinc-900">
           <Link href="/login">Return to Login</Link>
         </div>
       </div>
