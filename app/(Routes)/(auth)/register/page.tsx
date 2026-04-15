@@ -77,7 +77,7 @@ export const Register = () => {
             
             if (res.status === 200) {
                 setOtpSent(true);
-                setCooldown(120); 
+                setCooldown(60); 
                 toast.success(res.data.message);
             }
 

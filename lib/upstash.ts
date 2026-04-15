@@ -6,12 +6,17 @@ const redis = new Redis({
     token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-export const otpLimiter = new Ratelimit({
+export const ipLimiter = new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(5, "1m")
+    limiter: Ratelimit.fixedWindow(5, "1 m"),
+});
+
+export const emailLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(5, "1 m"),
 });
 
 export const otpVerifyLimiter = new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(5, "2m")
+    limiter: Ratelimit.slidingWindow(5, "2 m")
 });

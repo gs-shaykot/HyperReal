@@ -3,7 +3,7 @@ import { randomInt } from "crypto";
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import validator from "validator";
-import { otpLimiter } from "@/lib/upstash";
+import { emailLimiter, ipLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
@@ -16,13 +16,13 @@ export const POST = async (req: Request) => {
                 { status: 400 }
             );
         }
- 
-        const ipLimit = await otpLimiter.limit(`reset:${ip}`);
+
+        const ipLimit = await ipLimiter.limit(`reset:${ip}`);
         if (!ipLimit.success) {
             return NextResponse.json({ message: "Too many requests." }, { status: 429 });
         }
- 
-        const emailLimit = await otpLimiter.limit(`reset:${email.toLowerCase()}`);
+
+        const emailLimit = await emailLimiter.limit(`reset:${email.toLowerCase()}`);
         if (!emailLimit.success) {
             return NextResponse.json({ message: "Too many reset attempts." }, { status: 429 });
         }
