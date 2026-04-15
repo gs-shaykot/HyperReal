@@ -1,10 +1,20 @@
 import prisma from '@/lib/prisma';
+import { otpVerifyLimiter } from '@/lib/upstash';
 import argon2 from 'argon2';
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
         const { name, email, password, role, PhotoUrl, otp } = await req.json();
+
+        if(!email || !password || !name  ) {
+            return NextResponse.json({ success: false, message: 'Name, email and password are required.' }, { status: 400 });
+        }
+
+        const verifyLimit = await otpVerifyLimiter.limit(`register:${email}`);
+        if (!verifyLimit.success) {
+            return NextResponse.json({ success: false, message: 'Too many OTP verification attempts. Please try again later.' }, { status: 429 });
+        }
 
         const isUserExist = await prisma.user.findUnique({
             where: { email }

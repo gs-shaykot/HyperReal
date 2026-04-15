@@ -3,9 +3,11 @@ import { randomInt } from "crypto";
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 import validator from "validator";
+import { otpLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
         const { email } = await req.json();
 
         if (!email || !validator.isEmail(email)) {
@@ -13,6 +15,16 @@ export const POST = async (req: Request) => {
                 { success: false, message: "A valid email is required." },
                 { status: 400 }
             );
+        }
+ 
+        const ipLimit = await otpLimiter.limit(`reset:${ip}`);
+        if (!ipLimit.success) {
+            return NextResponse.json({ message: "Too many requests." }, { status: 429 });
+        }
+ 
+        const emailLimit = await otpLimiter.limit(`reset:${email}`);
+        if (!emailLimit.success) {
+            return NextResponse.json({ message: "Too many reset attempts." }, { status: 429 });
         }
 
         const existingUser = await prisma.user.findUnique({
@@ -43,8 +55,8 @@ export const POST = async (req: Request) => {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASSWORD,
             },
-        }); 
-        
+        });
+
         await emailSender.sendMail({
             from: `"Hyperreal" <${process.env.EMAIL_USER}>`,
             to: email.toLowerCase(),

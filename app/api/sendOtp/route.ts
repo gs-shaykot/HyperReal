@@ -2,13 +2,27 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
 import nodemailer from "nodemailer";
+import { otpLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
         const { email } = await req.json();
+
         if (!email) {
             return NextResponse.json({ success: false, message: 'Email is required.' }, { status: 400 });
         }
+
+        const ipLimit = await otpLimiter.limit(`sendOtp:${ip}`);
+        if (!ipLimit.success) {
+            return NextResponse.json({ success: false, message: 'Too many requests. Please try again later.' }, { status: 429 });
+        }
+
+        const emailLimit = await otpLimiter.limit(`sendOtp:${email}`);
+        if (!emailLimit.success) {
+            return NextResponse.json({ success: false, message: 'Too many requests for this email.' }, { status: 429 });
+        }
+
         const isUserExist = await prisma.user.findUnique({
             where: { email }
         })

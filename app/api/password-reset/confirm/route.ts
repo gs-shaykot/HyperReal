@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { otpVerifyLimiter } from "@/lib/upstash";
 import argon2 from "argon2";
 import { NextResponse } from "next/server";
 import validator from "validator";
@@ -11,6 +12,15 @@ export const POST = async (req: Request) => {
             return NextResponse.json(
                 { success: false, message: "A valid email is required." },
                 { status: 400 }
+            );
+        }
+
+        const limit = await otpVerifyLimiter.limit(`reset-confirm:${email}`);
+
+        if (!limit.success) {
+            return NextResponse.json(
+                { message: "Too many attempts. Try again later." },
+                { status: 429 }
             );
         }
 
