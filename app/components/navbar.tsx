@@ -6,7 +6,6 @@ import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
 import { fetchCartApi } from "@/lib/cartAPIs"
-import { useEffect } from "react"
 
 export const Navbar = () => {
     const { data: session } = useSession();
@@ -14,12 +13,10 @@ export const Navbar = () => {
 
     const { data: cart = [] } = useQuery({
         queryKey: ["cart"],
-        queryFn: fetchCartApi
+        queryFn: fetchCartApi,
+        enabled: !!session?.user
     })
 
-    useEffect(() => {
-
-    }, )
     let totalItems = cart.reduce((total: number, item: { quantity: number }) => total + item.quantity, 0);
 
     const navLinks =
