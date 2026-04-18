@@ -23,11 +23,11 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
     useEffect(() => {
         const parsedFromProp = parseTargetDate(targetDate);
-        if (parsedFromProp) {   
+        if (parsedFromProp) {
             localStorage.setItem(storageKey, String(parsedFromProp));
             setResolvedTargetDate(parsedFromProp);
             return;
-        }; 
+        };
 
         const storedTarget = localStorage.getItem(storageKey);
         if (storedTarget) {
@@ -50,40 +50,36 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
     }
 
     const renderer = ({ days, hours, minutes, seconds }: { days: number; hours: number; minutes: number; seconds: number }) => {
+        const items = [
+            { label: "DAYS", value: days },
+            { label: "HOURS", value: hours },
+            { label: "MINS", value: minutes },
+            { label: "SECS", value: seconds },
+        ];
+
         return (
-            <div className="flex gap-6">
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 sm:gap-4 md:gap-6">
 
-                {/* DAYS */}
-                <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
-                        {String(days).padStart(2, "0")}
-                    </div>
-                    <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">DAYS</p>
-                </div>
+                {items.map((item, idx) => (
+                    <div key={idx} className="flex flex-col items-center">
 
-                {/* HOURS */}
-                <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
-                        {String(hours).padStart(2, "0")}
-                    </div>
-                    <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">HOURS</p>
-                </div>
+                        <div className="
+                        w-16 h-16 
+                        sm:w-20 sm:h-20 
+                        md:w-24 md:h-24 
+                        bg-black flex items-center justify-center 
+                        text-lime-400 
+                        text-xl sm:text-2xl md:text-4xl 
+                        font-bold
+                    ">
+                            {String(item.value).padStart(2, "0")}
+                        </div>
 
-                {/* MINUTES */}
-                <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
-                        {String(minutes).padStart(2, "0")}
+                        <p className="mt-1 sm:mt-2 text-zinc-900 text-[10px] sm:text-xs font-semibold tracking-widest">
+                            {item.label}
+                        </p>
                     </div>
-                    <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">MINS</p>
-                </div>
-
-                {/* SECONDS */}
-                <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
-                        {String(seconds).padStart(2, "0")}
-                    </div>
-                    <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">SECS</p>
-                </div>
+                ))}
 
             </div>
         );
