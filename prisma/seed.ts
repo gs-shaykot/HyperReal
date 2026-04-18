@@ -599,8 +599,7 @@ main()
     await prisma.$disconnect();
     await pool.end();
   })
-  .catch(async (e) => {
-    console.error(e);
+  .catch(async (e) => { 
     await prisma.$disconnect();
     await pool.end();
     process.exit(1);

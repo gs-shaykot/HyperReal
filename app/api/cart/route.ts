@@ -76,8 +76,7 @@ export async function GET() {
 
         return NextResponse.json({ success: true, data: cart }, { status: 200 });
     }
-    catch (error) {
-        console.error("Error fetching cart:", error);
+    catch (error) { 
         return NextResponse.json({ success: false, message: "Failed to fetch cart" }, { status: 500 });
     }
 }

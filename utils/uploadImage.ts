@@ -20,8 +20,7 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
 
 
         return res.data.secure_url || res.data.url || defaultUrl;
-    } catch (error) {
-        console.error("Image upload failed:", error);
+    } catch (error) { 
         return defaultUrl;
     }
 };
