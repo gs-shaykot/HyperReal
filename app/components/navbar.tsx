@@ -16,8 +16,10 @@ export const Navbar = () => {
         queryKey: ["cart"],
         queryFn: fetchCartApi
     })
-    
 
+    useEffect(() => {
+
+    }, )
     let totalItems = cart.reduce((total: number, item: { quantity: number }) => total + item.quantity, 0);
 
     const navLinks =

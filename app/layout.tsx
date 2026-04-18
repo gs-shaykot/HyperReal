@@ -35,7 +35,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${spaceMono.variable} ${inter.variable}`}>
         <Providers>
-          <CyberpunkLoader /> 
+          {/* <CyberpunkLoader />  */}
           <ThemeConnector />
           <ThemeBackground />
           <Navbar />

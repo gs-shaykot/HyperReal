@@ -1,10 +1,53 @@
 "use client";
+import { useEffect, useState } from "react";
 import Countdown from "react-countdown";
 
+type LaunchCountdownProps = {
+    targetDate?: string | number | Date;
+    storageKey?: string;
+};
 
-export default function LaunchCountdown() {
+const DEFAULT_STORAGE_KEY = "hyperreal_upcoming_release_at";
+const DEFAULT_TARGET_DATE = "2026-04-29T00:00:00";
 
-    const targetDate = Date.now() + 1000 * 60 * 60 * 24 * 5;
+const parseTargetDate = (value?: string | number | Date): number | null => {
+    if (!value) return null;
+
+    const parsed = value instanceof Date ? value.getTime() : new Date(value).getTime();
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
+export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORAGE_KEY }: LaunchCountdownProps) {
+
+    const [resolvedTargetDate, setResolvedTargetDate] = useState<number | null>(null);
+
+    useEffect(() => {
+        const parsedFromProp = parseTargetDate(targetDate);
+        if (parsedFromProp) {   
+            localStorage.setItem(storageKey, String(parsedFromProp));
+            setResolvedTargetDate(parsedFromProp);
+            return;
+        }; 
+
+        const storedTarget = localStorage.getItem(storageKey);
+        if (storedTarget) {
+            const storedTimestamp = Number(storedTarget);
+            if (Number.isFinite(storedTimestamp) && storedTimestamp > 0) {
+                setResolvedTargetDate(storedTimestamp);
+                return;
+            }
+        }
+
+        const fallbackTimestamp = parseTargetDate(DEFAULT_TARGET_DATE);
+        if (fallbackTimestamp) {
+            localStorage.setItem(storageKey, String(fallbackTimestamp));
+            setResolvedTargetDate(fallbackTimestamp);
+        }
+    }, [targetDate, storageKey]);
+
+    if (!resolvedTargetDate) {
+        return null;
+    }
 
     const renderer = ({ days, hours, minutes, seconds }: { days: number; hours: number; minutes: number; seconds: number }) => {
         return (
@@ -47,6 +90,6 @@ export default function LaunchCountdown() {
     };
 
     return (
-        <Countdown date={targetDate} renderer={renderer} />
+        <Countdown date={resolvedTargetDate} renderer={renderer} />
     );
 }

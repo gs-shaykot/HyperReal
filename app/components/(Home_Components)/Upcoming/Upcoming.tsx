@@ -3,6 +3,8 @@ import React from 'react'
 
 export const Upcoming = () => {
     let product_name = "VOID RUNNER V3";
+    const launchDate = "2026-04-29T00:00:00";
+    
     return (
         <section className='w-full py-10 bg-second flex items-center justify-center'>
             <div className='max-w-7xl h-full mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-5 '>
@@ -35,7 +37,7 @@ export const Upcoming = () => {
                     <button className="cursor-pointer bg-black text-white px-8 py-4 font-black uppercase tracking-widest hover:bg-white hover:text-black border-2 border-black transition-all hover:-translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-none">SET REMINDER</button>
                 </div>
                 <div className='flex items-center justify-center'>
-                    <LaunchCountdown />
+                    <LaunchCountdown targetDate={launchDate} />
                 </div>
             </div>
         </section>
