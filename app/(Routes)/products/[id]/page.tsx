@@ -2,7 +2,7 @@ import { ProductDetails } from '@/app/(Routes)/products/[id]/ProductDetails';
 import prisma from '@/lib/prisma';
 import React from 'react'
 
-export const page = async ({ params }: any) => {
+const page = async ({ params }: any) => {
     const { id } = await params;
     const product = await prisma.product.findUnique({
         where: { id },

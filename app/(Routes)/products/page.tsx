@@ -9,7 +9,7 @@ type SeachProps = {
     }
 }
 
-export const page = async ({ searchParams }: SeachProps) => {
+const page = async ({ searchParams }: SeachProps) => {
 
     const { category } = await searchParams || null;
     
