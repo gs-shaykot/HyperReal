@@ -158,8 +158,7 @@ const RecoverAccess = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@gmail.com"
 
-              className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
-              // className="w-full light:bg-white input bg-main px-4 py-3 text-gray-300 outline-none placeholder:text-gray-600"
+              className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`} 
               disabled={resettingPassword}
             />
           </div>
@@ -174,8 +173,7 @@ const RecoverAccess = () => {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                placeholder="6-DIGIT CODE"
-                // className="flex-1 light:bg-white input bg-main px-4 py-3 font-mono tracking-[0.4em] text-gray-300 outline-none placeholder:tracking-[0.2em] placeholder:text-gray-600"
+                placeholder="6-DIGIT CODE" 
                 className="flex-1 light:bg-white bg-black border border-zinc-700 placeholder:text-zinc-700  placeholder:font-normal light:text-zinc-800 text-second light:font-bold  input focus:border-second focus:outline-none tracking-[0.5em] text-center font-mono"
                 disabled={resettingPassword}
               />
@@ -183,8 +181,7 @@ const RecoverAccess = () => {
               <button
                 type="button"
                 onClick={handleSendCode}
-                disabled={sendingCode || cooldown > 0 || resettingPassword}
-                // className={`px-4 bg-transparent hover:bg-second light:hover:bg-zinc-900 cursor-pointer border light:border-zinc-900 border-second light:text-zinc-900 light:hover:text-white text-second text-xs tracking-widest rounded-md hover:text-black transition-all duration-200 font-mono ${cooldown > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={sendingCode || cooldown > 0 || resettingPassword} 
                 className={`px-4 bg-transparent hover:bg-second light:hover:bg-zinc-900 cursor-pointer border light:border-zinc-900 border-second light:text-zinc-900 light:hover:text-white text-second text-xs tracking-widest rounded-md hover:text-black transition-all duration-200 font-mono  ${sendingCode || cooldown > 0 || resettingPassword
                   ? "cursor-not-allowed opacity-60"
                   : "hover:bg-second hover:text-black"
@@ -217,8 +214,7 @@ const RecoverAccess = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="ENTER NEW PASSCODE"
-                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
-                    // className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
+                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`} 
                     disabled={resettingPassword}
                   />
                   <button
@@ -226,8 +222,7 @@ const RecoverAccess = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 light:text-zinc-700 cursor-pointer text-second"
                     aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {/* FIX: EyeOff when visible, Eye when hidden */}
+                  > 
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -242,8 +237,7 @@ const RecoverAccess = () => {
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="RE-ENTER PASSCODE"
-                    // className="w-full bg-[#1a1f1c] px-4 py-3 pr-12 text-gray-300 outline-none placeholder:text-gray-600"
+                    placeholder="RE-ENTER PASSCODE" 
                     className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
                     disabled={resettingPassword}
                   />

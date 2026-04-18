@@ -25,7 +25,7 @@ const initialState: LoginState = {
 const LoginAction = async (prevState: LoginState, formData: FormData): Promise<LoginState> => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
- 
+
     if (!email || !password) {
         return {
             success: false,
@@ -74,7 +74,7 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
     }
 };
 
-export const Login = () => {
+export default function Login() {
     const router = useRouter();
     const [state, action, isPending] = useActionState(LoginAction, initialState);
     const [ShowPassword, setShowPassword] = useState(false);
@@ -251,5 +251,3 @@ export const Login = () => {
         </div>
     );
 };
-
-export default Login;
