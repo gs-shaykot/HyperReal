@@ -20,6 +20,7 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
 
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[240px_1fr]">
                     <aside className="lg:sticky lg:top-19.5 lg:self-start ">
+                        {/* category */}
                         <Category categories={categories} categoryId={categoryId} />
                     </aside>
  
