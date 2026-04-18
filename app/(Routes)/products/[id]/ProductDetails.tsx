@@ -3,8 +3,12 @@ import { ProductDetailsProps } from '@/app/types/Category'
 import { Check, Minus, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
+import { useCart } from '@/app/Hooks/useCart';
+import toast from 'react-hot-toast';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
+
+    const mutation = useCart();
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
@@ -26,7 +30,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     );
 
     //SELECTED IMAGES BASED ON SELECTED COLOR
-    
+
     let SelectedImage = useMemo(() => {
         return (
             product.productImages?.find((img) => img.color === selectedColor)?.imageUrl ?? product.productImages[1]?.imageUrl
@@ -126,6 +130,21 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <div className='flex-1'>
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
+                                    onClick={() => {
+                                        if (!selectedSize) {
+                                            toast.error("Please select a size");
+                                            return;
+                                        }
+                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
+                                        if (!selectedVariant) {
+                                            toast.error("Selected variant not available");
+                                            return;
+                                        }
+                                        mutation.mutate({
+                                            variantId: selectedVariant.id,
+                                            quantity
+                                        })
+                                    }}
                                     className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold light:text-white text-black">
                                     Add to Cart
                                 </motion.button>

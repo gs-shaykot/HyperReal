@@ -3,14 +3,24 @@ import { Sun, User, ShoppingBag, Moon } from "lucide-react"
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
-import { useTheme } from "next-themes" 
-
+import { useTheme } from "next-themes"
+import { useQuery } from "@tanstack/react-query"
+import { fetchCartApi } from "@/lib/cartAPIs"
+import { useEffect } from "react"
 
 export const Navbar = () => {
     const { data: session } = useSession();
     const { theme, setTheme } = useTheme();
 
-    const isLight = theme === 'light';
+    const { data: cart = [] } = useQuery({
+        queryKey: ["cart"],
+        queryFn: fetchCartApi
+    })
+    useEffect(() => {
+        console.log("Cart data in Navbar: ", cart);
+    }, [cart])
+
+    let totalItems = cart.reduce((total: number, item: { quantity: number }) => total + item.quantity, 0);
 
     const navLinks =
         <>
@@ -52,12 +62,11 @@ export const Navbar = () => {
                         <button className={`text-white light:text-zinc-900`}>
                             <label className="swap swap-rotate">
 
-                                {/* ✅ FIXED: controlled checkbox (SYNC WITH THEME) */}
                                 <input
                                     type="checkbox"
-                                    checked={isLight} // ✅ binds UI with actual theme
+                                    checked={theme === 'light'}
                                     onChange={(e) => {
-                                        setTheme(e.target.checked ? "light" : "dark"); // ✅ single source of truth
+                                        setTheme(e.target.checked ? "light" : "dark");
                                     }}
                                 />
 
@@ -80,7 +89,7 @@ export const Navbar = () => {
                         <div tabIndex={0} role="button" className={`text-white light:text-zinc-900 btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!`}>
                             <div className="indicator">
                                 <ShoppingBag size={18} strokeWidth={1.2} />
-                                <span className="badge badge-xs indicator-item border border-gray-500/85">8</span>
+                                <span className="badge badge-xs indicator-item border border-gray-500/85">{totalItems}</span>
                             </div>
                         </div>
                         <div className="dropdown dropdown-end flex items-center gap-2 justify-center">
