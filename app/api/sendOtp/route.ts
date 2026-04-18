@@ -6,24 +6,20 @@ import { emailLimiter, ipLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
-        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-        console.log('IP: ', ip)
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown"; 
         const { email } = await req.json();
 
         if (!email) {
             return NextResponse.json({ success: false, message: 'Email is required.' }, { status: 400 });
         }
 
-        const ipLimit = await ipLimiter.limit(`sendOtp:${ip}`);
-        console.log("RATE LIMIT RESULT:", {success: ipLimit.success, remaining: ipLimit.remaining});
+        const ipLimit = await ipLimiter.limit(`sendOtp:${ip}`); 
         if (!ipLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
         const emailLimit = await emailLimiter.limit(`sendOtp:${email.toLowerCase()}`);
-        
-        console.log("EMAIL RATE LIMIT RESULT:", { success: emailLimit?.success, remaining: emailLimit?.remaining });
-        
+          
         if (!emailLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many requests for this email.' }, { status: 429 });
         }

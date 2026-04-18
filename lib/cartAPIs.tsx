@@ -1,17 +1,14 @@
 import { CartItemType } from "@/app/types/cartType";
 import axios from "axios";
 
-export const addToCartApi = async (data: CartItemType) => {
-    console.log("Adding to cart:", data);
+export const addToCartApi = async (data: CartItemType) => { 
 
     try {
         const res = await axios.post("/api/cart", data);
 
         if (!res.data.success) {
             throw new Error(res.data.message);
-        }
-
-        console.log("Item added to cart:", res.data);
+        } 
         return res.data.data?.cartItems ?? [];
     }
     catch (error: unknown) {
