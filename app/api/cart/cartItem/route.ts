@@ -116,3 +116,43 @@ export async function GET() {
         return NextResponse.json({ success: false, message: "Failed to fetch cart" }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        const { itemId } = await req.json();
+
+        if (!itemId) {
+            return NextResponse.json({ success: false, message: "Item id is required" }, { status: 400 });
+        }
+
+        const cart = await prisma.cart.findUnique({
+            where: { userId: session.user.id },
+            select: { id: true },
+        });
+
+        if (!cart) {
+            return NextResponse.json({ success: false, message: "Cart not found" }, { status: 404 });
+        }
+
+        const deleted = await prisma.cartItem.deleteMany({
+            where: {
+                id: itemId,
+                cartId: cart.id,
+            }
+        });
+
+        if (deleted.count === 0) {
+            return NextResponse.json({ success: false, message: "Item not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, message: "Item removed from cart" }, { status: 200 });
+    }
+    catch (error) {
+        return NextResponse.json({ success: false, message: "Failed to remove item from cart" }, { status: 500 });
+    }
+}

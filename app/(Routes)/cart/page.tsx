@@ -1,14 +1,16 @@
 'use client'
 import { CartItemWithProductType } from '@/app/types/cartType';
-import { fetchCartApi } from '@/lib/cartAPIs'
-import { useQuery } from '@tanstack/react-query'
+import { deleteCartItemApi, fetchCartApi } from '@/lib/cartAPIs'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 
 const page = () => {
     const { data: session } = useSession();
+    const queryClient = useQueryClient();
 
     const { data: cart = [] } = useQuery({
         queryKey: ["cartItems"],
@@ -16,11 +18,28 @@ const page = () => {
         enabled: !!session?.user,
     });
 
-    // 🔥 CALCULATIONS
+    const { mutate: deleteCartItem } = useMutation({
+        mutationFn: deleteCartItemApi,
+        onSuccess: () => {
+            toast.success("Item removed from cart");
+            queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+            queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+        },
+        onError: () => {
+            toast.error("Failed to remove item from cart");
+        }
+    });
+
     const subtotal = cart.reduce(
         (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price,
         0
     );
+
+    const handleDeleteItem = (itemId: string) => {
+        if (!itemId) return;
+
+        deleteCartItem(itemId);
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 text-white py-10">
@@ -73,7 +92,11 @@ const page = () => {
 
                                 {/* PRICE */}
                                 <div className="flex flex-col gap-3 items-center justify-between text-right">
-                                    <Trash2 size={24} className='text-zinc-500 hover:text-red-500 transition-colors cursor-pointer'/>
+                                    <Trash2
+                                        size={24}
+                                        className='text-zinc-500 hover:text-red-500 transition-colors cursor-pointer'
+                                        onClick={() => handleDeleteItem(item.id!)}
+                                    />
                                     <p className="text-lime-400 font-bold text-lg">
                                         ${item.variant.product.price.toFixed(2)}
                                     </p>

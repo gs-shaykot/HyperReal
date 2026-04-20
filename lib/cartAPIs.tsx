@@ -42,3 +42,20 @@ export const countCartItems = async () => {
         throw error;
     }
 }
+
+export const deleteCartItemApi = async (itemId: string) => {
+    try {
+        const res = await axios.delete(`/api/cart/cartItem`, {
+            data: { itemId }
+        });
+
+        if (!res.data.success) {
+            throw new Error(res.data.message);
+        }
+
+        return res.data.data;
+    }
+    catch (error: unknown) {
+        throw error;
+    }
+}
