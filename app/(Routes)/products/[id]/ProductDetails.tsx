@@ -106,8 +106,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 }
                             </div>
                         </div>
-
-                        {/* ADD TO CART BUTTON */}
+ 
                         <div className='flex items-center justify-center gap-3 mt-2'>
                             {/* Quantity */}
                             <div className='flex items-center gap-4 border border-zinc-600 '>

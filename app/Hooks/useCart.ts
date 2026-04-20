@@ -7,13 +7,13 @@ export const useCart = () => {
 
     const mutation = useMutation({
         mutationFn: addToCartApi,
-        onMutate: async (newItem) => { 
+        onMutate: async (newItem) => {
 
-            await queryClient.cancelQueries({ queryKey: ["cart"] });
-            
-            const previousCartItem = queryClient.getQueryData<CartItemType[]>(["cart"]) ?? [];
+            await queryClient.cancelQueries({ queryKey: ["cartItems"] });
 
-            queryClient.setQueryData(["cart"], (old: CartItemType[] = []) => {
+            const previousCartItem = queryClient.getQueryData<CartItemType[]>(["cartItems"]) ?? [];
+
+            queryClient.setQueryData(["cartItems"], (old: CartItemType[] = []) => {
                 const safeOld = Array.isArray(old) ? old : [];
                 const existingItem = safeOld.find((item) => item.variantId === newItem.variantId);
 
@@ -28,12 +28,13 @@ export const useCart = () => {
 
         onError: (err, newItem, context) => {
             if (context?.previousCartItem) {
-                queryClient.setQueryData(["cart"], context.previousCartItem);
+                queryClient.setQueryData(["cartItems"], context.previousCartItem);
             }
         },
 
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ["cart"] });
+            queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+            queryClient.invalidateQueries({ queryKey: ["cartCount"] });
         }
     });
 

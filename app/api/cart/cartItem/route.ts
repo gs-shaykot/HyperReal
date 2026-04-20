@@ -64,40 +64,11 @@ export async function POST(req: Request) {
 
 export async function GET() {
     try {
+        console.log("cartItems GET HIT")
         const session = await getServerSession(authOptions);
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
-
-        // const cart = await prisma.cart.findUnique({
-        //     where: { userId: session.user.id },
-        //     select: {
-        //         id: true,
-        //         cartItems: {
-        //             select: {
-        //                 id: true,
-        //                 quantity: true,
-        //                 variant: {
-        //                     select: {
-        //                         size: true,
-        //                         color: true,
-        //                         product: {
-        //                             select: {
-        //                                 name: true,
-        //                                 price: true,
-        //                                 category: {
-        //                                     select: {
-        //                                         name: true
-        //                                     }
-        //                                 }
-        //                             }
-        //                         }
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // });
 
         const cart = await prisma.cart.findUnique({
             where: { userId: session.user.id },
@@ -121,8 +92,15 @@ export async function GET() {
                                             select: {
                                                 name: true
                                             }
+                                        },
+                                        productImages: {
+                                            select: {
+                                                imageUrl: true,
+                                                color: true,
+                                            }
                                         }
-                                    }
+                                    },
+
                                 }
                             }
                         }
@@ -131,7 +109,8 @@ export async function GET() {
             }
         })
 
-        return NextResponse.json({ success: true, data: cart }, { status: 200 });
+
+        return NextResponse.json({ success: true, data: cart?.cartItems ?? [] }, { status: 200 });
     }
     catch (error) {
         return NextResponse.json({ success: false, message: "Failed to fetch cart" }, { status: 500 });

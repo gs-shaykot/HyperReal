@@ -13,3 +13,22 @@ export type CartItemType = {
     variantId: string;
     quantity: number;
 }
+
+export type CartItemWithProductType = CartItemType & {
+    variant: {
+        size: string;
+        color: string;
+        product: {
+            name: string;
+            price: number;
+            isAvailable: boolean;
+            category: {
+                name: string;
+            },
+            productImages: {
+                imageUrl: string;
+                color: string;
+            }[]
+        }
+    }
+}

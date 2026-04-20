@@ -5,19 +5,18 @@ import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
-import { fetchCartApi } from "@/lib/cartAPIs"
+import { countCartItems } from "@/lib/cartAPIs"
 
 export const Navbar = () => {
     const { data: session } = useSession();
     const { theme, setTheme } = useTheme();
 
-    const { data: cart = [] } = useQuery({
-        queryKey: ["cart"],
-        queryFn: fetchCartApi,
+    const { data: cartCount = 0 } = useQuery({
+        queryKey: ["cartCount"],
+        queryFn: countCartItems,
         enabled: !!session?.user
     })
 
-    let totalItems = cart.reduce((total: number, item: { quantity: number }) => total + item.quantity, 0);
 
     const navLinks =
         <>
@@ -87,7 +86,7 @@ export const Navbar = () => {
                             <div className="indicator">
                                 <Link href='/cart'>
                                     <ShoppingBag size={18} strokeWidth={1.2} />
-                                    <span className="badge badge-xs indicator-item border border-gray-500/85">{totalItems}</span>
+                                    <span className="badge badge-xs indicator-item border border-gray-500/85">{cartCount}</span>
                                 </Link>
                             </div>
                         </div>
