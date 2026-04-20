@@ -85,8 +85,10 @@ export const Navbar = () => {
                         </button>
                         <div tabIndex={0} role="button" className={`text-white light:text-zinc-900 btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!`}>
                             <div className="indicator">
-                                <ShoppingBag size={18} strokeWidth={1.2} />
-                                <span className="badge badge-xs indicator-item border border-gray-500/85">{totalItems}</span>
+                                <Link href='/cart'>
+                                    <ShoppingBag size={18} strokeWidth={1.2} />
+                                    <span className="badge badge-xs indicator-item border border-gray-500/85">{totalItems}</span>
+                                </Link>
                             </div>
                         </div>
                         <div className="dropdown dropdown-end flex items-center gap-2 justify-center">

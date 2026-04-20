@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export const addToCartApi = async (data: CartItemType) => {
 
-    try {
+    try { 
         const res = await axios.post("/api/cart", data);
 
         if (!res.data.success) {

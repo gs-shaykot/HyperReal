@@ -135,7 +135,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                             toast.error("Please select a size");
                                             return;
                                         }
-                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
+                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize); 
                                         if (!selectedVariant) {
                                             toast.error("Selected variant not available");
                                             return;

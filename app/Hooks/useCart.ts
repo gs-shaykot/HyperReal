@@ -7,8 +7,7 @@ export const useCart = () => {
 
     const mutation = useMutation({
         mutationFn: addToCartApi,
-        onMutate: async (newItem) => {
-            console.log('OnMutate hit & the new item: ', newItem);
+        onMutate: async (newItem) => { 
 
             await queryClient.cancelQueries({ queryKey: ["cart"] });
             
