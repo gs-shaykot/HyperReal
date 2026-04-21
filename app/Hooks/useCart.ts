@@ -2,6 +2,7 @@ import { CartItemType } from "@/app/types/cartType";
 import { addToCartApi } from "@/lib/cartAPIs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+
 export const useCart = () => {
     const queryClient = useQueryClient();
 

@@ -1,6 +1,6 @@
 'use client'
 import { CartItemWithProductType } from '@/app/types/cartType';
-import { deleteCartItemApi, fetchCartApi } from '@/lib/cartAPIs'
+import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Trash2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -20,15 +20,59 @@ const page = () => {
 
     const { mutate: deleteCartItem } = useMutation({
         mutationFn: deleteCartItemApi,
-        onSuccess: () => {
-            toast.success("Item removed from cart");
-            queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-            queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+        onMutate: async (itemId: string) => {
+            await queryClient.cancelQueries({ queryKey: ["cartItems"] });
+
+            const previousCartItem = queryClient.getQueryData(["cartItems"]);
+
+            queryClient.setQueryData(["cartItems"], (old: CartItemWithProductType[] = []) => {
+                const safeOld = Array.isArray(old) ? old : [];
+                return safeOld.filter((item) => item.id !== itemId);
+            });
+            return { previousCartItem };
         },
-        onError: () => {
-            toast.error("Failed to remove item from cart");
+        onSuccess: () => {
+            toast.success("Item removed from cargo hold.");
+        },
+        onError: (_err, _itemId, context) => {
+            if (context?.previousCartItem) {
+                queryClient.setQueryData(["cartItems"], context.previousCartItem);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+            queryClient.invalidateQueries({ queryKey: ["cartCount"] })
         }
     });
+
+    type MiniCartType = {
+        itemId: string;
+        quantity: number;
+    }
+
+    const { mutate: updateCartItem } = useMutation({
+        mutationFn: updateCartItemApi,
+        onMutate: async ({ itemId, quantity }: MiniCartType) => {
+            await queryClient.cancelQueries({ queryKey: ["cartItems"] });
+            const previousCartItem = queryClient.getQueryData(["cartItems"]);
+            queryClient.setQueryData(["cartItems"], (old: CartItemWithProductType[] = []) => {
+                const safeOld = Array.isArray(old) ? old : [];
+                return safeOld.map((item) => item.id === itemId ? { ...item, quantity } : item);
+            });
+
+            return { previousCartItem };
+        },
+        onError: (_error, _variables, context) => {
+            if (context?.previousCartItem) {
+                queryClient.setQueryData(["cartItems"], context.previousCartItem);
+            }
+            toast.error("Failed to update item quantity.");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+            queryClient.invalidateQueries({ queryKey: ["cartCount"] });
+        }
+    })
 
     const subtotal = cart.reduce(
         (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price,
@@ -37,8 +81,12 @@ const page = () => {
 
     const handleDeleteItem = (itemId: string) => {
         if (!itemId) return;
-
         deleteCartItem(itemId);
+    }
+
+    const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
+        if (!itemId || newQuantity < 1) return;
+        updateCartItem({ itemId, quantity: newQuantity });
     }
 
     return (
@@ -84,9 +132,19 @@ const page = () => {
 
                                     {/* QUANTITY CONTROL */}
                                     <div className="flex items-center mt-3">
-                                        <button className="px-2 border border-zinc-600 border-r-0">-</button>
+                                        <button
+                                            className="px-2 border border-zinc-600 border-r-0"
+                                            onClick={() => handleUpdateQuantity(item.id!, item.quantity - 1)}
+                                        >
+                                            -
+                                        </button>
                                         <span className='border border-zinc-600 px-2'>{item.quantity}</span>
-                                        <button className="px-2 border border-zinc-600 border-l-0">+</button>
+                                        <button
+                                            className="px-2 border border-zinc-600 border-l-0"
+                                            onClick={() => handleUpdateQuantity(item.id!, item.quantity + 1)}
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                 </div>
 
