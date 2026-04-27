@@ -11,6 +11,11 @@ enum Role {
   ADMIN
 }
 
+enum CouponType {
+  percent
+  flat
+}
+
 enum OrderStatus {
   PENDING
   PROCESSING
@@ -132,9 +137,9 @@ model CartItem {
 }
 
 model Coupon {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  type        String
+  id          String     @id @default(uuid())
+  code        String     @unique
+  type        CouponType
   value       Float
   minSpend    Float
   maxDiscount Float?

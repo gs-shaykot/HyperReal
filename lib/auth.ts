@@ -39,6 +39,7 @@ export const authOptions: AuthOptions = {
                     createdAt: Fetchuser.createdAt,
                     picture: Fetchuser.PhotoUrl ??
                         "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png",
+                    isNewUser: Fetchuser.isNewUser,
                 }
                 return user;
             },
@@ -69,6 +70,7 @@ export const authOptions: AuthOptions = {
                             role: "USER",
                             password: "",
                             isVerified: true,
+                            isNewUser: true,
                         }
                     })
                 }
@@ -82,6 +84,7 @@ export const authOptions: AuthOptions = {
             if (user && 'role' in user) {
                 token.role = (user as any).role;
                 token.picture = (user as any).picture;
+                token.isNewUser = (user as any).isNewUser;
             }
             return token
         },
@@ -90,6 +93,7 @@ export const authOptions: AuthOptions = {
                 session.user.id = token.sub as string;
                 session.user.image = token.picture as string;
                 session.user.role = token.role as UserRole;
+                session.user.isNewUser = token.isNewUser as boolean;
             }
             return session;
         }
