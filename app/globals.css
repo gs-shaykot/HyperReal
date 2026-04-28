@@ -145,3 +145,13 @@ body {
     opacity: 1;
   }
 }
+
+.cornerStyle{
+  corner-shape: scoop;
+  border-radius: 20px;
+}
+
+.bevelStyle{
+  corner-shape: bevel;
+  border-radius: 20px;
+}

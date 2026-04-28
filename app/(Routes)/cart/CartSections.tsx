@@ -4,7 +4,7 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Sparkles, Trash2 } from 'lucide-react';
+import { ChevronRight, Sparkles, Trash2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
@@ -97,18 +97,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
     }
   })
 
-  /*====================UPDATE & DELETE HANDLE FUNCs=================== */
-
-  const handleDeleteItem = (itemId: string) => {
-    if (!itemId) return;
-    deleteCartItem(itemId);
-  }
-
-  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
-    if (!itemId || newQuantity < 1) return;
-    updateCartItem({ itemId, quantity: newQuantity });
-  }
-
   const subtotal = useMemo(() => {
     return cart.reduce(
       (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price, 0
@@ -129,14 +117,63 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
   console.log("Best Coupon next", nextBestCoupon);
 
+
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
   console.log("discount", discount);
 
   const total = subtotal + shippingCost - discount;
 
+
+
+  /*====================HANDLE FUNCs=================== */
+
+  const handleDeleteItem = (itemId: string) => {
+    if (!itemId) return;
+    deleteCartItem(itemId);
+  }
+
+  const handleUpdateQuantity = (itemId: string, newQuantity: number) => {
+    if (!itemId || newQuantity < 1) return;
+    updateCartItem({ itemId, quantity: newQuantity });
+  }
+
+  const handleLoadBestCoupon = () => {
+    if (!bestCoupon) return;
+
+    setCouponInput(bestCoupon.code);
+    setAppliedCoupon(null);
+  }
+
+  const handleClearCouponInput = () => {
+    setCouponInput('');
+    setAppliedCoupon(null);
+  }
+
+  const handleApplyCoupon = () => {
+    const code = couponInput.trim().toUpperCase();
+    const foundCoupon = coupons.find(c => c.code.toUpperCase() === code);
+    if (!foundCoupon) {
+      toast.error('Invalid coupon code.');
+      return;
+    }
+
+    if (foundCoupon.newUserOnly && !isNewUser) {
+      toast.error('This coupon is for new users only.');
+      return;
+    }
+
+    if (subtotal < foundCoupon.minSpend) {
+      toast.error(`Minimum spend $${foundCoupon.minSpend}`);
+      return;
+    }
+
+    setAppliedCoupon(foundCoupon);
+    toast.success(`${foundCoupon.code} applied successfully.`);
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 text-white py-10">
+    <div className="max-w-7xl mx-auto px-4 text-white pb-20">
       {/* HEADER */}
       <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide`}>
         CARGO <span className="text-lime-400">HOLD</span>
@@ -144,7 +181,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        {/* ================= LEFT SIDE ================= */}
+        {/* ================= LEFT PANEL ================= */}
         <div className="md:col-span-7 space-y-4">
           {cart.map((item: CartItemWithProductType) => {
             const matchedImage = item.variant.product.productImages.find(
@@ -218,7 +255,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   />
 
                   <p className="text-lime-400 font-bold text-xl">
-                    ${item.variant.product.price.toFixed(2)}
+                    ${(item.variant.product.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -226,7 +263,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
           })}
         </div>
 
-        {/* ================= RIGHT SIDE ================= */}
+        {/* ================= RIGHT PANEL ================= */}
         <div className="md:col-span-5">
           <div className="bg-[#1a1a1a] relative border border-zinc-800 p-4 ">
 
@@ -241,70 +278,93 @@ export const CartSections = ({ coupons }: CouponProps) => {
               Manifest Summary
             </h3>
 
-            <div className='relative bg-second/10  backdrop-blur-md border border-second/40 shadow-lg p-3 mb-3'>
+            {
+              bestCoupon && !appliedCoupon && (
+                <div className="cornerStyle w-full bg-second/5 border-2 border-second/40 p-3 my-5 flex items-center justify-between gap-4">
 
-              <div className="relative w-20 h-20 flex items-center justify-center group">
+                  <div className="relative w-18 h-18 flex items-center justify-center group">
+                    {/* soft ambient glow */}
+                    <div className="absolute inset-0 rounded-full bg-second/10 blur-lg animate-pulse" />
 
-                {/* soft ambient glow */}
-                <div className="absolute inset-0 rounded-full bg-second/10 blur-lg animate-pulse" />
+                    {/* SVG OCTAGON */}
+                    <svg
+                      viewBox="0 0 100 100"
+                      className="absolute inset-0 w-full h-full"
+                      fill="none"
+                    >
+                      {/* glowing border */}
+                      <polygon
+                        points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30"
+                        className="octagon-border"
+                      />
 
-                {/* SVG OCTAGON */}
-                <svg
-                  viewBox="0 0 100 100"
-                  className="absolute inset-0 w-full h-full"
-                  fill="none"
-                >
-                  {/* glowing border */}
-                  <polygon
-                    points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30"
-                    className="octagon-border"
-                  />
+                      {/* subtle inner line */}
+                      <polygon
+                        points="34,10 66,10 90,34 90,66 66,90 34,90 10,66 10,34"
+                        stroke="rgba(132,204,22,.25)"
+                        strokeWidth="3"
+                      />
+                    </svg>
 
-                  {/* subtle inner line */}
-                  <polygon
-                    points="34,10 66,10 90,34 90,66 66,90 34,90 10,66 10,34"
-                    stroke="rgba(132,204,22,.25)"
-                    strokeWidth="3"
-                  />
-                </svg>
+                    {/* inner glow behind icon */}
+                    <div className="absolute w-10 h-10 bg-lime-300/10 blur-md rounded-full animate-pulse" />
 
-                {/* inner glow behind icon */}
-                <div className="absolute w-10 h-10 bg-lime-300/10 blur-md rounded-full animate-pulse" />
+                    {/* centered sparkle */}
+                    <Sparkles
+                      size={30}
+                      className="relative z-10 text-lime-300 sparkle-icon"
+                      strokeWidth={2.2}
+                    />
+                  </div>
 
-                {/* centered sparkle */}
-                <Sparkles
-                  size={34}
-                  className="relative z-10 text-lime-300 sparkle-icon"
-                  strokeWidth={2.2}
-                />
-              </div>
+                  <div className='flex-1'>
+                    <h2 className='text-base font-medium text-second'>BEST OFFER FOR YOU</h2>
+                    <p className='text-xs'>Apply "{bestCoupon?.code.toUpperCase()}" and get ${bestCoupon?.value} off</p>
+                  </div>
 
-              <div>
+                  <button className='btn border-second bg-main text-second' onClick={handleLoadBestCoupon}>
+                    Apply <ChevronRight className=' ' />
+                  </button>
 
-              </div>
-              <div>
-
-              </div>
-
-            </div>
+                </div>
+              )
+            }
 
             {/* COUPON */}
             <div className="mb-5">
               <p className="text-xs text-zinc-500 mb-2">Voucher Protocol</p>
-              <div className="flex">
-                <input
-                  type="text"
-                  placeholder="Enter Code"
-                  className="flex-1 bg-black border border-zinc-700 px-3 py-2 text-sm outline-none"
-                />
-                <button className="bg-lime-400 text-black px-4 text-sm font-semibold">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Enter Code"
+                    value={couponInput}
+                    onChange={(event) => setCouponInput(event.target.value)}
+                    className="w-full bg-black border border-zinc-700 px-3 py-2 pr-10 text-sm outline-none rounded h-10"
+                  />
+                   
+                  {couponInput && (
+                    <button
+                      type="button"
+                      aria-label="Clear coupon code"
+                      onClick={handleClearCouponInput}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={handleApplyCoupon}
+                  className="bg-lime-400 text-black px-4 text-sm font-semibold rounded h-10"
+                >
                   APPLY
                 </button>
               </div>
             </div>
 
             {/* SUMMARY */}
-            <div className="text-sm space-y-2 border-t border-zinc-700 pt-4">
+            <div className="text-sm space-y-2 border-t border-b border-dashed border-zinc-700 py-4">
               <div className="flex justify-between text-zinc-400">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
@@ -312,15 +372,22 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
               <div className="flex justify-between text-zinc-400">
                 <span>Shipping</span>
-                <span>FREE</span>
+                <span>${shippingCost.toFixed(2)}</span>
               </div>
+
+              {discount > 0 && (
+                <div className="flex justify-between text-lime-300">
+                  <span>Discount</span>
+                  <span>- ${discount.toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
             {/* TOTAL */}
             <div className="flex justify-between mt-5 text-lg font-bold">
               <span>Total</span>
               <span className="text-lime-400">
-                ${subtotal.toFixed(2)}
+                ${total.toFixed(2)}
               </span>
             </div>
 
