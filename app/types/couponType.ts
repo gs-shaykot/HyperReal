@@ -3,6 +3,6 @@ export type couponType = {
     type: 'percent' | 'flat';
     value: number;
     minSpend: number;
-    maxDiscount?: number;
-    newUserOnly?: boolean;
+    maxDiscount?: number | null;
+    newUserOnly?: boolean | null;
 }

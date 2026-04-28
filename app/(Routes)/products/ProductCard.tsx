@@ -47,8 +47,8 @@ export const ProductCard = ({ products }: ProductProps) => {
                                 />
                             </motion.div>
 
-                            <div className="w-5 h-5 border-b border-r absolute bottom-2 right-2 z-20 group-hover:border-second transition-all" />
-                            <div className="w-5 h-5 border-b border-l absolute bottom-2 left-2 z-20 group-hover:border-second transition-all" />
+                            <span className="w-5 h-5 border-b border-r absolute bottom-2 right-2 z-20 group-hover:border-second transition-all" />
+                            <span className="w-5 h-5 border-b border-l absolute bottom-2 left-2 z-20 group-hover:border-second transition-all" />
                         </div>
 
                         {/* CONTENT */}

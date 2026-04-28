@@ -61,3 +61,87 @@ body {
   background-color: #8fb300;
   color: #0a0a0a;
 }
+
+.hexagon{
+  clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%);
+}
+/* globals.css */
+
+.offer-icon {
+  position: relative;
+  width: 84px;
+  height: 84px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+
+  /* lime octagon border */
+  border: 2px solid rgb(132 204 22); /* lime-500 */
+
+  /* octagon shape */
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0% 70%,
+    0% 30%
+  );
+
+  box-shadow:
+    0 0 8px rgba(132, 204, 22, 0.45),
+    inset 0 0 8px rgba(132, 204, 22, 0.12);
+}
+
+/* optional inner border */
+.offer-icon::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+
+  border: 1px solid rgba(132, 204, 22, 0.35);
+
+  clip-path: polygon(
+    30% 0%,
+    70% 0%,
+    100% 30%,
+    100% 70%,
+    70% 100%,
+    30% 100%,
+    0% 70%,
+    0% 30%
+  );
+}
+
+/* pulsing star */
+.offer-star {
+  position: relative;
+  z-index: 2;
+
+  font-size: 34px;
+  line-height: 1;
+  color: rgb(190 242 100);
+
+  animation: pulseStar 1.6s ease-in-out infinite;
+
+  text-shadow:
+    0 0 6px rgba(190, 242, 100, 0.8),
+    0 0 16px rgba(132, 204, 22, 0.7);
+}
+
+@keyframes pulseStar {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+}
