@@ -4,13 +4,14 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
+import { ChevronRight, Package, ShieldCheck, Sparkles, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
+import { color } from 'framer-motion';
 
 type CouponProps = {
   coupons: couponType[]
@@ -183,7 +184,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
 
         {/* ================= LEFT PANEL ================= */}
-        <div className="md:col-span-7 space-y-4">
+        <div className="md:col-span-6 space-y-4">
           {cart.map((item: CartItemWithProductType) => {
             const matchedImage = item.variant.product.productImages.find(
               (img) => img.color === item.variant.color
@@ -265,8 +266,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
         </div>
 
         {/* ================= RIGHT PANEL ================= */}
-        <div className="md:col-span-5">
-          <div className="bg-[#1a1a1a] relative border border-zinc-800 p-4">
+        <div className="md:col-span-6 bg-[#1a1a1a] border border-zinc-800">
+          <div className=" relative p-4">
 
             {/* CORNER */}
             <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -283,36 +284,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               bestCoupon && !appliedCoupon && (
                 <div className="cornerStyle w-full bg-second/5 border-2 border-second/40 p-3 my-5 flex items-center justify-between gap-4">
 
-                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-25"/>
-                  
-                  {/* <div className="relative w-18 h-18 flex items-center justify-center group"> 
-                    <div className="absolute inset-0 rounded-full bg-second/5 blur-lg animate-pulse" />
- 
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="absolute inset-0 w-full h-full"
-                      fill="none"
-                    > 
-                      <polygon
-                        points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30"
-                        className="octagon-border"
-                      />
- 
-                      <polygon
-                        points="34,10 66,10 90,34 90,66 66,90 34,90 10,66 10,34"
-                        stroke="rgba(132,204,22,.25)"
-                        strokeWidth="3"
-                      />
-                    </svg>
- 
-                    <div className="absolute w-10 h-10 bg-lime-300/10 blur-md rounded-full animate-pulse" />
- 
-                    <Sparkles
-                      size={30}
-                      className="relative z-10 text-lime-300 sparkle-icon"
-                      strokeWidth={2.2}
-                    />
-                  </div> */}
+                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-25" strokeWidth="3" />
 
                   <div className='flex-1'>
                     <h2 className='text-base font-medium text-second'>BEST OFFER FOR YOU</h2>
@@ -394,8 +366,25 @@ export const CartSections = ({ coupons }: CouponProps) => {
             </button>
           </div>
 
-          <div>
+          <div className='flex justify-between mx-4 border-t border-zinc-600 py-4'>
 
+            <div className='border-r border-zinc-500 w-full flex flex-col items-center justify-center gap-1 py-1'>
+              <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
+              <h3 className='text-sm text-zinc-400'>SECURE CHECKOUT</h3>
+              <p className='text-xs text-zinc-400'>Yout data is protected</p>
+            </div>
+
+            <div className='border-r border-zinc-500 w-full flex flex-col items-center justify-center gap-1 py-1'>
+              <Octagon icon={<Package size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
+              <h3 className='text-sm text-zinc-400'>FAST SHIPPING</h3>
+              <p className='text-xs text-zinc-400'>Delivered to you</p>
+            </div>
+            
+            <div className='w-full flex flex-col items-center justify-center gap-1 py-1'>
+              <Octagon icon={<Undo2 size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
+              <h3 className='text-sm text-zinc-400'>EASY RETURNS</h3>
+              <p className='text-xs text-zinc-400'>30-days returns</p>
+            </div>
           </div>
         </div>
       </div>

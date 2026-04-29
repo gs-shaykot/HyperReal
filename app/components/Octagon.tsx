@@ -6,16 +6,16 @@ type OctagonProps = {
     icon?: React.ReactNode;
     glow?: boolean;
     color?: string;
-    iconSize?: number;
     opacity?: string;
+    strokeWidth?: string | number;
 };
 
 export const Octagon = ({
     icon = <Sparkles size={30} strokeWidth={2.2} />,
     glow = false,
     color = "#84cc16",
-    iconSize = 30,
     opacity = "opacity-25",
+    strokeWidth = "3"
 }: OctagonProps) => {
     return (
         <div className="relative w-18 h-18 flex items-center justify-center group">
@@ -39,7 +39,7 @@ export const Octagon = ({
                     points="34,10 66,10 90,34 90,66 66,90 34,90 10,66 10,34"
                     stroke={color}
                     className={`${opacity}`}
-                    strokeWidth="3"
+                    strokeWidth={strokeWidth}
                 />
             </svg>
 
