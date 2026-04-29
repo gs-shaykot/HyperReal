@@ -4,14 +4,13 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, Package, ShieldCheck, Sparkles, Trash2, Undo2, X } from 'lucide-react';
+import { ChevronRight, Lock, Package, ShieldCheck, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
-import { color } from 'framer-motion';
 
 type CouponProps = {
   coupons: couponType[]
@@ -117,12 +116,25 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
 
-  console.log("Best Coupon next", nextBestCoupon);
+  const lockedEligibleCoupons = useMemo(() => {
+    return coupons
+      .filter((coupon) => {
+        if (coupon.newUserOnly && !isNewUser) return false;
+        return subtotal < coupon.minSpend;
+      })
+      .sort((a, b) => a.minSpend - b.minSpend);
+  }, [coupons, subtotal, isNewUser]);
+
+  const nextAfterNextCoupon = lockedEligibleCoupons[1] ?? null;
+
+  const finalCouponTarget = lockedEligibleCoupons[lockedEligibleCoupons.length - 1]?.minSpend ?? nextBestCoupon?.minSpend ?? subtotal;
+
+  const couponProgressPercent = finalCouponTarget > 0
+    ? Math.min((subtotal / finalCouponTarget) * 100, 100)
+    : 0;
 
 
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
-
-  console.log("discount", discount);
 
   const total = subtotal + shippingCost - discount;
 
@@ -178,7 +190,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     <div className="max-w-7xl mx-auto px-4 text-white pb-20">
       {/* HEADER */}
       <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide`}>
-        CARGO <span className="text-lime-400">HOLD</span>
+        CARGO <span className="text-second">HOLD</span>
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -193,7 +205,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             return (
               <div
                 key={item.id}
-                className="relative flex justify-between bg-[#1a1a1a] border border-zinc-800 p-4 overflow-hidden"
+                className="relative z-20 flex justify-between bg-[#1a1a1a] border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -263,6 +275,63 @@ export const CartSections = ({ coupons }: CouponProps) => {
               </div>
             );
           })}
+
+          {/* NEXT COUPON */}
+          {nextBestCoupon && (
+            <div className="relative border border-second/70 bg-linear-to-r from-[#0f1510] to-[#111711] p-4 overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-px bg-second/60" />
+
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <h3 className="text-second text-xl font-semibold uppercase tracking-wide">
+                    Unlock More. Save More.
+                  </h3>
+                  <p className="text-sm text-zinc-300 mt-1">
+                    Add ${nextBestCoupon.remainingSpend.toFixed(2)} more to unlock {nextBestCoupon.code.toUpperCase()} and save {nextBestCoupon.type === 'percent' ? `${nextBestCoupon.value}%` : `$${nextBestCoupon.value}`}.
+                  </p>
+
+                  {nextAfterNextCoupon && (
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Next tier: {nextAfterNextCoupon.code.toUpperCase()} at ${nextAfterNextCoupon.minSpend.toFixed(2)} ({nextAfterNextCoupon.type === 'percent' ? `${nextAfterNextCoupon.value}%` : `$${nextAfterNextCoupon.value}`} off).
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-zinc-300">
+                  <span className="text-second font-semibold">${subtotal.toFixed(2)}</span>
+                  <span className="text-zinc-500">/</span>
+                  <span>${nextBestCoupon.minSpend.toFixed(2)}</span>
+                  <Lock size={14} className="text-zinc-500" />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-second transition-all duration-500"
+                    style={{ width: `${couponProgressPercent}%` }}
+                  />
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                  <div>
+                    <p className="text-zinc-500">${nextBestCoupon.minSpend.toFixed(0)}</p>
+                    <p className="text-second font-medium uppercase">{nextBestCoupon.code.toUpperCase()}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-zinc-500">{nextAfterNextCoupon ? `$${nextAfterNextCoupon.minSpend.toFixed(0)}` : '--'}</p>
+                    <p className="text-zinc-400 font-medium uppercase">{nextAfterNextCoupon ? nextAfterNextCoupon.code.toUpperCase() : 'MAX TIER'}</p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-zinc-500">Target</p>
+                    <p className="text-zinc-400 font-medium">${finalCouponTarget.toFixed(0)}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ================= RIGHT PANEL ================= */}
@@ -379,7 +448,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               <h3 className='text-sm text-zinc-400'>FAST SHIPPING</h3>
               <p className='text-xs text-zinc-400'>Delivered to you</p>
             </div>
-            
+
             <div className='w-full flex flex-col items-center justify-center gap-1 py-1'>
               <Octagon icon={<Undo2 size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-sm text-zinc-400'>EASY RETURNS</h3>

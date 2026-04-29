@@ -131,7 +131,7 @@ body {
 
   text-shadow:
     0 0 6px rgba(190, 242, 100, 0.8),
-    0 0 16px rgba(132, 204, 22, 0.7);
+    0 0 16px oklab(91.184% -0.15235 0.17953 / 0.7);
 }
 
 @keyframes pulseStar {
@@ -155,3 +155,4 @@ body {
   corner-shape: bevel;
   border-radius: 20px;
 }
+ 
