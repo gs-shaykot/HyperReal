@@ -4,12 +4,13 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, Sparkles, Trash2, X } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
+import { Octagon } from '@/app/components/Octagon';
 
 type CouponProps = {
   coupons: couponType[]
@@ -265,13 +266,13 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
         {/* ================= RIGHT PANEL ================= */}
         <div className="md:col-span-5">
-          <div className="bg-[#1a1a1a] relative border border-zinc-800 p-4 ">
+          <div className="bg-[#1a1a1a] relative border border-zinc-800 p-4">
 
             {/* CORNER */}
             <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
               <span className='absolute top-0 right-7 w-5 h-px bg-zinc-600' />
               <span className='absolute bottom-7 left-0 w-px h-5 bg-zinc-600' />
-              <span className='absolute top-4 left-0 w-5.75 h-px bg-zinc-600 transform -rotate-45 origin-left' />
+              <span className='absolute top-4 left-0 w-5.75 h-px bg-zinc-600 transform -rotate-45 origin-left  drop-shadow-[0_0_5px_#ccff00] ' />
             </span>
 
             <h3 className={` ${hudson.className} text-3xl mb-6 uppercase`}>
@@ -282,44 +283,40 @@ export const CartSections = ({ coupons }: CouponProps) => {
               bestCoupon && !appliedCoupon && (
                 <div className="cornerStyle w-full bg-second/5 border-2 border-second/40 p-3 my-5 flex items-center justify-between gap-4">
 
-                  <div className="relative w-18 h-18 flex items-center justify-center group">
-                    {/* soft ambient glow */}
-                    <div className="absolute inset-0 rounded-full bg-second/10 blur-lg animate-pulse" />
-
-                    {/* SVG OCTAGON */}
+                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-25"/>
+                  
+                  {/* <div className="relative w-18 h-18 flex items-center justify-center group"> 
+                    <div className="absolute inset-0 rounded-full bg-second/5 blur-lg animate-pulse" />
+ 
                     <svg
                       viewBox="0 0 100 100"
                       className="absolute inset-0 w-full h-full"
                       fill="none"
-                    >
-                      {/* glowing border */}
+                    > 
                       <polygon
                         points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30"
                         className="octagon-border"
                       />
-
-                      {/* subtle inner line */}
+ 
                       <polygon
                         points="34,10 66,10 90,34 90,66 66,90 34,90 10,66 10,34"
                         stroke="rgba(132,204,22,.25)"
                         strokeWidth="3"
                       />
                     </svg>
-
-                    {/* inner glow behind icon */}
+ 
                     <div className="absolute w-10 h-10 bg-lime-300/10 blur-md rounded-full animate-pulse" />
-
-                    {/* centered sparkle */}
+ 
                     <Sparkles
                       size={30}
                       className="relative z-10 text-lime-300 sparkle-icon"
                       strokeWidth={2.2}
                     />
-                  </div>
+                  </div> */}
 
                   <div className='flex-1'>
                     <h2 className='text-base font-medium text-second'>BEST OFFER FOR YOU</h2>
-                    <p className='text-xs'>Apply "{bestCoupon?.code.toUpperCase()}" and get ${bestCoupon?.value} off</p>
+                    <p className='text-xs'>Apply "{bestCoupon?.code.toUpperCase()}" and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
                   <button className='btn border-second bg-main text-second' onClick={handleLoadBestCoupon}>
@@ -342,7 +339,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     onChange={(event) => setCouponInput(event.target.value)}
                     className="w-full bg-black border border-zinc-700 px-3 py-2 pr-10 text-sm outline-none rounded h-10"
                   />
-                   
+
                   {couponInput && (
                     <button
                       type="button"
@@ -375,12 +372,12 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 <span>${shippingCost.toFixed(2)}</span>
               </div>
 
-              {discount > 0 && (
-                <div className="flex justify-between text-lime-300">
-                  <span>Discount</span>
-                  <span>- ${discount.toFixed(2)}</span>
-                </div>
-              )}
+
+              <div className="flex justify-between text-lime-300">
+                <span>Discount</span>
+                <span>- ${discount.toFixed(2)}</span>
+              </div>
+
             </div>
 
             {/* TOTAL */}
@@ -395,6 +392,10 @@ export const CartSections = ({ coupons }: CouponProps) => {
             <button className="w-full mt-6 bg-lime-400 text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition">
               Initiate Transfer
             </button>
+          </div>
+
+          <div>
+
           </div>
         </div>
       </div>
