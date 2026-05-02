@@ -155,4 +155,50 @@ body {
   corner-shape: bevel;
   border-radius: 20px;
 }
+
+.cornerBorder {
+    width: 28px;
+    height: 2px;
+    top: 8px;
+    left: -5px;
+}
+
+.bar2 {
+    width: 2px;
+    height: 19px;
+    top: 18px;
+    left: 2px;
+    transform: translateX(-3.4px);
+}
+
+.cornerBar {
+    width: 25px;
+    height: 2px;
+    bottom: 6px;
+    right: -5px;
+    transform: rotate(-45deg);
+}
  
+.corners:after {
+    content: "";
+    border-left: 2px solid var(--color-second);
+    border-bottom: 2px solid var(--color-second);
+    z-index: 20;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    bottom: -2px;
+    left: -1.5px;
+}
+
+.corners:before {
+    content: "";
+    border-top: 2px solid var(--color-second);
+    border-right: 2px solid var(--color-second);
+    z-index: 20;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top: -2px;
+    right: -1.5px;
+}

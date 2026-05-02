@@ -1,6 +1,7 @@
 export type couponType = {
+    id?: string
     code: string;
-    type: 'percent' | 'flat';
+    type: string;
     value: number;
     minSpend: number;
     maxDiscount?: number | null;

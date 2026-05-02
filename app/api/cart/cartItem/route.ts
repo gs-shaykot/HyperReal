@@ -63,8 +63,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-    try {
-        console.log("cartItems GET HIT")
+    try { 
         const session = await getServerSession(authOptions);
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });

@@ -110,35 +110,16 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getBestCoupon(coupons, subtotal, isNewUser);
   }, [coupons, subtotal, isNewUser]);
 
-  console.log("Best Coupon right now", bestCoupon);
-
+  // next best coupon calculation
   const nextBestCoupon = useMemo(() => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
 
-  const lockedEligibleCoupons = useMemo(() => {
-    return coupons
-      .filter((coupon) => {
-        if (coupon.newUserOnly && !isNewUser) return false;
-        return subtotal < coupon.minSpend;
-      })
-      .sort((a, b) => a.minSpend - b.minSpend);
-  }, [coupons, subtotal, isNewUser]);
-
-  const nextAfterNextCoupon = lockedEligibleCoupons[1] ?? null;
-
-  const finalCouponTarget = lockedEligibleCoupons[lockedEligibleCoupons.length - 1]?.minSpend ?? nextBestCoupon?.minSpend ?? subtotal;
-
-  const couponProgressPercent = finalCouponTarget > 0
-    ? Math.min((subtotal / finalCouponTarget) * 100, 100)
-    : 0;
-
+  // console.log('Next Coupon: ', nextBestCoupon?.updatedCoupons);
 
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
   const total = subtotal + shippingCost - discount;
-
-
 
   /*====================HANDLE FUNCs=================== */
 
@@ -157,14 +138,15 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
     setCouponInput(bestCoupon.code);
     setAppliedCoupon(null);
-  }
+  };
 
   const handleClearCouponInput = () => {
     setCouponInput('');
     setAppliedCoupon(null);
-  }
+  };
 
   const handleApplyCoupon = () => {
+
     const code = couponInput.trim().toUpperCase();
     const foundCoupon = coupons.find(c => c.code.toUpperCase() === code);
     if (!foundCoupon) {
@@ -277,61 +259,22 @@ export const CartSections = ({ coupons }: CouponProps) => {
           })}
 
           {/* NEXT COUPON */}
-          {nextBestCoupon && (
-            <div className="relative border border-second/70 bg-linear-to-r from-[#0f1510] to-[#111711] p-4 overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-px bg-second/60" />
+          <div className='relative w-full h-31 bg-second/10 border-2 border-second/30 corners z-10'>
+            <div>
+              <span className='w-7 h-7 absolute -top-4 -left-4 bg-main transform rotate-45' />
+              <span className='w-7 h-7 absolute -bottom-4 -right-4 bg-main transform rotate-45' />
 
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="text-second text-xl font-semibold uppercase tracking-wide">
-                    Unlock More. Save More.
-                  </h3>
-                  <p className="text-sm text-zinc-300 mt-1">
-                    Add ${nextBestCoupon.remainingSpend.toFixed(2)} more to unlock {nextBestCoupon.code.toUpperCase()} and save {nextBestCoupon.type === 'percent' ? `${nextBestCoupon.value}%` : `$${nextBestCoupon.value}`}.
-                  </p>
+              <span className='w-7 h-0.5 top-2 -left-1.25 bg-second absolute transform -rotate-45' />
+              <span className='w-4 h-0.5 -top-0.5 left-4.75 bg-second absolute' />
+              <span className='w-0.5 h-4.75 top-4.5 left-0.5 transform -translate-x-[3.4px]  bg-second absolute' />
 
-                  {nextAfterNextCoupon && (
-                    <p className="text-xs text-zinc-400 mt-1">
-                      Next tier: {nextAfterNextCoupon.code.toUpperCase()} at ${nextAfterNextCoupon.minSpend.toFixed(2)} ({nextAfterNextCoupon.type === 'percent' ? `${nextAfterNextCoupon.value}%` : `$${nextAfterNextCoupon.value}`} off).
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-zinc-300">
-                  <span className="text-second font-semibold">${subtotal.toFixed(2)}</span>
-                  <span className="text-zinc-500">/</span>
-                  <span>${nextBestCoupon.minSpend.toFixed(2)}</span>
-                  <Lock size={14} className="text-zinc-500" />
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-second transition-all duration-500"
-                    style={{ width: `${couponProgressPercent}%` }}
-                  />
-                </div>
-
-                <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <p className="text-zinc-500">${nextBestCoupon.minSpend.toFixed(0)}</p>
-                    <p className="text-second font-medium uppercase">{nextBestCoupon.code.toUpperCase()}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-zinc-500">{nextAfterNextCoupon ? `$${nextAfterNextCoupon.minSpend.toFixed(0)}` : '--'}</p>
-                    <p className="text-zinc-400 font-medium uppercase">{nextAfterNextCoupon ? nextAfterNextCoupon.code.toUpperCase() : 'MAX TIER'}</p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-zinc-500">Target</p>
-                    <p className="text-zinc-400 font-medium">${finalCouponTarget.toFixed(0)}</p>
-                  </div>
-                </div>
-              </div>
+              <span className='cornerBar bg-second absolute' />
+              <span className='w-4 h-0.5 -bottom-0.5 right-4 bg-second absolute' />
+              <span className='w-0.5 h-4 bottom-4 right-0 transform translate-x-[1.9px] bg-second absolute'/>
             </div>
-          )}
+
+
+          </div>
         </div>
 
         {/* ================= RIGHT PANEL ================= */}

@@ -4,7 +4,7 @@ import React from 'react'
 
 const Page = async () => {
     const coupons = await prisma.coupon.findMany();
-    
+
     return (
         <div>
             <CartSections coupons={coupons} />

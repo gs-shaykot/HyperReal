@@ -19,6 +19,7 @@ export const getDiscount = (coupon: couponType, subtotal: number) => {
 }
 
 export const getBestCoupon = (coupons: couponType[], subtotal: number, isNewUser: boolean) => {
+
     const validCoupons = coupons.filter(coupon => {
         if (coupon.newUserOnly && !isNewUser) return false;
         return subtotal >= coupon.minSpend;
@@ -33,13 +34,14 @@ export const getBestCoupon = (coupons: couponType[], subtotal: number, isNewUser
 }
 
 export const getNextBestCoupon = (coupons: couponType[], subtotal: number) => {
-    const currentLockedCoupon = coupons.filter((coupon) => subtotal < coupon.minSpend).sort((a, b) => a.minSpend - b.minSpend);
+    const currentLockedCoupon = coupons.filter((coupon) => subtotal < coupon.minSpend).sort((a, b) => a.minSpend - b.minSpend).slice(0, 2);
     if (!currentLockedCoupon.length) return null;
 
-    const nextBestCoupon = currentLockedCoupon[0];
+    const updatedCoupons = currentLockedCoupon.map(coupon => ({
+        ...coupon,
+        remaining: coupon.minSpend - subtotal
+    }))
 
-    return {
-        ...nextBestCoupon,
-        remainingSpend: nextBestCoupon.minSpend - subtotal
-    };
+    return { updatedCoupons }
+
 }

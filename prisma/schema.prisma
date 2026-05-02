@@ -137,9 +137,9 @@ enum CouponType {
 }
 
 model Coupon {
-  id          String     @id @default(uuid())
-  code        String     @unique
-  type        CouponType
+  id          String   @id @default(uuid())
+  code        String   @unique
+  type        String
   value       Float
   minSpend    Float
   maxDiscount Float?
