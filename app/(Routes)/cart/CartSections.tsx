@@ -7,11 +7,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
-import Link from 'next/link';
+import { CartSkeleton } from '@/app/(Routes)/cart/CartSkeleton';
 
 type CouponProps = {
   coupons: couponType[]
@@ -23,21 +24,17 @@ const hudson = localFont({
 })
 
 export const CartSections = ({ coupons }: CouponProps) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const queryClient = useQueryClient();
 
-  const isNewUser = session?.user.isNewUser ?? false;
-  const canFetchCart = !!session?.user;
-
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
-  const [deliverCountry, setDeliverCountry] = useState('Bangladesh');
 
-  const { data: cart = [] } = useQuery({
+  const { data: cart = [], isPending: isCartPending } = useQuery({
     queryKey: ["cartItems"],
-    queryFn: () => (canFetchCart ? fetchCartApi() : Promise.resolve([])),
-    enabled: canFetchCart,
+    queryFn: fetchCartApi,
+    enabled: !!session?.user,
   });
 
   /*====================DELETE ITEM QUERY=================== */
@@ -100,13 +97,13 @@ export const CartSections = ({ coupons }: CouponProps) => {
     }
   })
 
+  const isNewUser = session?.user?.isNewUser ?? false;
+
   const subtotal = useMemo(() => {
     return cart.reduce(
       (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price, 0
     )
   }, [cart]);
-
-
 
   const bestCoupon = useMemo(() => {
     return getBestCoupon(coupons, subtotal, isNewUser);
@@ -116,29 +113,55 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
 
-  console.log('Next Coupon: ', nextBestCoupon?.updatedCoupons);
 
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
   const total = subtotal - discount;
 
-  if (!session?.user || cart.length === 0) {
+
+  if (status === "loading") {
+    return <CartSkeleton />
+  }
+
+  if (!session?.user) {
     return (
       <div className='py-40 flex flex-col items-center justify-center gap-6'>
-        <h3 className={`${hudson.className} text-5xl`}>CARGO <span className="text-second">HOLD</span></h3>
-        <p className='text-zinc-400'>your cart is empty</p>
+        <h3 className={`${hudson.className} text-5xl`}>
+          CARGO <span className="text-second">HOLD</span>
+        </h3>
 
-        <Link href='/products'>
-          <button className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
-            <span className={` flex items-center gap-2`}>
-              SHOP THE DROP
-              <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
-            </span>
+        <p className='text-zinc-400'>login to access your cargo</p>
+
+        <Link href='/login'>
+          <button className='btn bg-second text-black font-bold'>
+            LOGIN
           </button>
         </Link>
       </div>
-    )
-  };
+    );
+  }
+
+  if (isCartPending) {
+    return <CartSkeleton />;
+  }
+
+  if (cart.length === 0) {
+    return (
+      <div className='py-40 flex flex-col items-center justify-center gap-6'>
+        <h3 className={`${hudson.className} text-5xl`}>
+          CARGO <span className="text-second">HOLD</span>
+        </h3>
+
+        <p className='text-zinc-400'>your cart is empty</p>
+
+        <Link href='/products'>
+          <button className='btn bg-second text-black font-bold'>
+            SHOP THE DROP
+          </button>
+        </Link>
+      </div>
+    );
+  }
 
   /*====================HANDLE FUNCs=================== */
 
@@ -186,8 +209,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(foundCoupon);
     toast.success(`${foundCoupon.code} applied successfully.`);
   }
-
-
 
   return (
     <div className="max-w-7xl mx-auto px-4 text-white pb-20">
@@ -238,7 +259,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   </h3>
 
                   <p className="text-sm text-zinc-400 mt-1">
-                    {item.variant.product.category.name} // {item.variant.size}
+                    {item.variant.product.category.name} {'//'} {item.variant.size}
                   </p>
 
                   {/* QUANTITY CONTROL */}
@@ -396,7 +417,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
                   <div className='flex-1'>
                     <h2 className='text-base font-medium text-second'>BEST OFFER FOR YOU</h2>
-                    <p className='text-xs'>Apply "{bestCoupon?.code.toUpperCase()}" and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
+                    <p className='text-xs'>Apply &quot;{bestCoupon?.code.toUpperCase()}&quot; and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
                   <button className='btn border-second bg-main text-second' onClick={handleLoadBestCoupon}>
@@ -448,7 +469,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               </div>
 
               <div className="flex justify-between text-zinc-400">
-                <span>// Shipping</span>
+                <span>{'//'} Shipping</span>
                 <span className='text-sm text-zinc-600 italic'>CALCULATE IN CHECKOUT</span>
               </div>
 
