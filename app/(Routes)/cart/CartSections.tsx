@@ -4,7 +4,7 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, Lock, Package, ShieldCheck, Trash2, Undo2, X } from 'lucide-react';
+import { ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
@@ -115,7 +115,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
 
-  // console.log('Next Coupon: ', nextBestCoupon?.updatedCoupons);
+  console.log('Next Coupon: ', nextBestCoupon?.updatedCoupons);
 
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
@@ -167,6 +167,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(foundCoupon);
     toast.success(`${foundCoupon.code} applied successfully.`);
   }
+
+
 
   return (
     <div className="max-w-7xl mx-auto px-4 text-white pb-20">
@@ -260,6 +262,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
           {/* NEXT COUPON */}
           <div className='relative w-full h-31 bg-second/10 border-2 border-second/30 corners z-10'>
+            {/* CORNER DESIGNS */}
             <div>
               <span className='w-7 h-7 absolute -top-4 -left-4 bg-main transform rotate-45' />
               <span className='w-7 h-7 absolute -bottom-4 -right-4 bg-main transform rotate-45' />
@@ -270,9 +273,79 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
               <span className='cornerBar bg-second absolute' />
               <span className='w-4 h-0.5 -bottom-0.5 right-4 bg-second absolute' />
-              <span className='w-0.5 h-4 bottom-4 right-0 transform translate-x-[1.9px] bg-second absolute'/>
+              <span className='w-0.5 h-4 bottom-4 right-0 transform translate-x-[1.9px] bg-second absolute' />
             </div>
 
+            <div className='p-2 w-full h-full flex items-start gap-2'>
+              <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color='#ccff00 ' />
+              {/* INFO */}
+              <div className='w-full'>
+                {/* HEADER */}
+                <div className='flex justify-between w-full mb-3'>
+                  <div>
+                    <h3 className={`text-sm text-second font-medium`}>UNLOCK MORE. SAVE MORE</h3>
+                    <p className='text-sm'>Add <span className="text-second">${nextBestCoupon?.updatedCoupons[0].remaining}</span> more to save {" "}
+                      {
+                        nextBestCoupon?.updatedCoupons[0].type === 'percent' ?
+                          <span className="text-second">${nextBestCoupon.updatedCoupons[0].value}%</span> :
+                          <span className="text-second">${nextBestCoupon?.updatedCoupons[0].value}</span>
+                      }</p>
+                  </div>
+                  <div className='flex items-center justify-center gap-3 border-b border-dashed border-second/30'>
+                    <p>
+                      ${subtotal} / ${nextBestCoupon?.updatedCoupons[0].minSpend}
+                    </p>
+                    <Lock size={20} strokeWidth={2} />
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className='w-full h-10 '>
+                  <div className="flex gap-1">
+                    {
+                      nextBestCoupon?.updatedCoupons.map((coupon, index) => {
+
+                        const prevMinSpend =
+                          index === 0 ? 0 : nextBestCoupon.updatedCoupons[index - 1].minSpend;
+
+                        const segmentRange = coupon.minSpend - prevMinSpend;
+                        const progressInSegment = subtotal - prevMinSpend;
+
+                        const widthPercent = Math.max(
+                          0,
+                          Math.min((progressInSegment / segmentRange) * 100, 100)
+                        );
+
+                        return (
+                          <div key={coupon.id} className='w-full'>
+
+                            {/* BAR */}
+                            <div className='relative w-full h-2 bg-zinc-900 rounded-full overflow-hidden'>
+                              <span
+                                className='absolute top-0 left-0 bg-second h-2 shadow-[0_0_6px_#ccff00]'
+                                style={{ width: `${widthPercent}%` }}
+                              />
+                            </div>
+
+                            {/* LABELS */}
+                            <h4 className='text-xs text-zinc-400 mt-1'>
+                              SPEND ${coupon.minSpend} & GET
+                            </h4>
+
+                            <h5 className='text-xs font-bold text-zinc-400'>
+                              UP TO {coupon.type === 'percent'
+                                ? `${coupon.value}%`
+                                : `$${coupon.value}`} OFF
+                            </h5>
+
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
 
           </div>
         </div>
