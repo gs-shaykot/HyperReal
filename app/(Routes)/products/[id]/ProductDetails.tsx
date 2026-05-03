@@ -5,8 +5,11 @@ import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
 import toast from 'react-hot-toast';
+import { useSession } from 'next-auth/react';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
+
+    const { data: session } = useSession();
 
     const mutation = useCart();
 
@@ -106,7 +109,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 }
                             </div>
                         </div>
- 
+
                         <div className='flex items-center justify-center gap-3 mt-2'>
                             {/* Quantity */}
                             <div className='flex items-center gap-4 border border-zinc-600 '>
@@ -130,15 +133,21 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
+                                        if (!session?.user) {
+                                            toast.error("Please sign in to add items to your cart");
+                                            return;
+                                        }
+
                                         if (!selectedSize) {
                                             toast.error("Please select a size");
                                             return;
                                         }
-                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize); 
+                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
                                         if (!selectedVariant) {
                                             toast.error("Selected variant not available");
                                             return;
                                         }
+
                                         mutation.mutate({
                                             variantId: selectedVariant.id,
                                             quantity

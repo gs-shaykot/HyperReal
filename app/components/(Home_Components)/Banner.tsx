@@ -1,5 +1,6 @@
 'use client'
 import { ArrowRight } from 'lucide-react'
+import Link from 'next/link';
 import { useSelector } from 'react-redux';
 
 export const Banner = () => {
@@ -32,13 +33,15 @@ export const Banner = () => {
                 </div>
 
                 <div className='flex flex-col md:flex-row mt-3 justify-center items-center gap-3'>
-                    <button className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
+                    <Link href='/products'>
+                        <button className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
 
-                        <span className={` flex items-center gap-2`}>
-                            SHOP THE DROP
-                            <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
-                        </span>
-                    </button>
+                            <span className={` flex items-center gap-2`}>
+                                SHOP THE DROP
+                                <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
+                            </span>
+                        </button>
+                    </Link>
 
 
                     {/* ${theme === 'light' ? 'text-white hover:bg-white ' : 'text-zinc-900 hover:text-white  border-zinc-900 hover:bg-black'} */}

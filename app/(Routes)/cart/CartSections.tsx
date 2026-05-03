@@ -4,13 +4,14 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
+import { ArrowRight, ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
+import Link from 'next/link';
 
 type CouponProps = {
   coupons: couponType[]
@@ -23,8 +24,11 @@ const hudson = localFont({
 
 export const CartSections = ({ coupons }: CouponProps) => {
   const { data: session } = useSession();
+
   const queryClient = useQueryClient();
+
   const isNewUser = session?.user.isNewUser ?? false;
+  const canFetchCart = !!session?.user;
 
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
@@ -32,8 +36,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
   const { data: cart = [] } = useQuery({
     queryKey: ["cartItems"],
-    queryFn: fetchCartApi,
-    enabled: !!session?.user,
+    queryFn: () => (canFetchCart ? fetchCartApi() : Promise.resolve([])),
+    enabled: canFetchCart,
   });
 
   /*====================DELETE ITEM QUERY=================== */
@@ -108,7 +112,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getBestCoupon(coupons, subtotal, isNewUser);
   }, [coupons, subtotal, isNewUser]);
 
-  // next best coupon calculation
   const nextBestCoupon = useMemo(() => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
@@ -118,6 +121,24 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
   const total = subtotal - discount;
+
+  if (!session?.user || cart.length === 0) {
+    return (
+      <div className='py-40 flex flex-col items-center justify-center gap-6'>
+        <h3 className={`${hudson.className} text-5xl`}>CARGO <span className="text-second">HOLD</span></h3>
+        <p className='text-zinc-400'>your cart is empty</p>
+
+        <Link href='/products'>
+          <button className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
+            <span className={` flex items-center gap-2`}>
+              SHOP THE DROP
+              <ArrowRight className="group-hover:translate-x-1 transition-transform duration-300" />
+            </span>
+          </button>
+        </Link>
+      </div>
+    )
+  };
 
   /*====================HANDLE FUNCs=================== */
 
