@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
 import { CartSkeleton } from '@/app/(Routes)/cart/CartSkeleton';
+import { useRouter } from 'next/navigation';
 
 type CouponProps = {
   coupons: couponType[]
@@ -45,6 +46,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     queryFn: fetchCartApi,
     enabled: !!session?.user,
   });
+
 
   /*====================DELETE ITEM QUERY=================== */
 
@@ -171,6 +173,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
       </div>
     );
   }
+
+  const router = useRouter();
 
   /*====================HANDLE FUNCs=================== */
 
@@ -301,7 +305,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     onClick={() => handleDeleteItem(item.id!)}
                   />
 
-                  <p className="text-lime-400 font-bold text-xl">
+                  <p className="text-second font-bold text-xl">
                     ${(item.variant.product.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
@@ -462,7 +466,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
                 <button
                   onClick={handleApplyCoupon}
-                  className="bg-lime-400 text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition"
+                  className="bg-second text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition"
                 >
                   APPLY
                 </button>
@@ -492,13 +496,13 @@ export const CartSections = ({ coupons }: CouponProps) => {
             {/* TOTAL */}
             <div className="flex justify-between mt-5 text-lg font-bold">
               <span>Total</span>
-              <span className="text-lime-400 light:text-lime-600">
+              <span className="text-second light:text-lime-600">
                 ${total.toFixed(2)}
               </span>
             </div>
 
             {/* BUTTON */}
-            <button className="w-full mt-6 bg-lime-400 text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
+            <button onClick={() => router.push('/checkout')} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
           </div>
@@ -508,7 +512,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
               <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-sm text-zinc-400'>SECURE CHECKOUT</h3>
-              <p className='text-xs text-zinc-400'>Yout data is protected</p>
+              <p className='text-xs text-zinc-400'>Your data is protected</p>
             </div>
 
             <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>

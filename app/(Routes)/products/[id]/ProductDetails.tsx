@@ -80,7 +80,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                                 setSelectedSize(null);
                                             }}
                                             className={`w-8 h-8 rounded-full border
-                                            ${selectedColor === color ? "border-lime-400" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
+                                            ${selectedColor === color ? "border-second" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
                                             title={color}
                                         />
                                         {

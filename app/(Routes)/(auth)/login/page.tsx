@@ -155,7 +155,7 @@ export default function Login() {
                                     <span className="label-text text-xs tracking-widest text-zinc-500">
                                         PASSCODE
                                     </span>
-                                    <Link href='/RecoverAccess' className="text-xs light:text-zinc-500 light:hover:text-zinc-700 text-lime-400 hover:text-lime-300">
+                                    <Link href='/RecoverAccess' className="text-xs light:text-zinc-500 light:hover:text-zinc-700 text-second hover:text-lime-300">
                                         Forgot your passcode?
                                     </Link>
                                 </div>
@@ -189,7 +189,7 @@ export default function Login() {
                             disabled={isPending}
                             className={`btn w-full tracking-widest font-semibold transition-all ${isPending
                                 ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                                : 'bg-second text-black hover:bg-lime-400'
+                                : 'bg-second text-black hover:bg-second'
                                 }`}
                         >
                             {isPending ? (

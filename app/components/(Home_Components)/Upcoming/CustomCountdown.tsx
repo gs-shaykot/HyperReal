@@ -50,7 +50,7 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
                 {/* DAYS */}
                 <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
+                    <div className="w-24 h-24 bg-black flex items-center justify-center text-second text-4xl font-bold">
                         {String(days).padStart(2, "0")}
                     </div>
                     <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">DAYS</p>
@@ -58,7 +58,7 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
                 {/* HOURS */}
                 <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
+                    <div className="w-24 h-24 bg-black flex items-center justify-center text-second text-4xl font-bold">
                         {String(hours).padStart(2, "0")}
                     </div>
                     <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">HOURS</p>
@@ -66,7 +66,7 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
                 {/* MINUTES */}
                 <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
+                    <div className="w-24 h-24 bg-black flex items-center justify-center text-second text-4xl font-bold">
                         {String(minutes).padStart(2, "0")}
                     </div>
                     <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">MINS</p>
@@ -74,7 +74,7 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
                 {/* SECONDS */}
                 <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 bg-black flex items-center justify-center text-lime-400 text-4xl font-bold">
+                    <div className="w-24 h-24 bg-black flex items-center justify-center text-second text-4xl font-bold">
                         {String(seconds).padStart(2, "0")}
                     </div>
                     <p className="mt-2 text-zinc-900 light:text-white text-xs font-semibold tracking-widest">SECS</p>
