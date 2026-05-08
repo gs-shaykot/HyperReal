@@ -6,9 +6,10 @@ import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Ca
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
@@ -25,11 +26,19 @@ const hudson = localFont({
 
 export const CartSections = ({ coupons }: CouponProps) => {
   const { data: session, status } = useSession();
+  const { resolvedTheme } = useTheme();
 
   const queryClient = useQueryClient();
+  const [mounted, setMounted] = useState(false);
 
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const accentColor = mounted && resolvedTheme === 'light' ? '#8fb300' : '#ccff00';
 
   const { data: cart = [], isPending: isCartPending } = useQuery({
     queryKey: ["cartItems"],
@@ -211,9 +220,9 @@ export const CartSections = ({ coupons }: CouponProps) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 text-white pb-20">
+    <div className="max-w-7xl mx-auto px-4 text-white pb-20 ">
       {/* HEADER */}
-      <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide`}>
+      <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide light:text-zinc-900`}>
         CARGO <span className="text-second">HOLD</span>
       </h2>
 
@@ -229,7 +238,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             return (
               <div
                 key={item.id}
-                className="relative z-20 flex justify-between bg-[#1a1a1a] border border-zinc-800 p-4 overflow-hidden"
+                className="relative z-20 flex justify-between light:bg-white light:shadow-lg rounded-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -254,29 +263,29 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
                 {/* DETAILS */}
                 <div className="flex-1 px-6">
-                  <h3 className="text-lg font-semibold uppercase tracking-wide text-white">
+                  <h3 className="text-lg font-semibold uppercase tracking-wide text-white light:text-zinc-900">
                     {item.variant.product.name}
                   </h3>
 
-                  <p className="text-sm text-zinc-400 mt-1">
+                  <p className="text-sm text-zinc-400 light:text-zinc-500 mt-1">
                     {item.variant.product.category.name} {'//'} {item.variant.size}
                   </p>
 
                   {/* QUANTITY CONTROL */}
                   <div className="flex items-center mt-3">
                     <button
-                      className="px-3 py-1 border border-zinc-600 border-r-0 text-zinc-300 hover:text-white cursor-pointer"
+                      className="px-3 py-1 border border-zinc-600 border-r-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
                       onClick={() => handleUpdateQuantity(item.id!, item.quantity - 1)}
                     >
                       -
                     </button>
 
-                    <span className="border border-zinc-600 px-4 py-1 text-white">
+                    <span className="border border-zinc-600 px-4 py-1 light:text-zinc-900 text-white">
                       {item.quantity}
                     </span>
 
                     <button
-                      className="px-3 py-1 border border-zinc-600 border-l-0 text-zinc-300 hover:text-white cursor-pointer"
+                      className="px-3 py-1 border border-zinc-600 border-l-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
                       onClick={() => handleUpdateQuantity(item.id!, item.quantity + 1)}
                     >
                       +
@@ -301,11 +310,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
           })}
           {
             nextBestCoupon && (
-              <div className='relative w-full h-31 bg-second/10 border-2 border-second/30 corners z-10'>
+              <div className='relative w-full h-31 bg-second/10 light:bg-second/20 border-2 border-second/30 corners z-10'>
                 {/* CORNER DESIGNS */}
                 <div>
-                  <span className='w-7 h-7 absolute -top-4 -left-4 bg-main transform rotate-45' />
-                  <span className='w-7 h-7 absolute -bottom-4 -right-4 bg-main transform rotate-45' />
+                  <span className='w-7 h-7 absolute -top-4 -left-4 bg-main light:bg-white transform rotate-45' />
+                  <span className='w-7 h-7 absolute -bottom-4 -right-4 bg-main light:bg-white transform rotate-45' />
 
                   <span className='w-7 h-0.5 top-2 -left-1.25 bg-second absolute transform -rotate-45' />
                   <span className='w-4 h-0.5 -top-0.5 left-4.75 bg-second absolute' />
@@ -317,21 +326,21 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
 
                 <div className='p-2 w-full h-full flex items-start gap-2'>
-                  <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color='#ccff00 ' />
+                  <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color={accentColor} />
                   {/* INFO */}
                   <div className='w-full'>
                     {/* HEADER */}
                     <div className='flex justify-between w-full mb-3'>
                       <div>
                         <h3 className={`text-sm text-second font-medium`}>UNLOCK MORE. SAVE MORE</h3>
-                        <p className='text-sm'>Add <span className="text-second">${nextBestCoupon?.updatedCoupons[0].remaining}</span> more to save {" "}
+                        <p className='text-sm text-white light:text-zinc-900'>Add <span className="text-second">${nextBestCoupon?.updatedCoupons[0].remaining}</span> more to save {" "}
                           {
                             nextBestCoupon?.updatedCoupons[0].type === 'percent' ?
                               <span className="text-second">${nextBestCoupon.updatedCoupons[0].value}%</span> :
                               <span className="text-second">${nextBestCoupon?.updatedCoupons[0].value}</span>
                           }</p>
                       </div>
-                      <div className='flex items-center justify-center gap-3 border-b border-dashed border-second/30'>
+                      <div className='flex items-center justify-center gap-3 border-b border-dashed border-second/30 light:text-zinc-900'>
                         <p>
                           ${subtotal} / ${nextBestCoupon?.updatedCoupons[0].minSpend}
                         </p>
@@ -360,7 +369,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                               <div key={coupon.id} className='w-full'>
 
                                 {/* BAR */}
-                                <div className='relative w-full h-2 bg-zinc-900 rounded-full overflow-hidden'>
+                                <div className='relative w-full h-2 light:bg-zinc-500 bg-zinc-900 rounded-full overflow-hidden'>
                                   <span
                                     className='absolute top-0 left-0 bg-second h-2 shadow-[0_0_6px_#ccff00]'
                                     style={{ width: `${widthPercent}%` }}
@@ -368,11 +377,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
                                 </div>
 
                                 {/* LABELS */}
-                                <h4 className='text-xs text-zinc-400 mt-1'>
+                                <h4 className='text-xs text-zinc-400 light:text-zinc-500 mt-1'>
                                   SPEND ${coupon.minSpend} & GET
                                 </h4>
 
-                                <h5 className='text-xs font-bold text-zinc-400'>
+                                <h5 className='text-xs font-bold text-zinc-400 light:text-zinc-500'>
                                   UP TO {coupon.type === 'percent'
                                     ? `${coupon.value}%`
                                     : `$${coupon.value}`} OFF
@@ -390,12 +399,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
               </div>
             )
           }
-          {/* NEXT COUPON */}
 
         </div>
 
         {/* ================= RIGHT PANEL ================= */}
-        <div className="md:col-span-6 bg-[#1a1a1a] border border-zinc-800">
+        <div className="md:col-span-6 light:bg-white bg-[#1a1a1a] border border-zinc-800 light:border-zinc-200 shadow-lg rounded-tl-[28px]">
           <div className=" relative p-4">
 
             {/* CORNER */}
@@ -405,7 +413,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               <span className='absolute top-4 left-0 w-5.75 h-px bg-zinc-600 transform -rotate-45 origin-left  drop-shadow-[0_0_5px_#ccff00] ' />
             </span>
 
-            <h3 className={` ${hudson.className} text-3xl mb-6 uppercase`}>
+            <h3 className={` ${hudson.className} text-3xl mb-6 uppercase light:text-zinc-900`}>
               Manifest Summary
             </h3>
 
@@ -413,14 +421,14 @@ export const CartSections = ({ coupons }: CouponProps) => {
               bestCoupon && !appliedCoupon && (
                 <div className="cornerStyle w-full bg-second/5 border-2 border-second/40 p-3 my-5 flex items-center justify-between gap-4">
 
-                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-25" strokeWidth="3" />
+                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-60" strokeWidth="3" />
 
                   <div className='flex-1'>
-                    <h2 className='text-base font-medium text-second'>BEST OFFER FOR YOU</h2>
-                    <p className='text-xs'>Apply &quot;{bestCoupon?.code.toUpperCase()}&quot; and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
+                    <h2 className='text-base text-second font-bold'>BEST OFFER FOR YOU</h2>
+                    <p className='text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
-                  <button className='btn border-second bg-main text-second' onClick={handleLoadBestCoupon}>
+                  <button className='btn border-second bg-transparent hover:bg-second hover:text-black text-second' onClick={handleLoadBestCoupon}>
                     Apply <ChevronRight className=' ' />
                   </button>
 

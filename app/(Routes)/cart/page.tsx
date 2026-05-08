@@ -6,7 +6,7 @@ const Page = async () => {
     const coupons = await prisma.coupon.findMany();
 
     return (
-        <div>
+        <div className='light:bg-white'>
             <CartSections coupons={coupons} />
         </div>
     );
