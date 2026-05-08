@@ -438,7 +438,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             {/* COUPON */}
             <div className="mb-5">
-              <p className="text-xs text-zinc-500 mb-2">Voucher Protocol</p>
+              <p className="text-xs text-zinc-500 light:text-zinc-600 mb-2">Voucher Protocol</p>
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <input
@@ -446,7 +446,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     placeholder="Enter Code"
                     value={couponInput}
                     onChange={(event) => setCouponInput(event.target.value)}
-                    className="w-full bg-black border border-zinc-700 px-3 py-2 pr-10 text-sm outline-none rounded h-10"
+                    className="w-full bg-black light:bg-transparent border border-zinc-700 px-3 py-2 pr-10 text-sm light:text-zinc-900 outline-none rounded h-10 placeholder:text-zinc-600"
                   />
 
                   {couponInput && (
@@ -462,7 +462,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
                 <button
                   onClick={handleApplyCoupon}
-                  className="bg-lime-400 text-black px-4 text-sm font-semibold rounded h-10"
+                  className="bg-lime-400 text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition"
                 >
                   APPLY
                 </button>
@@ -471,18 +471,18 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             {/* SUMMARY */}
             <div className="text-sm space-y-2 border-t border-b border-dashed border-zinc-700 py-4">
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-zinc-400 light:text-zinc-600">
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
 
-              <div className="flex justify-between text-zinc-400">
+              <div className="flex justify-between text-zinc-400 light:text-zinc-600">
                 <span>{'//'} Shipping</span>
                 <span className='text-sm text-zinc-600 italic'>CALCULATE IN CHECKOUT</span>
               </div>
 
 
-              <div className="flex justify-between text-lime-300">
+              <div className="flex justify-between text-lime-300 light:text-lime-600">
                 <span>Discount</span>
                 <span>- ${discount.toFixed(2)}</span>
               </div>
@@ -492,26 +492,26 @@ export const CartSections = ({ coupons }: CouponProps) => {
             {/* TOTAL */}
             <div className="flex justify-between mt-5 text-lg font-bold">
               <span>Total</span>
-              <span className="text-lime-400">
+              <span className="text-lime-400 light:text-lime-600">
                 ${total.toFixed(2)}
               </span>
             </div>
 
             {/* BUTTON */}
-            <button className="w-full mt-6 bg-lime-400 text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition">
+            <button className="w-full mt-6 bg-lime-400 text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
           </div>
 
-          <div className='flex justify-between mx-4 border-t border-zinc-600 py-4'>
+          <div className='flex justify-between mx-4 border-t border-zinc-600 light:border-second border-dashed py-4'>
 
-            <div className='border-r border-zinc-500 w-full flex flex-col items-center justify-center gap-1 py-1'>
+            <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
               <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-sm text-zinc-400'>SECURE CHECKOUT</h3>
               <p className='text-xs text-zinc-400'>Yout data is protected</p>
             </div>
 
-            <div className='border-r border-zinc-500 w-full flex flex-col items-center justify-center gap-1 py-1'>
+            <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
               <Octagon icon={<Package size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-sm text-zinc-400'>FAST SHIPPING</h3>
               <p className='text-xs text-zinc-400'>Delivered to you</p>
