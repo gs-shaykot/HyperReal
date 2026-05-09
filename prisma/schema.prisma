@@ -25,6 +25,7 @@ enum PaymentMethod {
 }
 
 enum PaymentStatus {
+  PENDING
   SUCCESS
   FAILED
 }

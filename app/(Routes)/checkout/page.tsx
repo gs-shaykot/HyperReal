@@ -16,7 +16,6 @@ const hudson = localFont({
     display: "swap",
 })
 
-
 const page = () => {
     const { data: session, status } = useSession();
     const searchParams = useSearchParams();
@@ -24,6 +23,16 @@ const page = () => {
 
     const [selectedCountry, setSelectedCountry] = useState('bdt');
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry === 'bdt' ? 'sslc' : 'stripe');
+
+    const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
+        queryKey: ["exchangeRates"],
+        queryFn: async () => {
+            const res = await fetch("https://open.er-api.com/v6/latest/USD");
+            const data = await res.json();
+            return data.rates;
+        },
+        staleTime: 1000 * 60 * 60, // 1 hour cache
+    });
 
     const { data: cart = [], isPending: isCartPending } = useQuery({
         queryKey: ["cartItems"],
@@ -51,7 +60,6 @@ const page = () => {
     const shipping = selectedCountry === 'bdt' ? 1.2 : 20;
 
     const total = (subtotal + shipping) - discount
-
 
     const Countries = [
         { name: 'Bangladesh (BDT)', value: 'bdt' },
@@ -83,6 +91,23 @@ const page = () => {
         }
     }, [selectedCountry])
 
+    const convertPrice = (usdAmount: number) => {
+        if (!rates || selectedCountry === 'usd') return null;
+
+        const rate = rates[selectedCountry.toUpperCase()];
+        if (!rate) return null;
+
+        return usdAmount * rate;
+    };
+
+    const formatCurrency = (amount: number, currency: string) => {
+        return new Intl.NumberFormat(undefined, {
+            style: "currency",
+            currency: currency.toUpperCase(),
+        }).format(amount);
+    };
+
+    const convertedTotal = convertPrice(total);
 
     return (
         <div className=' bg-main light:bg-white py-10'>
@@ -100,6 +125,7 @@ const page = () => {
                         <h3>Encrypted Payment Protocol // 256-BIT</h3>
                     </div>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     {/* LEFT PANEL */}
                     <div className='md:col-span-8'>
@@ -207,7 +233,14 @@ const page = () => {
                                             { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
                                             { label: 'CASH ON DELIVERY', value: 'cod', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
                                         ].map((method) => (
-                                            <button key={method.value} className='bg-second/10 p-3 border border-second/20 hover:border-second transition-all cursor-pointer flex items-center justify-between gap-6'>
+                                            <button
+                                                key={method.value}
+                                                onClick={() => setSelectedPaymentMethod(method.value)}
+                                                className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
+                                                    ? 'bg-second/15 border-second'
+                                                    : 'bg-second/5 border-second/5 hover:bg-second/10 hover:border-second'
+                                                    } border`}
+                                            >
                                                 <div className='w-14 h-14 flex justify-center items-center border border-second'>
                                                     {method.icon}
                                                 </div>
@@ -222,7 +255,14 @@ const page = () => {
                                         [
                                             { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
                                         ].map((method) => (
-                                            <button key={method.value} className='bg-second/10 p-3 border border-second/20 hover:border-second transition-all cursor-pointer flex items-center justify-between gap-6'>
+                                            <button
+                                                key={method.value}
+                                                onClick={() => setSelectedPaymentMethod(method.value)}
+                                                className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
+                                                    ? 'bg-second/15 border-second'
+                                                    : 'bg-second/5 border-second/5 hover:bg-second/10 hover:border-second'
+                                                    } border`}
+                                            >
                                                 <div className='w-14 h-14 flex justify-center items-center border border-second'>
                                                     {method.icon}
                                                 </div>
@@ -256,11 +296,24 @@ const page = () => {
                                                 <h3 className='text-xs'>{item.variant.product.name}</h3>
                                                 <p className='text-xs text-zinc-400'>{item.quantity} x ${item.variant.product.price.toFixed(2)}</p>
                                             </div>
-                                            <p className='text-second text-xs'>$
+                                            <div className="text-right">
+                                                <p className='text-second text-xs'>
+                                                    ${(item.variant.product.price * item.quantity).toFixed(2)}
+                                                </p>
+
                                                 {
-                                                    (item.variant.product.price * item.quantity).toFixed(2)
+                                                    selectedCountry !== 'usd' && (
+                                                        <p className="text-[10px] text-second/70">
+                                                            ~ {
+                                                                formatCurrency(
+                                                                    convertPrice(item.variant.product.price * item.quantity) || 0,
+                                                                    selectedCountry
+                                                                )
+                                                            }
+                                                        </p>
+                                                    )
                                                 }
-                                            </p>
+                                            </div>
                                         </div>
                                     ))
                                 }
@@ -287,9 +340,21 @@ const page = () => {
 
                             <div className="flex justify-between mt-5 text-lg font-bold">
                                 <span>Total</span>
-                                <span className="text-second light:text-lime-600">
-                                    ${total.toFixed(2)}
-                                </span>
+                                <div className="flex flex-col justify-end items-end">
+                                    <span className="text-second light:text-lime-600">
+                                        ${total.toFixed(2)}
+                                    </span>
+                                    {
+                                        selectedCountry !== 'usd' && convertedTotal !== null && (
+                                            <div className="flex justify-between text-xs text-zinc-400 mt-1">
+                                                <span>Approx.</span>
+                                                <span>
+                                                    ~ {formatCurrency(convertedTotal, selectedCountry)}
+                                                </span>
+                                            </div>
+                                        )
+                                    }
+                                </div>
                             </div>
 
                         </div>
