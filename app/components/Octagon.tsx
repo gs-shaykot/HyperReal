@@ -45,7 +45,7 @@ export const Octagon = ({
 
             {
                 glow && (
-                    <div className="absolute w-10 h-10 bg-lime-300/10 blur-md rounded-full animate-pulse" />
+                    <div className="absolute w-10 h-10 bg-second/10 blur-md rounded-full animate-pulse" />
                 )
             }
 

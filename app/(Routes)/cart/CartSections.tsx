@@ -16,6 +16,7 @@ import { Octagon } from '@/app/components/Octagon';
 import { CartSkeleton } from '@/app/(Routes)/cart/CartSkeleton';
 import { useRouter } from 'next/navigation';
 
+
 type CouponProps = {
   coupons: couponType[]
 }
@@ -34,6 +35,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -173,8 +176,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
       </div>
     );
   }
-
-  const router = useRouter();
 
   /*====================HANDLE FUNCs=================== */
 
@@ -486,7 +487,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               </div>
 
 
-              <div className="flex justify-between text-lime-300 light:text-lime-600">
+              <div className="flex justify-between text-second light:text-lime-600">
                 <span>Discount</span>
                 <span>- ${discount.toFixed(2)}</span>
               </div>
@@ -502,7 +503,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             </div>
 
             {/* BUTTON */}
-            <button onClick={() => router.push('/checkout')} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
+            <button onClick={() => router.push(`/checkout?coupon=${appliedCoupon?.code}`)} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
           </div>

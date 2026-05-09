@@ -155,7 +155,7 @@ export default function Login() {
                                     <span className="label-text text-xs tracking-widest text-zinc-500">
                                         PASSCODE
                                     </span>
-                                    <Link href='/RecoverAccess' className="text-xs light:text-zinc-500 light:hover:text-zinc-700 text-second hover:text-lime-300">
+                                    <Link href='/RecoverAccess' className="text-xs light:text-zinc-500 light:hover:text-zinc-700 text-second hover:text-second">
                                         Forgot your passcode?
                                     </Link>
                                 </div>

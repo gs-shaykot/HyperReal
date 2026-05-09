@@ -74,3 +74,16 @@ export const updateCartItemApi = async (data: { itemId: string; quantity: number
         throw error;
     }
 }
+
+
+export const fetchCouponsApi = async () => {
+    const res = await fetch('/api/coupons')
+
+    if (!res.ok) {
+        throw new Error('Failed to fetch coupons')
+    }
+
+    const body = await res.json();
+ 
+    return body?.data ?? [];
+}

@@ -1,7 +1,14 @@
 'use client'
-import { ArrowLeft, Lock } from 'lucide-react'
+import { CartItemWithProductType } from '@/app/types/cartType'
+import { couponType } from '@/app/types/couponType'
+import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
+import { getDiscount } from '@/lib/Discount_Calculation_funcs'
+import { useQuery } from '@tanstack/react-query'
+import { ArrowLeft, DollarSign, HandCoins, Lock, ShieldCheck, Zap } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
-import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
 
 
 const hudson = localFont({
@@ -10,8 +17,41 @@ const hudson = localFont({
 })
 
 
-
 const page = () => {
+    const { data: session, status } = useSession();
+    const searchParams = useSearchParams();
+
+
+    const [selectedCountry, setSelectedCountry] = useState('bdt');
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry === 'bdt' ? 'sslc' : 'stripe');
+
+    const { data: cart = [], isPending: isCartPending } = useQuery({
+        queryKey: ["cartItems"],
+        queryFn: fetchCartApi,
+        enabled: !!session?.user,
+    });
+
+    const { data: coupons = [] } = useQuery({
+        queryKey: ['coupons'],
+        queryFn: fetchCouponsApi,
+
+    });
+
+    const couponCode = searchParams.get('coupon');
+    const appliedCoupon = coupons.find((coupon: couponType) => coupon.code === couponCode);
+
+    const subtotal = useMemo(() => {
+        return cart.reduce(
+            (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price, 0
+        )
+    }, [cart]);
+
+    const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
+
+    const shipping = selectedCountry === 'bdt' ? 1.2 : 20;
+
+    const total = (subtotal + shipping) - discount
+
 
     const Countries = [
         { name: 'Bangladesh (BDT)', value: 'bdt' },
@@ -24,13 +64,31 @@ const page = () => {
         { name: 'India (INR)', value: 'inr' },
     ]
 
-    const [selectedCountry, setSelectedCountry] = useState('Bangladesh (BDT)');
+    const paymentMethods = [
+        { name: 'SSLCOMMERZ', value: 'sslc' },
+        { name: 'STRIPE', value: 'stripe' },
+        { name: 'CASH ON DELIVERY', value: 'cod' },
+    ]
+
+    useEffect(() => {
+        if (selectedCountry === 'bdt') {
+            if (selectedPaymentMethod !== 'sslc' && selectedPaymentMethod !== 'cod') {
+                setSelectedPaymentMethod('sslc')
+            }
+        }
+        else {
+            if (selectedPaymentMethod !== 'stripe') {
+                setSelectedPaymentMethod('stripe')
+            }
+        }
+    }, [selectedCountry])
+
 
     return (
-        <div className=' bg-main light:bg-white'>
+        <div className=' bg-main light:bg-white py-10'>
             <div className="max-w-7xl mx-auto p-4">
                 {/* HEADER */}
-                <div className='py-8'>
+                <div className='pb-8'>
                     <button onClick={() => window.history.back()} className='text-xs flex items-center gap-2 text-zinc-300 light:text-zinc-700 cursor-pointer mb-2'>
                         <ArrowLeft size={18} /> Back to Cargo Hold
                     </button>
@@ -43,7 +101,7 @@ const page = () => {
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    {/* RIGHT PANEL */}
+                    {/* LEFT PANEL */}
                     <div className='md:col-span-8'>
                         <div className='bg-[#0f0f0f] p-6 border border-zinc-800 mb-8'>
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
@@ -140,11 +198,101 @@ const page = () => {
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 02 // Payment Gateway
                             </h2>
+
+                            <div className="flex flex-col gap-3">
+                                {
+                                    selectedCountry === 'bdt' ? (
+                                        [
+                                            { label: 'SSLCOMMERZ', value: 'sslc', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
+                                            { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
+                                            { label: 'CASH ON DELIVERY', value: 'cod', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
+                                        ].map((method) => (
+                                            <button key={method.value} className='bg-second/10 p-3 border border-second/20 hover:border-second transition-all cursor-pointer flex items-center justify-between gap-6'>
+                                                <div className='w-14 h-14 flex justify-center items-center border border-second'>
+                                                    {method.icon}
+                                                </div>
+                                                <div className='flex-1 text-start'>
+                                                    <h3>{method.label}</h3>
+                                                    <p className="text-xs text-gray-400">{method.desc}</p>
+                                                </div>
+                                                <ShieldCheck size={18} className='text-second' />
+                                            </button>
+                                        ))
+                                    ) : (
+                                        [
+                                            { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
+                                        ].map((method) => (
+                                            <button key={method.value} className='bg-second/10 p-3 border border-second/20 hover:border-second transition-all cursor-pointer flex items-center justify-between gap-6'>
+                                                <div className='w-14 h-14 flex justify-center items-center border border-second'>
+                                                    {method.icon}
+                                                </div>
+                                                <div className='flex-1 text-start'>
+                                                    <h3>{method.label}</h3>
+                                                    <p className="text-xs text-gray-400">{method.desc}</p>
+                                                </div>
+                                                <ShieldCheck size={18} className='text-second' />
+                                            </button>
+                                        ))
+                                    )
+                                }
+                            </div>
                         </div>
+
+
+                        <button className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
                     </div>
 
-                    {/* LEFT PANEL */}
-                    <div className='md:col-span-4'>
+                    {/* RIGHT PANEL */}
+                    <div className='md:col-span-4 lg:sticky lg:top-19.5 lg:self-start '>
+                        <div className='bg-[#0f0f0f] p-6 border border-zinc-800'>
+                            <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
+                                — Manifest
+                            </h2>
+                            <div>
+                                {
+                                    cart.map((item: CartItemWithProductType) => (
+                                        <div key={item.id} className='mb-2 border-zinc-800 border p-2 flex items-center justify-between'>
+                                            <div>
+                                                <h3 className='text-xs'>{item.variant.product.name}</h3>
+                                                <p className='text-xs text-zinc-400'>{item.quantity} x ${item.variant.product.price.toFixed(2)}</p>
+                                            </div>
+                                            <p className='text-second text-xs'>$
+                                                {
+                                                    (item.variant.product.price * item.quantity).toFixed(2)
+                                                }
+                                            </p>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+
+                            {/* SUMMARY */}
+                            <div className="text-sm space-y-2 border-t border-b border-dashed border-zinc-700 py-4">
+                                <div className="flex justify-between text-zinc-400 light:text-zinc-600">
+                                    <span>Subtotal</span>
+                                    <span>${subtotal.toFixed(2)}</span>
+                                </div>
+
+                                <div className="flex justify-between text-zinc-400 light:text-zinc-600">
+                                    <span>Shipping</span>
+                                    <span className='text-sm italic'>${shipping}</span>
+                                </div>
+
+
+                                <div className="flex justify-between text-lime-300 light:text-lime-600">
+                                    <span>Discount</span>
+                                    <span>-${discount.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between mt-5 text-lg font-bold">
+                                <span>Total</span>
+                                <span className="text-second light:text-lime-600">
+                                    ${total.toFixed(2)}
+                                </span>
+                            </div>
+
+                        </div>
                     </div>
                 </div>
             </div>
