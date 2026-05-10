@@ -23,6 +23,7 @@ const page = () => {
 
     const [selectedCountry, setSelectedCountry] = useState('bdt');
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry === 'bdt' ? 'sslc' : 'stripe');
+    const [selectedAddress, setSelectedAddress] = useState('');
 
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
@@ -57,9 +58,9 @@ const page = () => {
 
     const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
-    const shipping = selectedCountry === 'bdt' ? 1.2 : 20;
+    const shippingCost = selectedCountry === 'bdt' ? 1.2 : 20;
 
-    const total = (subtotal + shipping) - discount
+    const total = (subtotal + shippingCost) - discount
 
     const Countries = [
         { name: 'Bangladesh (BDT)', value: 'bdt' },
@@ -108,6 +109,18 @@ const page = () => {
     };
 
     const convertedTotal = convertPrice(total);
+
+    const handlePayment = (cartItems: CartItemWithProductType[], totalAmount: number, shippingCost: number, discount: number, paymentMethod: string, address: string) => {
+        const paymentData = {
+            cartItems,
+            totalAmount,
+            shippingCost,
+            discount,
+            paymentMethod,
+            address,
+        };
+        console.log("Initiating payment with data:", paymentData);
+    }
 
     return (
         <div className=' bg-main light:bg-white py-10'>
@@ -166,6 +179,7 @@ const page = () => {
                                         Address
                                     </label>
                                     <input
+                                        onChange={(e) => setSelectedAddress(e.target.value)}
                                         type="text"
                                         placeholder="42 NEON ST, SECTOR 7"
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
@@ -279,7 +293,7 @@ const page = () => {
                         </div>
 
 
-                        <button className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
+                        <button onClick={() => handlePayment(cart, total, shippingCost, discount, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
                     </div>
 
                     {/* RIGHT PANEL */}
@@ -328,7 +342,7 @@ const page = () => {
 
                                 <div className="flex justify-between text-zinc-400 light:text-zinc-600">
                                     <span>Shipping</span>
-                                    <span className='text-sm italic'>${shipping}</span>
+                                    <span className='text-sm italic'>${shippingCost}</span>
                                 </div>
 
 
@@ -356,7 +370,6 @@ const page = () => {
                                     }
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>

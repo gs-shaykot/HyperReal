@@ -152,6 +152,8 @@ model Order {
   userId      String
   status      OrderStatus @default(PENDING)
   totalAmount Float
+  address     String
+  
   user        User        @relation(fields: [userId], references: [id])
   orderItems  OrderItem[]
   payments    Payment[]
@@ -173,6 +175,9 @@ model Payment {
   orderId       String
   method        PaymentMethod
   status        PaymentStatus
-  transactionId String
-  order         Order         @relation(fields: [orderId], references: [id])
+  transactionId String?
+  amount        Float
+  createdAt     DateTime      @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
 }
