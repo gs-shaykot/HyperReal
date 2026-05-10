@@ -1,3 +1,6 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
@@ -10,14 +13,22 @@ CREATE TYPE "PaymentMethod" AS ENUM ('CARD', 'COD', 'BKASH');
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'FAILED');
 
+-- CreateEnum
+CREATE TYPE "CouponType" AS ENUM ('percent', 'flat');
+
 -- CreateTable
 CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "password" TEXT,
     "role" "Role" NOT NULL DEFAULT 'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "PhotoUrl" TEXT,
+    "isVerified" BOOLEAN NOT NULL DEFAULT false,
+    "otp" TEXT,
+    "otpExpiry" TIMESTAMP(3),
+    "isNewUser" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
@@ -54,6 +65,9 @@ CREATE TABLE "Product" (
     "price" DOUBLE PRECISION NOT NULL,
     "isAvailable" BOOLEAN NOT NULL DEFAULT true,
     "categoryId" TEXT NOT NULL,
+    "totalLikes" INTEGER NOT NULL DEFAULT 0,
+    "totalSold" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
@@ -74,6 +88,7 @@ CREATE TABLE "ProductImage" (
     "id" TEXT NOT NULL,
     "productId" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
+    "color" TEXT,
 
     CONSTRAINT "ProductImage_pkey" PRIMARY KEY ("id")
 );
@@ -81,7 +96,7 @@ CREATE TABLE "ProductImage" (
 -- CreateTable
 CREATE TABLE "Cart" (
     "id" TEXT NOT NULL,
-    "UserId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
 
     CONSTRAINT "Cart_pkey" PRIMARY KEY ("id")
 );
@@ -94,6 +109,19 @@ CREATE TABLE "CartItem" (
     "quantity" INTEGER NOT NULL,
 
     CONSTRAINT "CartItem_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Coupon" (
+    "id" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "type" TEXT NOT NULL,
+    "value" DOUBLE PRECISION NOT NULL,
+    "minSpend" DOUBLE PRECISION NOT NULL,
+    "maxDiscount" DOUBLE PRECISION,
+    "newUserOnly" BOOLEAN,
+
+    CONSTRAINT "Coupon_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -138,7 +166,16 @@ CREATE UNIQUE INDEX "category_name_key" ON "category"("name");
 CREATE UNIQUE INDEX "category_slug_key" ON "category"("slug");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "ProductVariant_productId_size_color_key" ON "ProductVariant"("productId", "size", "color");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Cart_userId_key" ON "Cart"("userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "CartItem_cartId_variantId_key" ON "CartItem"("cartId", "variantId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Coupon_code_key" ON "Coupon"("code");
 
 -- AddForeignKey
 ALTER TABLE "address" ADD CONSTRAINT "address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -153,7 +190,7 @@ ALTER TABLE "ProductVariant" ADD CONSTRAINT "ProductVariant_productId_fkey" FORE
 ALTER TABLE "ProductImage" ADD CONSTRAINT "ProductImage_productId_fkey" FOREIGN KEY ("productId") REFERENCES "Product"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Cart" ADD CONSTRAINT "Cart_UserId_fkey" FOREIGN KEY ("UserId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Cart" ADD CONSTRAINT "Cart_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CartItem" ADD CONSTRAINT "CartItem_cartId_fkey" FOREIGN KEY ("cartId") REFERENCES "Cart"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -172,3 +209,4 @@ ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_variantId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

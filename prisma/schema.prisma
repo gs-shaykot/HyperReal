@@ -6,6 +6,147 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id         String    @id @default(uuid())
+  name       String
+  email      String    @unique
+  password   String?
+  role       Role      @default(USER)
+  createdAt  DateTime  @default(now())
+  PhotoUrl   String?
+  isVerified Boolean   @default(false)
+  otp        String?
+  otpExpiry  DateTime?
+  isNewUser  Boolean   @default(true)
+  cart       Cart?
+  orders     Order[]
+  addresses  Address[]
+
+  @@map("user")
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  street    String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("address")
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  slug      String    @unique
+  createdAt DateTime  @default(now())
+  products  Product[]
+
+  @@map("category")
+}
+
+model Product {
+  id              String           @id @default(uuid())
+  name            String
+  description     String
+  price           Float
+  isAvailable     Boolean          @default(true)
+  categoryId      String
+  totalLikes      Int              @default(0)
+  totalSold       Int              @default(0)
+  createdAt       DateTime         @default(now())
+  category        Category         @relation(fields: [categoryId], references: [id])
+  productImages   ProductImage[]
+  productVariants ProductVariant[]
+}
+
+model ProductVariant {
+  id         String      @id @default(uuid())
+  productId  String
+  size       String
+  color      String
+  stock      Int
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+  product    Product     @relation(fields: [productId], references: [id])
+
+  @@unique([productId, size, color])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  imageUrl  String
+  color     String?
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id        String         @id @default(uuid())
+  cartId    String
+  variantId String
+  quantity  Int
+  cart      Cart           @relation(fields: [cartId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@unique([cartId, variantId])
+}
+
+model Coupon {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  type        String
+  value       Float
+  minSpend    Float
+  maxDiscount Float?
+  newUserOnly Boolean?
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  status      OrderStatus @default(PENDING)
+  totalAmount Float
+  address     String
+
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+  payments   Payment[]
+}
+
+model OrderItem {
+  id              String         @id @default(uuid())
+  orderId         String
+  variantId       String
+  quantity        Int
+  priceAtPurchase Float
+  order           Order          @relation(fields: [orderId], references: [id])
+  variant         ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String? // nullable until gateway returns it
+  amount        Float
+  createdAt     DateTime      @default(now())
+
+  order Order @relation(fields: [orderId], references: [id])
+}
+
 enum Role {
   USER
   ADMIN
@@ -30,154 +171,7 @@ enum PaymentStatus {
   FAILED
 }
 
-model User {
-  id         String    @id @default(uuid())
-  name       String
-  email      String    @unique
-  password   String?
-  role       Role      @default(USER)
-  PhotoUrl   String?
-  otp        String?
-  otpExpiry  DateTime?
-  isVerified Boolean   @default(false)
-  isNewUser  Boolean   @default(true)
-
-  createdAt DateTime  @default(now())
-  addresses Address[]
-  orders    Order[]
-  cart      Cart?
-
-  @@map("user")
-}
-
-model Address {
-  id        String   @id @default(uuid())
-  userId    String
-  street    String
-  city      String
-  state     String
-  zipCode   String
-  country   String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-
-  @@map("address")
-}
-
-model Category {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  slug      String    @unique
-  createdAt DateTime  @default(now())
-  products  Product[]
-
-  @@map("category")
-}
-
-model Product {
-  id          String  @id @default(uuid())
-  name        String
-  description String
-  price       Float
-  isAvailable Boolean @default(true)
-  categoryId  String
-
-  createdAt  DateTime @default(now())
-  totalLikes Int      @default(0)
-  totalSold  Int      @default(0)
-
-  category        Category         @relation(fields: [categoryId], references: [id])
-  productVariants ProductVariant[]
-  productImages   ProductImage[]
-}
-
-model ProductVariant {
-  id        String @id @default(uuid())
-  productId String
-
-  size       String
-  color      String
-  stock      Int
-  product    Product     @relation(fields: [productId], references: [id])
-  cartItems  CartItem[]
-  orderItems OrderItem[]
-
-  @@unique([productId, size, color])
-}
-
-model ProductImage {
-  id        String  @id @default(uuid())
-  productId String
-  imageUrl  String
-  color     String?
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model Cart {
-  id        String     @id @default(uuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id])
-  cartItems CartItem[]
-}
-
-model CartItem {
-  id        String @id @default(uuid())
-  cartId    String
-  variantId String
-  quantity  Int
-
-  cart    Cart           @relation(fields: [cartId], references: [id])
-  variant ProductVariant @relation(fields: [variantId], references: [id])
-
-  @@unique([cartId, variantId])
-}
-
 enum CouponType {
   percent
   flat
-}
-
-model Coupon {
-  id          String   @id @default(uuid())
-  code        String   @unique
-  type        String
-  value       Float
-  minSpend    Float
-  maxDiscount Float?
-  newUserOnly Boolean?
-}
-
-model Order {
-  id          String      @id @default(uuid())
-  userId      String
-  status      OrderStatus @default(PENDING)
-  totalAmount Float
-  address     String
-  
-  user        User        @relation(fields: [userId], references: [id])
-  orderItems  OrderItem[]
-  payments    Payment[]
-}
-
-model OrderItem {
-  id              String @id @default(uuid())
-  orderId         String
-  variantId       String
-  quantity        Int
-  priceAtPurchase Float
-
-  order   Order          @relation(fields: [orderId], references: [id])
-  variant ProductVariant @relation(fields: [variantId], references: [id])
-}
-
-model Payment {
-  id            String        @id @default(uuid())
-  orderId       String
-  method        PaymentMethod
-  status        PaymentStatus
-  transactionId String?
-  amount        Float
-  createdAt     DateTime      @default(now())
-
-  order Order @relation(fields: [orderId], references: [id])
 }
