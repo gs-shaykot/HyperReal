@@ -4,6 +4,7 @@ import { couponType } from '@/app/types/couponType'
 import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
 import { getDiscount } from '@/lib/Discount_Calculation_funcs'
 import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
 import { ArrowLeft, DollarSign, HandCoins, Lock, ShieldCheck, Zap } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
@@ -107,16 +108,16 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
     const convertedTotal = convertPrice(total);
 
-    const handlePayment = (cartItems: CartItemWithProductType[], totalAmount: number, shippingCost: number, discount: number, paymentMethod: string, address: string) => {
+    const handlePayment = async (cartItems: CartItemWithProductType[], country: string, coupon: string, paymentMethod: string, address: string) => {
         const paymentData = {
             cartItems,
-            totalAmount,
-            shippingCost,
-            discount,
+            country,
+            coupon,
             paymentMethod,
             address,
         };
-        console.log("Initiating payment with data:", paymentData);
+
+        const res = await axios.post("/api/order", paymentData);
     }
 
     return (
@@ -290,7 +291,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                         </div>
 
 
-                        <button onClick={() => handlePayment(cart, total, shippingCost, discount, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
+                        <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
                     </div>
 
                     {/* RIGHT PANEL */}

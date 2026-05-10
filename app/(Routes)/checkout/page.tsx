@@ -1,10 +1,9 @@
-import { CheckoutPage } from '@/app/(Routes)/checkout/CheckoutPage';
-import React from 'react'
+import { CheckoutPage } from "@/app/(Routes)/checkout/CheckoutPage";
 
-const page = ({ searchParams }: { searchParams: { coupon?: string } }) => {
-    const couponCode = searchParams?.coupon || null;
-    
-    return <CheckoutPage couponCode={couponCode} />;
-}
+const page = async ({ searchParams, }: { searchParams: Promise<{ coupon?: string }>; }) => {
+    const { coupon } = await searchParams;
 
-export default page
+    return <CheckoutPage couponCode={coupon || null} />;
+};
+
+export default page;
