@@ -140,7 +140,7 @@ model Payment {
   orderId       String
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
-  transactionId String? // nullable until gateway returns it
+  transactionId String?
   amount        Float
   createdAt     DateTime      @default(now())
 

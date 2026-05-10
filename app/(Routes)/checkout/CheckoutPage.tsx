@@ -3,6 +3,7 @@ import { CartItemWithProductType } from '@/app/types/cartType'
 import { couponType } from '@/app/types/couponType'
 import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
 import { getDiscount } from '@/lib/Discount_Calculation_funcs'
+import { PaymentMethod } from '@prisma/client'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { ArrowLeft, DollarSign, HandCoins, Lock, ShieldCheck, Zap } from 'lucide-react'
@@ -71,21 +72,21 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
         { name: 'India (INR)', value: 'inr' },
     ]
 
-    const paymentMethods = [
-        { name: 'SSLCOMMERZ', value: 'sslc' },
-        { name: 'STRIPE', value: 'stripe' },
-        { name: 'CASH ON DELIVERY', value: 'cod' },
-    ]
+    const paymentMethods: { name: string; value: PaymentMethod }[] = [
+        { name: 'SSLCOMMERZ', value: 'BKASH' },
+        { name: 'STRIPE', value: 'CARD' },
+        { name: 'CASH ON DELIVERY', value: 'COD' },
+    ];
 
     useEffect(() => {
         if (selectedCountry === 'bdt') {
-            if (selectedPaymentMethod !== 'sslc' && selectedPaymentMethod !== 'cod') {
-                setSelectedPaymentMethod('sslc')
+            if (selectedPaymentMethod !== 'BKASH' && selectedPaymentMethod !== 'COD') {
+                setSelectedPaymentMethod('BKASH')
             }
         }
         else {
-            if (selectedPaymentMethod !== 'stripe') {
-                setSelectedPaymentMethod('stripe')
+            if (selectedPaymentMethod !== 'CARD') {
+                setSelectedPaymentMethod('CARD')
             }
         }
     }, [selectedCountry])
@@ -118,6 +119,15 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
         };
 
         const res = await axios.post("/api/order", paymentData);
+
+        const data = res.data;
+
+        if (paymentMethod === "cod") {
+            window.location.href = "/success";
+        }
+        else {
+            window.location.href = data.paymentUrl;
+        }
     }
 
     return (
@@ -241,9 +251,9 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                 {
                                     selectedCountry === 'bdt' ? (
                                         [
-                                            { label: 'SSLCOMMERZ', value: 'sslc', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
-                                            { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
-                                            { label: 'CASH ON DELIVERY', value: 'cod', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
+                                            { label: 'SSLCOMMERZ', value: 'BKASH', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
+                                            { label: 'STRIPE', value: 'CARD', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
+                                            { label: 'CASH ON DELIVERY', value: 'COD', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
                                         ].map((method) => (
                                             <button
                                                 key={method.value}
@@ -265,7 +275,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                         ))
                                     ) : (
                                         [
-                                            { label: 'STRIPE', value: 'stripe', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
+                                            { label: 'STRIPE', value: 'CARD', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
                                         ].map((method) => (
                                             <button
                                                 key={method.value}
