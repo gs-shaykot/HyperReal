@@ -28,15 +28,15 @@ const hudson = localFont({
 
 export const CartSections = ({ coupons }: CouponProps) => {
   const { data: session, status } = useSession();
+
   const { resolvedTheme } = useTheme();
-
+  const router = useRouter();
   const queryClient = useQueryClient();
-  const [mounted, setMounted] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
 
-  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -44,12 +44,14 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
   const accentColor = mounted && resolvedTheme === 'light' ? '#8fb300' : '#ccff00';
 
+  // ================= CART QUERY =================
+
   const { data: cart = [], isPending: isCartPending } = useQuery({
     queryKey: ["cartItems"],
     queryFn: fetchCartApi,
-    enabled: !!session?.user,
+    enabled: status === "authenticated",
+    staleTime: 1000 * 60 * 2
   });
-
 
   /*====================DELETE ITEM QUERY=================== */
 
@@ -114,9 +116,10 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const isNewUser = session?.user?.isNewUser ?? false;
 
   const subtotal = useMemo(() => {
-    return cart.reduce(
-      (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price, 0
-    )
+    return cart.reduce((acc: number, item: any) => {
+      const price = item.variant?.product?.price || 0;
+      return acc + item.quantity * price;
+    }, 0);
   }, [cart]);
 
   const bestCoupon = useMemo(() => {
@@ -127,14 +130,12 @@ export const CartSections = ({ coupons }: CouponProps) => {
     return getNextBestCoupon(coupons, subtotal);
   }, [subtotal, coupons]);
 
-
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
   const total = subtotal - discount;
 
-
-  if (status === "loading") {
-    return <CartSkeleton />
+  if (status === "loading" || isCartPending) {
+    return <CartSkeleton />;
   }
 
   if (!session?.user) {
@@ -155,9 +156,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
     );
   }
 
-  if (isCartPending) {
-    return <CartSkeleton />;
-  }
 
   if (cart.length === 0) {
     return (
@@ -236,13 +234,17 @@ export const CartSections = ({ coupons }: CouponProps) => {
         {/* ================= LEFT PANEL ================= */}
         <div className="md:col-span-6 space-y-4">
           {cart.map((item: CartItemWithProductType) => {
-            const matchedImage = item.variant.product.productImages.find(
-              (img) => img.color === item.variant.color
-            )?.imageUrl;
+
+            const matchedImage =
+              item.variant?.product?.productImages?.find(
+                (img) => img.color === item.variant?.color
+              )?.imageUrl;
+
+            const safeImage = matchedImage || "/fallback.png";
 
             return (
               <div
-                key={item.id}
+                key={item.id ?? `cart-${Math.random()}`}
                 className="relative z-20 flex justify-between light:bg-white light:shadow-lg rounded-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
@@ -259,8 +261,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   <span className='absolute bottom-1 left-1 w-3 h-3 z-10 border-l border-b border-second'></span>
                   <span className='absolute bottom-1 right-1 w-3 h-3 z-10 border-r border-b border-second'></span>
                   <Image
-                    src={matchedImage as string}
-                    alt={item.variant.product.name}
+                    src={safeImage}
+                    alt="Product Image"
                     fill
                     className="object-cover"
                   />
@@ -269,11 +271,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 {/* DETAILS */}
                 <div className="flex-1 px-6">
                   <h3 className="text-lg font-semibold uppercase tracking-wide text-white light:text-zinc-900">
-                    {item.variant.product.name}
+                    {item.variant?.product?.name}
                   </h3>
 
                   <p className="text-sm text-zinc-400 light:text-zinc-500 mt-1">
-                    {item.variant.product.category.name} {'//'} {item.variant.size}
+                    {item.variant?.product?.category?.name} {'//'} {item.variant?.size}
                   </p>
 
                   {/* QUANTITY CONTROL */}
@@ -307,7 +309,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   />
 
                   <p className="text-second font-bold text-xl">
-                    ${(item.variant.product.price * item.quantity).toFixed(2)}
+                    ${(item.variant?.product?.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -341,7 +343,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                         <p className='text-sm text-white light:text-zinc-900'>Add <span className="text-second">${nextBestCoupon?.updatedCoupons[0].remaining}</span> more to save {" "}
                           {
                             nextBestCoupon?.updatedCoupons[0].type === 'percent' ?
-                              <span className="text-second">${nextBestCoupon.updatedCoupons[0].value}%</span> :
+                              <span className="text-second">${nextBestCoupon?.updatedCoupons[0].value}%</span> :
                               <span className="text-second">${nextBestCoupon?.updatedCoupons[0].value}</span>
                           }</p>
                       </div>
@@ -371,7 +373,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                             );
 
                             return (
-                              <div key={coupon.id} className='w-full'>
+                              <div key={`${coupon.id}-${index}`} className='w-full'>
 
                                 {/* BAR */}
                                 <div className='relative w-full h-2 light:bg-zinc-500 bg-zinc-900 rounded-full overflow-hidden'>

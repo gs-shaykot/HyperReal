@@ -1,5 +1,3 @@
-// CREATE ORDER:
-
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
@@ -18,7 +16,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
 
-        const { subTotal, OrderedItem, finalTotal } = await calculateOrder(cartItems, country, coupon);
+        const { finalTotal } = await calculateOrder(cartItems, country, coupon);
 
         const order = await prisma.order.create({
             data: {
@@ -74,7 +72,7 @@ export async function POST(req: Request) {
                 }
             );
 
-            const data = response.data; 
+            const data = response.data;
             
             return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
         }

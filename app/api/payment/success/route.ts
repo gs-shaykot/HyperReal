@@ -13,8 +13,10 @@ export async function POST(req: Request) {
         }
 
         const validationUrl = `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${process.env.SSLC_STORE_ID}&store_passwd=${process.env.SSLC_STORE_PASSWORD}&format=json`;
+
         const validationRes = await axios.get(validationUrl);
         const validationData = validationRes.data;
+        
 
         if (validationData.status !== "VALID") {
             await prisma.payment.updateMany({

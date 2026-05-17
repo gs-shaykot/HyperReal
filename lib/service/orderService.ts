@@ -2,7 +2,7 @@ import { CartItemWithProductType } from "@/app/types/cartType";
 import { getDiscount } from "@/lib/Discount_Calculation_funcs";
 import prisma from "@/lib/prisma";
 
-export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string) { 
+export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string) {
     const variantIds = cartItems.map(item => item.variantId);
 
     const variants = await prisma.productVariant.findMany({
@@ -17,10 +17,10 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
             throw new Error('Variant not found');
         }
         if (variant.stock < item.quantity) {
-            throw new Error('Insufficient stock for');
+            throw new Error('Insufficient stock');
         }
         if (item.quantity <= 0) {
-            throw new Error('Invalid quantity for');
+            throw new Error('Invalid quantity');
         }
 
         const productPrice = variant.product.price;
@@ -31,15 +31,15 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
             quantity: item.quantity,
             price: productPrice,
         }
-    }); 
-    const shippingCost = country === 'bdt' ? 1.2 : 20;  
+    });
+    const shippingCost = country === 'bdt' ? 1.2 : 20;
 
     const Appliedcoupon = await prisma.coupon.findUnique({
         where: { code: coupon }
-    }); 
+    });
 
-    const discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0; 
-    const finalTotal = subTotal + shippingCost - discount; 
+    const discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
+    const finalTotal = subTotal + shippingCost - discount;
 
-    return { subTotal, OrderedItem, finalTotal }
+    return { finalTotal }
 }
