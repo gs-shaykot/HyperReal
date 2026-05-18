@@ -116,14 +116,13 @@ model Coupon {
 model Order {
   id          String      @id @default(uuid())
   userId      String
-  orderCode   String      @unique
   status      OrderStatus @default(PENDING)
   totalAmount Float
   address     String
-
-  user       User        @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
-  payments   Payment[]
+  orderCode   String      @unique
+  user        User        @relation(fields: [userId], references: [id])
+  orderItems  OrderItem[]
+  payments    Payment[]
 }
 
 model OrderItem {
@@ -144,8 +143,7 @@ model Payment {
   transactionId String?       @unique
   amount        Float
   createdAt     DateTime      @default(now())
-
-  order Order @relation(fields: [orderId], references: [id])
+  order         Order         @relation(fields: [orderId], references: [id])
 }
 
 enum Role {
@@ -167,9 +165,9 @@ enum PaymentMethod {
 }
 
 enum PaymentStatus {
-  PENDING
   SUCCESS
   FAILED
+  PENDING
 }
 
 enum CouponType {
