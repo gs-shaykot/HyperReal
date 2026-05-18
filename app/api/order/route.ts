@@ -1,5 +1,6 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
+import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import { calculateOrder } from "@/lib/service/orderService";
 import axios from "axios";
@@ -18,12 +19,19 @@ export async function POST(req: Request) {
 
         const { finalTotal } = await calculateOrder(cartItems, country, coupon);
 
+        let orderCode = generateCustomId("HYP-ORD");
+
+        while (await prisma.order.findUnique({ where: { orderCode } })) {
+            orderCode = generateCustomId("HYP-ORD");
+        }
+
         const order = await prisma.order.create({
             data: {
                 userId: session.user.id,
                 totalAmount: finalTotal,
                 address: address,
                 status: "PENDING",
+                orderCode
             }
         });
 
@@ -46,7 +54,7 @@ export async function POST(req: Request) {
         })
 
         if (paymentMethod === "BKASH") {
-            const tran_id = order.id;
+            const tran_id = order.orderCode;
 
             const sslData = {
                 store_id: process.env.SSLC_STORE_ID,
@@ -73,7 +81,7 @@ export async function POST(req: Request) {
             );
 
             const data = response.data;
-            
+
             return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
         }
 

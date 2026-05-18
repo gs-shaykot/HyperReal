@@ -20,7 +20,7 @@ model User {
   isNewUser  Boolean   @default(true)
   cart       Cart?
   orders     Order[]
-  addresses  Address[]
+  addresses  Address[] 
 
   @@map("user")
 }
@@ -174,3 +174,4 @@ enum CouponType {
   percent
   flat
 }
+ 

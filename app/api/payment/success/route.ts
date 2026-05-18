@@ -1,3 +1,4 @@
+import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import axios from "axios";
 import { NextResponse } from "next/server";
@@ -16,44 +17,50 @@ export async function POST(req: Request) {
 
         const validationRes = await axios.get(validationUrl);
         const validationData = validationRes.data;
-        
-
-        if (validationData.status !== "VALID") {
-            await prisma.payment.updateMany({
-                where: { orderId: tran_id },
-                data: { status: "FAILED" }
-            })
-
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
-        }
 
         const order = await prisma.order.findUnique({
-            where: { id: tran_id },
+            where: { orderCode: tran_id },
         });
 
         if (!order) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        if (Number(validationData.amount) !== order.totalAmount) {
+        if (validationData.status !== "VALID") {
             await prisma.payment.updateMany({
-                where: { orderId: tran_id },
+                where: { orderId: order.id },
                 data: { status: "FAILED" }
             })
 
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
+
+        if (Number(validationData.amount) !== order.totalAmount) {
+            await prisma.payment.updateMany({
+                where: { orderId: order.id },
+                data: { status: "FAILED" }
+            })
+
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        }
+
+        let transactionId = generateCustomId("HYP-PAY");
+
+        while (await prisma.payment.findUnique({ where: { transactionId } })) {
+            transactionId = generateCustomId("HYP-PAY");
+        }
+
         await prisma.payment.updateMany({
-            where: { orderId: tran_id },
+            where: { orderId: order.id },
             data: {
                 status: "SUCCESS",
-                transactionId: validationData.tran_id
+                transactionId
             }
         });
 
         await prisma.order.update({
-            where: { id: tran_id },
+            where: { id: order.id },
             data: {
                 status: "PROCESSING"
             }

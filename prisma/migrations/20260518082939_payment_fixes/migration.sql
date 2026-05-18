@@ -1,28 +1,36 @@
-/*
-  Warnings:
+-- 0. Ensure enum value exists FIRST (safe)
+ALTER TYPE "PaymentStatus" ADD VALUE IF NOT EXISTS 'PENDING';
 
-  - A unique constraint covering the columns `[orderCode]` on the table `Order` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[transactionId]` on the table `Payment` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `address` to the `Order` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `orderCode` to the `Order` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `amount` to the `Payment` table without a default value. This is not possible if the table is not empty.
+-- 1. Add columns safely (nullable first)
+ALTER TABLE "Order"
+ADD COLUMN IF NOT EXISTS "address" TEXT,
+ADD COLUMN IF NOT EXISTS "orderCode" TEXT;
 
-*/
--- AlterEnum
-ALTER TYPE "PaymentStatus" ADD VALUE 'PENDING';
+ALTER TABLE "Payment"
+ADD COLUMN IF NOT EXISTS "amount" DOUBLE PRECISION,
+ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
--- AlterTable
-ALTER TABLE "Order" ADD COLUMN     "address" TEXT NOT NULL,
-ADD COLUMN     "orderCode" TEXT NOT NULL;
+-- 2. Backfill existing data
+UPDATE "Order"
+SET 
+  "address" = COALESCE("address", 'UNKNOWN'),
+  "orderCode" = COALESCE("orderCode", gen_random_uuid()::text);
 
--- AlterTable
-ALTER TABLE "Payment" ADD COLUMN     "amount" DOUBLE PRECISION NOT NULL,
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ALTER COLUMN "status" SET DEFAULT 'PENDING',
+UPDATE "Payment"
+SET "amount" = COALESCE("amount", 0);
+
+-- 3. Now enforce NOT NULL (safe now)
+ALTER TABLE "Order"
+ALTER COLUMN "address" SET NOT NULL,
+ALTER COLUMN "orderCode" SET NOT NULL;
+
+ALTER TABLE "Payment"
+ALTER COLUMN "amount" SET NOT NULL;
+
+-- 5. Relax transactionId constraint
+ALTER TABLE "Payment"
 ALTER COLUMN "transactionId" DROP NOT NULL;
 
--- CreateIndex
-CREATE UNIQUE INDEX "Order_orderCode_key" ON "Order"("orderCode");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Payment_transactionId_key" ON "Payment"("transactionId");
+-- 6. Create indexes safely
+CREATE UNIQUE INDEX IF NOT EXISTS "Order_orderCode_key" ON "Order"("orderCode");
+CREATE UNIQUE INDEX IF NOT EXISTS "Payment_transactionId_key" ON "Payment"("transactionId");
