@@ -116,6 +116,7 @@ model Coupon {
 model Order {
   id          String      @id @default(uuid())
   userId      String
+  orderCode   String      @unique
   status      OrderStatus @default(PENDING)
   totalAmount Float
   address     String
@@ -140,7 +141,7 @@ model Payment {
   orderId       String
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
-  transactionId String?
+  transactionId String?       @unique
   amount        Float
   createdAt     DateTime      @default(now())
 
