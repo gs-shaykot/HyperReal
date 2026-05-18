@@ -22,6 +22,7 @@ export async function POST(req: Request) {
             where: { orderCode: tran_id },
         });
 
+
         if (!order) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
@@ -36,7 +37,8 @@ export async function POST(req: Request) {
         }
 
 
-        if (Number(validationData.amount) !== order.totalAmount) {
+        if (Number(validationData.amount).toFixed(2) !== Number(order.totalAmount).toFixed(2)) {
+            console.log("Validation Amount: ", validationData.amount, " ", "", "Order Amount: ", order.totalAmount);
             await prisma.payment.updateMany({
                 where: { orderId: order.id },
                 data: { status: "FAILED" }

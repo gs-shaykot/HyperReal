@@ -7,6 +7,7 @@ import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -17,13 +18,17 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
 
-        const { finalTotal } = await calculateOrder(cartItems, country, coupon);
+        const { USD_finalTotal } = await calculateOrder(cartItems, country, coupon);
 
         let orderCode = generateCustomId("HYP-ORD");
 
         while (await prisma.order.findUnique({ where: { orderCode } })) {
             orderCode = generateCustomId("HYP-ORD");
         }
+
+        const res = await axios.get('https://open.er-api.com/v6/latest/USD');
+        const rates = res.data.rates;
+        const finalTotal = country === 'bdt' ? USD_finalTotal * rates.BDT : USD_finalTotal;
 
         const order = await prisma.order.create({
             data: {

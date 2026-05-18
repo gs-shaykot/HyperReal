@@ -39,7 +39,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
     });
 
     const discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
-    const finalTotal = subTotal + shippingCost - discount;
+    const USD_finalTotal = subTotal + shippingCost - discount;
 
-    return { finalTotal }
+    return { USD_finalTotal }
 }

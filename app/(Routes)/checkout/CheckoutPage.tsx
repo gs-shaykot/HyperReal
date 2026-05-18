@@ -32,7 +32,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
             const data = await res.json();
             return data.rates;
         },
-        staleTime: 1000 * 60 * 60, // 1 hour cache
+        staleTime: 1000 * 60 * 60,
     });
 
     const { data: cart = [], isPending: isCartPending } = useQuery({
@@ -295,9 +295,13 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                 }
                             </div>
                         </div>
+                        
+                        <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">
+                            {
+                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `~${formatCurrency(convertedTotal!, selectedCountry)}`
+                            }
+                        </button>
 
-
-                        <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">PAY {total.toFixed(2)}</button>
                     </div>
 
                     {/* RIGHT PANEL */}
