@@ -141,6 +141,7 @@ model Payment {
   id            String        @id @default(uuid())
   orderId       String
   method        PaymentMethod
+  country       String        @default("Bangladesh")
   status        PaymentStatus @default(PENDING)
   transactionId String?       @unique
   amount        Float
@@ -163,7 +164,7 @@ enum OrderStatus {
 enum PaymentMethod {
   CARD
   COD
-  BKASH
+  SSLC
 }
 
 enum PaymentStatus {

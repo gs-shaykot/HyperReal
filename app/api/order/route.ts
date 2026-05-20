@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
 
-        const { USD_finalTotal } = await calculateOrder(cartItems, country, coupon);
+        const { USD_finalTotal } = await calculateOrder(cartItems, country.value, coupon);
 
         let orderCode = generateCustomId("HYP-ORD");
 
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
         const res = await axios.get('https://open.er-api.com/v6/latest/USD');
         const rates = res.data.rates;
-        const finalTotal = country === 'bdt' ? USD_finalTotal * rates.BDT : USD_finalTotal;
+        const finalTotal = country.value === 'bdt' ? USD_finalTotal * rates.BDT : USD_finalTotal;
 
         const order = await prisma.order.create({
             data: {
@@ -55,10 +55,11 @@ export async function POST(req: Request) {
                 method: paymentMethod,
                 status: "PENDING",
                 amount: finalTotal,
+                country: country.shortName
             }
         })
 
-        if (paymentMethod === "BKASH") {
+        if (paymentMethod === "SSLC") {
             const tran_id = order.orderCode;
 
             const sslData = {

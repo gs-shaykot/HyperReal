@@ -20,9 +20,12 @@ const hudson = localFont({
 
 export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     const { data: session, status } = useSession();
-
-    const [selectedCountry, setSelectedCountry] = useState('bdt');
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry === 'bdt' ? 'sslc' : 'stripe');
+    console.log(session?.user)
+    const [selectedCountry, setSelectedCountry] = useState({
+        value: 'bdt',
+        shortName: 'BD',
+    });
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
     const [selectedAddress, setSelectedAddress] = useState('');
 
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
@@ -57,25 +60,25 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
     const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
-    const shippingCost = selectedCountry === 'bdt' ? 1.2 : 20;
+    const shippingCost = selectedCountry.value === 'bdt' ? 1.2 : 20;
 
     const total = (subtotal + shippingCost) - discount
 
     const Countries = [
-        { name: 'Bangladesh (BDT)', value: 'bdt' },
-        { name: 'United States (USD)', value: 'usd' },
-        { name: 'United Kingdom (GBP)', value: 'gbp' },
-        { name: 'Germany (EUR)', value: 'eur' },
-        { name: 'Japan (JPY)', value: 'jpy' },
-        { name: 'Australia (AUD)', value: 'aud' },
-        { name: 'Canada (CAD)', value: 'cad' },
-        { name: 'India (INR)', value: 'inr' },
-    ]
+        { name: "Bangladesh", shortName: "BD", value: "bdt" },
+        { name: "United States", shortName: "US", value: "usd" },
+        { name: "United Kingdom", shortName: "UK", value: "gbp" },
+        { name: "Germany", shortName: "DE", value: "eur" },
+        { name: "Japan", shortName: "JP", value: "jpy" },
+        { name: "Australia", shortName: "AU", value: "aud" },
+        { name: "Canada", shortName: "CA", value: "cad" },
+        { name: "India", shortName: "IN", value: "inr" },
+    ];
 
     useEffect(() => {
-        if (selectedCountry === 'bdt') {
-            if (selectedPaymentMethod !== 'BKASH' && selectedPaymentMethod !== 'COD') {
-                setSelectedPaymentMethod('BKASH')
+        if (selectedCountry.value === 'bdt') {
+            if (selectedPaymentMethod !== 'SSLC' && selectedPaymentMethod !== 'COD') {
+                setSelectedPaymentMethod('SSLC')
             }
         }
         else {
@@ -83,12 +86,12 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                 setSelectedPaymentMethod('CARD')
             }
         }
-    }, [selectedCountry])
+    }, [selectedCountry.value])
 
     const convertPrice = (usdAmount: number) => {
-        if (!rates || selectedCountry === 'usd') return null;
+        if (!rates || selectedCountry.value === 'usd') return null;
 
-        const rate = rates[selectedCountry.toUpperCase()];
+        const rate = rates[selectedCountry.value.toUpperCase()];
         if (!rate) return null;
 
         return usdAmount * rate;
@@ -103,7 +106,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
     const convertedTotal = convertPrice(total);
 
-    const handlePayment = async (cartItems: CartItemWithProductType[], country: string, coupon: string, paymentMethod: string, address: string) => {
+    const handlePayment = async (cartItems: CartItemWithProductType[], country: { value: string, shortName: string }, coupon: string, paymentMethod: string, address: string) => {
         const paymentData = {
             cartItems,
             country,
@@ -158,6 +161,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                     </label>
                                     <input
                                         type="text"
+                                        defaultValue={session?.user.name!}
                                         placeholder="JANE DOE"
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
@@ -171,6 +175,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                     </label>
                                     <input
                                         type="email"
+                                        defaultValue={session?.user.email!}
                                         placeholder="USER@GRID.NET"
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
@@ -221,8 +226,8 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                     </label>
 
                                     <select
-                                        value={selectedCountry}
-                                        onChange={(e) => setSelectedCountry(e.target.value)}
+                                        value={selectedCountry.value}
+                                        onChange={(e) => setSelectedCountry(Countries.find(c => c.value === e.target.value) || Countries[0])}
                                         className="select w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"
                                     >
                                         {
@@ -245,9 +250,9 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
                             <div className="flex flex-col gap-3">
                                 {
-                                    selectedCountry === 'bdt' ? (
+                                    selectedCountry.value === 'bdt' ? (
                                         [
-                                            { label: 'SSLCOMMERZ', value: 'BKASH', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
+                                            { label: 'SSLCOMMERZ', value: 'SSLC', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
                                             { label: 'STRIPE', value: 'CARD', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
                                             { label: 'CASH ON DELIVERY', value: 'COD', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
                                         ].map((method) => (
@@ -295,10 +300,10 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                 }
                             </div>
                         </div>
-                        
+
                         <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">
                             {
-                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `~${formatCurrency(convertedTotal!, selectedCountry)}`
+                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `~${formatCurrency(convertedTotal!, selectedCountry.value)}`
                             }
                         </button>
 
@@ -324,12 +329,12 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                                 </p>
 
                                                 {
-                                                    selectedCountry !== 'usd' && (
+                                                    selectedCountry.value !== 'usd' && (
                                                         <p className="text-[10px] text-second/70">
                                                             ~ {
                                                                 formatCurrency(
                                                                     convertPrice(item.variant.product.price * item.quantity) || 0,
-                                                                    selectedCountry
+                                                                    selectedCountry.value
                                                                 )
                                                             }
                                                         </p>
@@ -367,11 +372,11 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                                         ${total.toFixed(2)}
                                     </span>
                                     {
-                                        selectedCountry !== 'usd' && convertedTotal !== null && (
+                                        selectedCountry.value !== 'usd' && convertedTotal !== null && (
                                             <div className="flex justify-between text-xs text-zinc-400 mt-1">
                                                 <span>Approx.</span>
                                                 <span>
-                                                    ~ {formatCurrency(convertedTotal, selectedCountry)}
+                                                    ~ {formatCurrency(convertedTotal, selectedCountry.value)}
                                                 </span>
                                             </div>
                                         )

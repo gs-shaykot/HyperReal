@@ -1,4 +1,5 @@
 
+import { SuccessPage } from '@/app/(Routes)/(Payment Status)/success/SuccessPage';
 import prisma from '@/lib/prisma';
 
 const page = async ({ searchParams }: any) => {
@@ -30,6 +31,12 @@ const page = async ({ searchParams }: any) => {
                                 select: {
                                     name: true,
                                     price: true,
+
+                                    category: {
+                                        select: {
+                                            name: true,
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -53,7 +60,7 @@ const page = async ({ searchParams }: any) => {
     console.log(order)
     return (
         <div>
-            <h1>SUCCESS</h1>
+            <SuccessPage order={order} />
         </div>
     )
 }
