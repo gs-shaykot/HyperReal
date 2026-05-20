@@ -20,7 +20,7 @@ model User {
   isNewUser  Boolean   @default(true)
   cart       Cart?
   orders     Order[]
-  addresses  Address[] 
+  addresses  Address[]
 
   @@map("user")
 }
@@ -120,9 +120,11 @@ model Order {
   totalAmount Float
   address     String
   orderCode   String      @unique
-  user        User        @relation(fields: [userId], references: [id])
-  orderItems  OrderItem[]
-  payments    Payment[]
+  createdAt   DateTime    @default(now())
+
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+  payments   Payment[]
 }
 
 model OrderItem {
@@ -174,4 +176,3 @@ enum CouponType {
   percent
   flat
 }
- 

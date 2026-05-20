@@ -1,31 +1,61 @@
-"use client";
 
-import Link from "next/link";
+import prisma from '@/lib/prisma';
 
-export default function SuccessPage() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-green-50">
-      <div className="bg-white p-8 shadow-lg border border-green-200 text-center max-w-md">
-        <h1 className="text-3xl font-bold text-green-600 mb-4">
-          Payment Successful ✅
-        </h1>
+const page = async ({ searchParams }: any) => {
+    const { orderId } = await searchParams;
 
-        <p className="text-gray-600 mb-6">
-          Your order has been placed successfully.
-          <br />
-          We are now processing your order.
-        </p>
+    const order = await prisma.order.findUnique({
+        where: {
+            id: orderId
+        },
+        select: {
+            id: true,
+            userId: true,
+            status: true,
+            totalAmount: true,
+            orderCode: true,
+            createdAt: true,
 
-        <div className="flex flex-col gap-3">
-          <Link href="/" className="btn bg-green-600 text-white">
-            Go to Home
-          </Link>
+            orderItems: {
+                select: {
+                    quantity: true,
+                    priceAtPurchase: true,
 
-          <Link href="/orders" className="btn border border-green-600 text-green-600">
-            View Orders
-          </Link>
+                    variant: {
+                        select: {
+                            size: true,
+                            color: true,
+
+                            product: {
+                                select: {
+                                    name: true,
+                                    price: true,
+                                }
+                            }
+                        }
+
+                    }
+                }
+            },
+
+            payments: {
+                select: {
+                    orderId: true,
+                    method: true,
+                    status: true,
+                    transactionId: true,
+                    createdAt: true,
+                }
+            }
+        }
+    });
+
+    console.log(order)
+    return (
+        <div>
+            <h1>SUCCESS</h1>
         </div>
-      </div>
-    </div>
-  );
+    )
 }
+
+export default page

@@ -68,7 +68,7 @@ export async function POST(req: Request) {
             }
         });
 
-        return NextResponse.redirect(`${process.env.BASE_URL}/success`);
+        return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
 
     }
     catch (error: unknown) {
