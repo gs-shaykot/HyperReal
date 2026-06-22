@@ -13,11 +13,11 @@ import {
 import { useMemo } from "react";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
-
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
-  const discount = order.discount ? `$${order.discount}` : "$0.00";
-  const shippingCost = order.payments[0]?.country === 'BD' ? "$1.20" : "$20.00";
-  const subTotal = useMemo(() => {}, [])
+  const totalInUSD = order?.totalAmountInUSD || 0;
+  const totalInBDT = order?.totalAmount || 0;
+  const discount = order?.discount || 0;
+ 
 
   return (
     <section className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
@@ -148,15 +148,15 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                 <div className=" border-b border-dashed border-zinc-800 pb-2 space-y-4">
                   <div className="flex items-center justify-between text-sm text-zinc-400">
                     <span>Subtotal</span>
-                    <span className="font-semibold text-white">$240.00</span>
+                    <span className="font-semibold text-white">${totalInUSD.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-zinc-400">
                     <span>Shipping</span>
                     <span className="font-semibold text-white">$10.00</span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-zinc-400">
-                    <span>Shipping</span>
-                    <span className="font-semibold text-white">$10.00</span>
+                    <span>Discount</span>
+                    <span className="font-semibold text-white">-${discount.toFixed(2)}</span>
                   </div>
                 </div>
 

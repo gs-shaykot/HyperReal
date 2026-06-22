@@ -14,6 +14,7 @@ const page = async ({ searchParams }: any) => {
             userId: true,
             status: true,
             totalAmount: true,
+            totalAmountInUSD: true,
             orderCode: true,
             createdAt: true,
             address: true,

@@ -116,13 +116,10 @@ model Coupon {
 model Order {
   id               String      @id @default(uuid())
   userId           String
-  status           OrderStatus @default(PENDING)
-  totalAmount      Float       @default(0)
-  totalAmountInUSD Float       @default(0)
+  status           OrderStatus @default(PENDING) 
   address          String
   orderCode        String      @unique
-  createdAt        DateTime    @default(now())
-  discount         Float       @default(0)
+  createdAt        DateTime    @default(now()) 
 
   user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]

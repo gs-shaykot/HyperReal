@@ -41,5 +41,5 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
     const discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
     const USD_finalTotal = subTotal + shippingCost - discount;
 
-    return { USD_finalTotal, discount }
+    return { USD_finalTotal, subTotal, discount, shippingCost }
 }
