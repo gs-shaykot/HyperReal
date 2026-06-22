@@ -16,6 +16,8 @@ const page = async ({ searchParams }: any) => {
             totalAmount: true,
             orderCode: true,
             createdAt: true,
+            address: true,
+            discount: true,
 
             orderItems: {
                 select: {
@@ -52,15 +54,21 @@ const page = async ({ searchParams }: any) => {
                     status: true,
                     transactionId: true,
                     createdAt: true,
+                    country: true,
                 }
             }
         }
     });
 
+    const user = await prisma.user.findUnique({
+        where: {
+            id: order?.userId
+        }
+    });
     console.log(order)
     return (
         <div>
-            <SuccessPage order={order} />
+            <SuccessPage order={order} user={user} />
         </div>
     )
 }

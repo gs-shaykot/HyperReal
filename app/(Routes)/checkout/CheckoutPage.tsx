@@ -303,7 +303,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
                         <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">
                             {
-                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `~${formatCurrency(convertedTotal!, selectedCountry.value)}`
+                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `PAY ~${formatCurrency(convertedTotal!,selectedCountry.value)}`
                             }
                         </button>
 

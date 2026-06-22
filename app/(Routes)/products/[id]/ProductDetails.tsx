@@ -1,6 +1,6 @@
 "use client"
 import { ProductDetailsProps } from '@/app/types/Category'
-import { Check, Minus, Plus } from 'lucide-react';
+import { Check, Minus, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
@@ -134,7 +134,14 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
                                         if (!session?.user) {
-                                            toast.error("Please sign in to add items to your cart");
+                                            // toast.error("Please sign in to add items to your cart");
+                                            toast.custom((t) => (
+                                                <div className='bg-zinc-900 light:bg-white text-second text-sm light:text-black light:border-0 border border-zinc-800 px-4 py-2 rounded shadow flex items-center gap-2'> 
+                                                    <X className='text-red-500'/>
+                                                    Please sign in to add items <br /> to your cart
+
+                                                </div>
+                                            ));
                                             return;
                                         }
 

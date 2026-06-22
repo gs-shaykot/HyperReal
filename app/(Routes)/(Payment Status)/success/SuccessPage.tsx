@@ -10,10 +10,15 @@ import {
   Globe,
   Shield,
 } from "lucide-react";
+import { useMemo } from "react";
 
-export const SuccessPage = ({ order }: { order: any }) => {
+export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
 
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
+  const discount = order.discount ? `$${order.discount}` : "$0.00";
+  const shippingCost = order.payments[0]?.country === 'BD' ? "$1.20" : "$20.00";
+  const subTotal = useMemo(() => {}, [])
+
   return (
     <section className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-162.5">
@@ -34,9 +39,9 @@ export const SuccessPage = ({ order }: { order: any }) => {
         </div>
 
         {/* Receipt Card */}
-        <div className="border border-zinc-800 bg-[#050505] px-8 py-10">
+        <div className="border border-zinc-800 bg-[#050505] px-8 py-6">
           {/* Header */}
-          <div className="flex items-start justify-between border-b border-dashed border-zinc-800 pb-8">
+          <div className="flex items-start justify-between border-b border-dashed border-zinc-800 pb-5">
             <div>
               <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-3">
                 Cargo Receipt
@@ -68,82 +73,91 @@ export const SuccessPage = ({ order }: { order: any }) => {
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-3 gap-8 border-b border-dashed border-zinc-800 py-8">
-            <div>
+          <div className="grid grid-cols-3 gap-8 border-b border-dashed border-zinc-800 py-5">
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-4 text-zinc-500">
                 <ReceiptText className="w-3 h-3" />
-                <p className="text-[10px] uppercase tracking-[4px]">Gateway</p>
+                <p className="text-xs uppercase tracking-[4px]">Gateway</p>
               </div>
 
-              <p className="font-bold uppercase">Stripe</p>
+              <p className="font-medium uppercase">{order.payments[0]?.method}</p>
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-4 text-zinc-500">
                 <Shield className="w-3 h-3" />
-                <p className="text-[10px] uppercase tracking-[4px]">Method</p>
+                <p className="text-xs uppercase tracking-[4px]">Method</p>
               </div>
 
-              <p className="font-bold uppercase">Standard</p>
+              <p className="font-medium uppercase">Standard</p>
             </div>
 
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-2 mb-4 text-zinc-500">
                 <Globe className="w-3 h-3" />
-                <p className="text-[10px] uppercase tracking-[4px]">Region</p>
+                <p className="text-xs uppercase tracking-[4px]">Region</p>
               </div>
 
-              <p className="font-bold uppercase">US</p>
+              <p className="font-medium uppercase">{order.payments[0]?.country}</p>
             </div>
           </div>
 
           {/* Address */}
-          <div className="border-b border-dashed border-zinc-800 py-8">
-            <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-5">
+          <div className="border-b border-dashed border-zinc-800 py-5">
+            <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-2">
               Drop Coordinates
             </p>
 
             <div className="space-y-1">
-              <h4 className="font-black uppercase">Jane Doe</h4>
+              <h4 className="font-black uppercase">{user?.name}</h4>
 
-              <p className="text-zinc-400">user@grid.net</p>
+              <p className="text-zinc-400">{user?.email}</p>
 
-              <p className="text-zinc-400">42 Neon St, Sector 7</p>
+              <p className="text-zinc-400">{order?.address}</p>
             </div>
           </div>
 
           {/* Product */}
-          <div className="border-b border-dashed border-zinc-800 py-8">
-            <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-6">
+          <div className="border-b border-dashed border-zinc-800 py-5">
+            <p className="text-xs uppercase tracking-[4px] text-zinc-500 mb-4">
               Manifest
             </p>
 
-            <div className="flex items-start justify-between gap-6">
-              <div>
-                <h4 className="font-black uppercase tracking-wide">
-                  Phantom Shell Jacket [M] × 1
-                </h4>
-              </div>
+            {
+              order.orderItems.map((item: any, index: number) => (
+                <div key={index} className={`flex items-start justify-between gap-6 text-sm ${index === order.orderItems.length - 1 ? "mb-0" : "mb-3"}`}>
+                  <div>
+                    <h4 className="font-medium uppercase tracking-wide">
+                      {item.variant.product.name} [{item.variant.size}] × {item.quantity}
+                    </h4>
+                  </div>
 
-              <p className="font-black text-lime-400 whitespace-nowrap">
-                $240.00
-              </p>
-            </div>
+                  <p className="font-medium text-lime-400 whitespace-nowrap">
+                    ${(item.priceAtPurchase * item.quantity).toFixed(2)}
+                  </p>
+                </div>
+              ))
+            }
           </div>
 
           {/* Totals + QR */}
           <div className="flex flex-col md:flex-row justify-between gap-10 py-8 border-b border-dashed border-zinc-800">
             {/* Totals */}
             <div className="flex-1 max-w-sm">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span>Subtotal</span>
-                  <span className="font-semibold text-white">$240.00</span>
-                </div>
-
-                <div className="flex items-center justify-between text-zinc-400">
-                  <span>Shipping</span>
-                  <span className="font-semibold text-white">$10.00</span>
+              <div >
+                <div className=" border-b border-dashed border-zinc-800 pb-2 space-y-4">
+                  <div className="flex items-center justify-between text-sm text-zinc-400">
+                    <span>Subtotal</span>
+                    <span className="font-semibold text-white">$240.00</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-zinc-400">
+                    <span>Shipping</span>
+                    <span className="font-semibold text-white">$10.00</span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-zinc-400">
+                    <span>Shipping</span>
+                    <span className="font-semibold text-white">$10.00</span>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">

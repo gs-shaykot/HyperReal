@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
 
-        const { USD_finalTotal } = await calculateOrder(cartItems, country.value, coupon);
+        const { USD_finalTotal, discount } = await calculateOrder(cartItems, country.value, coupon);
 
         let orderCode = generateCustomId("HYP-ORD");
 
@@ -34,6 +34,7 @@ export async function POST(req: Request) {
             data: {
                 userId: session.user.id,
                 totalAmount: finalTotal,
+                discount: discount,
                 address: address,
                 status: "PENDING",
                 orderCode
