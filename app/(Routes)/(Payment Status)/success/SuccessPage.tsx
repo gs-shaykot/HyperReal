@@ -10,6 +10,7 @@ import {
   Globe,
   Shield,
 } from "lucide-react";
+import Link from "next/link";
 import { useMemo } from "react";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
@@ -245,9 +246,9 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
 
         {/* Continue Shopping */}
         <div className="text-center mt-8">
-          <button className="uppercase tracking-[4px] text-xs text-zinc-500 hover:text-white transition-all">
+          <Link href="/products" className="uppercase tracking-[4px] text-xs text-zinc-500 hover:text-white transition-all cursor-pointer">
             Continue Shopping →
-          </button>
+          </Link>
         </div>
       </div>
     </section>
