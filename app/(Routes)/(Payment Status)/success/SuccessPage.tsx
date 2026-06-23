@@ -16,7 +16,7 @@ import { useMemo } from "react";
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
 
-  const totalInUSD = order?.payments[0]?.totalAmountInUSD || 0;
+  const totalInUSD = order?.payments[0]?.totalProductPriceInUSD || 0;
   const discount = order?.payments[0]?.discount || 0;
   const totalInBDT = order?.payments[0]?.paidAmountInBDT || 0;
   const shippingCost = order?.payments[0]?.shippingCost || 0;

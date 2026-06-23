@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                 method: paymentMethod,
                 status: "PENDING",
                 paidAmountInBDT: finalTotal,
-                totalAmountInUSD: subTotal,
+                totalProductPriceInUSD: subTotal,
                 discount: discount,
                 shippingCost: shippingCost,
                 country: country.shortName

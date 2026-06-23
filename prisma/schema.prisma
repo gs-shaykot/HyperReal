@@ -137,17 +137,16 @@ model OrderItem {
 }
 
 model Payment {
-  id            String        @id @default(uuid())
-  orderId       String
-  method        PaymentMethod
-  country       String        @default("Bangladesh")
-  status        PaymentStatus @default(PENDING)
-  transactionId String?       @unique
-
-  paidAmountInBDT      Float @default(0)
-  totalAmountInUSD Float @default(0)
-  discount         Float @default(0)
-  shippingCost     Float @default(0)
+  id                     String        @id @default(uuid())
+  orderId                String
+  method                 PaymentMethod
+  country                String        @default("Bangladesh")
+  status                 PaymentStatus @default(PENDING)
+  transactionId          String?       @unique
+  paidAmountInBDT        Float         @default(0)
+  totalProductPriceInUSD Float         @default(0)
+  discount               Float         @default(0)
+  shippingCost           Float         @default(0)
 
   createdAt DateTime @default(now())
   order     Order    @relation(fields: [orderId], references: [id])
