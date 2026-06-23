@@ -13,12 +13,9 @@ const page = async ({ searchParams }: any) => {
             id: true,
             userId: true,
             status: true,
-            totalAmount: true,
-            totalAmountInUSD: true,
             orderCode: true,
             createdAt: true,
             address: true,
-            discount: true,
 
             orderItems: {
                 select: {
@@ -54,6 +51,10 @@ const page = async ({ searchParams }: any) => {
                     method: true,
                     status: true,
                     transactionId: true,
+                    paidAmountInBDT: true,
+                    totalAmountInUSD: true,
+                    shippingCost: true,
+                    discount: true,
                     createdAt: true,
                     country: true,
                 }
@@ -69,7 +70,7 @@ const page = async ({ searchParams }: any) => {
     console.log(order)
     return (
         <div>
-            <SuccessPage order={order} user={user} />
+            <SuccessPage order={order} user={user} /> 
         </div>
     )
 }

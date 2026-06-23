@@ -63,7 +63,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     const shippingCost = selectedCountry.value === 'bdt' ? 1.2 : 20;
 
     const total = (subtotal + shippingCost) - discount
-
+    
     const Countries = [
         { name: "Bangladesh", shortName: "BD", value: "bdt" },
         { name: "United States", shortName: "US", value: "usd" },

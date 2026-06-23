@@ -114,12 +114,12 @@ model Coupon {
 }
 
 model Order {
-  id               String      @id @default(uuid())
-  userId           String
-  status           OrderStatus @default(PENDING) 
-  address          String
-  orderCode        String      @unique
-  createdAt        DateTime    @default(now()) 
+  id        String      @id @default(uuid())
+  userId    String
+  status    OrderStatus @default(PENDING)
+  address   String
+  orderCode String      @unique
+  createdAt DateTime    @default(now())
 
   user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]
@@ -143,9 +143,14 @@ model Payment {
   country       String        @default("Bangladesh")
   status        PaymentStatus @default(PENDING)
   transactionId String?       @unique
-  amount        Float
-  createdAt     DateTime      @default(now())
-  order         Order         @relation(fields: [orderId], references: [id])
+
+  paidAmountInBDT      Float @default(0)
+  totalAmountInUSD Float @default(0)
+  discount         Float @default(0)
+  shippingCost     Float @default(0)
+
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id])
 }
 
 enum Role {

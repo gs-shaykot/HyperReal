@@ -14,23 +14,28 @@ import { useMemo } from "react";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
-  const totalInUSD = order?.totalAmountInUSD || 0;
-  const totalInBDT = order?.totalAmount || 0;
-  const discount = order?.discount || 0;
- 
+
+  const totalInUSD = order?.payments[0]?.totalAmountInUSD || 0;
+  const discount = order?.payments[0]?.discount || 0;
+  const totalInBDT = order?.payments[0]?.paidAmountInBDT || 0;
+  const shippingCost = order?.payments[0]?.shippingCost || 0;
+
+  const grandTotal = useMemo(() => {
+    return totalInUSD + shippingCost - discount;
+  }, [discount, shippingCost, totalInUSD]);
 
   return (
     <section className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-162.5">
         {/* Top Success */}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-16 h-16 border border-lime-400 flex items-center justify-center mb-5">
-            <CheckCircle2 className="w-8 h-8 text-lime-400" strokeWidth={2.5} />
+          <div className="w-16 h-16 border border-second flex items-center justify-center mb-5">
+            <CheckCircle2 className="w-8 h-8 text-second" strokeWidth={2.5} />
           </div>
 
           <h1 className="text-[58px] leading-none font-black uppercase italic tracking-[-3px]">
             <span className="text-white">Transfer</span>{" "}
-            <span className="text-lime-400">Complete</span>
+            <span className="text-second">Complete</span>
           </h1>
 
           <p className="mt-4 text-[10px] uppercase tracking-[5px] text-zinc-400">
@@ -61,7 +66,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                 Order ID
               </p>
 
-              <h3 className="text-lime-400 font-bold uppercase tracking-wide">
+              <h3 className="text-second font-bold uppercase tracking-wide">
                 {order.orderCode}
               </h3>
 
@@ -132,7 +137,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                     </h4>
                   </div>
 
-                  <p className="font-medium text-lime-400 whitespace-nowrap">
+                  <p className="font-medium text-second whitespace-nowrap">
                     ${(item.priceAtPurchase * item.quantity).toFixed(2)}
                   </p>
                 </div>
@@ -152,7 +157,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                   </div>
                   <div className="flex items-center justify-between text-sm text-zinc-400">
                     <span>Shipping</span>
-                    <span className="font-semibold text-white">$10.00</span>
+                    <span className="font-semibold text-white">${shippingCost.toFixed(2)}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm text-zinc-400">
                     <span>Discount</span>
@@ -165,9 +170,15 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                     Total Paid
                   </span>
 
-                  <span className="text-2xl font-black text-lime-400">
-                    $250.00
-                  </span>
+                  <div className="flex items-end gap-2 flex-col">
+                    <span className="text-xl font-black text-second">
+                      ${grandTotal.toFixed(2)}
+                    </span>
+                    <span className="text-sm font-black text-second">
+                      ~ {totalInBDT.toFixed(2)} BDT
+                    </span>
+
+                  </div>
                 </div>
               </div>
             </div>
@@ -178,7 +189,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                 <img
                   src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=hyperreal-order"
                   alt="qr"
-                  className="w-[140px] h-[140px]"
+                  className="w-35 h-35"
                 />
               </div>
 
@@ -191,18 +202,18 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
           {/* Barcode */}
           <div className="pt-8 flex flex-col items-center text-center">
             <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-4">
-              TXN-PREVIEW-MPDWWHHQ
+              {order?.payments[0]?.transactionId || "TXN-PREVIEW-MPDWWHHQ"}
             </p>
 
-            <div className="flex items-end gap-[2px] h-14">
+            <div className="flex items-end gap-0.5 h-14">
               {Array.from({ length: 58 }).map((_, i) => (
                 <div
                   key={i}
                   className={`bg-white ${i % 3 === 0
-                    ? "w-[3px] h-full"
+                    ? "w-0.75 h-full"
                     : i % 2 === 0
-                      ? "w-[2px] h-10"
-                      : "w-[1px] h-12"
+                      ? "w-0.5 h-10"
+                      : "w-px h-12"
                     }`}
                 />
               ))}
@@ -216,17 +227,17 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
 
         {/* Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <button className="h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
+          <button className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
             <Download className="w-4 h-4" />
             Download
           </button>
 
-          <button className="h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
+          <button className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
             <Printer className="w-4 h-4" />
             Print Slip
           </button>
 
-          <button className="h-14 bg-lime-400 text-black hover:bg-lime-300 transition-all uppercase tracking-wide text-sm font-black flex items-center justify-center gap-3">
+          <button className="cursor-pointer h-14 bg-second text-black hover:bg-lime-300 transition-all uppercase tracking-wide text-sm font-black flex items-center justify-center gap-3">
             View Orders
             <ArrowRight className="w-4 h-4" />
           </button>

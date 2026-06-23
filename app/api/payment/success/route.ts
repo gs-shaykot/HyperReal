@@ -22,6 +22,9 @@ export async function POST(req: Request) {
             where: { orderCode: tran_id },
         });
 
+        const payment = await prisma.payment.findFirst({
+            where: { orderId: order?.id }
+        });
 
         if (!order) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
@@ -36,9 +39,8 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-
-        if (Number(validationData.amount).toFixed(2) !== Number(order.totalAmount).toFixed(2)) {
-            console.log("Validation Amount: ", validationData.amount, " ", "", "Order Amount: ", order.totalAmount);
+        if (Number(validationData.amount).toFixed(2) !== Number(payment?.paidAmountInBDT).toFixed(2)) {
+            console.log("Validation Amount: ", validationData.amount, " ", "", "Order Amount: ", payment?.paidAmountInBDT);
             await prisma.payment.updateMany({
                 where: { orderId: order.id },
                 data: { status: "FAILED" }
