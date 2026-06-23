@@ -175,9 +175,12 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                     <span className="text-xl font-black text-second">
                       ${grandTotal.toFixed(2)}
                     </span>
-                    <span className="text-sm font-black text-second">
-                      ~ {totalInBDT.toFixed(2)} BDT
-                    </span>
+                    {
+                      order?.payments[0]?.country === 'BD' &&
+                      <span className="text-sm font-black text-second">
+                        ~ {totalInBDT.toFixed(2)} BDT
+                      </span>
+                    }
 
                   </div>
                 </div>
