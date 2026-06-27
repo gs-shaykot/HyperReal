@@ -20,11 +20,26 @@ export async function POST(req: Request) {
 
         const order = await prisma.order.findUnique({
             where: { orderCode: tran_id },
+            select: {
+                id: true,
+                userId: true,
+
+                orderItems: {
+                    select: {
+                        quantity: true,
+                        variantId: true,
+                    }
+                }
+            }
         });
 
         const payment = await prisma.payment.findFirst({
             where: { orderId: order?.id }
         });
+
+        const cart = await prisma.cart.findFirst({
+            where: { userId: order?.userId }
+        })
 
         if (!order) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
@@ -55,19 +70,70 @@ export async function POST(req: Request) {
             transactionId = generateCustomId("HYP-PAY");
         }
 
-        await prisma.payment.updateMany({
-            where: { orderId: order.id },
-            data: {
-                status: "SUCCESS",
-                transactionId
-            }
-        });
+        await prisma.$transaction(async (tx) => {
+            await tx.payment.updateMany({
+                where: { orderId: order.id },
+                data: {
+                    status: "SUCCESS",
+                    transactionId,
+                },
+            });
 
-        await prisma.order.update({
-            where: { id: order.id },
-            data: {
-                status: "PROCESSING"
-            }
+            await tx.order.update({
+                where: { id: order.id },
+                data: {
+                    status: "PROCESSING",
+                },
+            });
+            console.log("orders list AFTER success: ", order);
+            // await Promise.all(
+            //     order.orderItems.map(async (item) => {
+            //         const result = await tx.productVariant.updateMany({
+            //             where: {
+            //                 id: item.variantId,
+            //                 stock: {
+            //                     gte: item.quantity,
+            //                 },
+            //             },
+            //             data: {
+            //                 stock: {
+            //                     decrement: item.quantity,
+            //                 },
+            //             },
+            //         });
+
+            //         if (result.count === 0) {
+            //             throw new Error(
+            //                 `Insufficient stock for variant ${item.variantId}`
+            //             );
+            //         }
+            //     })
+            // );
+
+            await Promise.all(
+                order.orderItems.map(async (item) => {
+                    const res = await tx.productVariant.updateMany({
+                        where: {
+                            id: item.variantId
+                        },
+                        data: {
+                            stock: {
+                                decrement: item.quantity
+                            }
+                        }
+                    });
+
+                    if(res.count === 0) {
+                        throw new Error('Insufficient stock for selected variant.');
+                    }
+                })
+            )
+
+            await tx.cartItem.deleteMany({
+                where: {
+                    cartId: cart?.id,
+                },
+            });
         });
 
         return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);

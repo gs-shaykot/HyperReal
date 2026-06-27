@@ -19,6 +19,7 @@ export type CartItemWithProductType = CartItemType & {
         size: string;
         color: string;
         product: {
+            id: string;
             name: string;
             price: number;
             isAvailable: boolean;

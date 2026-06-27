@@ -19,6 +19,8 @@ const page = async ({ searchParams }: any) => {
 
             orderItems: {
                 select: {
+                    id: true,
+                    variantId: true,
                     quantity: true,
                     priceAtPurchase: true,
 
@@ -29,6 +31,7 @@ const page = async ({ searchParams }: any) => {
 
                             product: {
                                 select: {
+                                    id: true,
                                     name: true,
                                     price: true,
 
@@ -67,7 +70,7 @@ const page = async ({ searchParams }: any) => {
             id: order?.userId
         }
     });
-    console.log(order)
+    // console.log(order)
     return (
         <div>
             <SuccessPage order={order} user={user} />

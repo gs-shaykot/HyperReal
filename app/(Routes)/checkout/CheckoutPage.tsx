@@ -3,13 +3,11 @@ import { CartItemWithProductType } from '@/app/types/cartType'
 import { couponType } from '@/app/types/couponType'
 import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
 import { getDiscount } from '@/lib/Discount_Calculation_funcs'
-import { PaymentMethod } from '@prisma/client'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { ArrowLeft, DollarSign, HandCoins, Lock, ShieldCheck, Zap } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
-import { useSearchParams } from 'next/navigation'
 import { useState, useEffect, useMemo } from 'react'
 
 
@@ -20,7 +18,7 @@ const hudson = localFont({
 
 export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     const { data: session, status } = useSession();
-    console.log(session?.user)
+
     const [selectedCountry, setSelectedCountry] = useState({
         value: 'bdt',
         shortName: 'BD',
@@ -63,7 +61,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     const shippingCost = selectedCountry.value === 'bdt' ? 1.2 : 20;
 
     const total = (subtotal + shippingCost) - discount
-    
+
     const Countries = [
         { name: "Bangladesh", shortName: "BD", value: "bdt" },
         { name: "United States", shortName: "US", value: "usd" },
@@ -105,7 +103,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     };
 
     const convertedTotal = convertPrice(total);
-
+    console.log('cart format', cart)
     const handlePayment = async (cartItems: CartItemWithProductType[], country: { value: string, shortName: string }, coupon: string, paymentMethod: string, address: string) => {
         const paymentData = {
             cartItems,
@@ -303,7 +301,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
 
                         <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">
                             {
-                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `PAY ~${formatCurrency(convertedTotal!,selectedCountry.value)}`
+                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `PAY ~${formatCurrency(convertedTotal!, selectedCountry.value)}`
                             }
                         </button>
 

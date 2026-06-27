@@ -84,6 +84,7 @@ export async function GET() {
                                 color: true,
                                 product: {
                                     select: {
+                                        id: true,
                                         name: true,
                                         price: true,
                                         isAvailable: true,
