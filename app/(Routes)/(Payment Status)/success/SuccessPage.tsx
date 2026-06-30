@@ -45,12 +45,12 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Receipt</title>
+        <title>Receipt-${order.orderCode}</title>
         <style>
           html, body {
             margin: 0;
             padding: 0;
-            background: white;
+            background: black;
             display: flex;
             justify-content: center;
             align-items: flex-start;
