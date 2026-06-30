@@ -32,8 +32,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
         [product.productVariants, selectedColor]
     );
 
-    //SELECTED IMAGES BASED ON SELECTED COLOR
+    let ExtractedVariant = useMemo(
+        () => product.productVariants?.find(variant => variant.color === selectedColor && variant.size === selectedSize),
+        [product.productVariants, selectedColor, selectedSize]
+    );
 
+    //SELECTED IMAGES BASED ON SELECTED COLOR
     let SelectedImage = useMemo(() => {
         return (
             product.productImages?.find((img) => img.color === selectedColor)?.imageUrl ?? product.productImages[1]?.imageUrl
@@ -80,7 +84,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                                 setSelectedSize(null);
                                             }}
                                             className={`w-8 h-8 rounded-full border
-                                            ${selectedColor === color ? "border-second" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
+                                                ${selectedColor === color ? "border-second" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
                                             title={color}
                                         />
                                         {
@@ -136,8 +140,8 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         if (!session?.user) {
                                             // toast.error("Please sign in to add items to your cart");
                                             toast.custom((t) => (
-                                                <div className='bg-zinc-900 light:bg-white text-second text-sm light:text-black light:border-0 border border-zinc-800 px-4 py-2 rounded shadow flex items-center gap-2'> 
-                                                    <X className='text-red-500'/>
+                                                <div className='bg-zinc-900 light:bg-white text-second text-sm light:text-black light:border-0 border border-zinc-800 px-4 py-2 rounded shadow flex items-center gap-2'>
+                                                    <X className='text-red-500' />
                                                     Please sign in to add items <br /> to your cart
 
                                                 </div>

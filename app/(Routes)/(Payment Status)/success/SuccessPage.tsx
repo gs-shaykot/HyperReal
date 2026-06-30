@@ -1,5 +1,6 @@
 "use client"
-
+import { toPng } from "html-to-image";
+import jsPDF from "jspdf";
 import {
   CheckCircle2,
   CalendarDays,
@@ -11,7 +12,8 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
@@ -24,6 +26,90 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const grandTotal = useMemo(() => {
     return totalInUSD + shippingCost - discount;
   }, [discount, shippingCost, totalInUSD]);
+
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = async () => {
+    if (!receiptRef.current) return;
+
+    const dataUrl = await toPng(receiptRef.current, {
+      pixelRatio: 3,
+      cacheBust: true,
+    });
+
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Receipt</title>
+        <style>
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+          }
+
+          img {
+              width: 210mm;       
+              height: auto;
+              display: block;
+              margin: 0 auto;
+          }
+
+          @page {
+            size: A4;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${dataUrl}" />
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
+  const handleDownload = async () => {
+    if (!receiptRef.current) return;
+
+    const dataUrl = await toPng(receiptRef.current, {
+      pixelRatio: 3,
+      cacheBust: true,
+    });
+
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "px",
+      format: "a4",
+    });
+
+    const img = new Image();
+    img.src = dataUrl;
+
+    await new Promise((resolve) => (img.onload = resolve));
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (img.height * pdfWidth) / img.width;
+
+    pdf.addImage(dataUrl, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    pdf.save(`Receipt-${order.orderCode}.pdf`);
+  };
 
   return (
     <section className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
@@ -45,7 +131,8 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
         </div>
 
         {/* Receipt Card */}
-        <div className="border border-zinc-800 bg-[#050505] px-8 py-6">
+
+        <div ref={receiptRef} className="border border-zinc-800 bg-[#050505] px-8 py-6">
           {/* Header */}
           <div className="flex items-start justify-between border-b border-dashed border-zinc-800 pb-5">
             <div>
@@ -204,7 +291,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
           </div>
 
           {/* Barcode */}
-          <div className="pt-8 flex flex-col items-center text-center">
+          <div className="pt-5 flex flex-col items-center text-center">
             <p className="text-[10px] uppercase tracking-[4px] text-zinc-500 mb-4">
               {order?.payments[0]?.transactionId || "TXN-PREVIEW-MPDWWHHQ"}
             </p>
@@ -223,7 +310,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
               ))}
             </div>
 
-            <p className="mt-5 text-[10px] uppercase tracking-[4px] text-zinc-500">
+            <p className="mt-3 text-[10px] uppercase tracking-[4px] text-zinc-500">
               Thank You For Entering The Grid
             </p>
           </div>
@@ -231,12 +318,12 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
 
         {/* Buttons */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <button className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
+          <button onClick={handleDownload} className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
             <Download className="w-4 h-4" />
             Download
           </button>
 
-          <button className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
+          <button onClick={handlePrint} className="cursor-pointer h-14 border border-zinc-600 hover:border-zinc-400 transition-all uppercase tracking-wide text-sm font-bold flex items-center justify-center gap-3">
             <Printer className="w-4 h-4" />
             Print Slip
           </button>
