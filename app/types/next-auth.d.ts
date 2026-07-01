@@ -7,6 +7,7 @@ declare module "next-auth" {
             role: "USER" | "ADMIN";
             image: string;
             isNewUser: boolean;
+            createdAt: string;
         } & DefaultSession["user"];
     }
 

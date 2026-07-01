@@ -85,6 +85,7 @@ export const authOptions: AuthOptions = {
                 token.role = (user as any).role;
                 token.picture = (user as any).picture;
                 token.isNewUser = (user as any).isNewUser;
+                token.createdAt = (user as any).createdAt;
             }
             return token
         },
@@ -94,6 +95,7 @@ export const authOptions: AuthOptions = {
                 session.user.image = token.picture as string;
                 session.user.role = token.role as UserRole;
                 session.user.isNewUser = token.isNewUser as boolean;
+                session.user.createdAt = token.createdAt as Date;
             }
             return session;
         }

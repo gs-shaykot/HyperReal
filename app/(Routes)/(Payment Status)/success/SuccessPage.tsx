@@ -28,7 +28,6 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   }, [discount, shippingCost, totalInUSD]);
 
   const receiptRef = useRef<HTMLDivElement>(null);
-  const isDark = document.documentElement.classList.contains("dark");
   
   const handlePrint = async () => {
     if (!receiptRef.current) return;
