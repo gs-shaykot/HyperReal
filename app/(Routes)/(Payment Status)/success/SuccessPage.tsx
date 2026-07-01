@@ -112,7 +112,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   };
 
   return (
-    <section className="min-h-screen bg-black text-white flex items-center justify-center px-4 py-10">
+    <section className="min-h-screen bg-main light:bg-white text-white flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-162.5">
         {/* Top Success */}
         <div className="flex flex-col items-center text-center mb-10">
@@ -121,11 +121,11 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
           </div>
 
           <h1 className="text-[58px] leading-none font-black uppercase italic tracking-[-3px]">
-            <span className="text-white">Transfer</span>{" "}
+            <span className="text-white light:text-zinc-900">Transfer</span>{" "}
             <span className="text-second">Complete</span>
           </h1>
 
-          <p className="mt-4 text-[10px] uppercase tracking-[5px] text-zinc-400">
+          <p className="mt-4 text-[10px] uppercase tracking-[5px] text-zinc-400 light:text-zinc-600">
             Authorized // {order.payments[0]?.method} // {order.payments[0]?.transactionId || "TXN-PREVIEW-MPDWWHHQ"}
           </p>
         </div>
