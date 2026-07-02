@@ -156,7 +156,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     );
   }
 
-  
+
   if (cart.length === 0) {
     return (
       <div className='py-40 flex flex-col items-center justify-center gap-6'>

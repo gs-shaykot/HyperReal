@@ -8,7 +8,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
 
     return (
         <section className="max-w-7xl px-4 mx-auto py-10">
-            <div className='flex justify-between items-center  mb-7 md:mb-10'> 
+            <div className='flex justify-between items-center  mb-7 md:mb-10'>
                 <h2 className={`light:text-zinc-900 text-white text-2xl md:text-4xl italic font-bold transition-colors duration-200`}>TRENDING<span className='text-second'> HEAT</span></h2>
 
                 <Link href="/products" className="text-sm hidden md:block light:text-zinc-800 group hover:text-second transition-colors duration-200 relative right-2">
@@ -17,7 +17,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
             </div>
             <div className="grid griwd-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-5">
                 {
-                    productsWithTags.map((product) => ( 
+                    productsWithTags.map((product) => (
                         <div key={product.id} >
                             <Link href={`/products/${product.id}`}>
                                 <motion.div
@@ -28,10 +28,10 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                                         y: -6,
                                         boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                                         borderColor: "#8fb300",
-                                    }} 
+                                    }}
                                     className={`light:bg-white bg-zinc-900 border-2 border-transparent shadow-md overflow-hidden relative z-2 group cursor-pointer`}
                                 >
- 
+
                                     <div className="relative z-10 h-80 w-full overflow-hidden">
                                         <div
                                             className="h-full w-full"
@@ -49,9 +49,9 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                                         <div className="w-5 h-5 border-b border-r absolute bottom-2 right-2 z-20 group-hover:border-second transition-all" />
                                         <div className="w-5 h-5 border-b border-l absolute bottom-2 left-2 z-20 group-hover:border-second transition-all" />
                                     </div>
- 
+
                                     <div className="px-3 py-2 text-sm">
-                                        <div className="flex justify-between items-center"> 
+                                        <div className="flex justify-between items-center">
                                             <h3
                                                 className={`font-semibold light:text-zinc-900 text-white group-hover:text-second `}
                                             >
@@ -88,7 +88,7 @@ export const HeatProductWrapper = ({ productsWithTags }: { productsWithTags: any
                         </div>
                     ))
                 }
-            </div> 
+            </div>
             <Link href="/products" className={`light:text-zinc-900 light:border-zinc-900 border text-second border-second block md:hidden group transition-colors duration-200 relative md:right-2 py-2 text-center mt-3 `}>
                 VIEW ALL <span className='group-hover:relative group-hover:left-1 group-hover:transition group-hover:delay-150'>→</span>
             </Link>

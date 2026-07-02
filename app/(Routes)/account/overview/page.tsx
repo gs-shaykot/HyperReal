@@ -1,25 +1,101 @@
-import React from 'react';
+import StatCard from "@/app/(Routes)/account/StatCard";
+import { CircleCheckBig, Heart, Package } from "lucide-react";
 
-const page = () => {
+
+export default function OverviewPage() {
   return (
-    <section className='space-y-4 p-6 text-zinc-100'>
-      <div>
-        <h1 className='text-2xl font-bold'>Account Overview</h1>
-        <p className='mt-2 text-sm text-zinc-400'>A quick summary of your account activity and profile status.</p>
+    <div className="space-y-6">
+
+      <div className="grid grid-cols-3 gap-5">
+
+        <StatCard
+          title="Orders"
+          value={4}
+          icon={<Package />}
+        />
+        <StatCard
+          title="Delivered"
+          value={1}
+          icon={<CircleCheckBig />}
+        />
+        <StatCard
+          title="Wishlist"
+          value={3}
+          icon={<Heart />}
+        />
+
       </div>
 
-      <div className='grid gap-4 sm:grid-cols-2'>
-        <div className='border border-zinc-800 bg-[#0f0f0f] p-4'>
-          <h2 className='text-sm uppercase tracking-[0.2em] text-zinc-500'>Profile</h2>
-          <p className='mt-2 text-zinc-300'>Keep your personal details, contact info, and preferences up to date.</p>
+      <div className="border border-neutral-700 p-6">
+
+        <h2 className="text-3xl font-bold mb-6">
+          Identity Matrix
+        </h2>
+
+        <div className="grid grid-cols-2 gap-8">
+
+          <div>
+            <p className="text-neutral-500">
+              Full Name
+            </p>
+
+            <h3>GS Shaykot</h3>
+          </div>
+
+          <div>
+            <p className="text-neutral-500">
+              Username
+            </p>
+
+            <h3>gsshaykot</h3>
+          </div>
+
+          <div>
+            <p className="text-neutral-500">
+              Email
+            </p>
+
+            <h3>gs@email.com</h3>
+          </div>
+
+          <div>
+            <p className="text-neutral-500">
+              Phone
+            </p>
+
+            <h3>+8801XXXXXXXXX</h3>
+          </div>
+
         </div>
-        <div className='border border-zinc-800 bg-[#0f0f0f] p-4'>
-          <h2 className='text-sm uppercase tracking-[0.2em] text-zinc-500'>Recent Activity</h2>
-          <p className='mt-2 text-zinc-300'>Track orders, saved items, and other account actions from one place.</p>
-        </div>
+
       </div>
-    </section>
+
+      <div className="border border-neutral-700 p-6">
+
+        <h2 className="text-3xl font-bold mb-6">
+          Recent Activity
+        </h2>
+
+        {[1, 2, 3].map((order) => (
+          <div
+            key={order}
+            className="border-b border-neutral-800 py-4 flex justify-between"
+          >
+            <div>
+              <p>ORD-88{order}</p>
+              <small className="text-neutral-500">
+                2 Items
+              </small>
+            </div>
+
+            <p className="text-lime-400">
+              $200
+            </p>
+          </div>
+        ))}
+
+      </div>
+
+    </div>
   );
-};
-
-export default page;
+}

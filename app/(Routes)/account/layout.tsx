@@ -37,7 +37,7 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
             <AccountHeader />
             <div className='grid grid-cols-[260px_1fr] gap-6 py-7'>
                 <AccountSidebar orderCount={orderCount as number} TotalPayment={TotalPayment._sum.totalProductPriceInUSD as number} />
-                <section className='bg-zinc-900'>
+                <section>
                     {children}
                 </section>
             </div>

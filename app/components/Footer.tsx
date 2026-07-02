@@ -63,7 +63,7 @@ const Footer = () => {
                                 </li>
                             </ul>
                         </div>
-                        
+
                         {/* Newsletter */}
                         <div className="md:col-span-2">
                             <h3 className="text-sm font-bold uppercase tracking-wider text-second mb-6">

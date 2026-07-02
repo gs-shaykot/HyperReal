@@ -18,8 +18,8 @@ export const ComboPack = () => {
                     <p className='w-10/12 light:text-zinc-600 text-zinc-300'>
                         Our latest editorial explores the tension between urban decay and digital perfection. Shot on location in Tokyo's underground districts.
                     </p>
-                    
-                    
+
+
                     <ul className='list-[circle] list-inside mt-4 light:text-zinc-900 text-white marker:text-second'>
                         <li>CYBER-SHELL PARKA</li>
                         <li>STEALTH JOGGER</li>

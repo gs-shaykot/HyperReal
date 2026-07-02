@@ -35,7 +35,7 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
   const pathname = usePathname();
 
   return (
-    <div>
+    <div className="lg:sticky lg:top-19.5 lg:self-start">
       <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2 mb-3'>
         <ul className='flex flex-col gap-2'>
           {menus.map((menu) => (
@@ -57,17 +57,17 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
 
       <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2'>
         <ul>
-          <li>
-            <h2>TOTAL SPENT</h2>
-            <span>${TotalPayment?.toFixed(2)}</span>
+          <li className="p-2 py-3 border-b border-zinc-800">
+            <h2 className="mb-2">TOTAL SPENT</h2>
+            <span className="text-second">${TotalPayment?.toFixed(2)}</span>
           </li>
-          <li>
-            <h2>ORDERS</h2>
-            <span>{orderCount}</span>
+          <li className="p-2 py-3 border-b border-zinc-800">
+            <h2 className="mb-2">ORDERS</h2>
+            <span className="text-second">{orderCount}</span>
           </li>
-          <li>
-            <h2>TIER</h2>
-            <span>BRONZE</span>
+          <li className="p-2 py-3">
+            <h2 className="mb-2">TIER</h2>
+            <span className="text-second">BRONZE</span>
           </li>
         </ul>
       </div>

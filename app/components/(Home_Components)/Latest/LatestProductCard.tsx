@@ -10,7 +10,7 @@ export const LatestProductCard = ({ products }: { products: any[] }) => {
     const featured = products[0];
     const others = products.slice(1, 5);
 
-    return ( 
+    return (
         <section className={`light:bg-white border-zinc-800 bg-main/80 relative overflow-hidden border-b py-5`}>
             <div
                 className="absolute inset-0 opacity-20"

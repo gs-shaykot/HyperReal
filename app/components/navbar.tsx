@@ -107,7 +107,7 @@ export const Navbar = () => {
                                                 <li><a>{session?.user?.name}</a></li>
                                                 <li>
                                                     {
-                                                        session?.user ? <Link href="/profile">Profie</Link> : <Link href="/login">Login</Link>
+                                                        session?.user ? <Link href="/account">Profie</Link> : <Link href="/login">Login</Link>
                                                     }
                                                 </li>
                                                 <li>
