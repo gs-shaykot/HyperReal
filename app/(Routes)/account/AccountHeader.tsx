@@ -7,9 +7,10 @@ import React from 'react'
 
 export const AccountHeader = () => {
     const { data: session } = useSession();
-    console.log("Session in AccountHeader:", session)
+
     return (
-        <div className='flex justify-between items-center px-4 py-6 bg-[#0e0e0f] shadow-2xl border-t-3 border-second overflow-hidden'>
+        <div className='flex justify-between items-center px-4 py-6 bg-[#0f0f0f] shadow-2xl border-t-3 border-second overflow-hidden mt-8'>
+
             <div className='flex justify-between gap-5 items-center'>
                 <div className='w-28 h-28 bg-second overflow-hidden'>
                     <Image src={session?.user.image || '/default-image.jpg'} alt="User Image" width={112} height={112} />
@@ -20,6 +21,7 @@ export const AccountHeader = () => {
                     <span className='text-zinc-400'>Joined {session?.user.createdAt && new Date(session.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
                 </div>
             </div>
+
             {/* Signout Button */}
             <div className='relative'>
                 <h1 className='text-9xl text-second/5 font-bold absolute -right-3 -bottom-20 z-5'>ID</h1>

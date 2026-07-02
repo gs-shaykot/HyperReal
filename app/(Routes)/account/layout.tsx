@@ -4,10 +4,10 @@ import React from 'react'
 
 const AccountLayout = ({ children }: { children: React.ReactNode }) => {
     return (
-        <main className='max-w-7xl mx-auto px-4 py-10'>
+        <main className='max-w-7xl mx-auto px-4 '>
             {/* Account Header */}
             <AccountHeader />
-            <div className='grid grid-cols-[260px_1fr] gap-6 mt-5 py-10'>
+            <div className='grid grid-cols-[260px_1fr] gap-6 py-7'>
                 <AccountSidebar />
                 <section className='bg-zinc-900'>
                     {children}
