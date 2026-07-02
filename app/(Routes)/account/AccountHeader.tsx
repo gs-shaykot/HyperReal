@@ -7,7 +7,7 @@ import React from 'react'
 
 export const AccountHeader = () => {
     const { data: session } = useSession();
-
+    
     return (
         <div className='flex justify-between items-center px-4 py-6 bg-[#0f0f0f] shadow-2xl border-t-3 border-second overflow-hidden mt-8'>
 

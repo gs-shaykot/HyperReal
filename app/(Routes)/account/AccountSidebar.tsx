@@ -31,27 +31,47 @@ const menus = [
   },
 ];
 
-export const AccountSidebar = () => {
+export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: number; TotalPayment: number }) => {
   const pathname = usePathname();
 
   return (
-    <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2'>
-      <ul className='flex flex-col gap-2'>
-        {menus.map((menu) => (
-          <li key={menu.title}>
-            <Link
-              href={menu.href}
-              className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors ${pathname === menu.href
-                ? "bg-second text-zinc-900 font-bold font-sans"
-                : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                }`}
-            >
-              <menu.icon className='h-5 w-5' />
-              {menu.title}
-            </Link>
+    <div>
+      <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2 mb-3'>
+        <ul className='flex flex-col gap-2'>
+          {menus.map((menu) => (
+            <li key={menu.title}>
+              <Link
+                href={menu.href}
+                className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors ${pathname === menu.href
+                  ? "bg-second text-zinc-900 font-bold font-sans"
+                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  }`}
+              >
+                <menu.icon className={`h-5 w-5 text-second ${pathname === menu.href ? "text-zinc-900" : ""}`}/>
+                {menu.title}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2'>
+        <ul>
+          <li>
+            <h2>TOTAL SPENT</h2>
+            <span>${TotalPayment?.toFixed(2)}</span>
           </li>
-        ))}
-      </ul>
+          <li>
+            <h2>ORDERS</h2>
+            <span>{orderCount}</span>
+          </li>
+          <li>
+            <h2>TIER</h2>
+            <span>BRONZE</span>
+          </li>
+        </ul>
+      </div>
+
     </div>
   )
 }
