@@ -1,13 +1,17 @@
+import { Identity } from "@/app/(Routes)/account/overview/Identity";
 import StatCard from "@/app/(Routes)/account/StatCard";
-import { CircleCheckBig, Heart, Package } from "lucide-react";
+import { authOptions } from "@/lib/auth";
+import { CircleCheckBig, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
+import { getServerSession } from "next-auth";
 
+export default async function OverviewPage() {
+  const session = await getServerSession(authOptions);
+  const { id, name, email, image } = session?.user || {};
 
-export default function OverviewPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
 
       <div className="grid grid-cols-3 gap-5">
-
         <StatCard
           title="Orders"
           value={4}
@@ -23,54 +27,11 @@ export default function OverviewPage() {
           value={3}
           icon={<Heart />}
         />
-
       </div>
 
-      <div className="border border-neutral-700 p-6">
+      <Identity id={id as string} name={name as string} email={email as string} image={image as string} />
 
-        <h2 className="text-3xl font-bold mb-6">
-          Identity Matrix
-        </h2>
-
-        <div className="grid grid-cols-2 gap-8">
-
-          <div>
-            <p className="text-neutral-500">
-              Full Name
-            </p>
-
-            <h3>GS Shaykot</h3>
-          </div>
-
-          <div>
-            <p className="text-neutral-500">
-              Username
-            </p>
-
-            <h3>gsshaykot</h3>
-          </div>
-
-          <div>
-            <p className="text-neutral-500">
-              Email
-            </p>
-
-            <h3>gs@email.com</h3>
-          </div>
-
-          <div>
-            <p className="text-neutral-500">
-              Phone
-            </p>
-
-            <h3>+8801XXXXXXXXX</h3>
-          </div>
-
-        </div>
-
-      </div>
-
-      <div className="border border-neutral-700 p-6">
+      <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
 
         <h2 className="text-3xl font-bold mb-6">
           Recent Activity

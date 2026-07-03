@@ -18,6 +18,7 @@ model User {
   otp        String?
   otpExpiry  DateTime?
   isNewUser  Boolean   @default(true)
+
   cart       Cart?
   orders     Order[]
   addresses  Address[]

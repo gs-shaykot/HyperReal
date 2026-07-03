@@ -20,7 +20,7 @@ export default function StatCard({
                 {value}
             </h2>
 
-            <p className="text-neutral-500 uppercase mt-3">
+            <p className="text-zinc-400 text-sm uppercase mt-3">
                 {title}
             </p>
 
