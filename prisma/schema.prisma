@@ -188,3 +188,8 @@ enum CouponType {
   percent
   flat
 }
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+}

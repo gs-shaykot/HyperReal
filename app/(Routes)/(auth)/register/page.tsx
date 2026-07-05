@@ -9,7 +9,7 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
 
-export const Register = () => {
+const Register = () => {
     const router = useRouter();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -138,7 +138,7 @@ export const Register = () => {
                 password,
                 role: 'USER',
                 PhotoUrl: imageUrl,
-                otp
+                otp,
             };
 
             const res = await axios.post("/api/register", userData);
