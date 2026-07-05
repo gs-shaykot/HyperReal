@@ -6,7 +6,7 @@ import { emailLimiter, ipLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
-        console.log("Request received for sending OTP.");
+        
         const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
         const { email } = await req.json();
         

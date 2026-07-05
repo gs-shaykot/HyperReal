@@ -13,7 +13,7 @@ export const AccountHeader = () => {
 
             <div className='flex justify-between gap-5 items-center'>
                 <div className='w-28 h-28 bg-second overflow-hidden'>
-                    <Image src={session?.user.image || '/default-image.jpg'} alt="User Image" width={112} height={112} />
+                    <Image src={session?.user?.image || '/default-image.jpg'} alt="User Image" width={112} height={112} />
                 </div>
                 <div className='flex flex-col space-y-2'>
                     <span className='text-zinc-400'>OPERATIVE //</span>

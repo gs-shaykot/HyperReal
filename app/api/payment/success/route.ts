@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         }
 
         if (Number(validationData.amount).toFixed(2) !== Number(payment?.paidAmountInBDT).toFixed(2)) {
-            console.log("Validation Amount: ", validationData.amount, " ", "", "Order Amount: ", payment?.paidAmountInBDT);
+            
             await prisma.payment.updateMany({
                 where: { orderId: order.id },
                 data: { status: "FAILED" }
@@ -85,7 +85,7 @@ export async function POST(req: Request) {
                     status: "PROCESSING",
                 },
             });
-            console.log("orders list AFTER success: ", order);
+            
             // await Promise.all(
             //     order.orderItems.map(async (item) => {
             //         const result = await tx.productVariant.updateMany({

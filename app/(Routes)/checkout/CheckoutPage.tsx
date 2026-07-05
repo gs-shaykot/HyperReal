@@ -103,7 +103,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     };
 
     const convertedTotal = convertPrice(total);
-    console.log('cart format', cart)
+    
     const handlePayment = async (cartItems: CartItemWithProductType[], country: { value: string, shortName: string }, coupon: string, paymentMethod: string, address: string) => {
         const paymentData = {
             cartItems,

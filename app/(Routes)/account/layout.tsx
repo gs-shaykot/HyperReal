@@ -28,9 +28,6 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
         })
     ]);
 
-    console.log("Order Count: ", orderCount);
-    console.log("Total Payment: ", TotalPayment._sum.totalProductPriceInUSD);
-
     return (
         <main className='max-w-7xl mx-auto px-4 '>
             {/* Account Header */}
