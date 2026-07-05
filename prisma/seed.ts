@@ -1,4 +1,5 @@
-// this is the fixed file, but still having "No Rows" issue
+
+
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -28,6 +29,48 @@ const CATEGORIES = [
   { name: "Tech Gear", slug: "techgear" },
 ];
 
+const COUPONS = [
+  {
+    code: "SAVE3000",
+    type: "flat",
+    value: 300,
+    minSpend: 3000,
+    maxDiscount: null,
+    newUserOnly: false,
+  },
+  {
+    code: "SAVE1000",
+    type: "flat",
+    value: 100,
+    minSpend: 1000,
+    maxDiscount: null,
+    newUserOnly: false,
+  },
+  {
+    code: "SAVE20P",
+    type: "percent",
+    value: 20,
+    minSpend: 2500,
+    maxDiscount: 100,
+    newUserOnly: false,
+  },
+  {
+    code: "SAVE2000",
+    type: "flat",
+    value: 250,
+    minSpend: 2000,
+    maxDiscount: null,
+    newUserOnly: false,
+  },
+  {
+    code: "WELCOME10",
+    type: "percent",
+    value: 10,
+    minSpend: 0,
+    maxDiscount: 50,
+    newUserOnly: true,
+  },
+];
 
 const IMAGE_MAP: Record<
   string,
@@ -523,6 +566,13 @@ async function main() {
 
   console.log("✅ Categories seeded");
 
+  await prisma.coupon.createMany({
+    data: COUPONS,
+    skipDuplicates: true,
+  });
+
+  console.log("✅ Coupons seeded");
+
   for (const item of PRODUCTS) {
     const category = await prisma.category.findUnique({
       where: { slug: item.categorySlug },
@@ -599,7 +649,7 @@ main()
     await prisma.$disconnect();
     await pool.end();
   })
-  .catch(async (e) => { 
+  .catch(async (e) => {
     await prisma.$disconnect();
     await pool.end();
     process.exit(1);

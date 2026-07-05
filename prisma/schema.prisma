@@ -9,14 +9,12 @@ datasource db {
 model User {
   id            String   @id @default(uuid())
   name          String
-  email         String   @unique
-  phone         String
+  email         String   @unique 
   password      String?
   PhotoUrl      String?
   role          Role     @default(USER)
   createdAt     DateTime @default(now())
-  isVerified    Boolean  @default(false)
-  testMigration String?
+  isVerified    Boolean  @default(false) 
 
   otp       String?
   otpExpiry DateTime?
@@ -32,17 +30,13 @@ model User {
 model Address {
   id     String @id @default(uuid())
   userId String
-
-  label    String?
-  fullName String
-
+  
   street  String
   city    String
   state   String
   zipCode String
   country String
-
-  isDefault Boolean  @default(false)
+ 
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
