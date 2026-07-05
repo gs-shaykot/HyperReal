@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Order" ADD COLUMN     "totalProductPriceInUSD" DOUBLE PRECISION NOT NULL DEFAULT 0,
-ALTER COLUMN "totalAmount" SET DEFAULT 0;

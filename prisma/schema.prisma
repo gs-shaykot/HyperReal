@@ -7,33 +7,41 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(uuid())
+  id         String   @id @default(uuid())
   name       String
-  email      String    @unique
+  email      String   @unique
+  phone      String
   password   String?
-  role       Role      @default(USER)
-  createdAt  DateTime  @default(now())
   PhotoUrl   String?
-  isVerified Boolean   @default(false)
-  otp        String?
-  otpExpiry  DateTime?
-  isNewUser  Boolean   @default(true)
+  role       Role     @default(USER)
+  createdAt  DateTime @default(now())
+  isVerified Boolean  @default(false)
 
-  cart       Cart?
-  orders     Order[]
-  addresses  Address[]
+  otp       String?
+  otpExpiry DateTime?
+  isNewUser Boolean   @default(true)
+
+  cart      Cart?
+  orders    Order[]
+  addresses Address[]
 
   @@map("user")
 }
 
 model Address {
-  id        String   @id @default(uuid())
-  userId    String
-  street    String
-  city      String
-  state     String
-  zipCode   String
-  country   String
+  id     String @id @default(uuid())
+  userId String
+
+  label    String?
+  fullName String
+
+  street  String
+  city    String
+  state   String
+  zipCode String
+  country String
+
+  isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 

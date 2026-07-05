@@ -1,6 +1,3 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "public";
-
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 
@@ -8,10 +5,10 @@ CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');
 CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PROCESSING', 'SHIPPED', 'COMPLETED');
 
 -- CreateEnum
-CREATE TYPE "PaymentMethod" AS ENUM ('CARD', 'COD', 'BKASH');
+CREATE TYPE "PaymentMethod" AS ENUM ('CARD', 'COD', 'SSLC');
 
 -- CreateEnum
-CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'FAILED');
+CREATE TYPE "PaymentStatus" AS ENUM ('SUCCESS', 'FAILED', 'PENDING');
 
 -- CreateEnum
 CREATE TYPE "CouponType" AS ENUM ('percent', 'flat');
@@ -21,10 +18,11 @@ CREATE TABLE "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
     "password" TEXT,
+    "PhotoUrl" TEXT,
     "role" "Role" NOT NULL DEFAULT 'USER',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "PhotoUrl" TEXT,
     "isVerified" BOOLEAN NOT NULL DEFAULT false,
     "otp" TEXT,
     "otpExpiry" TIMESTAMP(3),
@@ -37,11 +35,14 @@ CREATE TABLE "user" (
 CREATE TABLE "address" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
+    "label" TEXT,
+    "fullName" TEXT NOT NULL,
     "street" TEXT NOT NULL,
     "city" TEXT NOT NULL,
     "state" TEXT NOT NULL,
     "zipCode" TEXT NOT NULL,
     "country" TEXT NOT NULL,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "address_pkey" PRIMARY KEY ("id")
@@ -129,7 +130,9 @@ CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
-    "totalAmount" DOUBLE PRECISION NOT NULL,
+    "address" TEXT NOT NULL,
+    "orderCode" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -150,8 +153,14 @@ CREATE TABLE "Payment" (
     "id" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
     "method" "PaymentMethod" NOT NULL,
-    "status" "PaymentStatus" NOT NULL,
-    "transactionId" TEXT NOT NULL,
+    "country" TEXT NOT NULL DEFAULT 'Bangladesh',
+    "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
+    "transactionId" TEXT,
+    "paidAmountInBDT" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "totalProductPriceInUSD" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "discount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "shippingCost" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
@@ -176,6 +185,12 @@ CREATE UNIQUE INDEX "CartItem_cartId_variantId_key" ON "CartItem"("cartId", "var
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Coupon_code_key" ON "Coupon"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Order_orderCode_key" ON "Order"("orderCode");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_transactionId_key" ON "Payment"("transactionId");
 
 -- AddForeignKey
 ALTER TABLE "address" ADD CONSTRAINT "address_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -209,4 +224,3 @@ ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_variantId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-

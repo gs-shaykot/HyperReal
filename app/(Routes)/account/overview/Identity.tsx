@@ -5,6 +5,13 @@ import React, { useState } from 'react'
 export const Identity = ({ id, name, email, image }: { id: string; name: string; email: string; image: string }) => {
 
     const [isEditing, setIsEditing] = useState(false)
+    const [newName, setName] = useState("");
+    const [newEmail, setEmail] = useState("");
+    const [newPhone, setPhone] = useState("")
+
+    const handleSave = () => {
+        setIsEditing(false)
+    }
 
     return (
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
@@ -12,6 +19,7 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
                 <h2 className="text-xl font-bold">
                     Identity Matrix
                 </h2>
+
                 <div>
                     {
                         isEditing && (
@@ -31,7 +39,7 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
                         )
                     }
                     {
-                        !isEditing && ( 
+                        !isEditing && (
                             <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline rounded-none hover:bg-white light:hover:bg-zinc-900 hover:text-zinc-900">
                                 <SquarePen size={16} />
                                 Edit
@@ -43,15 +51,24 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
 
             <div className="grid grid-cols-2 gap-8">
 
-                <div className="border-b border-zinc-800">
+                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <User size={18} strokeWidth={0.75} />
                         <p className="text-neutral-500 text-sm">
                             Full Name
                         </p>
                     </div>
+                    {
+                        !isEditing && (
+                            <h3 className="pb-2 text-sm">{name || "Your Name"}</h3>
+                        )
+                    }
 
-                    <h3 className="pb-2 text-sm">{name || "Your Name"}</h3>
+                    {
+                        isEditing && (
+                            <input type="text" defaultValue={name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                        )
+                    }
                 </div>
 
                 <div className="border-b border-zinc-800">
@@ -65,26 +82,44 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
                     <h3 className="pb-2 text-sm">{"USER"}</h3>
                 </div>
 
-                <div className="border-b border-zinc-800">
+                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <Mail size={18} strokeWidth={0.75} />
                         <p className="text-neutral-500 text-sm">
                             Email
                         </p>
                     </div>
+                    {
+                        !isEditing && (
+                            <h3 className="pb-2 text-sm">{email || "gs@email.com"}</h3>
+                        )
+                    }
 
-                    <h3 className="pb-2 text-sm">{email || "gs@email.com"}</h3>
+                    {
+                        isEditing && (
+                            <input type="text" defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                        )
+                    }
                 </div>
 
-                <div className="border-b border-zinc-800">
+                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <Phone size={18} strokeWidth={0.75} />
                         <p className="text-neutral-500 text-sm">
                             Phone
                         </p>
                     </div>
+                    {
+                        !isEditing && (
+                            <h3 className="pb-2 text-sm">{"+8801XXXXXXXXX"}</h3>
+                        )
+                    }
 
-                    <h3 className="pb-2 text-sm">{"+8801XXXXXXXXX"}</h3>
+                    {
+                        isEditing && (
+                            <input type="text" defaultValue={"+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                        )
+                    }
                 </div>
 
             </div>
