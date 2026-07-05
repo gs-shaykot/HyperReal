@@ -1,25 +1,26 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { randomInt } from "crypto";
-import nodemailer from "nodemailer"; 
+import nodemailer from "nodemailer";
 import { emailLimiter, ipLimiter } from "@/lib/upstash";
 
 export const POST = async (req: Request) => {
     try {
-        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown"; 
+        console.log("Request received for sending OTP.");
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
         const { email } = await req.json();
-
+        
         if (!email) {
             return NextResponse.json({ success: false, message: 'Email is required.' }, { status: 400 });
         }
 
-        const ipLimit = await ipLimiter.limit(`sendOtp:${ip}`); 
+        const ipLimit = await ipLimiter.limit(`sendOtp:${ip}`);
         if (!ipLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many requests. Please try again later.' }, { status: 429 });
         }
 
         const emailLimit = await emailLimiter.limit(`sendOtp:${email.toLowerCase()}`);
-          
+
         if (!emailLimit.success) {
             return NextResponse.json({ success: false, message: 'Too many requests for this email.' }, { status: 429 });
         }
@@ -77,6 +78,7 @@ export const POST = async (req: Request) => {
         return NextResponse.json({ success: true, message: 'OTP sent successfully. Please check your email.' }, { status: 200 });
     }
     catch (error) {
+        console.error("Failed to send OTP:", error);
         return NextResponse.json({ success: false, message: 'Failed to send OTP.' }, { status: 500 });
     }
 
