@@ -40,6 +40,7 @@ export const authOptions: AuthOptions = {
                     picture: Fetchuser.PhotoUrl ??
                         "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png",
                     isNewUser: Fetchuser.isNewUser,
+                    authProvider: Fetchuser.authprovider,
                 }
                 return user;
             },
@@ -71,6 +72,7 @@ export const authOptions: AuthOptions = {
                             password: "",
                             isVerified: true,
                             isNewUser: true,
+                            authprovider: "GOOGLE"
                         }
                     })
                 }
@@ -80,14 +82,26 @@ export const authOptions: AuthOptions = {
             return true;
         },
         async jwt({ token, user }) {
+            if (user?.email) {
+                const dbUser = await prisma.user.findUnique({
+                    where: {
+                        email: user.email.toLowerCase(),
+                    },
+                });
 
-            if (user && 'role' in user) {
-                token.role = (user as any).role;
-                token.picture = (user as any).picture;
-                token.isNewUser = (user as any).isNewUser;
-                token.createdAt = (user as any).createdAt;
+                if (dbUser) {
+                    token.role = dbUser.role;
+                    token.picture =
+                        dbUser.PhotoUrl ??
+                        "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png";
+
+                    token.isNewUser = dbUser.isNewUser;
+                    token.createdAt = dbUser.createdAt;
+                    token.authProvider = dbUser.authprovider;
+                }
             }
-            return token
+
+            return token;
         },
         async session({ session, token }: any) {
             if (session.user) {
@@ -96,6 +110,7 @@ export const authOptions: AuthOptions = {
                 session.user.role = token.role as UserRole;
                 session.user.isNewUser = token.isNewUser as boolean;
                 session.user.createdAt = token.createdAt as Date;
+                session.user.authProvider = token.authProvider as string;
             }
             return session;
         }

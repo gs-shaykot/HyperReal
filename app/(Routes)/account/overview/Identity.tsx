@@ -1,13 +1,18 @@
 'use client'
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
+import { useSession } from 'next-auth/react';
 import React, { useState } from 'react'
 
 export const Identity = ({ id, name, email, image }: { id: string; name: string; email: string; image: string }) => {
 
+    const { data: session } = useSession()
+    console.log(session?.user);
+    
     const [isEditing, setIsEditing] = useState(false)
     const [newName, setName] = useState("");
     const [newEmail, setEmail] = useState("");
     const [newPhone, setPhone] = useState("")
+
 
     const handleSave = () => {
         setIsEditing(false)
