@@ -1,13 +1,18 @@
 import { Identity } from "@/app/(Routes)/account/overview/Identity";
 import StatCard from "@/app/(Routes)/account/StatCard";
 import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import { CircleCheckBig, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
 import { getServerSession } from "next-auth";
 
 export default async function OverviewPage() {
   const session = await getServerSession(authOptions);
-  const { id, name, email, image, authProvider } = session?.user || {}; 
-  console.log("AuthProvider:", session?.user);
+  const { id, name, email, image, authProvider } = session?.user || {};
+
+  const user = await prisma.user.findUnique({
+    where: { id: id as string },
+  });
+  
 
   return (
     <div className="space-y-6 ">
@@ -30,7 +35,7 @@ export default async function OverviewPage() {
         />
       </div>
 
-      <Identity id={id as string} name={name as string} email={email as string} image={image as string} authProvider={authProvider as string} />
+      <Identity/>
 
       <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
 

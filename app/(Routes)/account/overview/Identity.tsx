@@ -1,20 +1,64 @@
 'use client'
+import { useProfile } from '@/app/Hooks/useProfile';
+import { getProfile } from '@/lib/profileApi';
+import { useQuery } from '@tanstack/react-query';
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-export const Identity = ({ id, name, email, image, authProvider }: { id: string; name: string; email: string; image: string; authProvider: string }) => {
-
+export const Identity = () => {
+    const updateProfileMutation = useProfile();
+    const { data: profile, isLoading } = useQuery({
+        queryKey: ["profile"],
+        queryFn: getProfile,
+    });
     const [isEditing, setIsEditing] = useState(false)
-    const [newName, setName] = useState("");
-    const [newEmail, setEmail] = useState("");
-    const [newPhone, setPhone] = useState("")
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        phone: "",
+    });
 
+    useEffect(() => {
+        if (profile) {
+            setFormData({
+                name: profile.name ?? "",
+                email: profile.email ?? "",
+                phone: profile.phone ?? "",
+            });
+        }
+    }, [profile]);
 
-    const handleSave = () => {
-        setIsEditing(false);
-        console.log(newName, newEmail, newPhone)
+    if (isLoading) {
+        return (
+            <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
+                <p>Loading...</p>
+            </div>
+        );
     }
+    const handleSave = () => {
+        const profileData = {
+            id: profile?.id,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone
+        }
 
+        if (
+            profileData.name === profile?.name &&
+            profileData.email === profile?.email &&
+            profileData.phone === profile?.phone
+        ) {
+            setIsEditing(false);
+            return;
+        }
+
+        updateProfileMutation.mutate(profileData, {
+            onSuccess: () => {
+                setIsEditing(false);
+            }
+        });
+    }
+    console.log(profile)
     return (
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
             <div className="flex justify-between items-start mb-3">
@@ -62,13 +106,13 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{name || "Your Name"}</h3>
+                            <h3 className="pb-2 text-sm">{formData.name}</h3>
                         )
                     }
-    
+
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setName(e.target.value)} defaultValue={name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
@@ -81,7 +125,7 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                         </p>
                     </div>
 
-                    <h3 className="pb-2 text-sm">{authProvider}</h3>
+                    <h3 className="pb-2 text-sm">{profile?.authprovider}</h3>
                 </div>
 
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
@@ -93,13 +137,13 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{email || "gs@email.com"}</h3>
+                            <h3 className="pb-2 text-sm">{formData.email}</h3>
                         )
                     }
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setEmail(e.target.value)} readOnly={!(isEditing && authProvider === "EMAIL")} defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, email: e.target.value })} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
@@ -113,13 +157,13 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{"+8801XXXXXXXXX"}</h3>
+                            <h3 className="pb-2 text-sm">{formData.phone || "+8801XXXXXXXXX"}</h3>
                         )
                     }
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setPhone(e.target.value)} defaultValue={"+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, phone: e.target.value })} value={formData.phone || "+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
