@@ -1,13 +1,9 @@
 'use client'
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
-import { useSession } from 'next-auth/react';
 import React, { useState } from 'react'
 
-export const Identity = ({ id, name, email, image }: { id: string; name: string; email: string; image: string }) => {
+export const Identity = ({ id, name, email, image, authProvider }: { id: string; name: string; email: string; image: string; authProvider: string }) => {
 
-    const { data: session } = useSession()
-    console.log(session?.user);
-    
     const [isEditing, setIsEditing] = useState(false)
     const [newName, setName] = useState("");
     const [newEmail, setEmail] = useState("");
@@ -84,7 +80,7 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
                         </p>
                     </div>
 
-                    <h3 className="pb-2 text-sm">{"USER"}</h3>
+                    <h3 className="pb-2 text-sm">{authProvider}</h3>
                 </div>
 
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
@@ -102,7 +98,7 @@ export const Identity = ({ id, name, email, image }: { id: string; name: string;
 
                     {
                         isEditing && (
-                            <input type="text" defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" readOnly={!(isEditing && authProvider === "EMAIL")} defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>

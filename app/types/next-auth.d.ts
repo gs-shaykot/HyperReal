@@ -8,6 +8,7 @@ declare module "next-auth" {
             image: string;
             isNewUser: boolean;
             createdAt: string;
+            authProvider: "GOOGLE" | "EMAIL";
         } & DefaultSession["user"];
     }
 

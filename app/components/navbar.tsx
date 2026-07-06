@@ -98,7 +98,7 @@ export const Navbar = () => {
                                                 <div className="w-7 h-7 rounded-full">
                                                     <img
                                                         alt="User avatar"
-                                                        src={session?.user?.image} />
+                                                        src={session?.user?.image} referrerPolicy="no-referrer" />
                                                 </div>
                                             </div>
                                             <ul
@@ -107,7 +107,7 @@ export const Navbar = () => {
                                                 <li><a>{session?.user?.name}</a></li>
                                                 <li>
                                                     {
-                                                        session?.user ? <Link href="/account">Profie</Link> : <Link href="/login">Login</Link>
+                                                        session?.user ? <Link href="/account">Profile</Link> : <Link href="/login">Login</Link>
                                                     }
                                                 </li>
                                                 <li>

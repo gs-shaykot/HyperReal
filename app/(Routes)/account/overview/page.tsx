@@ -6,7 +6,8 @@ import { getServerSession } from "next-auth";
 
 export default async function OverviewPage() {
   const session = await getServerSession(authOptions);
-  const { id, name, email, image } = session?.user || {};
+  const { id, name, email, image, authProvider } = session?.user || {}; 
+  console.log("AuthProvider:", session?.user);
 
   return (
     <div className="space-y-6 ">
@@ -29,7 +30,7 @@ export default async function OverviewPage() {
         />
       </div>
 
-      <Identity id={id as string} name={name as string} email={email as string} image={image as string} />
+      <Identity id={id as string} name={name as string} email={email as string} image={image as string} authProvider={authProvider as string} />
 
       <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
 
