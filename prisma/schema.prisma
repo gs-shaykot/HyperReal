@@ -21,7 +21,7 @@ model User {
   otp       String?
   otpExpiry DateTime?
   isNewUser Boolean   @default(true)
-  authprovider AuthProvider @default(EMAIL)
+  authProvider AuthProvider @default(EMAIL)
 
   cart      Cart?
   orders    Order[]

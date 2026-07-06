@@ -40,7 +40,7 @@ export const authOptions: AuthOptions = {
                     picture: Fetchuser.PhotoUrl ??
                         "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png",
                     isNewUser: Fetchuser.isNewUser,
-                    authProvider: Fetchuser.authprovider,
+                    authProvider: Fetchuser.authProvider,
                 }
                 return user;
             },
@@ -72,7 +72,7 @@ export const authOptions: AuthOptions = {
                             password: "",
                             isVerified: true,
                             isNewUser: true,
-                            authprovider: "GOOGLE"
+                            authProvider: "GOOGLE",
                         }
                     })
                 }
@@ -97,7 +97,7 @@ export const authOptions: AuthOptions = {
 
                     token.isNewUser = dbUser.isNewUser;
                     token.createdAt = dbUser.createdAt;
-                    token.authProvider = dbUser.authprovider;
+                    token.authProvider = dbUser.authProvider;
                 }
             }
 

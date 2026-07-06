@@ -125,7 +125,7 @@ export const Identity = () => {
                         </p>
                     </div>
 
-                    <h3 className="pb-2 text-sm">{profile?.authprovider}</h3>
+                    <h3 className="pb-2 text-sm">{profile?.authProvider}</h3>
                 </div>
 
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>

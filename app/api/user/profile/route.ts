@@ -17,7 +17,7 @@ export async function GET(req: Request) {
                 email: true,
                 phone: true,
                 PhotoUrl: true,
-                authprovider: true,
+                authProvider: true,
             },
         })
         return NextResponse.json({ success: true, profile: user }, { status: 200 });
