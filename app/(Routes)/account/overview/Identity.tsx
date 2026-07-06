@@ -11,7 +11,8 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
 
 
     const handleSave = () => {
-        setIsEditing(false)
+        setIsEditing(false);
+        console.log(newName, newEmail, newPhone)
     }
 
     return (
@@ -29,7 +30,7 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                                     <X size={16} />
                                     Cancel
                                 </button>
-                                <button className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
+                                <button onClick={handleSave} className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
 
                                     <span className={` flex items-center gap-2`}>
                                         <Save size={16} strokeWidth={2} />
@@ -64,10 +65,10 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
                             <h3 className="pb-2 text-sm">{name || "Your Name"}</h3>
                         )
                     }
-
+    
                     {
                         isEditing && (
-                            <input type="text" defaultValue={name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setName(e.target.value)} defaultValue={name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
@@ -98,7 +99,7 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
 
                     {
                         isEditing && (
-                            <input type="text" readOnly={!(isEditing && authProvider === "EMAIL")} defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setEmail(e.target.value)} readOnly={!(isEditing && authProvider === "EMAIL")} defaultValue={email || "gs@email.com"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
@@ -118,7 +119,7 @@ export const Identity = ({ id, name, email, image, authProvider }: { id: string;
 
                     {
                         isEditing && (
-                            <input type="text" defaultValue={"+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setPhone(e.target.value)} defaultValue={"+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
                         )
                     }
                 </div>
