@@ -81,7 +81,7 @@ export const authOptions: AuthOptions = {
 
             return true;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user }) { 
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {
@@ -90,6 +90,7 @@ export const authOptions: AuthOptions = {
                 });
 
                 if (dbUser) {
+                    token.id = dbUser.id;
                     token.role = dbUser.role;
                     token.picture =
                         dbUser.PhotoUrl ??
@@ -103,15 +104,15 @@ export const authOptions: AuthOptions = {
 
             return token;
         },
-        async session({ session, token }: any) {
+        async session({ session, token }: any) { 
             if (session.user) {
-                session.user.id = token.sub as string;
+                session.user.id = token.id as string;
                 session.user.image = token.picture as string;
                 session.user.role = token.role as UserRole;
                 session.user.isNewUser = token.isNewUser as boolean;
                 session.user.createdAt = token.createdAt as Date;
                 session.user.authProvider = token.authProvider as string;
-            }
+            } 
             return session;
         }
     },

@@ -6,11 +6,14 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     try {
         const session = await getServerSession(authOptions);
+        console.log("Session:", session?.user);
+
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
+        
         const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
+            where: { id: session.user?.id },
             select: {
                 id: true,
                 name: true,
@@ -20,6 +23,7 @@ export async function GET(req: Request) {
                 authProvider: true,
             },
         })
+        console.log("User:", user);
         return NextResponse.json({ success: true, profile: user }, { status: 200 });
     }
     catch (error) {

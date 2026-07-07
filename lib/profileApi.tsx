@@ -14,6 +14,6 @@ export const ProfileEdit = async ({ email, name, phone }: { id: string; email: s
 }
 export const getProfile = async () => {
     const res = await axios.get("/api/user/profile");
-
+    console.log(res.data.profile)
     return res.data.profile;
 };

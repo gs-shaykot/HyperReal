@@ -9,8 +9,7 @@ import { countCartItems } from "@/lib/cartAPIs"
 
 export const Navbar = () => {
     const { data: session } = useSession();
-    const { theme, setTheme } = useTheme();
-
+    const { theme, setTheme } = useTheme(); 
     const { data: cartCount = 0 } = useQuery({
         queryKey: ["cartCount"],
         queryFn: countCartItems,

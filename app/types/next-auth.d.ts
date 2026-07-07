@@ -1,5 +1,5 @@
 import { DefaultSession } from "next-auth";
-
+// okay or not ?
 declare module "next-auth" {
     interface Session {
         user: {
@@ -21,8 +21,11 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
     interface JWT {
+        id: string;
         role: "USER" | "ADMIN";
         picture: string;
         isNewUser: boolean;
+        createdAt: Date;
+        authProvider: "GOOGLE" | "EMAIL";
     }
 }

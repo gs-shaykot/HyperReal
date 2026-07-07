@@ -5,14 +5,7 @@ import prisma from "@/lib/prisma";
 import { CircleCheckBig, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
 import { getServerSession } from "next-auth";
 
-export default async function OverviewPage() {
-  const session = await getServerSession(authOptions);
-  const { id, name, email, image, authProvider } = session?.user || {};
-
-  const user = await prisma.user.findUnique({
-    where: { id: id as string },
-  });
-  
+export default async function OverviewPage() { 
 
   return (
     <div className="space-y-6 ">
