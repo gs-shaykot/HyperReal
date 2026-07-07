@@ -6,15 +6,20 @@ import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
 import { countCartItems } from "@/lib/cartAPIs"
+import { getProfile } from "@/lib/profileApi"
 
 export const Navbar = () => {
     const { data: session } = useSession();
-    const { theme, setTheme } = useTheme(); 
+    const { theme, setTheme } = useTheme();
     const { data: cartCount = 0 } = useQuery({
         queryKey: ["cartCount"],
         queryFn: countCartItems,
         enabled: !!session?.user
     })
+    const { data: profile, isLoading } = useQuery({
+        queryKey: ["profile"],
+        queryFn: getProfile,
+    });
 
     const navLinks =
         <>
@@ -103,7 +108,7 @@ export const Navbar = () => {
                                             <ul
                                                 tabIndex={-1}
                                                 className="menu menu-sm dropdown-content light:bg-white bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1">
-                                                <li><a>{session?.user?.name}</a></li>
+                                                <li><a>{profile?.name}</a></li>
                                                 <li>
                                                     {
                                                         session?.user ? <Link href="/account">Profile</Link> : <Link href="/login">Login</Link>

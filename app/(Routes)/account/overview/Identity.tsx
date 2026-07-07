@@ -3,9 +3,11 @@ import { useProfile } from '@/app/Hooks/useProfile';
 import { getProfile } from '@/lib/profileApi';
 import { useQuery } from '@tanstack/react-query';
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
+import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react'
 
 export const Identity = () => {
+    const { data: session } = useSession();
     const updateProfileMutation = useProfile();
     const { data: profile, isLoading } = useQuery({
         queryKey: ["profile"],
@@ -58,7 +60,7 @@ export const Identity = () => {
             }
         });
     }
-    console.log(profile)
+    console.log('User: ', session?.user);
     return (
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
             <div className="flex justify-between items-start mb-3">
