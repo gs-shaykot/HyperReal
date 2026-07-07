@@ -1,6 +1,6 @@
 "use client"
 import { ProductDetailsProps } from '@/app/types/Category'
-import { Check, Minus, Plus, X } from 'lucide-react';
+import { Check, HeartPlus, Minus, Plus, X } from 'lucide-react';
 import { useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
@@ -166,6 +166,14 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                     }}
                                     className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold light:text-white text-black">
                                     Add to Cart
+                                </motion.button>
+                            </div>
+
+                            <div> 
+                                <motion.button
+                                    whileTap={{ scale: 0.98 }}
+                                    className='border border-zinc-700 hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105'>
+                                    <HeartPlus />
                                 </motion.button>
                             </div>
                         </div>
