@@ -1,36 +1,52 @@
-import { Postwishlist } from "@/lib/wishlistAPI";
+import { wishlist } from "@/app/types/Product";
+import { DeleteWishlist, Postwishlist } from "@/lib/wishlistAPI";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export const useWishlist = () => {
     const queryClient = useQueryClient();
 
-    const addToWishlistMutation = useMutation({
+    const toggleWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
-        mutationFn: Postwishlist,
-        onMutate: async (newWishlistItem) => { 
+        mutationFn: ({ productId, isWishlisted }: { productId: string; isWishlisted: boolean }) => {
+            if (isWishlisted) {
+                return DeleteWishlist({ productId });
+            }
+            return Postwishlist({ productId });
+        },
+
+        onMutate: async ({ productId, isWishlisted }) => {
+            console.log("Mutating wishlist for productId: ", productId);
 
             await queryClient.cancelQueries({ queryKey: ['wishlist'] });
 
-            const previousWishlist = queryClient.getQueryData(['wishlist']);
+            const previousWishlist = queryClient.getQueryData<wishlist[]>(['wishlist']);
 
             queryClient.setQueryData(
                 ['wishlist'],
-                (old: { productId: string }[] = []) => {
-                    return [...old, newWishlistItem];
+                (old: wishlist[] = []) => {
+                    if (isWishlisted) {
+                        return old.filter(item => item.productId !== productId);
+                    }
+                    return [...old, { productId }]
                 }
             );
 
             return { previousWishlist };
         },
-        onError: (error, _, context) => {
-            console.error("Failed to add wishlist item:", error);
+        onError: (error, __, context) => {
+            console.log("Error occurred while toggling wishlist: ", error);
+
             queryClient.setQueryData(
                 ['wishlist'],
                 context?.previousWishlist
             );
         },
-        onSuccess: () => {
+
+        onSuccess: (_, variables) => {
+            if(variables.isWishlisted) {
+                toast.success("Item removed from wishlist successfully.");
+            }
             toast.success("Item added to wishlist successfully.");
         },
         onSettled: () => {
@@ -38,5 +54,5 @@ export const useWishlist = () => {
         }
     });
 
-    return addToWishlistMutation;
+    return toggleWishlistMutation;
 }

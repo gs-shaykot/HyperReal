@@ -1,7 +1,7 @@
 "use client"
 import { ProductDetailsProps } from '@/app/types/Category'
 import { Check, HeartPlus, Minus, Plus, X } from 'lucide-react';
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
 import toast from 'react-hot-toast';
@@ -15,7 +15,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const { data: session } = useSession();
 
     const mutation = useCart();
-    const addToWishlistMutation = useWishlist();
+    const toggleWishlistMutation = useWishlist();
 
     const { data: wishlistItems } = useQuery({
         queryKey: ["wishlist"],
@@ -24,7 +24,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some((item: any) => item.productId === product.id);
-    }, [wishlistItems, product.id]); 
+    }, [wishlistItems, product.id]);
+    
+    useEffect(() => {
+        console.log("Wishlist items fetched: ", wishlistItems);
+        console.log("Is product wishlisted: ", isWishlisted);
+    }, [wishlistItems, isWishlisted]);
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
@@ -184,7 +189,10 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                             <div>
                                 <motion.button
-                                    onClick={() => { addToWishlistMutation.mutate({ productId: product.id }); }}
+                                    onClick={() => {
+                                        console.log("Product that will mutate: ", product.id);
+                                        toggleWishlistMutation.mutate({ productId: product.id, isWishlisted });
+                                    }}
                                     whileTap={{ scale: 0.98 }}
                                     className={`border  hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted ? 'bg-second/30 border-second text-second' : 'border-zinc-600'}`}>
                                     <HeartPlus />
