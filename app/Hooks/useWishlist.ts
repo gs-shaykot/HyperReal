@@ -1,0 +1,33 @@
+import { Postwishlist } from "@/lib/wishlistAPI";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+
+export const useWishlist = () => {
+    const queryClient = useQueryClient();
+
+    const addToWishlistMutation = useMutation({
+        mutationKey: ["wishlist"],
+        mutationFn: Postwishlist,
+        onMutate: async (newWishlistItem) => {
+            await queryClient.cancelQueries({ queryKey: ['wishlist'] });
+
+            const previousWishlist = queryClient.getQueryData(['wishlist']);
+
+            queryClient.setQueryData(['wishlist'], (old: any) => {
+                return [...(old || []), newWishlistItem];
+            })
+            return { previousWishlist };
+        },
+        onError: (_, __, context) => {
+            queryClient.setQueryData(['wishlist'], context?.previousWishlist);
+        },
+        onSuccess: () => {
+            toast.success("Item added to wishlist successfully.");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['wishlist'] });
+        }
+    });
+
+    return addToWishlistMutation;
+}
