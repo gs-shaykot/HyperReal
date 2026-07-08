@@ -2,18 +2,45 @@ import { Identity } from "@/app/(Routes)/account/overview/Identity";
 import StatCard from "@/app/(Routes)/account/StatCard";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { CircleCheckBig, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
+import { ArrowRight, CircleCheckBig, Clock, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 
-export default async function OverviewPage() { 
+export default async function OverviewPage() {
+  const session = await getServerSession(authOptions);
+  const orders = await prisma.order.findMany({
+    where: {
+      userId: session?.user.id
+    },
+    select: {
+      id: true,
+      status: true,
+      orderCode: true,
+      createdAt: true,
+      orderItems: {
+        select: {
+          quantity: true,
+        }
+      },
+      payments: {
+        select: {
+          country: true,
+          paidAmountInBDT: true,
+          totalProductPriceInUSD: true,
+        }
+      }
+    }
+  })
 
+
+  console.log('Orders:', orders)
   return (
     <div className="space-y-6 ">
 
       <div className="grid grid-cols-3 gap-5">
         <StatCard
           title="Orders"
-          value={4}
+          value={orders.length}
           icon={<Package />}
         />
         <StatCard
@@ -28,31 +55,66 @@ export default async function OverviewPage() {
         />
       </div>
 
-      <Identity/>
+      <Identity />
 
       <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
 
-        <h2 className="text-3xl font-bold mb-6">
-          Recent Activity
-        </h2>
-
-        {[1, 2, 3].map((order) => (
-          <div
-            key={order}
-            className="border-b border-neutral-800 py-4 flex justify-between"
-          >
-            <div>
-              <p>ORD-88{order}</p>
-              <small className="text-neutral-500">
-                2 Items
-              </small>
-            </div>
-
-            <p className="text-lime-400">
-              $200
-            </p>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">
+            RECENT ORDERS
+          </h2>
+          <div className="flex items-center text-sm text-second transition-colors hover:border-b hover:border-second">
+            <Link href="/account/orders">
+              View All
+            </Link>
+            <ArrowRight size={16} />
           </div>
-        ))}
+        </div>
+
+        {
+          orders.length > 0 ? (
+            <div>
+              {
+                orders.map((order) => (
+                  <div key={order.id} className="flex justify-between items-center border border-zinc-800 hover:border-second p-3 mb-2">
+                    <div className="flex items-center gap-3">
+                      <Clock size={18} className="text-second" />
+                      <div>
+                        <p>{order.orderCode}</p>
+                        <div className="flex items-center gap-2 text-xs text-zinc-400">
+                          <p>{order.createdAt.toLocaleDateString()}</p>
+                          <span className="w-2 h-2 bg-transparent border border-second rounded-full" />
+                          <p>{order.orderItems.reduce((total, item) => total + item.quantity, 0)} items</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      {
+                        order.payments.map((payment, index) => (
+                          payment.country === 'BD' ? (
+                            <p key={index} className="text-sm font-semibold">
+                              ৳ {payment.paidAmountInBDT.toFixed(2)}
+                            </p>
+                          ) : (
+                            <p className="text-sm font-semibold">
+                              ${payment.totalProductPriceInUSD.toFixed(2)}
+                            </p>
+                          )
+                        ))
+                      }
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-neutral-500">
+                No recent orders found.
+              </p>
+            </div>
+          )
+        }
 
       </div>
 

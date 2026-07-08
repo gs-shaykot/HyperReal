@@ -313,7 +313,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — Manifest
                             </h2>
-                            <div className='w-full h-44 overflow-y-auto mb-4 pr-2'>
+                            <div className='w-full h-auto overflow-y-auto mb-4 pr-2'>
                                 {
                                     cart.map((item: CartItemWithProductType) => (
                                         <div key={item.id} className='mb-2 border-zinc-800 border p-2 flex items-center justify-between'>

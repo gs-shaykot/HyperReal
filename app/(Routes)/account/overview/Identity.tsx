@@ -64,7 +64,7 @@ export const Identity = () => {
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
             <div className="flex justify-between items-start mb-3">
                 <h2 className="text-xl font-bold">
-                    Identity Matrix
+                    IDENTITY MATRIX
                 </h2>
 
                 <div>
