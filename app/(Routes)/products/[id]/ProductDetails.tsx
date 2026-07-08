@@ -25,12 +25,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some((item: any) => item.productId === product.id);
     }, [wishlistItems, product.id]);
-    
-    useEffect(() => {
-        console.log("Wishlist items fetched: ", wishlistItems);
-        console.log("Is product wishlisted: ", isWishlisted);
-    }, [wishlistItems, isWishlisted]);
-
+     
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
         () => [...new Set(product.productVariants?.map(variant => variant.color))],
