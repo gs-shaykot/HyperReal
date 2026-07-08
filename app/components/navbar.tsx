@@ -16,7 +16,7 @@ export const Navbar = () => {
         queryFn: countCartItems,
         enabled: !!session?.user
     })
-    const { data: profile, isLoading } = useQuery({
+    const { data: profile } = useQuery({
         queryKey: ["profile"],
         queryFn: getProfile,
     });

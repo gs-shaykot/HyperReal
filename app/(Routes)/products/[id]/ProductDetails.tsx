@@ -6,12 +6,22 @@ import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
+import { useWishlist } from '@/app/Hooks/useWishlist';
+import { useQuery } from '@tanstack/react-query';
+import { Getwishlist } from '@/lib/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     const { data: session } = useSession();
 
     const mutation = useCart();
+    const addToWishlistMutation = useWishlist();
+    const { data: wishlistItems } = useQuery({
+        queryKey: ["wishlist"],
+        queryFn: Getwishlist
+    })
+
+    useMemo(() => { console.log("Getting Wishlist: ", wishlistItems) }, [wishlistItems])
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
@@ -169,8 +179,21 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 </motion.button>
                             </div>
 
-                            <div> 
+                            <div>
                                 <motion.button
+                                    onClick={() => {
+                                        try {
+                                            console.log("clicked");
+
+                                            addToWishlistMutation.mutate({
+                                                productId: product.id,
+                                            });
+
+                                            console.log("mutate called");
+                                        } catch (err) {
+                                            console.error(err);
+                                        }
+                                    }}
                                     whileTap={{ scale: 0.98 }}
                                     className='border border-zinc-700 hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105'>
                                     <HeartPlus />

@@ -9,17 +9,27 @@ export const useWishlist = () => {
         mutationKey: ["wishlist"],
         mutationFn: Postwishlist,
         onMutate: async (newWishlistItem) => {
+            console.log("Came for adding to wishlist: ", newWishlistItem);
+
             await queryClient.cancelQueries({ queryKey: ['wishlist'] });
 
             const previousWishlist = queryClient.getQueryData(['wishlist']);
 
-            queryClient.setQueryData(['wishlist'], (old: any) => {
-                return [...(old || []), newWishlistItem];
-            })
+            queryClient.setQueryData(
+                ['wishlist'],
+                (old: { productId: string }[] = []) => {
+                    return [...old, newWishlistItem];
+                }
+            );
+
             return { previousWishlist };
         },
-        onError: (_, __, context) => {
-            queryClient.setQueryData(['wishlist'], context?.previousWishlist);
+        onError: (error, _, context) => {
+            console.error("Failed to add wishlist item:", error);
+            queryClient.setQueryData(
+                ['wishlist'],
+                context?.previousWishlist
+            );
         },
         onSuccess: () => {
             toast.success("Item added to wishlist successfully.");
