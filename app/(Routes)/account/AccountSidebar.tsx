@@ -44,10 +44,10 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
                 href={menu.href}
                 className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors ${pathname === menu.href
                   ? "bg-second text-zinc-900 font-bold font-sans"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                  : "text-white hover:bg-zinc-800 hover:text-white"
                   }`}
               >
-                <menu.icon className={`h-5 w-5 text-second ${pathname === menu.href ? "text-zinc-900" : ""}`}/>
+                <menu.icon className={`h-5 w-5 text-white ${pathname === menu.href ? "text-zinc-900" : ""}`}/>
                 {menu.title}
               </Link>
             </li>
