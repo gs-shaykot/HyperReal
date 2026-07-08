@@ -15,8 +15,8 @@ const page = async ({ searchParams }: SeachProps) => {
     
     const categoryId = category ?? null;
     const categories = await getCategories();
-    const products = await getProducts(categoryId ?? undefined) 
-    
+    const products = await getProducts(categoryId ?? undefined)
+
     return (
         <div>
             <ProductLayout categories={categories} categoryId={categoryId} products={products} />

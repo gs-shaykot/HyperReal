@@ -5,8 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-        console.log("Session:", session?.user);
+        const session = await getServerSession(authOptions); 
 
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
@@ -22,8 +21,7 @@ export async function GET(req: Request) {
                 PhotoUrl: true,
                 authProvider: true,
             },
-        })
-        console.log("User:", user);
+        }) 
         return NextResponse.json({ success: true, profile: user }, { status: 200 });
     }
     catch (error) {

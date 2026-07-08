@@ -59,8 +59,7 @@ export const Identity = () => {
                 setIsEditing(false);
             }
         });
-    }
-    console.log('User: ', session?.user);
+    } 
     return (
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
             <div className="flex justify-between items-start mb-3">
