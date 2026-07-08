@@ -8,8 +8,7 @@ export const useWishlist = () => {
     const addToWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
         mutationFn: Postwishlist,
-        onMutate: async (newWishlistItem) => {
-            console.log("Came for adding to wishlist: ", newWishlistItem);
+        onMutate: async (newWishlistItem) => { 
 
             await queryClient.cancelQueries({ queryKey: ['wishlist'] });
 

@@ -16,12 +16,15 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     const mutation = useCart();
     const addToWishlistMutation = useWishlist();
+
     const { data: wishlistItems } = useQuery({
         queryKey: ["wishlist"],
         queryFn: Getwishlist
     })
 
-    useMemo(() => { console.log("Getting Wishlist: ", wishlistItems) }, [wishlistItems])
+    const isWishlisted = useMemo(() => {
+        return wishlistItems?.some((item: any) => item.productId === product.id);
+    }, [wishlistItems, product.id]); 
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
@@ -181,21 +184,9 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                             <div>
                                 <motion.button
-                                    onClick={() => {
-                                        try {
-                                            console.log("clicked");
-
-                                            addToWishlistMutation.mutate({
-                                                productId: product.id,
-                                            });
-
-                                            console.log("mutate called");
-                                        } catch (err) {
-                                            console.error(err);
-                                        }
-                                    }}
+                                    onClick={() => { addToWishlistMutation.mutate({ productId: product.id }); }}
                                     whileTap={{ scale: 0.98 }}
-                                    className='border border-zinc-700 hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105'>
+                                    className={`border  hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted ? 'bg-second/30 border-second text-second' : 'border-zinc-600'}`}>
                                     <HeartPlus />
                                 </motion.button>
                             </div>
