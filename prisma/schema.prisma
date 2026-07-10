@@ -84,6 +84,7 @@ model ProductVariant {
   cartItems  CartItem[]
   orderItems OrderItem[]
   product    Product     @relation(fields: [productId], references: [id])
+  wishlists  Wishlist[]
 
   @@unique([productId, size, color])
 }
@@ -164,13 +165,15 @@ model Payment {
 }
 
 model Wishlist {
-  id        String   @id @default(uuid())
-  userId    String  
-  productId String
-  createdAt DateTime @default(now())
+  id               String   @id @default(uuid())
+  userId           String
+  productId        String
+  createdAt        DateTime @default(now())
+  productVariantId String
 
-  user     User    @relation(fields: [userId], references: [id])
-  prorduct Product @relation(fields: [productId], references: [id])
+  user     User           @relation(fields: [userId], references: [id])
+  prorduct Product        @relation(fields: [productId], references: [id])
+  variant  ProductVariant @relation(fields: [productVariantId], references: [id])
 
   @@unique([userId, productId])
 }

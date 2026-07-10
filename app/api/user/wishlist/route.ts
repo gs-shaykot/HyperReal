@@ -6,8 +6,8 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { productId } = await req.json();
-        console.log("Received productId for wishlist in API: ", productId);
+        const { productId, variantId } = await req.json();
+
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
@@ -18,6 +18,7 @@ export async function POST(req: Request) {
             data: {
                 userId: session.user.id,
                 productId: productId,
+                productVariantId: variantId,
             }
         });
 
@@ -37,6 +38,14 @@ export async function GET(req: Request) {
         }
         const wishlistItems = await prisma.wishlist.findMany({
             where: { userId: session.user.id },
+            include: {
+                prorduct: {
+                    include: {
+                        productImages: true
+                    }
+                },
+                variant: true
+            }
         });
 
         return NextResponse.json({ success: true, data: wishlistItems }, { status: 200 });

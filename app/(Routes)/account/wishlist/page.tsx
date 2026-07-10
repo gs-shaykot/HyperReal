@@ -1,17 +1,11 @@
-import React from 'react';
+import { WishlistCards } from '@/app/(Routes)/account/wishlist/WishlistCards';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 
-const page = () => {
+const page = async () => {
     return (
-        <section className='space-y-4 p-6 text-zinc-100'>
-            <div>
-                <h1 className='text-2xl font-bold'>Wishlist</h1>
-                <p className='mt-2 text-sm text-zinc-400'>Keep track of products you want to revisit or buy later.</p>
-            </div>
-
-            <div className='border border-zinc-800 bg-[#0f0f0f] p-4'>
-                <p className='text-zinc-300'>Your wishlist is empty for now.</p>
-            </div>
-        </section>
+        <WishlistCards />
     );
 };
 

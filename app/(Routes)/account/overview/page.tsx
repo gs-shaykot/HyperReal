@@ -32,8 +32,7 @@ export default async function OverviewPage() {
     }
   })
 
-
-  console.log('Orders:', orders)
+ 
   return (
     <div className="space-y-6 ">
 

@@ -8,16 +8,14 @@ export const useWishlist = () => {
 
     const toggleWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
-        mutationFn: ({ productId, isWishlisted }: { productId: string; isWishlisted: boolean }) => {
+        mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => {
             if (isWishlisted) {
                 return DeleteWishlist({ productId });
             }
-            return Postwishlist({ productId });
+            return Postwishlist({ productId, variantId });
         },
 
-        onMutate: async ({ productId, isWishlisted }) => {
-            console.log("Mutating wishlist for productId: ", productId);
-
+        onMutate: async ({ productId, isWishlisted, variantId }) => {
             await queryClient.cancelQueries({ queryKey: ['wishlist'] });
 
             const previousWishlist = queryClient.getQueryData<wishlist[]>(['wishlist']);
@@ -28,7 +26,7 @@ export const useWishlist = () => {
                     if (isWishlisted) {
                         return old.filter(item => item.productId !== productId);
                     }
-                    return [...old, { productId }]
+                    return [...old, { productId, productVariantId: variantId }];
                 }
             );
 
@@ -44,7 +42,7 @@ export const useWishlist = () => {
         },
 
         onSuccess: (_, variables) => {
-            if(variables.isWishlisted) {
+            if (variables.isWishlisted) {
                 toast.success("Item removed from wishlist successfully.");
             }
             toast.success("Item added to wishlist successfully.");

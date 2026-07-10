@@ -11,7 +11,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Getwishlist } from '@/lib/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
-
     const { data: session } = useSession();
 
     const mutation = useCart();
@@ -21,11 +20,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
         queryKey: ["wishlist"],
         queryFn: Getwishlist
     })
-
+    console.log("wishlist products: ", wishlistItems);
+    
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some((item: any) => item.productId === product.id);
     }, [wishlistItems, product.id]);
-     
+
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
         () => [...new Set(product.productVariants?.map(variant => variant.color))],
@@ -185,8 +185,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <div>
                                 <motion.button
                                     onClick={() => {
-                                        console.log("Product that will mutate: ", product.id);
-                                        toggleWishlistMutation.mutate({ productId: product.id, isWishlisted });
+                                        toggleWishlistMutation.mutate({ productId: product.id, isWishlisted, variantId: ExtractedVariant?.id as string });
                                     }}
                                     whileTap={{ scale: 0.98 }}
                                     className={`border  hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted ? 'bg-second/30 border-second text-second' : 'border-zinc-600'}`}>
