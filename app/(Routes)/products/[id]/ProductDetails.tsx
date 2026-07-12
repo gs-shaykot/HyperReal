@@ -23,8 +23,10 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     console.log("wishlist products: ", wishlistItems);
     
     const isWishlisted = useMemo(() => {
-        return wishlistItems?.some((item: any) => item.productId === product.id);
+        return wishlistItems?.some((item: any) => item?.product?.id === product.id);
     }, [wishlistItems, product.id]);
+
+    console.log("isWishlisted: ", isWishlisted);
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(

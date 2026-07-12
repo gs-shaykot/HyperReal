@@ -7,6 +7,9 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         const { productId, variantId } = await req.json();
+        console.log("Received productId:", productId);
+        console.log("Received variantId:", variantId);
+        
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }

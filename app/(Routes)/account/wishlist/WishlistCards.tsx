@@ -29,12 +29,12 @@ export const WishlistCards = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
-                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm">
+                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm hover:border hover:border-second transition-all group cursor-pointer">
                                     <figure>
                                         <Image
                                             width={600}
                                             height={600}
-                                            className="w-full h-auto object-cover"
+                                            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
                                             src={
                                                 item?.product?.productImages.find(img => img.color === item.variant.color)?.imageUrl ||
                                                 item?.product?.productImages[0]?.imageUrl
@@ -61,8 +61,8 @@ export const WishlistCards = () => {
                                             <button
                                                 onClick={() => {
                                                     toggleWishlistMutation.mutate({ productId: item.product.id as string, isWishlisted: true, variantId: item.variant.id as string });
-                                                }} className='border border-zinc-700 p-2 btn rounded-none bg-transparent group hover:border-white transition-all hover:scale-105'>
-                                                <Heart className='group-hover:text-second' />
+                                                }} className='border border-zinc-700 p-2 btn rounded-none bg-second/30 group hover:border-white transition-all hover:scale-105'>
+                                                <Heart className='text-second' />
                                             </button>
                                         </div>
                                     </div>
