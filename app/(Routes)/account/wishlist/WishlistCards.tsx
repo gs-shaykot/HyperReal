@@ -4,7 +4,7 @@ import { useWishlist } from '@/app/Hooks/useWishlist'
 import { wishlistWithProduct } from '@/app/types/Product'
 import { Getwishlist } from '@/lib/wishlistAPI'
 import { useQuery } from '@tanstack/react-query'
-import { Eye, Heart, Package } from 'lucide-react'
+import { Eye, Heart, Package, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useMemo } from 'react'
@@ -22,7 +22,17 @@ export const WishlistCards = () => {
         <section>
             <div className='flex justify-between items-center mb-3'>
                 <h2 className='text-2xl font-bold italic'>SAVED <span className='text-second'>ITEMS</span></h2>
-                <h3 className='text-sm text-zinc-500'>{wishlistItems?.length} ITEMS</h3>
+                <div className='flex justify-between items-center gap-3'>
+                    <h3 className='text-sm text-zinc-500'>{wishlistItems?.length} ITEMS</h3>
+                    {
+                        wishlistItems?.length > 0 && (
+                            <button className='flex justify-between items-center btn btn-sm bg-transparent rounded-none hover:bg-zinc-900 text-red-500 shadow-none'>
+                                <Trash2 size={16} />
+                                CLEAR ALL
+                            </button>
+                        )
+                    }
+                </div>
             </div>
             {
                 wishlistItems?.length > 0 ? (

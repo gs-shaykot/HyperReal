@@ -14,3 +14,4 @@ export const DeleteWishlist = async ({ productId }: { productId: string }) => {
     const res = await axios.delete('/api/user/wishlist', { data: { productId } });
     return res.data.data;
 }
+
