@@ -9,7 +9,7 @@ export async function POST(req: Request) {
         const { productId, variantId } = await req.json();
         console.log("Received productId:", productId);
         console.log("Received variantId:", variantId);
-        
+
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
@@ -69,7 +69,27 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { productId } = await req.json();
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
+        }
+
+        const { productId, clearAll } = await req.json();
+        if (clearAll) {
+            await prisma.wishlist.deleteMany({
+                where: {
+                    userId: session.user.id,
+                },
+            });
+
+            return NextResponse.json(
+                {
+                    success: true,
+                    message: "Wishlist cleared successfully.",
+                },
+                { status: 200 }
+            );
+        }
+        
         const res = await prisma.wishlist.deleteMany({
             where: {
                 userId: session?.user.id,

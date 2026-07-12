@@ -1,5 +1,6 @@
 'use client'
 import { useCart } from '@/app/Hooks/useCart'
+import { useClearWishlist } from '@/app/Hooks/useClearWishlist'
 import { useWishlist } from '@/app/Hooks/useWishlist'
 import { wishlistWithProduct } from '@/app/types/Product'
 import { Getwishlist } from '@/lib/wishlistAPI'
@@ -17,6 +18,7 @@ export const WishlistCards = () => {
 
     const mutation = useCart();
     const toggleWishlistMutation = useWishlist();
+    const clearWishlistMutation = useClearWishlist();
 
     return (
         <section>
@@ -26,7 +28,9 @@ export const WishlistCards = () => {
                     <h3 className='text-sm text-zinc-500'>{wishlistItems?.length} ITEMS</h3>
                     {
                         wishlistItems?.length > 0 && (
-                            <button className='flex justify-between items-center btn btn-sm bg-transparent rounded-none hover:bg-zinc-900 text-red-500 shadow-none'>
+                            <button
+                                onClick={() => clearWishlistMutation.mutate()}
+                                className='flex justify-between items-center btn btn-sm bg-transparent rounded-none hover:bg-zinc-900 text-red-500 shadow-none'>
                                 <Trash2 size={16} />
                                 CLEAR ALL
                             </button>

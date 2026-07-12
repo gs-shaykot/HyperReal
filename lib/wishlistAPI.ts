@@ -15,3 +15,12 @@ export const DeleteWishlist = async ({ productId }: { productId: string }) => {
     return res.data.data;
 }
 
+export const ClearWishlist = async () => {
+    const res = await axios.delete("/api/user/wishlist", {
+        data: {
+            clearAll: true,
+        },
+    });
+
+    return res.data;
+};
