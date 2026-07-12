@@ -7,7 +7,6 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
         const { productId, variantId } = await req.json();
-
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
@@ -38,10 +37,17 @@ export async function GET(req: Request) {
         }
         const wishlistItems = await prisma.wishlist.findMany({
             where: { userId: session.user.id },
-            include: {
-                prorduct: {
-                    include: {
-                        productImages: true
+            select: {
+                product: {
+                    select: {
+                        name: true,
+                        price: true,
+                        productImages: true,
+                        category: {
+                            select: {
+                                name: true
+                            }
+                        }
                     }
                 },
                 variant: true
