@@ -40,6 +40,7 @@ export async function GET(req: Request) {
             select: {
                 product: {
                     select: {
+                        id: true,
                         name: true,
                         price: true,
                         productImages: true,

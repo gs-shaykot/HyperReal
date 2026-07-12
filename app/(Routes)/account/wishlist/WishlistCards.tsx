@@ -1,4 +1,6 @@
 'use client'
+import { useCart } from '@/app/Hooks/useCart'
+import { useWishlist } from '@/app/Hooks/useWishlist'
 import { wishlistWithProduct } from '@/app/types/Product'
 import { Getwishlist } from '@/lib/wishlistAPI'
 import { useQuery } from '@tanstack/react-query'
@@ -13,7 +15,8 @@ export const WishlistCards = () => {
         queryFn: Getwishlist
     });
 
-    console.log("Wishlist: ", wishlistItems);
+    const mutation = useCart();
+    const toggleWishlistMutation = useWishlist();
 
     return (
         <section>
@@ -23,7 +26,6 @@ export const WishlistCards = () => {
             </div>
             {
                 wishlistItems?.length > 0 ? (
-                    // i used daisy ui card. but don't know why the cards are overlapping each other.
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
@@ -34,8 +36,8 @@ export const WishlistCards = () => {
                                             height={600}
                                             className="w-full h-auto object-cover"
                                             src={
-                                                item.product.productImages.find(img => img.color === item.variant.color)?.imageUrl ||
-                                                item.product.productImages[0]?.imageUrl
+                                                item?.product?.productImages.find(img => img.color === item.variant.color)?.imageUrl ||
+                                                item?.product?.productImages[0]?.imageUrl
                                             }
                                             alt="Shoes" />
                                     </figure>
@@ -52,11 +54,14 @@ export const WishlistCards = () => {
                                         </div>
                                         <p className="text-lg font-bold text-second">${item.product.price?.toFixed(2)}</p>
                                         <div className="card-actions justify-between items-center">
-                                            <button className="flex-1 btn rounded-none bg-second shadow-none text-zinc-900 cursor-pointer">Add To Cart</button>
-                                            <button className='border border-zinc-700 p-2 btn rounded-none bg-transparent group hover:border-white transition-all hover:scale-105'>
+                                            <button onClick={() => { mutation.mutate({ variantId: item.variant.id as string, quantity: 1 }) }} className="flex-1 btn rounded-none bg-second shadow-none text-zinc-900 cursor-pointer">Add To Cart</button>
+                                            <Link href={`/products/${item.product.id}`} className='border border-zinc-700 p-2 btn rounded-none bg-transparent group hover:border-white transition-all hover:scale-105'>
                                                 <Eye className='group-hover:text-second' />
-                                            </button>
-                                            <button className='border border-zinc-700 p-2 btn rounded-none bg-transparent group hover:border-white transition-all hover:scale-105'>
+                                            </Link>
+                                            <button
+                                                onClick={() => {
+                                                    toggleWishlistMutation.mutate({ productId: item.product.id as string, isWishlisted: true, variantId: item.variant.id as string });
+                                                }} className='border border-zinc-700 p-2 btn rounded-none bg-transparent group hover:border-white transition-all hover:scale-105'>
                                                 <Heart className='group-hover:text-second' />
                                             </button>
                                         </div>
