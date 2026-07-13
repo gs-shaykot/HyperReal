@@ -15,7 +15,6 @@ export const WishlistCards = () => {
         queryKey: ["wishlist"],
         queryFn: Getwishlist
     });
-
     const mutation = useCart();
     const toggleWishlistMutation = useWishlist();
     const clearWishlistMutation = useClearWishlist();
@@ -47,7 +46,7 @@ export const WishlistCards = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
-                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm border hover:border-second border-zi-700 transition-all group cursor-pointer">
+                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm border hover:border-second border-zinc-700 transition-all group cursor-pointer">
                                     <figure>
                                         <Image
                                             width={600}

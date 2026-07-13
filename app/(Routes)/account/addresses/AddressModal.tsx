@@ -46,7 +46,7 @@ export default function AddressModal({
 
                 {/* Header */}
                 <div className="mb-8 flex items-center justify-between">
-                    <h2 className="font-mono text-3xl font-bold uppercase tracking-widest">
+                    <h2 className="text-2xl font-bold uppercase tracking-widest">
                         New Drop Location
                     </h2>
 
@@ -61,7 +61,7 @@ export default function AddressModal({
                 <form action={handleSubmit} className="space-y-6">
                     {/* Label */}
                     <div>
-                        <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                        <label className="mb-2 block text-sm uppercase tracking-widest">
                             Label
                         </label>
 
@@ -75,7 +75,7 @@ export default function AddressModal({
 
                     {/* Full Name */}
                     <div>
-                        <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                        <label className="mb-2 block text-sm uppercase tracking-widest">
                             Full Name
                         </label>
 
@@ -90,7 +90,7 @@ export default function AddressModal({
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 Street
                             </label>
 
@@ -102,7 +102,7 @@ export default function AddressModal({
                         </div>
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 House / Apartment
                             </label>
 
@@ -119,7 +119,7 @@ export default function AddressModal({
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 City
                             </label>
 
@@ -131,7 +131,7 @@ export default function AddressModal({
                         </div>
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 Postal Code
                             </label>
 
@@ -148,7 +148,7 @@ export default function AddressModal({
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 Country
                             </label>
 
@@ -161,7 +161,7 @@ export default function AddressModal({
                         </div>
 
                         <div>
-                            <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
+                            <label className="mb-2 block text-sm uppercase tracking-widest">
                                 Phone Number
                             </label>
 
