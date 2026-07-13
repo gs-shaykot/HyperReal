@@ -41,6 +41,7 @@ model Address {
   state    String
   zipCode  String
   country  String
+  phone    String
 
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -169,7 +170,7 @@ model Wishlist {
   userId           String
   productId        String
   createdAt        DateTime       @default(now())
-  productVariantId String 
+  productVariantId String
   user             User           @relation(fields: [userId], references: [id])
   product          Product        @relation(fields: [productId], references: [id])
   variant          ProductVariant @relation(fields: [productVariantId], references: [id])
