@@ -5,7 +5,7 @@ export type AddressType = {
     fullName: string;
     street: string;
     city: string;
-    state: string;
+    house: string;
     zipCode: string;
     country: string;
     phone: string;

@@ -24,15 +24,16 @@ export default function AddressModal({
 
     const handleSubmit = (formData: FormData) => {
         const data = {
-            label: formData.get("label")?.toString() ?? "",
-            fullName: formData.get("fullName")?.toString() ?? "",
-            street: formData.get("street")?.toString() ?? "",
-            state: formData.get("state")?.toString() ?? "",
-            city: formData.get("city")?.toString() ?? "",
-            zipCode: formData.get("zipCode")?.toString() ?? "",
-            country: formData.get("country")?.toString() ?? "",
-            phone: formData.get("phone")?.toString() ?? "",
+            label: formData.get("label")?.toString().trim() || "Home",
+            fullName: formData.get("fullName")?.toString().trim() || "",
+            street: formData.get("street")?.toString().trim() || "",
+            house: formData.get("house")?.toString().trim() || "",
+            city: formData.get("city")?.toString().trim() || "",
+            zipCode: formData.get("zipCode")?.toString().trim() || "",
+            country: formData.get("country")?.toString().trim() || "",
+            phone: formData.get("phone")?.toString().trim() || "",
         };
+        console.log("Form data submitted: ", data);
         addressMutation.mutate(data);
         if (!isLoading) {
             onCloseAction();
@@ -102,11 +103,11 @@ export default function AddressModal({
 
                         <div>
                             <label className="mb-2 block font-mono text-sm uppercase tracking-widest">
-                                State
+                                House / Apartment
                             </label>
 
                             <input
-                                name="state"
+                                name="house"
                                 type="text"
                                 className="input input-bordered w-full rounded-none bg-[#0f0f0f] border-2 border-zinc-800 focus:border-second outline-0"
                             />

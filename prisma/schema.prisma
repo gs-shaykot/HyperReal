@@ -38,12 +38,12 @@ model Address {
   fullName String
   street   String
   city     String
-  state    String
+  house    String
   zipCode  String
   country  String
   phone    String
 
-  isDefault Boolean  @default(false)
+  isDefault Boolean  @default(true) 
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 

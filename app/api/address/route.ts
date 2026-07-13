@@ -6,11 +6,10 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const address = await req.json();
-        const session = await getServerSession(authOptions);
-
+        const session = await getServerSession(authOptions); 
         const res = await prisma.address.create({
             data: {
-                userId: session?.user.id,
+                userId: session?.user.id, 
                 ...address
             }
         })

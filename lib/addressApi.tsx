@@ -3,7 +3,7 @@ import axios from "axios";
 
 export const addAddress = async (address: AddressType) => {
     try {
-        if (!address.label || !address.fullName || !address.street || !address.city || !address.zipCode || !address.country || !address.phone) {
+        if (!address.fullName || !address.street || !address.city || !address.zipCode || !address.country || !address.phone) {
             throw new Error('All fields are required.');
         }
 
