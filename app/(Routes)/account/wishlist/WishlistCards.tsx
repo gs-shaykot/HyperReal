@@ -29,7 +29,11 @@ export const WishlistCards = () => {
                     {
                         wishlistItems?.length > 0 && (
                             <button
-                                onClick={() => clearWishlistMutation.mutate()}
+                                onClick={() => {
+                                    if (confirm("Are you sure you want to clear your wishlist?")) {
+                                        clearWishlistMutation.mutate();
+                                    }
+                                }}
                                 className='flex justify-between items-center btn btn-sm bg-transparent rounded-none hover:bg-zinc-900 text-red-500 shadow-none'>
                                 <Trash2 size={16} />
                                 CLEAR ALL
@@ -43,7 +47,7 @@ export const WishlistCards = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
-                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm hover:border hover:border-second transition-all group cursor-pointer">
+                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm border hover:border-second border-zinc-700 transition-all group cursor-pointer">
                                     <figure>
                                         <Image
                                             width={600}
