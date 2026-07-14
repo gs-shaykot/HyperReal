@@ -1,9 +1,10 @@
 "use client"
 import AddressModal from '@/app/(Routes)/account/addresses/AddressModal';
+import { useMakePrimary } from '@/app/Hooks/useAddress';
 import { AddressType } from '@/app/types/AddressType';
 import { getAddresses } from '@/lib/addressApi';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Phone, Plus, Trash2 } from 'lucide-react'
+import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react'
 import Link from 'next/link';
 import React, { useState } from 'react'
 
@@ -13,6 +14,8 @@ export const Address = () => {
         queryFn: getAddresses
     });
     const [open, setOpen] = useState(false);
+    const makePrimary = useMakePrimary();
+
     return (
         <div>
             {/* Header */}
@@ -37,7 +40,7 @@ export const Address = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (
-                                <div key={idx} className='border border-zinc-700 flex flex-col h-full '>
+                                <div key={idx} className={`border ${address.isDefault ? 'border-second' : ' border-zinc-700 '} flex flex-col h-full relative`}>
                                     <div className='p-3 flex gap-2 items-start'>
                                         <MapPin size={20} className='inline text-second mt-1.5' />
                                         <div className='space-y-1.5 flex-1'>
@@ -52,11 +55,35 @@ export const Address = () => {
                                         </div>
                                     </div>
                                     <div className='mt-auto p-3 border-t border-zinc-700 border-dashed'>
-                                        <button className="btn w-full rounded-none shadow-none bg-second text-zinc-900">
-                                            <Trash2 size={16} strokeWidth={2} className='mr-2 text-red-500' />
-                                            REMOVE
-                                        </button>
+                                        {
+                                            address.isDefault ? (
+                                                <button className="btn border-0 w-full rounded-none shadow-none bg-transparent hover:bg-[#262626] text-red-500">
+                                                    <Trash2 size={16} strokeWidth={2} className='mr-2 ' />
+                                                    REMOVE
+                                                </button>
+                                            ) : (
+                                                <div className='flex justify-between items-center w-full'>
+                                                    <button
+                                                        onClick={() => makePrimary.mutate(address.id as string)}
+                                                        className="btn border-0 w-6/12 rounded-none shadow-none bg-transparent hover:bg-[#262626] text-white">
+                                                        <Star size={16} strokeWidth={2} className='mr-2 ' />
+                                                        PRIMARY
+                                                    </button>
+                                                    <button className="btn border-0 w-6/12 rounded-none shadow-none bg-transparent hover:bg-[#262626] text-red-500">
+                                                        <Trash2 size={16} strokeWidth={2} className='mr-2 ' />
+                                                        REMOVE
+                                                    </button>
+                                                </div>
+                                            )
+                                        }
                                     </div>
+                                    {
+                                        address.isDefault && (
+                                            <span className="badge badge-success bg-second text-zinc-900 rounded-none absolute top-0 right-0 border-0 font-bold">
+                                                PRIMARY
+                                            </span>
+                                        )
+                                    }
                                 </div>
                             ))
                         }
@@ -78,6 +105,6 @@ export const Address = () => {
                     </div>
                 )
             }
-        </div>
+        </div >
     )
 }

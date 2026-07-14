@@ -28,6 +28,7 @@ export const getAddresses = async () => {
 
 export const makePrimaryAddress = async (id: string) => {
     try {
+        console.log("Making address primary with id: ", id);
         const res = await axios.patch("/api/address/default", { id });
         return res.data;
     }

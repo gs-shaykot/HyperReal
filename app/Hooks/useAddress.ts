@@ -1,5 +1,5 @@
 import { AddressType } from "@/app/types/AddressType";
-import { addAddress } from "@/lib/addressApi";
+import { addAddress, makePrimaryAddress } from "@/lib/addressApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -36,3 +36,52 @@ export const useAddress = () => {
     });
     return addressMutation;
 }
+
+export const useMakePrimary = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: makePrimaryAddress,
+
+        onMutate: async (selectedId: string) => {
+
+            await queryClient.cancelQueries({
+                queryKey: ["address"]
+            });
+
+            const previousAddresses =
+                queryClient.getQueryData<AddressType[]>(["address"]);
+
+            queryClient.setQueryData<AddressType[]>(
+                ["address"],
+                (old = []) =>
+                    old.map(address => ({
+                        ...address,
+                        isDefault: address.id === selectedId
+                    }))
+            );
+
+            return { previousAddresses };
+        },
+
+        onError: (_, __, context) => {
+
+            queryClient.setQueryData(
+                ["address"],
+                context?.previousAddresses
+            );
+
+            toast.error("Failed to update address.");
+        },
+
+        onSuccess: () => {
+            toast.success("Primary address updated.");
+        },
+
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["address"]
+            });
+        }
+    });
+};
