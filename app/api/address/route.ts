@@ -6,13 +6,20 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const address = await req.json();
-        const session = await getServerSession(authOptions); 
+        const session = await getServerSession(authOptions);
+
+        const existingAddress = await prisma.address.count({
+            where: { userId: session?.user.id }
+        })
+
         const res = await prisma.address.create({
             data: {
-                userId: session?.user.id, 
-                ...address
+                userId: session?.user.id,
+                ...address,
+                isDefault: existingAddress === 0
             }
-        })
+        });
+        
 
         return NextResponse.json({ message: "Address added successfully.", data: res }, { status: 200 });
     }

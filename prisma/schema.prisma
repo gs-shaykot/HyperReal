@@ -43,7 +43,7 @@ model Address {
   country  String
   phone    String
 
-  isDefault Boolean  @default(true) 
+  isDefault Boolean  @default(false) 
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 

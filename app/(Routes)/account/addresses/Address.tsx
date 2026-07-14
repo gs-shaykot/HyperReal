@@ -3,7 +3,7 @@ import AddressModal from '@/app/(Routes)/account/addresses/AddressModal';
 import { AddressType } from '@/app/types/AddressType';
 import { getAddresses } from '@/lib/addressApi';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Phone, Plus } from 'lucide-react'
+import { MapPin, Phone, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link';
 import React, { useState } from 'react'
 
@@ -13,7 +13,6 @@ export const Address = () => {
         queryFn: getAddresses
     });
     const [open, setOpen] = useState(false);
-    console.log("Addresses fetched: ", addresses);
     return (
         <div>
             {/* Header */}
@@ -38,17 +37,25 @@ export const Address = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (
-                                <div key={idx} className='border border-zinc-700 p-3 flex gap-2 items-start'>
-                                    <MapPin size={20} className='inline text-second mt-1.5' />
-                                    <div className='space-y-1.5 flex-1'>
-                                        <h1 className='font-1.5old text-lg'>{address.label?.toUpperCase()}</h1>
-                                        <p className='text-lg font-medium'>{address.fullName}</p>
-                                        <p className='text-sm border-dashed border-b border-zinc-700 pb-1'>{address.house},{address.street}</p>
-                                        <div className='flex gap-2 justify-between items-center'>
-                                            <p className='text-sm'>{address.city},{address.zipCode}</p>
-                                            <p className='flex items-center'><Phone size={14}/>: {address.phone}</p>
+                                <div key={idx} className='border border-zinc-700 flex flex-col h-full '>
+                                    <div className='p-3 flex gap-2 items-start'>
+                                        <MapPin size={20} className='inline text-second mt-1.5' />
+                                        <div className='space-y-1.5 flex-1'>
+                                            <h1 className='font-bold text-sm'>{address.label?.toUpperCase()}</h1>
+                                            <p className='text-sm font-medium'>{address.fullName}</p>
+                                            <p className='text-sm border-dashed border-b border-zinc-700 pb-1 text-zinc-400'>{address.house},{address.street}</p>
+                                            <div className='flex gap-2 justify-between items-center'>
+                                                <p className='text-sm text-zinc-400'>{address.city},{address.zipCode}</p>
+                                                <p className='flex items-center text-zinc-400'><Phone size={14} />: {address.phone}</p>
+                                            </div>
+                                            <p className='text-sm text-zinc-400'>{address.country}</p>
                                         </div>
-                                        <p className='text-sm'>{address.country}</p>
+                                    </div>
+                                    <div className='mt-auto p-3 border-t border-zinc-700 border-dashed'>
+                                        <button className="btn w-full rounded-none shadow-none bg-second text-zinc-900">
+                                            <Trash2 size={16} strokeWidth={2} className='mr-2 text-red-500' />
+                                            REMOVE
+                                        </button>
                                     </div>
                                 </div>
                             ))

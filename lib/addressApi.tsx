@@ -25,3 +25,14 @@ export const getAddresses = async () => {
         throw error;
     }
 }
+
+export const makePrimaryAddress = async (id: string) => {
+    try {
+        const res = await axios.patch("/api/address/default", { id });
+        return res.data;
+    }
+    catch (error) {
+        console.error("Error occurred while making address primary: ", error);
+        throw error;
+    }
+}
