@@ -42,28 +42,21 @@ export const useMakePrimary = () => {
 
     return useMutation({
         mutationFn: makePrimaryAddress,
-
         onMutate: async (selectedId: string) => {
-
-            await queryClient.cancelQueries({
-                queryKey: ["address"]
-            });
-
-            const previousAddresses =
-                queryClient.getQueryData<AddressType[]>(["address"]);
+            await queryClient.cancelQueries({ queryKey: ["address"] });
+            const previousAddresses = queryClient.getQueryData<AddressType[]>(["address"])
 
             queryClient.setQueryData<AddressType[]>(
                 ["address"],
-                (old = []) =>
-                    old.map(address => ({
+                (old: AddressType[] = []) => {
+                    return old.map(address => ({
                         ...address,
                         isDefault: address.id === selectedId
-                    }))
-            );
-
+                    }));
+                }
+            )
             return { previousAddresses };
         },
-
         onError: (_, __, context) => {
 
             queryClient.setQueryData(

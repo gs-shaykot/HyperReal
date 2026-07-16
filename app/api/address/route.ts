@@ -35,7 +35,15 @@ export async function GET() {
         const res = await prisma.address.findMany({
             where: {
                 userId: session?.user.id
-            }
+            },
+            orderBy: [
+                {
+                    isDefault: 'desc'
+                },
+                {
+                    createdAt: 'asc'
+                }
+            ]
         });
         return NextResponse.json({ message: "Addresses fetched successfully.", data: res }, { status: 200 });
     }

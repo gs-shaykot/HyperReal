@@ -37,6 +37,7 @@ export const Address = () => {
             {/* Address List */}
             {
                 addresses?.length > 0 ? (
+                    // almost done, now the "Primary" address is moving to the last of the list. but i want it to be the first of the list.
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (

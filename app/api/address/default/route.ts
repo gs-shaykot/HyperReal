@@ -7,16 +7,12 @@ export async function PATCH(req: Request) {
     try {
         const { id } = await req.json();
         const session = await getServerSession(authOptions);
-
-        console.log("Id inside patch api: ", id);
+ 
         await prisma.$transaction(async (tx) => {
             // set all addresses of the user to isDefault: false except the id'th address.
             await tx.address.updateMany({
                 where: {
                     userId: session?.user.id,
-                    // NOT: {
-                    //     id
-                    // }
                 },
                 data: {
                     isDefault: false
