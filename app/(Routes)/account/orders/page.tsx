@@ -1,16 +1,20 @@
+import { AllOrder } from '@/app/(Routes)/account/orders/AllOrder';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
 import React from 'react';
 
-const page = () => {
+const page = async () => {
+    const session = await getServerSession(authOptions);
+    const orders = await prisma.order.findMany({
+        where: {
+            userId: session?.user.id
+        }
+    });
+    console.log("Orders:", orders);
     return (
-        <section className='space-y-4 p-6 text-zinc-100'>
-            <div>
-                <h1 className='text-2xl font-bold'>Orders</h1>
-                <p className='mt-2 text-sm text-zinc-400'>Review your recent purchases, delivery progress, and order history.</p>
-            </div>
-
-            <div className='border border-zinc-800 bg-[#0f0f0f] p-4'>
-                <p className='text-zinc-300'>No orders to display yet. Your order history will appear here once you place a purchase.</p>
-            </div>
+        <section className='text-zinc-100'>
+            <AllOrder />
         </section>
     );
 };
