@@ -1,6 +1,7 @@
 
 import { SuccessPage } from '@/app/(Routes)/(Payment Status)/success/SuccessPage';
 import prisma from '@/lib/prisma';
+import { orderDetailsSelect } from '@/lib/prisma/orderSelect';
 
 const page = async ({ searchParams }: any) => {
     const { orderId } = await searchParams;
@@ -9,60 +10,7 @@ const page = async ({ searchParams }: any) => {
         where: {
             id: orderId
         },
-        select: {
-            id: true,
-            userId: true,
-            status: true,
-            orderCode: true,
-            createdAt: true,
-            address: true,
-
-            orderItems: {
-                select: {
-                    id: true,
-                    variantId: true,
-                    quantity: true,
-                    priceAtPurchase: true,
-
-                    variant: {
-                        select: {
-                            size: true,
-                            color: true,
-
-                            product: {
-                                select: {
-                                    id: true,
-                                    name: true,
-                                    price: true,
-
-                                    category: {
-                                        select: {
-                                            name: true,
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-            },
-
-            payments: {
-                select: {
-                    orderId: true,
-                    method: true,
-                    status: true,
-                    transactionId: true,
-                    paidAmountInBDT: true,
-                    totalProductPriceInUSD: true,
-                    shippingCost: true,
-                    discount: true,
-                    createdAt: true,
-                    country: true,
-                }
-            }
-        }
+        select: orderDetailsSelect
     });
 
     const user = await prisma.user.findUnique({
@@ -70,7 +18,7 @@ const page = async ({ searchParams }: any) => {
             id: order?.userId
         }
     });
-    
+
     return (
         <div>
             <SuccessPage order={order} user={user} />
