@@ -10,22 +10,46 @@ export type OrderType = Prisma.OrderGetPayload<{
 }>
 
 export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
-
+    console.log("Order: ", orders)
     return (
         <div>
             {/* Header */}
             <div className='flex justify-between items-center mb-3'>
                 <h2 className='text-2xl font-bold italic'>Order<span className='text-second'> History</span></h2>
-                <h2 className='text-xs text-zinc-500'>{orders.length} TRANSMISSIONS</h2>
+                <h2 className='text-xs text-zinc-500'>{orders?.length} TRANSMISSIONS</h2>
             </div>
             {
-                orders.length > 0 ?
+                orders?.length > 0 ?
                     (
                         <div>
                             {
-                                orders.map((order) => (
+                                orders?.map((order) => (
                                     <div key={order.id} className='p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
-
+                                        <div className=''>
+                                            <div>
+                                                <h2>{order.orderCode}</h2>
+                                                <h3>{order.status}</h3>
+                                            </div>
+                                            <div>
+                                                <h3>
+                                                    {order.createdAt.toLocaleDateString("en-US", {
+                                                        day: "numeric",
+                                                        month: "numeric",
+                                                        year: "numeric",
+                                                    })}
+                                                </h3>
+                                                <h3>{order.orderItems.length} ITEMS</h3>
+                                            </div>
+                                            <div>
+                                                {
+                                                    order.orderItems.map((item)=>(
+                                                        <div key={item.id} className='flex items-center gap-2'>
+                                                            <h3>{item.variant.product.name}</h3>
+                                                        </div>
+                                                    ))
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
                                 ))
                             }
