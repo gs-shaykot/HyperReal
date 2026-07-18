@@ -1,7 +1,7 @@
 'use client'
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect'
 import { Prisma } from '@prisma/client'
-import { Heart, Package, Plus } from 'lucide-react'
+import { Eye, Heart, Package, Plus } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -24,13 +24,13 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                         <div>
                             {
                                 orders?.map((order) => (
-                                    <div key={order.id} className='p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
-                                        <div className=''>
-                                            <div>
+                                    <div key={order.id} className='flex justify-between items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
+                                        <div className='flex flex-col'>
+                                            <div className='flex justify-between items-center gap-3'>
                                                 <h2>{order.orderCode}</h2>
                                                 <h3>{order.status}</h3>
                                             </div>
-                                            <div>
+                                            <div className='flex justify-between items-center gap-3'>
                                                 <h3>
                                                     {order.createdAt.toLocaleDateString("en-US", {
                                                         day: "numeric",
@@ -40,15 +40,25 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                 </h3>
                                                 <h3>{order.orderItems.length} ITEMS</h3>
                                             </div>
-                                            <div>
+                                            <div className='flex justify-between items-center gap-3'>
                                                 {
-                                                    order.orderItems.map((item)=>(
+                                                    order.orderItems.map((item) => (
                                                         <div key={item.id} className='flex items-center gap-2'>
                                                             <h3>{item.variant.product.name}</h3>
                                                         </div>
                                                     ))
                                                 }
                                             </div>
+                                        </div>
+                                        <div className='flex justify-between items-end'>
+                                            <div>
+                                                <h3>TOAL</h3>
+                                                <h3>{order.payments[0].totalProductPriceInUSD.toFixed(2)}</h3>
+                                            </div>
+                                            <button className='btn'>
+                                                <Eye />
+                                                VIEW
+                                            </button>
                                         </div>
                                     </div>
                                 ))

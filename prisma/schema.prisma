@@ -186,8 +186,9 @@ enum Role {
 enum OrderStatus {
   PENDING
   PROCESSING
-  SHIPPED
-  COMPLETED
+  SHIPPED 
+  DELIVERED
+  CANCELLED
 }
 
 enum PaymentMethod {
