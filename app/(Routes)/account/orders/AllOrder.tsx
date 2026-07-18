@@ -1,7 +1,7 @@
 'use client'
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect'
 import { Prisma } from '@prisma/client'
-import { Eye, Heart, Package, Plus } from 'lucide-react'
+import { CalendarDays, ClockArrowUp, Eye, Heart, Hourglass, OctagonX, Package, PackageCheck, Plus, Truck } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -10,7 +10,35 @@ export type OrderType = Prisma.OrderGetPayload<{
 }>
 
 export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
-    console.log("Order: ", orders)
+
+    const OrderStatus = [
+        {
+            status: "PENDING",
+            icon: Hourglass,
+            color: "yellow-500"
+        },
+        {
+            status: "PROCESSING",
+            icon: ClockArrowUp,
+            color: "orange-400"
+        },
+        {
+            status: "SHIPPED",
+            icon: Truck,
+            color: "blue-500"
+        },
+        {
+            status: "DELIVERED",
+            icon: PackageCheck,
+            color: "second"
+        },
+        {
+            status: "CANCELLED",
+            icon: OctagonX, 
+            color: "red-500"
+        }
+    ]
+
     return (
         <div>
             {/* Header */}
@@ -25,37 +53,52 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                             {
                                 orders?.map((order) => (
                                     <div key={order.id} className='flex justify-between items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
-                                        <div className='flex flex-col'>
-                                            <div className='flex justify-between items-center gap-3'>
-                                                <h2>{order.orderCode}</h2>
-                                                <h3>{order.status}</h3>
+                                        <div className='flex flex-col space-y-2'>
+                                            <div className='flex justify-between items-center gap-2 w-68'>
+                                                <h2 className='font-bold '>{order.orderCode}</h2>
+                                                <h3 className='flex justify-start gap-1'>
+                                                    {
+                                                        OrderStatus?.map((stat,idx) => (
+                                                            stat.status === order.status && (
+                                                                <span key={idx} className={`flex items-center text-xs border border-${stat.color} text-${stat.color} p-1 rounded-full`}>
+                                                                    <stat.icon className={`h-4 w-4 text-${stat.color} inline-block mr-1`} />
+                                                                    {stat.status}
+                                                                </span>
+                                                            )
+                                                        ))
+                                                    }
+                                                </h3>
                                             </div>
-                                            <div className='flex justify-between items-center gap-3'>
-                                                <h3>
+
+                                            <div className='flex items-center gap-4 text-zinc-400 text-sm'>
+                                                <h3 className='flex justify-between items-center gap-1'>
+                                                    <CalendarDays size={16} />
                                                     {order.createdAt.toLocaleDateString("en-US", {
                                                         day: "numeric",
                                                         month: "numeric",
                                                         year: "numeric",
                                                     })}
                                                 </h3>
+                                                <span className='w-2 h-2 rounded-full border border-second'/>
                                                 <h3>{order.orderItems.length} ITEMS</h3>
                                             </div>
-                                            <div className='flex justify-between items-center gap-3'>
+
+                                            <div className='flex items-center gap-2'>
                                                 {
                                                     order.orderItems.map((item) => (
-                                                        <div key={item.id} className='flex items-center gap-2'>
+                                                        <div key={item.id} className='flex items-center text-sm text-zinc-400 bg-zinc-900 px-2 py-1'>
                                                             <h3>{item.variant.product.name}</h3>
                                                         </div>
                                                     ))
                                                 }
                                             </div>
                                         </div>
-                                        <div className='flex justify-between items-end'>
-                                            <div>
-                                                <h3>TOAL</h3>
-                                                <h3>{order.payments[0].totalProductPriceInUSD.toFixed(2)}</h3>
+                                        <div className='flex justify-between items-center gap-3'>
+                                            <div className='flex flex-col justify-center items-center'>
+                                                <h3 className='text-zinc-400'>TOTAL</h3>
+                                                <h3 className='text-second'>${order.payments[0].totalProductPriceInUSD.toFixed(2)}</h3>
                                             </div>
-                                            <button className='btn'>
+                                            <button className='btn btn-sm rounded-none bg-transparent hover:bg-white hover:text-zinc-900 border-white'>
                                                 <Eye />
                                                 VIEW
                                             </button>
