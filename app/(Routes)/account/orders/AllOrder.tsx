@@ -15,27 +15,27 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
         {
             status: "PENDING",
             icon: Hourglass,
-            color: "yellow-500"
+            classname: "border-yellow-500 text-yellow-500"
         },
         {
             status: "PROCESSING",
             icon: ClockArrowUp,
-            color: "orange-400"
+            classname: "border-orange-400 text-orange-400"
         },
         {
             status: "SHIPPED",
             icon: Truck,
-            color: "blue-500"
+            classname: "border-sky-400 text-sky-400"
         },
         {
             status: "DELIVERED",
             icon: PackageCheck,
-            color: "second"
+            classname: "border-second text-second" 
         },
         {
             status: "CANCELLED",
-            icon: OctagonX, 
-            color: "red-500"
+            icon: OctagonX,
+            classname: "border-red-500 text-red-500"
         }
     ]
 
@@ -53,15 +53,15 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                             {
                                 orders?.map((order) => (
                                     <div key={order.id} className='flex justify-between items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
-                                        <div className='flex flex-col space-y-2'>
-                                            <div className='flex justify-between items-center gap-2 w-68'>
-                                                <h2 className='font-bold '>{order.orderCode}</h2>
+                                        <div className='flex flex-col space-y-2'> 
+                                            <div className='flex items-center gap-2 w-68'>
+                                                <h2 className='font-bold'>{order.orderCode}</h2>
                                                 <h3 className='flex justify-start gap-1'>
                                                     {
-                                                        OrderStatus?.map((stat,idx) => (
+                                                        OrderStatus?.map((stat, idx) => (
                                                             stat.status === order.status && (
-                                                                <span key={idx} className={`flex items-center text-xs border border-${stat.color} text-${stat.color} p-1 rounded-full`}>
-                                                                    <stat.icon className={`h-4 w-4 text-${stat.color} inline-block mr-1`} />
+                                                                <span key={idx} className={`flex items-center text-xs border ${stat.classname} p-1 rounded-full shrink-0`}>
+                                                                    <stat.icon className={`h-4 w-4 text-${stat.classname} inline-block mr-1`} />
                                                                     {stat.status}
                                                                 </span>
                                                             )
@@ -79,7 +79,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                         year: "numeric",
                                                     })}
                                                 </h3>
-                                                <span className='w-2 h-2 rounded-full border border-second'/>
+                                                <span className='w-2 h-2 rounded-full border border-second' />
                                                 <h3>{order.orderItems.length} ITEMS</h3>
                                             </div>
 
@@ -124,6 +124,6 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                         </div>
                     )
             }
-        </div>
+        </div >
     )
 }

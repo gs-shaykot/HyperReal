@@ -12,8 +12,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useRef } from "react";
-import { useReactToPrint } from "react-to-print";
+import { useMemo, useRef } from "react"; 
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");

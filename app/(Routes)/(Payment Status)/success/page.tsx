@@ -1,5 +1,4 @@
-
-import { SuccessPage } from '@/app/(Routes)/(Payment Status)/success/SuccessPage';
+import { SuccessPage } from './SuccessPage';
 import prisma from '@/lib/prisma';
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect';
 
