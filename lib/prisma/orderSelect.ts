@@ -30,9 +30,10 @@ export const orderDetailsSelect = {
                                 select: {
                                     name: true,
                                 }
-                            }
+                            },
+                            productImages: true
                         }
-                    }
+                    },
                 }
 
             }

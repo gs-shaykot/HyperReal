@@ -1,7 +1,7 @@
 "use client";
 import { useAddress } from "@/app/Hooks/useAddress";
 import { getAddresses } from "@/lib/addressApi";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { on } from "events";
 import { X, Save } from "lucide-react";
 
@@ -10,10 +10,7 @@ type AddressModalProps = {
     onCloseAction: () => void;
 };
 
-export default function AddressModal({
-    open,
-    onCloseAction,
-}: AddressModalProps) {
+export default function AddressModal({ open, onCloseAction, }: AddressModalProps) {
     const addressMutation = useAddress();
 
     const { data: addresses, isLoading } = useQuery({

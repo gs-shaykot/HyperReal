@@ -4,8 +4,7 @@ import { useMakePrimary } from '@/app/Hooks/useAddress';
 import { AddressType } from '@/app/types/AddressType';
 import { getAddresses } from '@/lib/addressApi';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react'
-import Link from 'next/link';
+import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react' 
 import React, { useState } from 'react'
 
 export const Address = () => {
@@ -36,8 +35,7 @@ export const Address = () => {
 
             {/* Address List */}
             {
-                addresses?.length > 0 ? (
-                    // almost done, now the "Primary" address is moving to the last of the list. but i want it to be the first of the list.
+                addresses?.length > 0 ? ( 
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (
