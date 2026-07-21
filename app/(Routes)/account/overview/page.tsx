@@ -6,7 +6,7 @@ import { ArrowRight, CircleCheckBig, Clock, Heart, Mail, Package, Phone, Shield,
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 
-export default async function OverviewPage() { 
+export default async function OverviewPage() {  
   const session = await getServerSession(authOptions);
   const orders = await prisma.order.findMany({
     where: {

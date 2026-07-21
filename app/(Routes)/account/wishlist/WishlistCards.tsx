@@ -1,4 +1,5 @@
 'use client'
+import { WishlistSkeleton } from '@/app/components/skeletons/WishlistSkeleton'
 import { useCart } from '@/app/Hooks/useCart'
 import { useClearWishlist } from '@/app/Hooks/useClearWishlist'
 import { useWishlist } from '@/app/Hooks/useWishlist'
@@ -18,6 +19,10 @@ export const WishlistCards = () => {
     const mutation = useCart();
     const toggleWishlistMutation = useWishlist();
     const clearWishlistMutation = useClearWishlist();
+
+    if (isLoading) {
+        return <WishlistSkeleton />
+    }
 
     return (
         <section>

@@ -1,10 +1,11 @@
 "use client"
 import AddressModal from '@/app/(Routes)/account/addresses/AddressModal';
+import { AddressSkeleton } from '@/app/components/skeletons/AddressSkeleton';
 import { useMakePrimary } from '@/app/Hooks/useAddress';
 import { AddressType } from '@/app/types/AddressType';
 import { getAddresses } from '@/lib/addressApi';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react' 
+import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
 
 export const Address = () => {
@@ -14,6 +15,10 @@ export const Address = () => {
     });
     const [open, setOpen] = useState(false);
     const makePrimary = useMakePrimary();
+
+    if (isLoading) {
+        return <AddressSkeleton />
+    }
 
     return (
         <div>
@@ -35,7 +40,7 @@ export const Address = () => {
 
             {/* Address List */}
             {
-                addresses?.length > 0 ? ( 
+                addresses?.length > 0 ? (
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (
