@@ -29,11 +29,22 @@ export const Identity = () => {
             });
         }
     }, [profile]);
-
     if (isLoading) {
         return (
-            <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
-                <p>Loading...</p>
+            <div className="border border-neutral-700 bg-[#0f0f0f] p-5 animate-pulse">
+                <div className="flex justify-between items-center mb-6">
+                    <div className="h-6 w-44 bg-zinc-800 rounded" />
+                    <div className="h-9 w-20 bg-zinc-800 rounded" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="space-y-3">
+                            <div className="h-3 w-20 bg-zinc-800 rounded" />
+                            <div className="h-5 w-40 bg-zinc-700 rounded" />
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }
@@ -59,7 +70,7 @@ export const Identity = () => {
                 setIsEditing(false);
             }
         });
-    } 
+    }
     return (
         <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
             <div className="flex justify-between items-start mb-3">
