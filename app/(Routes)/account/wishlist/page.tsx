@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 
-const page = async () => {
+const page = async () => { 
     return (
         <WishlistCards />
     );
