@@ -1,11 +1,12 @@
 'use client'
 import { CartItemWithProductType } from '@/app/types/cartType'
 import { couponType } from '@/app/types/couponType'
+import { getAddresses } from '@/lib/addressApi'
 import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
 import { getDiscount } from '@/lib/Discount_Calculation_funcs'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { ArrowLeft, DollarSign, HandCoins, Lock, ShieldCheck, Zap } from 'lucide-react'
+import { ArrowLeft, Check, DollarSign, HandCoins, Lock, MapPin, ShieldCheck, Zap } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
 import { useState, useEffect, useMemo } from 'react'
@@ -16,7 +17,7 @@ const hudson = localFont({
     display: "swap",
 })
 
-export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
+export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status } = useSession();
 
     const [selectedCountry, setSelectedCountry] = useState({
@@ -46,6 +47,12 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
         queryKey: ['coupons'],
         queryFn: fetchCouponsApi,
         enabled: status === 'authenticated',
+    });
+
+    const { data: addresses = [], isLoading: isAddressesLoading } = useQuery({
+        queryKey: ["address"],
+        queryFn: getAddresses,
+        enabled: addressesCount > 0,
     });
 
     const appliedCoupon = coupons.find((coupon: couponType) => coupon.code === couponCode);
@@ -103,7 +110,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
     };
 
     const convertedTotal = convertPrice(total);
-    
+
     const handlePayment = async (cartItems: CartItemWithProductType[], country: { value: string, shortName: string }, coupon: string, paymentMethod: string, address: string) => {
         const paymentData = {
             cartItems,
@@ -146,12 +153,99 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                     {/* LEFT PANEL */}
                     <div className='md:col-span-8'>
                         <div className='bg-[#0f0f0f] p-6 border border-zinc-800 mb-8'>
-                            <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
+                            <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
+                            {/* Saved Addresses */}
+                            {/* Saved Addresses */}
+                            <div>
+                                <h3 className="mb-2 text-sm text-zinc-500">
+        // Use Saved Address
+                                </h3>
 
+                                {/* No saved addresses */}
+                                {addressesCount === 0 && (
+                                    <div className="border border-zinc-800 p-4 mb-3">
+                                        <p className="text-xs text-zinc-500">
+                                            No saved addresses found. Please add an address in your profile.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Loading skeleton */}
+                                {addressesCount > 0 && isAddressesLoading && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                                        {Array.from({ length: addressesCount }).map((_, index) => (
+                                            <div
+                                                key={index}
+                                                className="border border-zinc-800 p-3"
+                                            >
+                                                <div className="animate-pulse">
+                                                    <div className="h-3 bg-zinc-800 w-20 mb-3" />
+
+                                                    <div className="h-3.5 bg-zinc-800 w-32 mb-2" />
+
+                                                    <div className="h-3 bg-zinc-800 w-4/5 mb-1" />
+
+                                                    <div className="h-3 bg-zinc-800 w-2/3" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Saved address cards */}
+                                {addressesCount > 0 && !isAddressesLoading && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                                        {addresses.map((address: any) => (
+                                            <div
+                                                key={address.id}
+                                                className={`${address.isDefault
+                                                    ? "border-second bg-second/10"
+                                                    : "border-zinc-800"
+                                                    } border p-3 cursor-pointer relative`}
+                                            >
+                                                <div className="flex items-center justify-start gap-2">
+                                                    <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
+                                                        <MapPin
+                                                            size={14}
+                                                            className="text-second"
+                                                        />
+
+                                                        {address.label.toUpperCase()}
+                                                    </h3>
+
+                                                    {address.isDefault && (
+                                                        <span className="text-xs text-second">
+                                                            // Primary
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <h3 className="text-sm">
+                                                    {address.fullName}
+                                                </h3>
+
+                                                <h3 className="text-xs">
+                                                    {address.house},{address.street}. {address.city}
+                                                </h3>
+
+                                                {address.isDefault && (
+                                                    <div className="absolute top-2 right-2">
+                                                        <Check
+                                                            size={14}
+                                                            className="text-second"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* User Details */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                                 {/* Full Name */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
@@ -241,6 +335,7 @@ export const CheckoutPage = ({ couponCode }: { couponCode: string | null }) => {
                             </div>
                         </div>
 
+                        {/* Payment Options */}
                         <div className='bg-[#0f0f0f] p-6 border border-zinc-800'>
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 02 // Payment Gateway
