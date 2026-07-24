@@ -19,14 +19,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const { data: wishlistItems } = useQuery({
         queryKey: ["wishlist"],
         queryFn: Getwishlist
-    })
-    console.log("wishlist products: ", wishlistItems);
+    }) 
     
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some((item: any) => item?.product?.id === product.id);
     }, [wishlistItems, product.id]);
-
-    console.log("isWishlisted: ", isWishlisted);
+ 
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(

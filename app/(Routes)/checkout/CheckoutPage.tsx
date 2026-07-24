@@ -1,4 +1,5 @@
 'use client'
+import { AddressType } from '@/app/types/AddressType'
 import { CartItemWithProductType } from '@/app/types/cartType'
 import { couponType } from '@/app/types/couponType'
 import { getAddresses } from '@/lib/addressApi'
@@ -27,6 +28,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
     });
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
     const [selectedAddress, setSelectedAddress] = useState('');
+    const [useSavedAddress, setUseSavedAddress] = useState<AddressType | null>();
 
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
@@ -199,13 +201,14 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                 {/* Saved address cards */}
                                 {addressesCount > 0 && !isAddressesLoading && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                                        {addresses.map((address: any) => (
-                                            <div
+                                        {addresses.map((address: AddressType) => (
+                                            <button
+                                                onClick={() => useSavedAddress?.id === address.id ? setUseSavedAddress(null) : setUseSavedAddress(address)}
                                                 key={address.id}
-                                                className={`${address.isDefault
+                                                className={`${address.id === useSavedAddress?.id
                                                     ? "border-second bg-second/10"
-                                                    : "border-zinc-800"
-                                                    } border p-3 cursor-pointer relative`}
+                                                    : "border-zinc-800 bg-transparent"
+                                                    } border p-3 cursor-pointer relative btn flex flex-col h-auto rounded-none items-start`}
                                             >
                                                 <div className="flex items-center justify-start gap-2">
                                                     <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
@@ -214,7 +217,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                             className="text-second"
                                                         />
 
-                                                        {address.label.toUpperCase()}
+                                                        {address.label?.toUpperCase()}
                                                     </h3>
 
                                                     {address.isDefault && (
@@ -228,19 +231,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                     {address.fullName}
                                                 </h3>
 
-                                                <h3 className="text-xs">
+                                                <h3 className="text-xs text-start">
                                                     {address.house},{address.street}. {address.city}
                                                 </h3>
-
-                                                {address.isDefault && (
-                                                    <div className="absolute top-2 right-2">
-                                                        <Check
-                                                            size={14}
-                                                            className="text-second"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 )}
@@ -255,7 +249,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </label>
                                     <input
                                         type="text"
-                                        defaultValue={session?.user.name!}
+                                        defaultValue={useSavedAddress ? useSavedAddress.fullName : session?.user.name!}
                                         placeholder="JANE DOE"
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
@@ -282,6 +276,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         Address
                                     </label>
                                     <input
+                                        defaultValue={useSavedAddress?.house ? useSavedAddress.house + ', ' + useSavedAddress.street : ''}
                                         onChange={(e) => setSelectedAddress(e.target.value)}
                                         type="text"
                                         placeholder="42 NEON ST, SECTOR 7"
@@ -296,6 +291,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </label>
                                     <input
                                         type="text"
+                                        defaultValue={useSavedAddress?.city ? useSavedAddress.city : ''}
                                         placeholder="YOUR ORBITAL CITY"
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
@@ -308,6 +304,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </label>
                                     <input
                                         type="text"
+                                        defaultValue={useSavedAddress?.zipCode ? useSavedAddress.zipCode : ''}
                                         placeholder="00000"
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
@@ -348,6 +345,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         <input
                                             type="tel"
                                             placeholder="PHONE NUMBER"
+                                            defaultValue={useSavedAddress?.phone ? useSavedAddress.phone : ''}
                                             required
                                             className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                         />

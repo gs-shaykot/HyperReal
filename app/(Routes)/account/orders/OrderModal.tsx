@@ -61,8 +61,7 @@ export const OrderModal = ({
         (stat) => stat.status === order.status
     );
 
-    const StatusIcon = currentStatus?.icon;
-    console.log("Order: ", order);
+    const StatusIcon = currentStatus?.icon; 
     return (
         <dialog className="modal modal-open">
             <div className="modal-box max-w-2xl max-h-[90vh] rounded-none border border-zinc-700 bg-main p-0 shadow-xl">

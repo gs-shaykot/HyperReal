@@ -9,8 +9,7 @@ export const useAddress = () => {
     const addressMutation = useMutation({
         mutationKey: ["address"],
         mutationFn: addAddress,
-        onMutate: async (newAddress) => {
-            console.log("Adding new address: ", newAddress);
+        onMutate: async (newAddress) => { 
             await queryClient.cancelQueries({ queryKey: ['address'] });
 
             const previousAddress = queryClient.getQueryData(['address']);

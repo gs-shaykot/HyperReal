@@ -30,7 +30,6 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
             country: formData.get("country")?.toString().trim() || "",
             phone: formData.get("phone")?.toString().trim() || "",
         };
-        console.log("Form data submitted: ", data);
         addressMutation.mutate(data);
         if (!isLoading) {
             onCloseAction();
