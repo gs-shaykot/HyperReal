@@ -15,7 +15,8 @@ import { useState, useEffect, useMemo } from 'react'
 const hudson = localFont({
     src: "../../../fonts/Hudson NY Press.woff",
     display: "swap",
-})
+});
+
 
 export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status } = useSession();
@@ -70,15 +71,16 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
     const total = (subtotal + shippingCost) - discount
 
     const Countries = [
-        { name: "Bangladesh", shortName: "BD", value: "bdt" },
-        { name: "United States", shortName: "US", value: "usd" },
-        { name: "United Kingdom", shortName: "UK", value: "gbp" },
-        { name: "Germany", shortName: "DE", value: "eur" },
-        { name: "Japan", shortName: "JP", value: "jpy" },
-        { name: "Australia", shortName: "AU", value: "aud" },
-        { name: "Canada", shortName: "CA", value: "cad" },
-        { name: "India", shortName: "IN", value: "inr" },
+        { name: "Bangladesh", shortName: "BD", value: "bdt", countryCode: "+880" },
+        { name: "United States", shortName: "US", value: "usd", countryCode: "+1" },
+        { name: "United Kingdom", shortName: "UK", value: "gbp", countryCode: "+44" },
+        { name: "Germany", shortName: "DE", value: "eur", countryCode: "+49" },
+        { name: "Japan", shortName: "JP", value: "jpy", countryCode: "+81" },
+        { name: "Australia", shortName: "AU", value: "aud", countryCode: "+61" },
+        { name: "Canada", shortName: "CA", value: "cad", countryCode: "+1" },
+        { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
     ];
+    const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
 
     useEffect(() => {
         if (selectedCountry.value === 'bdt') {
@@ -156,11 +158,11 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
-                            {/* Saved Addresses */}
+
                             {/* Saved Addresses */}
                             <div>
                                 <h3 className="mb-2 text-sm text-zinc-500">
-        // Use Saved Address
+                                    // Use Saved Address
                                 </h3>
 
                                 {/* No saved addresses */}
@@ -312,7 +314,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                 </div>
 
                                 {/* Country (full width) */}
-                                <div className="md:col-span-2">
+                                <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Delivery Country
                                     </label>
@@ -332,6 +334,25 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </select>
                                 </div>
 
+                                {/* Phone Number */}
+                                <div>
+                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                        Phone Number
+                                    </label>
+
+                                    <div className="flex w-full">
+                                        <div className="flex items-center px-3 bg-black border border-r-0 border-gray-900 text-sm text-second">
+                                            {selectedCountryCode}
+                                        </div>
+
+                                        <input
+                                            type="tel"
+                                            placeholder="PHONE NUMBER"
+                                            required
+                                            className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
