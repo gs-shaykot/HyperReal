@@ -7,11 +7,11 @@ import { fetchCartApi, fetchCouponsApi } from '@/lib/cartAPIs'
 import { getDiscount } from '@/lib/Discount_Calculation_funcs'
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { ArrowLeft, Check, DollarSign, HandCoins, Lock, MapPin, ShieldCheck, Zap } from 'lucide-react'
+import { ArrowLeft, Check, DollarSign, HandCoins, Lock, MapPin, Plus, ShieldCheck, Zap } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
 import { useState, useEffect, useMemo, SubmitEventHandler } from 'react'
-
+import { motion } from "framer-motion";
 
 const hudson = localFont({
     src: "../../../fonts/Hudson NY Press.woff",
@@ -27,7 +27,11 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
     });
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
     const [useSavedAddress, setUseSavedAddress] = useState<AddressType | null>();
-    // const 
+    const [addNewAddress, setAddNewAddress] = useState({
+        addNew: false,
+        isChecked: false,
+    });
+
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
         queryFn: async () => {
@@ -81,8 +85,6 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
     ];
     const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
-    
-    console.log("Saved Addressed: ", addresses)
 
     useEffect(() => {
         if (selectedCountry.value === 'bdt') {
@@ -124,11 +126,13 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         const email = formData.get("email") as string;
         const address = formData.get("address") as string;
         const city = formData.get("city") as string;
-        const postalCode = formData.get("postalCode") as string;
-        const phone = formData.get("phone") as string;
+        const zipCode = formData.get("postalCode") as string;
+        const phoneInput = formData.get("phone") as string;
 
-        const normalizedPhone = phone.trim().replace(/^0+/, "");
-        const fullPhoneNumber = `${selectedCountryCode}${normalizedPhone}`;
+        const cleanedPhone = phoneInput.replace(/[^\d]/g, "");
+        const nationalPhone = cleanedPhone.replace(/^0+/, "");
+        const fullPhoneNumber = `${selectedCountryCode}${nationalPhone}`;
+
         console.log("Full Phone Number:", fullPhoneNumber);
         const paymentData = {
             cart,
@@ -137,10 +141,9 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
             paymentMethod: selectedPaymentMethod,
             address: useSavedAddress || {
                 fullName,
-                email,
                 address,
                 city,
-                postalCode,
+                zipCode,
                 phone: fullPhoneNumber
             }
         };
@@ -237,7 +240,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                     const savedCountry = Countries.find((country) => country.name === address.country);
 
                                                     if (savedCountry) {
-                                                        setSelectedCountry(savedCountry); 
+                                                        setSelectedCountry(savedCountry);
                                                     }
                                                 }}
                                                 key={address.id}
@@ -272,6 +275,13 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                 </h3>
                                             </button>
                                         ))}
+                                        <button
+                                            type='button'
+                                            onClick={() => setAddNewAddress((prev => ({ ...prev, addNew: !prev.addNew })))}
+                                            className={`btn h-auto  rounded-none border  ${addNewAddress.addNew ? 'bg-second/15 border-second' : 'bg-transparent border-zinc-700'} hover:border-second border-dashed flex flex-col shadow-none`}>
+                                            <Plus size={18} />
+                                            NEW ADDRESS
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -316,8 +326,32 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     />
                                 </div>
 
+                                <div>
+                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                        Street
+                                    </label>
+
+                                    <input
+                                        name="street"
+                                        type="text"
+                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                        House / Apartment
+                                    </label>
+
+                                    <input
+                                        name="house"
+                                        type="text"
+                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                    />
+                                </div>
+
                                 {/* Address */}
-                                <div className="md:col-span-2">
+                                {/* <div className="md:col-span-2">
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Address
                                     </label>
@@ -332,7 +366,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
-                                </div>
+                                </div> */}
 
                                 {/* City */}
                                 <div>
@@ -420,6 +454,34 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </div>
                                 </div>
                             </div>
+                            {
+                                addNewAddress.addNew && (
+                                    // Save Address Checkbox
+                                    < motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className='mt-4 border-t border-zinc-800 border-dashed'>
+                                        <label className="flex items-start pt-3 gap-5 bg-[#0f0f0f] cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                name="saveAddress"
+                                                className="checkbox w-5 h-5 checkbox-neutral rounded-none border-second checked:bg-second checked:text-black checked:border-second"
+                                            />
+
+                                            <div>
+                                                <h3 className="text-xs font-bold tracking-widest uppercase text-zinc-100">
+                                                    Save this address for later autofill
+                                                </h3>
+
+                                                <p className="text-xs text-zinc-500 tracking-widest uppercase mt-1">
+                                                    Stored in your profile → Addresses
+                                                </p>
+                                            </div>
+                                        </label>
+                                    </motion.div>
+                                )
+                            }
                         </div>
 
                         {/* Payment Options */}
@@ -611,7 +673,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                         </div>
                     </div>
                 </div>
-            </div>
+            </div >
         </div >
     )
 }
