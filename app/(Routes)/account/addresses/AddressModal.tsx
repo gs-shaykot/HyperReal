@@ -11,9 +11,10 @@ type AddressModalProps = {
     onCloseAction: () => void;
 };
 
+
 export default function AddressModal({ open, onCloseAction, }: AddressModalProps) {
     const [selectedCountry, setSelectedCountry] = useState({
-        value: 'bdt',
+        name: 'Bangladesh',
         shortName: 'BD',
     });
 
@@ -34,9 +35,14 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
         { name: "Canada", shortName: "CA", value: "cad", countryCode: "+1" },
         { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
     ];
-    const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
+    const selectedCountryCode = Countries.find(country => country.name === selectedCountry.name)?.countryCode ?? "";
 
     const handleSubmit = (formData: FormData) => {
+        const phoneInput = formData.get("phone")?.toString().trim() || "";
+        const cleanedPhone = phoneInput.replace(/[^\d]/g, "");
+        const nationalPhone = cleanedPhone.replace(/^0+/, "");
+        const fullPhoneNumber = `${selectedCountryCode}${nationalPhone}`;
+
         const data = {
             label: formData.get("label")?.toString().trim() || "Home",
             fullName: formData.get("fullName")?.toString().trim() || "",
@@ -44,8 +50,8 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
             house: formData.get("house")?.toString().trim() || "",
             city: formData.get("city")?.toString().trim() || "",
             zipCode: formData.get("zipCode")?.toString().trim() || "",
-            country: formData.get("country")?.toString().trim() || "",
-            phone: formData.get("phone")?.toString().trim() || "",
+            country: selectedCountry.name,
+            phone: fullPhoneNumber
         };
         addressMutation.mutate(data);
         if (!isLoading) {
@@ -167,11 +173,11 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             </label>
 
                             <select
-                                value={selectedCountry.value}
+                                value={selectedCountry.name}
                                 onChange={(e) =>
                                     setSelectedCountry(
                                         Countries.find(
-                                            (country) => country.value === e.target.value
+                                            (country) => country.name === e.target.value
                                         ) || Countries[0]
                                     )
                                 }
@@ -201,7 +207,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
 
                                 <input
                                     name="phone"
-                                    type="tel" 
+                                    type="tel"
                                     placeholder="PHONE NUMBER"
                                     required
                                     className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"

@@ -129,8 +129,7 @@ model Coupon {
 model Order {
   id        String      @id @default(uuid())
   userId    String
-  status    OrderStatus @default(PENDING)
-  address   String
+  status    OrderStatus @default(PENDING) 
   orderCode String      @unique
   createdAt DateTime    @default(now())
 

@@ -81,6 +81,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
     ];
     const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
+    
+    console.log("Saved Addressed: ", addresses)
 
     useEffect(() => {
         if (selectedCountry.value === 'bdt') {
@@ -127,7 +129,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
         const normalizedPhone = phone.trim().replace(/^0+/, "");
         const fullPhoneNumber = `${selectedCountryCode}${normalizedPhone}`;
-
+        console.log("Full Phone Number:", fullPhoneNumber);
         const paymentData = {
             cart,
             country: selectedCountry,
@@ -224,11 +226,20 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         {addresses.map((address: AddressType) => (
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    useSavedAddress?.id === address.id
-                                                        ? setUseSavedAddress(null)
-                                                        : setUseSavedAddress(address)
-                                                }
+                                                onClick={() => {
+                                                    if (useSavedAddress?.id === address.id) {
+                                                        setUseSavedAddress(null);
+                                                        return;
+                                                    }
+
+                                                    setUseSavedAddress(address);
+
+                                                    const savedCountry = Countries.find((country) => country.name === address.country);
+
+                                                    if (savedCountry) {
+                                                        setSelectedCountry(savedCountry); 
+                                                    }
+                                                }}
                                                 key={address.id}
                                                 className={`${address.id === useSavedAddress?.id
                                                     ? "border-second bg-second/10"
@@ -247,7 +258,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
                                                     {address.isDefault && (
                                                         <span className="text-xs text-second">
-                                        // Primary
+                                                        // Primary
                                                         </span>
                                                     )}
                                                 </div>
@@ -401,7 +412,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         <input
                                             name="phone"
                                             type="tel"
-                                            defaultValue={useSavedAddress?.phone ?? ""}
+                                            defaultValue={useSavedAddress?.phone.replace(selectedCountryCode, '') ?? ""}
                                             placeholder="PHONE NUMBER"
                                             required
                                             className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"

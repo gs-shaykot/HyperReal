@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string) {
     const variantIds = cartItems.map(item => item.variantId);
-
+    
     const variants = await prisma.productVariant.findMany({
         where: { id: { in: variantIds } },
         include: { product: true }
