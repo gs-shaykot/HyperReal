@@ -17,6 +17,7 @@ export async function POST(req: Request) {
 
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
+        
 
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon);
 

@@ -11,4 +11,5 @@ export type AddressType = {
     phone: string;
     createdAt?: Date;
     isDefault?: boolean;
+    email?: string;
 }

@@ -4,6 +4,7 @@ import { getAddresses } from "@/lib/addressApi";
 import { useQuery } from "@tanstack/react-query";
 import { on } from "events";
 import { X, Save } from "lucide-react";
+import { useState } from "react";
 
 type AddressModalProps = {
     open: boolean;
@@ -11,13 +12,29 @@ type AddressModalProps = {
 };
 
 export default function AddressModal({ open, onCloseAction, }: AddressModalProps) {
-    const addressMutation = useAddress();
+    const [selectedCountry, setSelectedCountry] = useState({
+        value: 'bdt',
+        shortName: 'BD',
+    });
 
+    const addressMutation = useAddress();
     const { data: addresses, isLoading } = useQuery({
         queryKey: ["address"],
         queryFn: getAddresses
     });
     if (!open) return null;
+
+    const Countries = [
+        { name: "Bangladesh", shortName: "BD", value: "bdt", countryCode: "+880" },
+        { name: "United States", shortName: "US", value: "usd", countryCode: "+1" },
+        { name: "United Kingdom", shortName: "UK", value: "gbp", countryCode: "+44" },
+        { name: "Germany", shortName: "DE", value: "eur", countryCode: "+49" },
+        { name: "Japan", shortName: "JP", value: "jpy", countryCode: "+81" },
+        { name: "Australia", shortName: "AU", value: "aud", countryCode: "+61" },
+        { name: "Canada", shortName: "CA", value: "cad", countryCode: "+1" },
+        { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
+    ];
+    const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
 
     const handleSubmit = (formData: FormData) => {
         const data = {
@@ -143,30 +160,53 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                     {/* Country + Phone */}
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
+
                         <div>
-                            <label className="mb-2 block text-sm uppercase tracking-widest">
+                            <label className="label label-text text-xs text-gray-400 uppercase">
                                 Country
                             </label>
 
-                            <input
-                                name="country"
-                                value="Bangladesh"
-                                readOnly
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] border-2 border-zinc-800 focus:border-second outline-0"
-                            />
+                            <select
+                                value={selectedCountry.value}
+                                onChange={(e) =>
+                                    setSelectedCountry(
+                                        Countries.find(
+                                            (country) => country.value === e.target.value
+                                        ) || Countries[0]
+                                    )
+                                }
+                                className="select w-full bg-[#0f0f0f] border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"
+                            >
+                                {Countries.map((country) => (
+                                    <option
+                                        key={country.name}
+                                        value={country.value}
+                                        className="hover:bg-second hover:text-zinc-900"
+                                    >
+                                        {country.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-sm uppercase tracking-widest">
-                                Phone Number
+                            <label className="label label-text text-xs text-gray-400 uppercase">
+                                Phone Number <span className="text-[10px] tracking-wider">(without country code)</span>
                             </label>
 
-                            <input
-                                name="phone"
-                                type="tel"
-                                placeholder="+81 123456789"
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] border-2 border-zinc-800 focus:border-second outline-0"
-                            />
+                            <div className="flex w-full">
+                                <div className="flex items-center px-3 bg-black border border-r-0 border-gray-900 text-sm text-second">
+                                    {selectedCountryCode}
+                                </div>
+
+                                <input
+                                    name="phone"
+                                    type="tel" 
+                                    placeholder="PHONE NUMBER"
+                                    required
+                                    className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                />
+                            </div>
                         </div>
 
                     </div>

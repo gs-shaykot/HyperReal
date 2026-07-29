@@ -10,14 +10,13 @@ import axios from 'axios'
 import { ArrowLeft, Check, DollarSign, HandCoins, Lock, MapPin, ShieldCheck, Zap } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, SubmitEventHandler } from 'react'
 
 
 const hudson = localFont({
     src: "../../../fonts/Hudson NY Press.woff",
     display: "swap",
 });
-
 
 export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status } = useSession();
@@ -27,9 +26,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         shortName: 'BD',
     });
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
-    const [selectedAddress, setSelectedAddress] = useState('');
     const [useSavedAddress, setUseSavedAddress] = useState<AddressType | null>();
-
+    // const 
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
         queryFn: async () => {
@@ -115,25 +113,46 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
     const convertedTotal = convertPrice(total);
 
-    const handlePayment = async (cartItems: CartItemWithProductType[], country: { value: string, shortName: string }, coupon: string, paymentMethod: string, address: string) => {
+    const handlePayment: SubmitEventHandler<HTMLFormElement> = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.currentTarget);
+
+        const fullName = formData.get("fullName") as string;
+        const email = formData.get("email") as string;
+        const address = formData.get("address") as string;
+        const city = formData.get("city") as string;
+        const postalCode = formData.get("postalCode") as string;
+        const phone = formData.get("phone") as string;
+
+        const normalizedPhone = phone.trim().replace(/^0+/, "");
+        const fullPhoneNumber = `${selectedCountryCode}${normalizedPhone}`;
+
         const paymentData = {
-            cartItems,
-            country,
-            coupon,
-            paymentMethod,
-            address,
+            cart,
+            country: selectedCountry,
+            coupon: appliedCoupon,
+            paymentMethod: selectedPaymentMethod,
+            address: useSavedAddress || {
+                fullName,
+                email,
+                address,
+                city,
+                postalCode,
+                phone: fullPhoneNumber
+            }
         };
+        console.log("Payment Data:", paymentData);
+        // const res = await axios.post("/api/order", paymentData);
 
-        const res = await axios.post("/api/order", paymentData);
+        // const data = res.data;
 
-        const data = res.data;
-
-        if (paymentMethod === "cod") {
-            window.location.href = "/success";
-        }
-        else {
-            window.location.href = data.paymentUrl;
-        }
+        // if (selectedPaymentMethod === "cod") {
+        //     window.location.href = "/success";
+        // }
+        // else {
+        //     window.location.href = data.paymentUrl;
+        // }
     }
 
     return (
@@ -155,8 +174,12 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     {/* LEFT PANEL */}
-                    <div className='md:col-span-8'>
-                        <div className='bg-[#0f0f0f] p-6 border border-zinc-800 mb-8'>
+                    <form
+                        onSubmit={handlePayment}
+                        className="md:col-span-8"
+                    >
+                        {/* Delivery Coordinates */}
+                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
@@ -186,11 +209,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                             >
                                                 <div className="animate-pulse">
                                                     <div className="h-3 bg-zinc-800 w-20 mb-3" />
-
                                                     <div className="h-3.5 bg-zinc-800 w-32 mb-2" />
-
                                                     <div className="h-3 bg-zinc-800 w-4/5 mb-1" />
-
                                                     <div className="h-3 bg-zinc-800 w-2/3" />
                                                 </div>
                                             </div>
@@ -203,7 +223,12 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
                                         {addresses.map((address: AddressType) => (
                                             <button
-                                                onClick={() => useSavedAddress?.id === address.id ? setUseSavedAddress(null) : setUseSavedAddress(address)}
+                                                type="button"
+                                                onClick={() =>
+                                                    useSavedAddress?.id === address.id
+                                                        ? setUseSavedAddress(null)
+                                                        : setUseSavedAddress(address)
+                                                }
                                                 key={address.id}
                                                 className={`${address.id === useSavedAddress?.id
                                                     ? "border-second bg-second/10"
@@ -222,7 +247,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
                                                     {address.isDefault && (
                                                         <span className="text-xs text-second">
-                                                            // Primary
+                                        // Primary
                                                         </span>
                                                     )}
                                                 </div>
@@ -241,15 +266,23 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                             </div>
 
                             {/* User Details */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                            >
                                 {/* Full Name */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Full Name
                                     </label>
+
                                     <input
+                                        name="fullName"
                                         type="text"
-                                        defaultValue={useSavedAddress ? useSavedAddress.fullName : session?.user.name!}
+                                        defaultValue={
+                                            useSavedAddress
+                                                ? useSavedAddress.fullName
+                                                : session?.user.name ?? ""
+                                        }
                                         placeholder="JANE DOE"
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
@@ -261,25 +294,31 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Email
                                     </label>
+
                                     <input
+                                        name="email"
                                         type="email"
-                                        defaultValue={session?.user.email!}
+                                        defaultValue={session?.user.email ?? ""}
                                         placeholder="USER@GRID.NET"
                                         required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
-                                {/* Address  */}
+                                {/* Address */}
                                 <div className="md:col-span-2">
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Address
                                     </label>
+
                                     <input
-                                        defaultValue={useSavedAddress?.house ? useSavedAddress.house + ', ' + useSavedAddress.street : ''}
-                                        onChange={(e) => setSelectedAddress(e.target.value)}
+                                        name="address"
                                         type="text"
+                                        defaultValue={
+                                            useSavedAddress ? `${useSavedAddress.house}, ${useSavedAddress.street}` : ""
+                                        }
                                         placeholder="42 NEON ST, SECTOR 7"
+                                        required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
@@ -289,10 +328,13 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         City
                                     </label>
+
                                     <input
+                                        name="city"
                                         type="text"
-                                        defaultValue={useSavedAddress?.city ? useSavedAddress.city : ''}
+                                        defaultValue={useSavedAddress?.city ?? ""}
                                         placeholder="YOUR ORBITAL CITY"
+                                        required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
@@ -302,39 +344,53 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Postal Code
                                     </label>
+
                                     <input
+                                        name="postalCode"
                                         type="text"
-                                        defaultValue={useSavedAddress?.zipCode ? useSavedAddress.zipCode : ''}
+                                        defaultValue={useSavedAddress?.zipCode ?? ""}
                                         placeholder="00000"
+                                        required
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
-                                {/* Country (full width) */}
+                                {/* Country */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Delivery Country
                                     </label>
 
                                     <select
-                                        value={selectedCountry.value}
-                                        onChange={(e) => setSelectedCountry(Countries.find(c => c.value === e.target.value) || Countries[0])}
+                                        value={
+                                            useSavedAddress ? Countries.find((country) => country.name === useSavedAddress.country)?.value : selectedCountry.value
+                                        }
+                                        onChange={(e) => {
+                                            setUseSavedAddress(null);
+                                            setSelectedCountry(
+                                                Countries.find(
+                                                    (country) => country.value === e.target.value
+                                                ) || Countries[0]
+                                            )
+                                        }}
                                         className="select w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"
                                     >
-                                        {
-                                            Countries.map((country) => (
-                                                <option key={country.value} value={country.value} className='hover:bg-second hover:text-zinc-900'>
-                                                    {country.name}
-                                                </option>
-                                            ))
-                                        }
+                                        {Countries.map((country) => (
+                                            <option
+                                                key={country.name}
+                                                value={country.value}
+                                                className="hover:bg-second hover:text-zinc-900"
+                                            >
+                                                {country.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
                                 {/* Phone Number */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
-                                        Phone Number
+                                        Phone Number <span className="text-[10px] tracking-wider">(without country code)</span>
                                     </label>
 
                                     <div className="flex w-full">
@@ -343,9 +399,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         </div>
 
                                         <input
+                                            name="phone"
                                             type="tel"
+                                            defaultValue={useSavedAddress?.phone ?? ""}
                                             placeholder="PHONE NUMBER"
-                                            defaultValue={useSavedAddress?.phone ? useSavedAddress.phone : ''}
                                             required
                                             className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                         />
@@ -355,71 +412,116 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                         </div>
 
                         {/* Payment Options */}
-                        <div className='bg-[#0f0f0f] p-6 border border-zinc-800'>
+                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800">
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 02 // Payment Gateway
                             </h2>
 
                             <div className="flex flex-col gap-3">
-                                {
-                                    selectedCountry.value === 'bdt' ? (
-                                        [
-                                            { label: 'SSLCOMMERZ', value: 'SSLC', desc: 'bKash / Nagad / Rocket / Local Cards', icon: <Zap className='text-second' /> },
-                                            { label: 'STRIPE', value: 'CARD', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
-                                            { label: 'CASH ON DELIVERY', value: 'COD', desc: 'Pay with cash upon delivery', icon: <HandCoins className='text-second' /> }
-                                        ].map((method) => (
-                                            <button
-                                                key={method.value}
-                                                onClick={() => setSelectedPaymentMethod(method.value)}
-                                                className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                    ? 'bg-second/15 border-second'
-                                                    : 'bg-second/5 border-second/5 hover:bg-second/10 hover:border-second'
-                                                    } border`}
-                                            >
-                                                <div className='w-14 h-14 flex justify-center items-center border border-second'>
-                                                    {method.icon}
-                                                </div>
-                                                <div className='flex-1 text-start'>
-                                                    <h3>{method.label}</h3>
-                                                    <p className="text-xs text-gray-400">{method.desc}</p>
-                                                </div>
-                                                <ShieldCheck size={18} className='text-second' />
-                                            </button>
-                                        ))
-                                    ) : (
-                                        [
-                                            { label: 'STRIPE', value: 'CARD', desc: 'International Cards, Apple Pay, Google Pay', icon: <DollarSign className='text-second' /> },
-                                        ].map((method) => (
-                                            <button
-                                                key={method.value}
-                                                onClick={() => setSelectedPaymentMethod(method.value)}
-                                                className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                    ? 'bg-second/15 border-second'
-                                                    : 'bg-second/5 border-second/5 hover:bg-second/10 hover:border-second'
-                                                    } border`}
-                                            >
-                                                <div className='w-14 h-14 flex justify-center items-center border border-second'>
-                                                    {method.icon}
-                                                </div>
-                                                <div className='flex-1 text-start'>
-                                                    <h3>{method.label}</h3>
-                                                    <p className="text-xs text-gray-400">{method.desc}</p>
-                                                </div>
-                                                <ShieldCheck size={18} className='text-second' />
-                                            </button>
-                                        ))
-                                    )
-                                }
+                                {selectedCountry.value === "bdt" ? (
+                                    [
+                                        {
+                                            label: "SSLCOMMERZ",
+                                            value: "SSLC",
+                                            desc: "bKash / Nagad / Rocket / Local Cards",
+                                            icon: <Zap className="text-second" />,
+                                        },
+                                        {
+                                            label: "STRIPE",
+                                            value: "CARD",
+                                            desc: "International Cards, Apple Pay, Google Pay",
+                                            icon: <DollarSign className="text-second" />,
+                                        },
+                                        {
+                                            label: "CASH ON DELIVERY",
+                                            value: "COD",
+                                            desc: "Pay with cash upon delivery",
+                                            icon: <HandCoins className="text-second" />,
+                                        },
+                                    ].map((method) => (
+                                        <button
+                                            type="button"
+                                            key={method.value}
+                                            onClick={() =>
+                                                setSelectedPaymentMethod(method.value)
+                                            }
+                                            className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
+                                                ? "bg-second/15 border-second"
+                                                : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
+                                                } border`}
+                                        >
+                                            <div className="w-14 h-14 flex justify-center items-center border border-second">
+                                                {method.icon}
+                                            </div>
+
+                                            <div className="flex-1 text-start">
+                                                <h3>{method.label}</h3>
+                                                <p className="text-xs text-gray-400">
+                                                    {method.desc}
+                                                </p>
+                                            </div>
+
+                                            <ShieldCheck
+                                                size={18}
+                                                className="text-second"
+                                            />
+                                        </button>
+                                    ))
+                                ) : (
+                                    [
+                                        {
+                                            label: "STRIPE",
+                                            value: "CARD",
+                                            desc: "International Cards, Apple Pay, Google Pay",
+                                            icon: <DollarSign className="text-second" />,
+                                        },
+                                    ].map((method) => (
+                                        <button
+                                            type="button"
+                                            key={method.value}
+                                            onClick={() =>
+                                                setSelectedPaymentMethod(method.value)
+                                            }
+                                            className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
+                                                ? "bg-second/15 border-second"
+                                                : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
+                                                } border`}
+                                        >
+                                            <div className="w-14 h-14 flex justify-center items-center border border-second">
+                                                {method.icon}
+                                            </div>
+
+                                            <div className="flex-1 text-start">
+                                                <h3>{method.label}</h3>
+                                                <p className="text-xs text-gray-400">
+                                                    {method.desc}
+                                                </p>
+                                            </div>
+
+                                            <ShieldCheck
+                                                size={18}
+                                                className="text-second"
+                                            />
+                                        </button>
+                                    ))
+                                )}
                             </div>
                         </div>
 
-                        <button onClick={() => handlePayment(cart, selectedCountry, couponCode!, selectedPaymentMethod, selectedAddress)} className="btn mt-4 w-full rounded-none bg-second text-zinc-900">
-                            {
-                                selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'COD' ? `PAY $${total.toFixed(2)}` : `PAY ~${formatCurrency(convertedTotal!, selectedCountry.value)}`
-                            }
+                        {/* Submit Payment */}
+                        <button
+                            type="submit"
+                            className="btn mt-4 w-full rounded-none bg-second text-zinc-900"
+                        >
+                            {selectedPaymentMethod === "CARD" ||
+                                selectedPaymentMethod === "COD"
+                                ? `PAY $${total.toFixed(2)}`
+                                : `PAY ~${formatCurrency(
+                                    convertedTotal!,
+                                    selectedCountry.value
+                                )}`}
                         </button>
-
-                    </div>
+                    </form>
 
                     {/* RIGHT PANEL */}
                     <div className='md:col-span-4 lg:sticky lg:top-19.5 lg:self-start '>

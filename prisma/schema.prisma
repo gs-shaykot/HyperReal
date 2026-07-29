@@ -43,7 +43,7 @@ model Address {
   country  String
   phone    String
 
-  isDefault Boolean  @default(false) 
+  isDefault Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
@@ -134,9 +134,10 @@ model Order {
   orderCode String      @unique
   createdAt DateTime    @default(now())
 
-  user       User        @relation(fields: [userId], references: [id])
-  orderItems OrderItem[]
-  payments   Payment[]
+  user         User          @relation(fields: [userId], references: [id])
+  orderItems   OrderItem[]
+  payments     Payment[]
+  orderHistory OrderHistory?
 }
 
 model OrderItem {
@@ -147,6 +148,20 @@ model OrderItem {
   priceAtPurchase Float
   order           Order          @relation(fields: [orderId], references: [id])
   variant         ProductVariant @relation(fields: [variantId], references: [id])
+}
+
+model OrderHistory {
+  id      String @id @default(uuid())
+  orderId String @unique
+
+  fullName String
+  street   String
+  city     String
+  house    String
+  zipCode  String
+  country  String
+  phone    String
+  order    Order  @relation(fields: [orderId], references: [id])
 }
 
 model Payment {
@@ -186,7 +201,7 @@ enum Role {
 enum OrderStatus {
   PENDING
   PROCESSING
-  SHIPPED 
+  SHIPPED
   DELIVERED
   CANCELLED
 }
