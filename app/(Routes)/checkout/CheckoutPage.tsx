@@ -31,7 +31,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         addNew: false,
         isChecked: false,
     });
-
+    
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
         queryFn: async () => {
@@ -277,7 +277,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         ))}
                                         <button
                                             type='button'
-                                            onClick={() => setAddNewAddress((prev => ({ ...prev, addNew: !prev.addNew })))}
+                                            onClick={() => {
+                                                setAddNewAddress((prev => ({ isChecked: prev.addNew ? true : false, addNew: !prev.addNew })))
+
+                                            }}
                                             className={`btn h-auto  rounded-none border  ${addNewAddress.addNew ? 'bg-second/15 border-second' : 'bg-transparent border-zinc-700'} hover:border-second border-dashed flex flex-col shadow-none`}>
                                             <Plus size={18} />
                                             NEW ADDRESS
@@ -325,7 +328,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
-
+                                {/* Street */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         Street
@@ -338,6 +341,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     />
                                 </div>
 
+                                {/* House / Apartment */}
                                 <div>
                                     <label className="label label-text text-xs text-gray-400 uppercase">
                                         House / Apartment
@@ -461,10 +465,13 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         initial={{ opacity: 0, y: -10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
-                                        className='mt-4 border-t border-zinc-800 border-dashed'>
-                                        <label className="flex items-start pt-3 gap-5 bg-[#0f0f0f] cursor-pointer">
+                                        className='mt-4 mb-3 border-t border-zinc-800 border-dashed'>
+                                        <label
+                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] cursor-pointer">
                                             <input
+                                                onClick={() => setAddNewAddress((prev) => ({ ...prev, isChecked: !prev.isChecked }))}
                                                 type="checkbox"
+                                                defaultChecked={addNewAddress.isChecked}
                                                 name="saveAddress"
                                                 className="checkbox w-5 h-5 checkbox-neutral rounded-none border-second checked:bg-second checked:text-black checked:border-second"
                                             />
@@ -479,6 +486,28 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                 </p>
                                             </div>
                                         </label>
+                                    </motion.div>
+                                )
+                            }
+                            {
+                                addNewAddress.isChecked && addNewAddress.addNew && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <div>
+                                            <label className="label label-text text-xs text-gray-400 uppercase">
+                                                LABEL (OPTIONAL)
+                                            </label>
+
+                                            <input
+                                                name="label"
+                                                type="text"
+                                                placeholder="HOME / OFFICE / DROPZONE"
+                                                className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                            />
+                                        </div>
                                     </motion.div>
                                 )
                             }
