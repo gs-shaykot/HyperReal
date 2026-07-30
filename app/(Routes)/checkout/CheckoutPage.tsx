@@ -31,7 +31,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         addNew: false,
         isChecked: false,
     });
-    
+
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
         queryKey: ["exchangeRates"],
         queryFn: async () => {
@@ -124,7 +124,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
         const fullName = formData.get("fullName") as string;
         const email = formData.get("email") as string;
-        const address = formData.get("address") as string;
+        const street = formData.get("street") as string;
+        const house = formData.get("house") as string;
         const city = formData.get("city") as string;
         const zipCode = formData.get("postalCode") as string;
         const phoneInput = formData.get("phone") as string;
@@ -141,7 +142,9 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
             paymentMethod: selectedPaymentMethod,
             address: useSavedAddress || {
                 fullName,
-                address,
+                email,
+                street,
+                house,
                 city,
                 zipCode,
                 phone: fullPhoneNumber
@@ -159,7 +162,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         //     window.location.href = data.paymentUrl;
         // }
     }
-
+    console.log("User Saved Data:", useSavedAddress);
     return (
         <div className=' bg-main light:bg-white py-10'>
             <div className="max-w-7xl mx-auto p-4">
@@ -177,7 +180,9 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div
+                    key={useSavedAddress?.id ?? "manual"}
+                    className="grid grid-cols-1 md:grid-cols-12 gap-6">
                     {/* LEFT PANEL */}
                     <form
                         onSubmit={handlePayment}
@@ -247,7 +252,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                 className={`${address.id === useSavedAddress?.id
                                                     ? "border-second bg-second/10"
                                                     : "border-zinc-800 bg-transparent"
-                                                    } border p-3 cursor-pointer relative btn flex flex-col h-auto rounded-none items-start`}
+                                                    } border p-3 cursor-pointer relative btn flex flex-col h-auto rounded-none items-start hover:border-second`}
                                             >
                                                 <div className="flex items-center justify-start gap-2">
                                                     <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
@@ -335,8 +340,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </label>
 
                                     <input
+                                        defaultValue={useSavedAddress?.street}
                                         name="street"
                                         type="text"
+                                        placeholder='42 NEON ST, SECTOR 7'
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
@@ -348,8 +355,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                     </label>
 
                                     <input
+                                        defaultValue={useSavedAddress?.house}
                                         name="house"
                                         type="text"
+                                        placeholder='APT 42B'
                                         className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
@@ -505,7 +514,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                 name="label"
                                                 type="text"
                                                 placeholder="HOME / OFFICE / DROPZONE"
-                                                className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                                className="uppercase input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                             />
                                         </div>
                                     </motion.div>
