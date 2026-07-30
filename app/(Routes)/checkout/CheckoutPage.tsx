@@ -12,6 +12,7 @@ import { useSession } from 'next-auth/react'
 import localFont from 'next/font/local'
 import { useState, useEffect, useMemo, SubmitEventHandler } from 'react'
 import { motion } from "framer-motion";
+import { useAddress } from '@/app/Hooks/useAddress'
 
 const hudson = localFont({
     src: "../../../fonts/Hudson NY Press.woff",
@@ -20,7 +21,7 @@ const hudson = localFont({
 
 export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status } = useSession();
-
+    const addressMutation = useAddress();
     const [selectedCountry, setSelectedCountry] = useState({
         name: 'Bangladesh',
         shortName: 'BD',
@@ -50,7 +51,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         queryFn: fetchCartApi,
         enabled: status === 'authenticated',
     });
-    
+
     const { data: coupons = [] } = useQuery({
         queryKey: ['coupons'],
         queryFn: fetchCouponsApi,
@@ -126,7 +127,6 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         const formData = new FormData(e.currentTarget);
 
         const fullName = formData.get("fullName") as string;
-        const email = formData.get("email") as string;
         const street = formData.get("street") as string;
         const house = formData.get("house") as string;
         const city = formData.get("city") as string;
@@ -137,11 +137,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         const nationalPhone = cleanedPhone.replace(/^0+/, "");
         const fullPhoneNumber = `${selectedCountryCode}${nationalPhone}`;
 
-        console.log("Full Phone Number:", fullPhoneNumber);
         const paymentData = {
             cartItems: cart,
             country: selectedCountry,
-            coupon: appliedCoupon.code,
+            coupon: appliedCoupon?.code,
             paymentMethod: selectedPaymentMethod,
             address: useSavedAddress || {
                 label: label,
@@ -153,7 +152,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                 phone: fullPhoneNumber,
             }
         };
-        console.log("Payment Data:", paymentData);
+
         const res = await axios.post("/api/order", paymentData);
 
         const data = res.data;

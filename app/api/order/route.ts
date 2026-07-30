@@ -71,6 +71,20 @@ export async function POST(req: Request) {
             }
         })
 
+        const addressToSave = await prisma.address.create({
+            data: {
+                userId: session.user.id,
+                label,
+                fullName,
+                street,
+                city,
+                house,
+                zipCode,
+                country: country.name,
+                phone
+            }
+        })
+
         if (paymentMethod === "SSLC") {
             const tran_id = order.orderCode;
 
