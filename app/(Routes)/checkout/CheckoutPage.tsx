@@ -22,8 +22,11 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
     const { data: session, status } = useSession();
 
     const [selectedCountry, setSelectedCountry] = useState({
-        value: 'bdt',
+        name: 'Bangladesh',
         shortName: 'BD',
+        value: 'bdt',
+        countryCode: '+880'
+
     });
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
     const [useSavedAddress, setUseSavedAddress] = useState<AddressType | null>();
@@ -47,7 +50,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         queryFn: fetchCartApi,
         enabled: status === 'authenticated',
     });
-
+    
     const { data: coupons = [] } = useQuery({
         queryKey: ['coupons'],
         queryFn: fetchCouponsApi,
@@ -61,7 +64,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
     });
 
     const appliedCoupon = coupons.find((coupon: couponType) => coupon.code === couponCode);
-
+    console.log("Applied Coupon:", appliedCoupon);
     const subtotal = useMemo(() => {
         return cart.reduce(
             (acc: number, item: CartItemWithProductType) => acc + item.quantity * item.variant.product.price, 0
@@ -129,40 +132,39 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         const city = formData.get("city") as string;
         const zipCode = formData.get("postalCode") as string;
         const phoneInput = formData.get("phone") as string;
-
+        const label = formData.get("label") as string || '';
         const cleanedPhone = phoneInput.replace(/[^\d]/g, "");
         const nationalPhone = cleanedPhone.replace(/^0+/, "");
         const fullPhoneNumber = `${selectedCountryCode}${nationalPhone}`;
 
         console.log("Full Phone Number:", fullPhoneNumber);
         const paymentData = {
-            cart,
+            cartItems: cart,
             country: selectedCountry,
-            coupon: appliedCoupon,
+            coupon: appliedCoupon.code,
             paymentMethod: selectedPaymentMethod,
             address: useSavedAddress || {
+                label: label,
                 fullName,
-                email,
                 street,
-                house,
                 city,
+                house,
                 zipCode,
-                phone: fullPhoneNumber
+                phone: fullPhoneNumber,
             }
         };
         console.log("Payment Data:", paymentData);
-        // const res = await axios.post("/api/order", paymentData);
+        const res = await axios.post("/api/order", paymentData);
 
-        // const data = res.data;
+        const data = res.data;
 
-        // if (selectedPaymentMethod === "cod") {
-        //     window.location.href = "/success";
-        // }
-        // else {
-        //     window.location.href = data.paymentUrl;
-        // }
+        if (selectedPaymentMethod === "cod") {
+            window.location.href = "/success";
+        }
+        else {
+            window.location.href = data.paymentUrl;
+        }
     }
-    console.log("User Saved Data:", useSavedAddress);
     return (
         <div className=' bg-main light:bg-white py-10'>
             <div className="max-w-7xl mx-auto p-4">
@@ -241,6 +243,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                                     }
 
                                                     setUseSavedAddress(address);
+                                                    setAddNewAddress((prev) => ({ ...prev, addNew: false, isChecked: false }));
 
                                                     const savedCountry = Countries.find((country) => country.name === address.country);
 
@@ -283,7 +286,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                         <button
                                             type='button'
                                             onClick={() => {
-                                                setAddNewAddress((prev => ({ isChecked: prev.addNew ? true : false, addNew: !prev.addNew })))
+                                                setAddNewAddress((prev => ({ isChecked: prev.addNew ? true : false, addNew: !prev.addNew })));
+                                                setUseSavedAddress(null);
 
                                             }}
                                             className={`btn h-auto  rounded-none border  ${addNewAddress.addNew ? 'bg-second/15 border-second' : 'bg-transparent border-zinc-700'} hover:border-second border-dashed flex flex-col shadow-none`}>
@@ -427,8 +431,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                             setUseSavedAddress(null);
                                             setSelectedCountry(
                                                 Countries.find(
-                                                    (country) => country.value === e.target.value
-                                                ) || Countries[0]
+                                                    (country) => country.value === e.target.value) || Countries[0]
                                             )
                                         }}
                                         className="select w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"

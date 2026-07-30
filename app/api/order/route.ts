@@ -17,8 +17,7 @@ export async function POST(req: Request) {
 
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address } = body;
-        
-
+        const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon);
 
         let orderCode = generateCustomId("HYP-ORD");
@@ -34,9 +33,19 @@ export async function POST(req: Request) {
         const order = await prisma.order.create({
             data: {
                 userId: session.user.id,
-                // address: address,
                 status: "PENDING",
-                orderCode
+                orderCode,
+                orderHistory: {
+                    create: {
+                        fullName,
+                        street,
+                        city,
+                        house,
+                        zipCode,
+                        country: country.name,
+                        phone
+                    }
+                }
             }
         });
 

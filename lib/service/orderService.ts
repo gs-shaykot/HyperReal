@@ -3,6 +3,7 @@ import { getDiscount } from "@/lib/Discount_Calculation_funcs";
 import prisma from "@/lib/prisma";
 
 export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string) {
+    console.log("Calculating order for cart items:", cartItems, "Country:", country, "Coupon:", coupon);
     const variantIds = cartItems.map(item => item.variantId);
     
     const variants = await prisma.productVariant.findMany({
