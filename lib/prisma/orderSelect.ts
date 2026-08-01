@@ -6,7 +6,6 @@ export const orderDetailsSelect = {
     status: true,
     orderCode: true,
     createdAt: true,
-    address: true,
 
     orderItems: {
         select: {
@@ -39,5 +38,6 @@ export const orderDetailsSelect = {
             }
         }
     },
+    orderHistory: true,
     payments: true
 } satisfies Prisma.OrderSelect;

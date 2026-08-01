@@ -17,7 +17,7 @@ const page = async ({ searchParams }: any) => {
             id: order?.userId
         }
     });
-
+    
     return (
         <div>
             <SuccessPage order={order} user={user} />

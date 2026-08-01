@@ -21,7 +21,7 @@ const hudson = localFont({
 
 export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status } = useSession();
-    const addressMutation = useAddress();
+    
     const [selectedCountry, setSelectedCountry] = useState({
         name: 'Bangladesh',
         shortName: 'BD',
@@ -29,11 +29,17 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         countryCode: '+880'
 
     });
+    const [showAllAddresses, setShowAllAddresses] = useState(false);
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(selectedCountry.value === 'bdt' ? 'sslc' : 'stripe');
     const [useSavedAddress, setUseSavedAddress] = useState<AddressType | null>();
     const [addNewAddress, setAddNewAddress] = useState({
         addNew: false,
         isChecked: false,
+    });
+    const [selectedDeliveryOption, setSelectedDeliveryOption] = useState({
+        label: "Standard Drop",
+        cost: selectedCountry.value === 'bdt' ? 1.2 : 15,
+        estimatedDelivery: selectedCountry.value === 'bdt' ? "3-5" : "10-15",
     });
 
     const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
@@ -74,7 +80,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
     const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
 
-    const shippingCost = selectedCountry.value === 'bdt' ? 1.2 : 20;
+    const shippingCost = selectedDeliveryOption ? selectedDeliveryOption.cost : 0;
 
     const total = (subtotal + shippingCost) - discount
 
@@ -89,6 +95,19 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         { name: "India", shortName: "IN", value: "inr", countryCode: "+91" },
     ];
     const selectedCountryCode = Countries.find(country => country.value === selectedCountry.value)?.countryCode ?? "";
+
+    const DeliveryOptions = [
+        {
+            label: "Standard Drop",
+            cost: selectedCountry.value === 'bdt' ? 1.2 : 15,
+            estimatedDelivery: selectedCountry.value === 'bdt' ? "3-5" : "10-15",
+        },
+        {
+            label: "Express Drop",
+            cost: selectedCountry.value === 'bdt' ? 2.5 : 30,
+            estimatedDelivery: selectedCountry.value === 'bdt' ? "1-2" : "5-7",
+        }
+    ]
 
     useEffect(() => {
         if (selectedCountry.value === 'bdt') {
@@ -152,6 +171,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                 phone: fullPhoneNumber,
             },
             saveAddress: addNewAddress.isChecked,
+            deliveryOption: selectedDeliveryOption.label,
         };
 
         const res = await axios.post("/api/order", paymentData);
@@ -165,6 +185,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
             window.location.href = data.paymentUrl;
         }
     }
+
     return (
         <div className=' bg-main light:bg-white py-10'>
             <div className="max-w-7xl mx-auto p-4">
@@ -232,75 +253,107 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
 
                                 {/* Saved address cards */}
                                 {addressesCount > 0 && !isAddressesLoading && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                                        {addresses.map((address: AddressType) => (
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                                            {(showAllAddresses
+                                                ? addresses
+                                                : addresses.slice(0, 3)
+                                            ).map((address: AddressType) => (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        if (useSavedAddress?.id === address.id) {
+                                                            setUseSavedAddress(null);
+                                                            return;
+                                                        }
+
+                                                        setUseSavedAddress(address);
+                                                        setAddNewAddress((prev) => ({
+                                                            ...prev,
+                                                            addNew: false,
+                                                            isChecked: false,
+                                                        }));
+
+                                                        const savedCountry = Countries.find(
+                                                            (country) => country.name === address.country
+                                                        );
+
+                                                        if (savedCountry) {
+                                                            setSelectedCountry(savedCountry);
+                                                        }
+                                                    }}
+                                                    key={address.id}
+                                                    className={`${address.id === useSavedAddress?.id
+                                                        ? "border-second bg-second/10"
+                                                        : "border-zinc-800 bg-transparent"
+                                                        } border p-3 cursor-pointer btn flex flex-col h-auto rounded-none items-start hover:border-second relative`}
+                                                >
+                                                    <div className="flex items-center justify-start gap-2">
+                                                        <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
+                                                            <MapPin
+                                                                size={14}
+                                                                className="text-second"
+                                                            />
+                                                            {address.label?.toUpperCase()}
+                                                        </h3>
+
+                                                        {address.isDefault && (
+                                                            <span className="text-xs text-second">
+                                                                {/* PRIMARY */}
+                                                                PRIMARY
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <h3 className="text-sm">
+                                                        {address.fullName}
+                                                    </h3>
+
+                                                    <h3 className="text-xs text-start">
+                                                        {address.house}, {address.street}. {address.city}
+                                                    </h3>
+                                                </button>
+                                            ))}
+
+                                            {/* New Address Card */}
                                             <button
                                                 type="button"
                                                 onClick={() => {
-                                                    if (useSavedAddress?.id === address.id) {
-                                                        setUseSavedAddress(null);
-                                                        return;
-                                                    }
-
-                                                    setUseSavedAddress(address);
-                                                    setAddNewAddress((prev) => ({ ...prev, addNew: false, isChecked: false }));
-
-                                                    const savedCountry = Countries.find((country) => country.name === address.country);
-
-                                                    if (savedCountry) {
-                                                        setSelectedCountry(savedCountry);
-                                                    }
+                                                    setAddNewAddress((prev) => ({
+                                                        isChecked: prev.addNew ? true : false,
+                                                        addNew: !prev.addNew,
+                                                    }));
+                                                    setUseSavedAddress(null);
                                                 }}
-                                                key={address.id}
-                                                className={`${address.id === useSavedAddress?.id
-                                                    ? "border-second bg-second/10"
-                                                    : "border-zinc-800 bg-transparent"
-                                                    } border p-3 cursor-pointer relative btn flex flex-col h-auto rounded-none items-start hover:border-second`}
+                                                className={`btn h-26 rounded-none border ${addNewAddress.addNew
+                                                    ? "bg-second/15 border-second"
+                                                    : "bg-transparent border-zinc-700"
+                                                    } hover:border-second border-dashed flex flex-col shadow-none`}
                                             >
-                                                <div className="flex items-center justify-start gap-2">
-                                                    <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
-                                                        <MapPin
-                                                            size={14}
-                                                            className="text-second"
-                                                        />
-
-                                                        {address.label?.toUpperCase()}
-                                                    </h3>
-
-                                                    {address.isDefault && (
-                                                        <span className="text-xs text-second">
-                                                        // Primary
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                <h3 className="text-sm">
-                                                    {address.fullName}
-                                                </h3>
-
-                                                <h3 className="text-xs text-start">
-                                                    {address.house},{address.street}. {address.city}
-                                                </h3>
+                                                <Plus size={18} />
+                                                NEW ADDRESS
                                             </button>
-                                        ))}
-                                        <button
-                                            type='button'
-                                            onClick={() => {
-                                                setAddNewAddress((prev => ({ isChecked: prev.addNew ? true : false, addNew: !prev.addNew })));
-                                                setUseSavedAddress(null);
+                                        </div>
 
-                                            }}
-                                            className={`btn h-auto  rounded-none border  ${addNewAddress.addNew ? 'bg-second/15 border-second' : 'bg-transparent border-zinc-700'} hover:border-second border-dashed flex flex-col shadow-none`}>
-                                            <Plus size={18} />
-                                            NEW ADDRESS
-                                        </button>
-                                    </div>
+                                        {/* Show All / Show Less */}
+                                        {addressesCount > 4 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowAllAddresses((prev) => !prev)}
+                                                className="btn w-full rounded-none border border-zinc-700 bg-transparent hover:border-second text-xs tracking-[0.3em]"
+                                            >
+                                                {showAllAddresses
+                                                    ? "SHOW LESS"
+                                                    : `SHOW ALL ADDRESSES (${addressesCount})`}
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
 
                             {/* User Details */}
                             <div
-                                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"
                             >
                                 {/* Full Name */}
                                 <div>
@@ -524,11 +577,34 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                 )
                             }
                         </div>
+                        
+                        {/* Delivery Options */}
+                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800 mb-8">
+                            <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
+                                — 02 // DELIVERY COORDINATES
+                            </h2>
+                            <div className='grid grid-cols-2 gap-4'>
+                                {
+                                    DeliveryOptions.map((option, index) => (
+                                        <button key={index} type={'button'}
+                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 border-second' : 'bg-main hover:bg-second/10 hover:border-second'}`}
+                                            onClick={() => setSelectedDeliveryOption(option)}
+                                        >
+                                            <div>
+                                                <h3>{option.label}</h3>
+                                                <h3 className='text-zinc-400 text-xs mt-2 font-extralight'>ETA // {option.estimatedDelivery} Days</h3>
+                                            </div>
+                                            <h3 className='self-end'>${option.cost}</h3>
+                                        </button>
+                                    ))
+                                }
+                            </div>
+                        </div>
 
                         {/* Payment Options */}
                         <div className="bg-[#0f0f0f] p-6 border border-zinc-800">
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
-                                — 02 // Payment Gateway
+                                — 03 // Payment Gateway
                             </h2>
 
                             <div className="flex flex-col gap-3">

@@ -2,14 +2,27 @@ import { CartItemWithProductType } from "@/app/types/cartType";
 import { getDiscount } from "@/lib/Discount_Calculation_funcs";
 import prisma from "@/lib/prisma";
 
-export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string) {
-    console.log("Calculating order for cart items:", cartItems, "Country:", country, "Coupon:", coupon);
+export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string, deliveryOption?: string) {
+
     const variantIds = cartItems.map(item => item.variantId);
-    
+
     const variants = await prisma.productVariant.findMany({
         where: { id: { in: variantIds } },
         include: { product: true }
     });
+
+    const DeliveryOptions = [
+        {
+            label: "Standard Drop",
+            cost: country === 'bdt' ? 1.2 : 15,
+            estimatedDelivery: country === 'bdt' ? "3-5" : "10-15",
+        },
+        {
+            label: "Express Drop",
+            cost: country === 'bdt' ? 2.5 : 30,
+            estimatedDelivery: country === 'bdt' ? "1-2" : "5-7",
+        }
+    ]
 
     let subTotal = 0;
     const OrderedItem = cartItems.map(item => {
@@ -33,7 +46,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
             price: productPrice,
         }
     });
-    const shippingCost = country === 'bdt' ? 1.2 : 20;
+    const shippingCost = deliveryOption ? DeliveryOptions.find(option => option.label === deliveryOption)?.cost || 0 : 0;
 
     const Appliedcoupon = await prisma.coupon.findUnique({
         where: { code: coupon }

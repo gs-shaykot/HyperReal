@@ -6,7 +6,7 @@ import { calculateOrder } from "@/lib/service/orderService";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-// Now okay ?
+
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -15,9 +15,9 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { cartItems, country, coupon, paymentMethod, address, saveAddress } = body;
+        const { cartItems, country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
         const { label, fullName, street, city, house, zipCode, phone } = address;
-        const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon);
+        const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);
 
         let orderCode = generateCustomId("HYP-ORD");
 
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                             house,
                             zipCode,
                             country: country.name,
-                            phone
+                            phone,
                         }
                     },
                     orderItems: {
