@@ -6,8 +6,7 @@ import { calculateOrder } from "@/lib/service/orderService";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-
-
+// Now okay ?
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
@@ -16,7 +15,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { cartItems, country, coupon, paymentMethod, address } = body;
+        const { cartItems, country, coupon, paymentMethod, address, saveAddress } = body;
         const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon);
 
@@ -30,60 +29,70 @@ export async function POST(req: Request) {
         const rates = res.data.rates;
         const finalTotal = country.value === 'bdt' ? USD_finalTotal * rates.BDT : USD_finalTotal;
 
-        const order = await prisma.order.create({
-            data: {
-                userId: session.user.id,
-                status: "PENDING",
-                orderCode,
-                orderHistory: {
-                    create: {
-                        fullName,
-                        street,
-                        city,
-                        house,
-                        zipCode,
-                        country: country.name,
-                        phone
+        if (saveAddress) {
+            const addressCount = await prisma.address.count({
+                where: {
+                    userId: session.user.id
+                }
+            });
+            if (addressCount >= 10) {
+                return NextResponse.json({ success: false, message: "Address limit reached. You can save up to 10 addresses." }, { status: 400 });
+            }
+        }
+
+        const order = await prisma.$transaction(async (tx) => {
+            const order = await tx.order.create({
+                data: {
+                    userId: session.user.id,
+                    status: "PENDING",
+                    orderCode,
+                    orderHistory: {
+                        create: {
+                            fullName,
+                            street,
+                            city,
+                            house,
+                            zipCode,
+                            country: country.name,
+                            phone
+                        }
+                    },
+                    orderItems: {
+                        create: cartItems.map((item: CartItemWithProductType) => ({
+                            variantId: item.variantId,
+                            quantity: item.quantity,
+                            priceAtPurchase: item.variant.product.price,
+                        }))
+                    },
+                    payments: {
+                        create: {
+                            method: paymentMethod,
+                            status: "PENDING",
+                            paidAmountInBDT: finalTotal,
+                            totalProductPriceInUSD: subTotal,
+                            discount: discount,
+                            shippingCost: shippingCost,
+                            country: country.shortName
+                        }
                     }
                 }
-            }
+            });
+
+            saveAddress && await tx.address.create({
+                data: {
+                    userId: session.user.id,
+                    label,
+                    fullName,
+                    street,
+                    city,
+                    house,
+                    zipCode,
+                    country: country.name,
+                    phone
+                }
+            })
+            return order;
         });
-
-        const orderItem = await prisma.orderItem.createMany({
-            data: cartItems.map((item: CartItemWithProductType) => ({
-                orderId: order.id,
-                variantId: item.variantId,
-                quantity: item.quantity,
-                priceAtPurchase: item.variant.product.price,
-            }))
-        });
-
-        const payment = await prisma.payment.create({
-            data: {
-                orderId: order.id,
-                method: paymentMethod,
-                status: "PENDING",
-                paidAmountInBDT: finalTotal,
-                totalProductPriceInUSD: subTotal,
-                discount: discount,
-                shippingCost: shippingCost,
-                country: country.shortName
-            }
-        })
-
-        const addressToSave = await prisma.address.create({
-            data: {
-                userId: session.user.id,
-                label,
-                fullName,
-                street,
-                city,
-                house,
-                zipCode,
-                country: country.name,
-                phone
-            }
-        })
 
         if (paymentMethod === "SSLC") {
             const tran_id = order.orderCode;
@@ -117,6 +126,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
         }
 
+        return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
     }
     catch (error) {
         console.error('Error creating order:', error);

@@ -150,7 +150,8 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                 house,
                 zipCode,
                 phone: fullPhoneNumber,
-            }
+            },
+            saveAddress: addNewAddress.isChecked,
         };
 
         const res = await axios.post("/api/order", paymentData);
