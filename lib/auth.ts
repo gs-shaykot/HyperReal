@@ -81,7 +81,7 @@ export const authOptions: AuthOptions = {
 
             return true;
         },
-        async jwt({ token, user }) { 
+        async jwt({ token, user, trigger }) {
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {
@@ -102,9 +102,26 @@ export const authOptions: AuthOptions = {
                 }
             }
 
+            if (trigger === 'update') {
+                const dbUser = await prisma.user.findUnique({
+                    where: { id: token.id as string },
+                });
+
+                if (dbUser) {
+                    token.role = dbUser.role;
+                    token.picture =
+                        dbUser.PhotoUrl ??
+                        "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png";
+
+                    token.isNewUser = dbUser.isNewUser;
+                    token.createdAt = dbUser.createdAt;
+                    token.authProvider = dbUser.authProvider;
+                }
+            }
+
             return token;
         },
-        async session({ session, token }: any) { 
+        async session({ session, token }: any) {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
@@ -112,7 +129,7 @@ export const authOptions: AuthOptions = {
                 session.user.isNewUser = token.isNewUser as boolean;
                 session.user.createdAt = token.createdAt as Date;
                 session.user.authProvider = token.authProvider as string;
-            } 
+            }
             return session;
         }
     },

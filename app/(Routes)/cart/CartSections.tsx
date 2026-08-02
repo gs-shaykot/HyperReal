@@ -27,8 +27,8 @@ const hudson = localFont({
 })
 
 export const CartSections = ({ coupons }: CouponProps) => {
-  const { data: session, status } = useSession();
-
+  const { data: session, status, update } = useSession();
+  console.log('session', session?.user);
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -199,8 +199,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(null);
   };
 
-  const handleApplyCoupon = () => {
-
+  const handleApplyCoupon = () => { 
     const code = couponInput.trim().toUpperCase();
     const foundCoupon = coupons.find(c => c.code.toUpperCase() === code);
     if (!foundCoupon) {

@@ -21,7 +21,7 @@ export const getDiscount = (coupon: couponType, subtotal: number) => {
 export const getBestCoupon = (coupons: couponType[], subtotal: number, isNewUser: boolean) => {
 
     const validCoupons = coupons.filter(coupon => {
-        if (coupon.newUserOnly && !isNewUser) return false;
+        if (coupon.newUserOnly && !isNewUser) return false; 
         return subtotal >= coupon.minSpend;
     });
 

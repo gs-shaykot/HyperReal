@@ -20,8 +20,8 @@ const hudson = localFont({
 });
 
 export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
-    const { data: session, status } = useSession();
-    
+    const { data: session, status, update } = useSession();
+
     const [selectedCountry, setSelectedCountry] = useState({
         name: 'Bangladesh',
         shortName: 'BD',
@@ -177,7 +177,10 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
         const res = await axios.post("/api/order", paymentData);
 
         const data = res.data;
-
+        if (data.success) {
+            await update();
+        }
+        
         if (selectedPaymentMethod === "cod") {
             window.location.href = "/success";
         }
@@ -577,7 +580,7 @@ export const CheckoutPage = ({ couponCode, addressesCount }: { couponCode: strin
                                 )
                             }
                         </div>
-                        
+
                         {/* Delivery Options */}
                         <div className="bg-[#0f0f0f] p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
