@@ -39,8 +39,9 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: false, message: "Address limit reached. You can save up to 10 addresses." }, { status: 400 });
             }
         }
-
+ 
         const order = await prisma.$transaction(async (tx) => {
+
             const order = await tx.order.create({
                 data: {
                     userId: session.user.id,
@@ -90,7 +91,18 @@ export async function POST(req: Request) {
                     country: country.name,
                     phone
                 }
-            })
+            });
+
+            await tx.user.updateMany({
+                where: {
+                    id: session.user.id,
+                    isNewUser: true
+                },
+                data: {
+                    isNewUser: false
+                }
+            }); 
+
             return order;
         });
 
