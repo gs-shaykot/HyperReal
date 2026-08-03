@@ -2,7 +2,7 @@ import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import axios from "axios";
 import { NextResponse } from "next/server";
-
+// app\api\payment\success\route.ts:
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
@@ -85,31 +85,7 @@ export async function POST(req: Request) {
                     status: "PROCESSING",
                 },
             });
-            
-            // await Promise.all(
-            //     order.orderItems.map(async (item) => {
-            //         const result = await tx.productVariant.updateMany({
-            //             where: {
-            //                 id: item.variantId,
-            //                 stock: {
-            //                     gte: item.quantity,
-            //                 },
-            //             },
-            //             data: {
-            //                 stock: {
-            //                     decrement: item.quantity,
-            //                 },
-            //             },
-            //         });
-
-            //         if (result.count === 0) {
-            //             throw new Error(
-            //                 `Insufficient stock for variant ${item.variantId}`
-            //             );
-            //         }
-            //     })
-            // );
-
+             
             await Promise.all(
                 order.orderItems.map(async (item) => {
                     const res = await tx.productVariant.updateMany({
@@ -144,3 +120,4 @@ export async function POST(req: Request) {
         return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
     }
 }
+// --> here is the success route. i think i should increase the coupon here instead.

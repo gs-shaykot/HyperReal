@@ -16,6 +16,8 @@ export async function POST(req: Request) {
 
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
+        console.log("Coupon from request body:", coupon);
+
         const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);
 
@@ -39,7 +41,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ success: false, message: "Address limit reached. You can save up to 10 addresses." }, { status: 400 });
             }
         }
- 
+
         const order = await prisma.$transaction(async (tx) => {
 
             const order = await tx.order.create({
@@ -101,7 +103,18 @@ export async function POST(req: Request) {
                 data: {
                     isNewUser: false
                 }
-            }); 
+            });
+
+            await tx.coupon.update({
+                where: {
+                    code: coupon
+                },
+                data: {
+                    usedCount: {
+                        increment: 1
+                    }
+                }
+            });
 
             return order;
         });

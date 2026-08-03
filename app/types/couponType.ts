@@ -6,4 +6,7 @@ export type couponType = {
     minSpend: number;
     maxDiscount?: number | null;
     newUserOnly?: boolean | null;
+    limit?: number | null;
+    usedCount: number;
+    expiryDate?: Date | null;
 }

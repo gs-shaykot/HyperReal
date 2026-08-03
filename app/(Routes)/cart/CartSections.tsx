@@ -127,7 +127,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
   }, [coupons, subtotal, isNewUser]);
 
   const nextBestCoupon = useMemo(() => {
-    return getNextBestCoupon(coupons, subtotal);
+    return getNextBestCoupon(coupons, subtotal, isNewUser);
   }, [subtotal, coupons]);
 
   const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
@@ -199,7 +199,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(null);
   };
 
-  const handleApplyCoupon = () => { 
+  const handleApplyCoupon = () => {
     const code = couponInput.trim().toUpperCase();
     const foundCoupon = coupons.find(c => c.code.toUpperCase() === code);
     if (!foundCoupon) {

@@ -117,13 +117,16 @@ model CartItem {
 }
 
 model Coupon {
-  id          String   @id @default(uuid())
-  code        String   @unique
+  id          String    @id @default(uuid())
+  code        String    @unique
   type        String
   value       Float
   minSpend    Float
   maxDiscount Float?
   newUserOnly Boolean?
+  limit       Int?
+  usedCount   Int       @default(0)
+  expiryDate  DateTime?
 }
 
 model Order {
@@ -175,6 +178,7 @@ model Payment {
   discount               Float         @default(0)
   shippingCost           Float         @default(0)
   shippingMethod         String?       @default("Standard Drop")
+  couponCode             String?
 
   createdAt DateTime @default(now())
   order     Order    @relation(fields: [orderId], references: [id])
