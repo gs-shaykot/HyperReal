@@ -42,13 +42,13 @@ export async function POST(req: Request) {
             }
         }
 
-        const order = await prisma.$transaction(async (tx) => {
+        const order = await prisma.$transaction(async (tx) => { 
 
             const order = await tx.order.create({
                 data: {
                     userId: session.user.id,
                     status: "PENDING",
-                    orderCode,
+                    orderCode, 
                     orderHistory: {
                         create: {
                             fullName,
@@ -60,6 +60,7 @@ export async function POST(req: Request) {
                             phone,
                         }
                     },
+
                     orderItems: {
                         create: cartItems.map((item: CartItemWithProductType) => ({
                             variantId: item.variantId,
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
                             priceAtPurchase: item.variant.product.price,
                         }))
                     },
+
                     payments: {
                         create: {
                             method: paymentMethod,
@@ -75,7 +77,8 @@ export async function POST(req: Request) {
                             totalProductPriceInUSD: subTotal,
                             discount: discount,
                             shippingCost: shippingCost,
-                            country: country.shortName
+                            country: country.shortName,
+                            couponCode: coupon || null
                         }
                     }
                 }
@@ -104,18 +107,7 @@ export async function POST(req: Request) {
                     isNewUser: false
                 }
             });
-
-            await tx.coupon.update({
-                where: {
-                    code: coupon
-                },
-                data: {
-                    usedCount: {
-                        increment: 1
-                    }
-                }
-            });
-
+            
             return order;
         });
 
@@ -149,7 +141,9 @@ export async function POST(req: Request) {
             const data = response.data;
 
             return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
-        }
+        }  
+        
+        console.log("Order created successfully:", order);
 
         return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
     }

@@ -47,12 +47,18 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
         }
     });
     const shippingCost = deliveryOption ? DeliveryOptions.find(option => option.label === deliveryOption)?.cost || 0 : 0;
+    let discount = 0;
 
-    const Appliedcoupon = await prisma.coupon.findUnique({
-        where: { code: coupon }
-    });
+    if (coupon) {
+        const Appliedcoupon = await prisma.coupon.findUnique({
+            where: { code: coupon }
+        });
 
-    const discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
+        if (Appliedcoupon) {
+            discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
+        }
+    }
+
     const USD_finalTotal = subTotal + shippingCost - discount;
 
     return { USD_finalTotal, subTotal, discount, shippingCost }

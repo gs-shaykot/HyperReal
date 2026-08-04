@@ -28,7 +28,7 @@ const hudson = localFont({
 
 export const CartSections = ({ coupons }: CouponProps) => {
   const { data: session, status, update } = useSession();
-  console.log('session', session?.user);
+
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -504,7 +504,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
             </div>
 
             {/* BUTTON */}
-            <button onClick={() => router.push(`/checkout?coupon=${appliedCoupon?.code}`)} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
+            {/* /checkout?${appliedCoupon?.code ? coupon=${appliedCoupon?.code} : ''} */}
+            <button onClick={() => router.push(`/checkout?${appliedCoupon?.code ? `coupon=${appliedCoupon?.code}` : ''}`)} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
           </div>

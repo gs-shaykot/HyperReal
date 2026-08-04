@@ -2,7 +2,7 @@ import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import axios from "axios";
 import { NextResponse } from "next/server";
-// app\api\payment\success\route.ts:
+
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
@@ -23,43 +23,54 @@ export async function POST(req: Request) {
             select: {
                 id: true,
                 userId: true,
-
                 orderItems: {
                     select: {
                         quantity: true,
                         variantId: true,
-                    }
-                }
-            }
+                    },
+                },
+                payments: {
+                    select: {
+                        paidAmountInBDT: true,
+                        couponCode: true,
+                        status: true,
+                    },
+                },
+            },
         });
-
-        const payment = await prisma.payment.findFirst({
-            where: { orderId: order?.id }
-        });
-
-        const cart = await prisma.cart.findFirst({
-            where: { userId: order?.userId }
-        })
 
         if (!order) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
+        const payment = order.payments[0];
+
+        if (!payment) {
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        }
+
+        const cart = await prisma.cart.findFirst({
+            where: { userId: order.userId },
+        });
+
         if (validationData.status !== "VALID") {
             await prisma.payment.updateMany({
                 where: { orderId: order.id },
-                data: { status: "FAILED" }
-            })
+                data: { status: "FAILED" },
+            });
 
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        if (Number(validationData.amount).toFixed(2) !== Number(payment?.paidAmountInBDT).toFixed(2)) {
-            
+        const validationAmount = Number(validationData.amount).toFixed(2);
+        const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
+
+        if (validationAmount !== paidAmount) {
+
             await prisma.payment.updateMany({
                 where: { orderId: order.id },
-                data: { status: "FAILED" }
-            })
+                data: { status: "FAILED" },
+            });
 
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
@@ -71,6 +82,7 @@ export async function POST(req: Request) {
         }
 
         await prisma.$transaction(async (tx) => {
+
             await tx.payment.updateMany({
                 where: { orderId: order.id },
                 data: {
@@ -85,39 +97,51 @@ export async function POST(req: Request) {
                     status: "PROCESSING",
                 },
             });
-             
+
             await Promise.all(
                 order.orderItems.map(async (item) => {
+
                     const res = await tx.productVariant.updateMany({
                         where: {
-                            id: item.variantId
+                            id: item.variantId,
                         },
                         data: {
                             stock: {
-                                decrement: item.quantity
-                            }
-                        }
+                                decrement: item.quantity,
+                            },
+                        },
                     });
 
-                    if(res.count === 0) {
-                        throw new Error('Insufficient stock for selected variant.');
+                    if (res.count === 0) {
+                        throw new Error("Insufficient stock for selected variant.");
                     }
                 })
-            )
+            );
 
-            await tx.cartItem.deleteMany({
+            const deletedCartItems = await tx.cartItem.deleteMany({
                 where: {
                     cartId: cart?.id,
                 },
             });
+
+            if (payment?.couponCode) {
+                await tx.coupon.update({
+                    where: {
+                        code: payment.couponCode,
+                    },
+                    data: {
+                        usedCount: {
+                            increment: 1,
+                        },
+                    },
+                });
+            }
         });
 
         return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
 
-    }
-    catch (error: unknown) {
-        console.error("Payment Validation Error:", error);
+    } catch (error: unknown) {
+        console.error("[payment/success] Payment Validation Error:", error);
         return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
     }
 }
-// --> here is the success route. i think i should increase the coupon here instead.
