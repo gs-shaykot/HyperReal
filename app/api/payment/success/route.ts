@@ -1,10 +1,12 @@
-import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
+import { completePayment, markPaymentFailed } from "@/lib/service/paymentService";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
+        console.log("[payment/success] Route hit");
+
         const formData = await req.formData();
         const tran_id = formData.get("tran_id") as string;
         const val_id = formData.get("val_id") as string;
@@ -49,16 +51,12 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        const cart = await prisma.cart.findFirst({
-            where: { userId: order.userId },
-        });
+        if (payment.status === "SUCCESS") {
+            return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
+        }
 
         if (validationData.status !== "VALID") {
-            await prisma.payment.updateMany({
-                where: { orderId: order.id },
-                data: { status: "FAILED" },
-            });
-
+            await markPaymentFailed(order.id); 
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
@@ -66,77 +64,11 @@ export async function POST(req: Request) {
         const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
 
         if (validationAmount !== paidAmount) {
-
-            await prisma.payment.updateMany({
-                where: { orderId: order.id },
-                data: { status: "FAILED" },
-            });
-
+            await markPaymentFailed(order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        let transactionId = generateCustomId("HYP-PAY");
-
-        while (await prisma.payment.findUnique({ where: { transactionId } })) {
-            transactionId = generateCustomId("HYP-PAY");
-        }
-
-        await prisma.$transaction(async (tx) => {
-
-            await tx.payment.updateMany({
-                where: { orderId: order.id },
-                data: {
-                    status: "SUCCESS",
-                    transactionId,
-                },
-            });
-
-            await tx.order.update({
-                where: { id: order.id },
-                data: {
-                    status: "PROCESSING",
-                },
-            });
-
-            await Promise.all(
-                order.orderItems.map(async (item) => {
-
-                    const res = await tx.productVariant.updateMany({
-                        where: {
-                            id: item.variantId,
-                        },
-                        data: {
-                            stock: {
-                                decrement: item.quantity,
-                            },
-                        },
-                    });
-
-                    if (res.count === 0) {
-                        throw new Error("Insufficient stock for selected variant.");
-                    }
-                })
-            );
-
-            const deletedCartItems = await tx.cartItem.deleteMany({
-                where: {
-                    cartId: cart?.id,
-                },
-            });
-
-            if (payment?.couponCode) {
-                await tx.coupon.update({
-                    where: {
-                        code: payment.couponCode,
-                    },
-                    data: {
-                        usedCount: {
-                            increment: 1,
-                        },
-                    },
-                });
-            }
-        });
+        await completePayment(order);
 
         return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
 
