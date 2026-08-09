@@ -2,7 +2,8 @@ import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
-import { calculateOrder } from "@/lib/service/orderService"; 
+import { calculateOrder } from "@/lib/service/orderService";
+import { stripe } from "@/lib/stripe";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -13,15 +14,16 @@ export async function POST(req: Request) {
         if (!session?.user) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
+
         // Parsing requested body: 
         const body = await req.json();
         const { cartItems, country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
 
-        // Calculating Order total & others
+        // Calculating Order total & others: 
         const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);
 
-        // Generating unique order code
+        // Generating unique order code: 
         let orderCode = generateCustomId("HYP-ORD");
         while (await prisma.order.findUnique({ where: { orderCode } })) {
             orderCode = generateCustomId("HYP-ORD");
@@ -44,7 +46,6 @@ export async function POST(req: Request) {
         }
 
         const order = await prisma.$transaction(async (tx) => {
-
             const order = await tx.order.create({
                 data: {
                     userId: session.user.id,
@@ -111,7 +112,7 @@ export async function POST(req: Request) {
 
             return order;
         });
-
+        // done...what next ?
         switch (paymentMethod) {
             case "SSLC": {
                 const tran_id = order.orderCode;
@@ -144,9 +145,34 @@ export async function POST(req: Request) {
 
                 return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
             }
-            case "CARD": {
-                
-                break;
+            case "STRIPE": {
+                const paymentIntent = await stripe.paymentIntents.create({
+                    amount: Math.round(USD_finalTotal * 100),
+                    currency: "usd", 
+                    payment_method_types: ["card"],
+
+                    metadata: {
+                        orderId: order.id,
+                        orderCode: order.orderCode,
+                        userId: session.user.id,
+                    },
+                });
+
+                await prisma.payment.updateMany({
+                    where: {
+                        orderId: order.id,
+                    },
+                    data: {
+                        paymentIntentId: paymentIntent.id,
+                    },
+                });
+
+                return NextResponse.json({
+                    success: true,
+                    orderId: order.id,
+                    clientSecret:
+                        paymentIntent.client_secret,
+                });
             }
             case "COD": {
                 // Handle Cash on Delivery payment

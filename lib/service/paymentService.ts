@@ -42,10 +42,19 @@ type CompletePaymentType = Prisma.OrderGetPayload<{
 }>;
 
 
-export async function completePayment(order: CompletePaymentType) {
+export async function completePayment(
+    order: CompletePaymentType,
+    stripeDetails?: {
+        paymentIntentId?: string;
+        stripeChargeId?: string;
+        cardBrand?: string;
+        last4?: string;
+        receiptUrl?: string;
+    }
+) {
     const payment = order.payments[0];
 
-    if (payment.status === PaymentStatus.SUCCESS) {
+    if (payment && payment.status === PaymentStatus.SUCCESS) {
         return;
     }
 
@@ -61,6 +70,11 @@ export async function completePayment(order: CompletePaymentType) {
             data: {
                 status: PaymentStatus.SUCCESS,
                 transactionId,
+                ...(stripeDetails?.paymentIntentId && { paymentIntentId: stripeDetails.paymentIntentId }),
+                ...(stripeDetails?.stripeChargeId && { stripeChargeId: stripeDetails.stripeChargeId }),
+                ...(stripeDetails?.cardBrand && { cardBrand: stripeDetails.cardBrand }),
+                ...(stripeDetails?.last4 && { last4: stripeDetails.last4 }),
+                ...(stripeDetails?.receiptUrl && { receiptUrl: stripeDetails.receiptUrl }),
             },
         });
 

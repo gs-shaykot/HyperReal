@@ -25,6 +25,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
     ]
 
     let subTotal = 0;
+    
     const OrderedItem = cartItems.map(item => {
         const variant = variants.find(v => v.id === item.variantId);
         if (!variant) {
@@ -46,6 +47,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
             price: productPrice,
         }
     });
+    
     const shippingCost = deliveryOption ? DeliveryOptions.find(option => option.label === deliveryOption)?.cost || 0 : 0;
     let discount = 0;
 

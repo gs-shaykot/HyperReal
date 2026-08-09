@@ -130,7 +130,7 @@ model Coupon {
 }
 
 model Order {
-  id        String      @id @default(uuid())
+  id        String      @id @unique @default(uuid())
   userId    String
   status    OrderStatus @default(PENDING)
   orderCode String      @unique
@@ -167,17 +167,27 @@ model OrderHistory {
 }
 
 model Payment {
-  id                     String        @id @default(uuid())
-  orderId                String
-  method                 PaymentMethod
-  country                String        @default("Bangladesh")
-  status                 PaymentStatus @default(PENDING)
-  transactionId          String?       @unique
-  paidAmountInBDT        Float         @default(0)
-  totalProductPriceInUSD Float         @default(0)
-  discount               Float         @default(0)
-  shippingCost           Float         @default(0)
-  shippingMethod         String?       @default("Standard Drop")
+  id      String        @id @default(uuid())
+  orderId String
+  method  PaymentMethod
+  country String        @default("Bangladesh")
+  status  PaymentStatus @default(PENDING)
+
+  transactionId String? @unique
+
+  // Stripe
+  paymentIntentId String? @unique
+  stripeChargeId  String? @unique
+  cardBrand       String?
+  last4           String?
+  receiptUrl      String?
+
+  // Existing fields
+  paidAmountInBDT        Float   @default(0)
+  totalProductPriceInUSD Float   @default(0)
+  discount               Float   @default(0)
+  shippingCost           Float   @default(0)
+  shippingMethod         String? @default("Standard Drop")
   couponCode             String?
 
   createdAt DateTime @default(now())
@@ -211,7 +221,7 @@ enum OrderStatus {
 }
 
 enum PaymentMethod {
-  CARD
+  STRIPE
   COD
   SSLC
 }
