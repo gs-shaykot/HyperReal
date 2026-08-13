@@ -52,6 +52,9 @@ export async function completePayment(
         receiptUrl?: string;
     }
 ) {
+    console.log("[paymentService] Completing payment for order ID:", order.id);
+    console.log("[paymentService] Stripe details:", stripeDetails);
+
     const payment = order.payments[0];
 
     if (payment && payment.status === PaymentStatus.SUCCESS) {
@@ -70,11 +73,20 @@ export async function completePayment(
             data: {
                 status: PaymentStatus.SUCCESS,
                 transactionId,
-                ...(stripeDetails?.paymentIntentId && { paymentIntentId: stripeDetails.paymentIntentId }),
-                ...(stripeDetails?.stripeChargeId && { stripeChargeId: stripeDetails.stripeChargeId }),
-                ...(stripeDetails?.cardBrand && { cardBrand: stripeDetails.cardBrand }),
-                ...(stripeDetails?.last4 && { last4: stripeDetails.last4 }),
-                ...(stripeDetails?.receiptUrl && { receiptUrl: stripeDetails.receiptUrl }),
+                ...(
+                    stripeDetails?.paymentIntentId && { paymentIntentId: stripeDetails.paymentIntentId }
+                ),
+                ...(
+                    stripeDetails?.stripeChargeId && { stripeChargeId: stripeDetails.stripeChargeId }
+                ),
+                ...(
+                    stripeDetails?.cardBrand && { cardBrand: stripeDetails.cardBrand }),
+                ...(
+                    stripeDetails?.last4 && { last4: stripeDetails.last4 }
+                ),
+                ...(
+                    stripeDetails?.receiptUrl && { receiptUrl: stripeDetails.receiptUrl }
+                ),
             },
         });
 

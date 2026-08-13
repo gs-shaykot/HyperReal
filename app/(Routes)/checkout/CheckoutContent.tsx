@@ -206,6 +206,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                 if (!data.clientSecret) {
                     toast.error("Unable to initialize Stripe payment.");
+                    setIsSubmitting(false);
                     return;
                 }
 
@@ -213,11 +214,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                 if (!cardElement) {
                     toast.error("Card information is not ready.");
+                    setIsSubmitting(false);
                     return;
                 }
 
                 if (!cardHolderName.trim()) {
                     toast.error("Please enter the card holder name.");
+                    setIsSubmitting(false);
                     return;
                 }
                 setIsProcessingPayment(true);
@@ -248,12 +251,27 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     const paymentIntent = result.paymentIntent;
 
                     if (paymentIntent.status === "succeeded") {
-                        toast.success("Payment successful!");
-                        // window.location.href = "/success";
+
                         console.log(
                             "[Stripe] PaymentIntent succeeded:",
                             paymentIntent.id
                         );
+
+                        console.log(
+                            "[Stripe] Order ID:",
+                            data.orderId
+                        );
+
+                        console.log(
+                            "[Stripe] Redirect URL:",
+                            `/success?orderId=${data.orderId}`
+                        );
+                        const redirectUrl = `/success?orderId=${encodeURIComponent(data.orderId)}`;
+
+                        toast.success("Payment Successfully Done");
+
+                        window.location.href = redirectUrl;
+                        return
                     }
                     else {
                         toast.error("Payment failed. Please try again.");
@@ -263,13 +281,22 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     setIsProcessingPayment(false);
                 }
             }
-
-            if (selectedPaymentMethod === "COD") {
-                window.location.href = "/success";
+            else if (selectedPaymentMethod === "COD") {
+                window.location.href = `/success?orderId=${encodeURIComponent(data.orderId)}`;
+                return;
             }
+            else {
+                if (!data.paymentUrl) {
+                    toast.error("Payment gateway URL is missing.");
+                    setIsSubmitting(false);
+                    return;
+                }
 
-            await update();
-            window.location.href = data.paymentUrl;
+                await update();
+                window.location.href = data.paymentUrl;
+
+                return;
+            }
 
         }
         catch (error: any) {

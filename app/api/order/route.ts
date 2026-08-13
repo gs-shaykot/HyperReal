@@ -112,7 +112,7 @@ export async function POST(req: Request) {
 
             return order;
         });
-        // done...what next ?
+
         switch (paymentMethod) {
             case "SSLC": {
                 const tran_id = order.orderCode;
@@ -145,10 +145,11 @@ export async function POST(req: Request) {
 
                 return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
             }
+
             case "STRIPE": {
                 const paymentIntent = await stripe.paymentIntents.create({
                     amount: Math.round(USD_finalTotal * 100),
-                    currency: "usd", 
+                    currency: "usd",
                     payment_method_types: ["card"],
 
                     metadata: {
@@ -166,7 +167,7 @@ export async function POST(req: Request) {
                         paymentIntentId: paymentIntent.id,
                     },
                 });
-
+                console.log("[Stripe] PaymentIntent created:", paymentIntent.client_secret, 'order ID: ', order.id);
                 return NextResponse.json({
                     success: true,
                     orderId: order.id,
@@ -175,7 +176,7 @@ export async function POST(req: Request) {
                 });
             }
             case "COD": {
-                // Handle Cash on Delivery payment
+
                 break;
             }
 

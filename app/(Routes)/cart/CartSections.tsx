@@ -233,7 +233,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
         {/* ================= LEFT PANEL ================= */}
         <div className="md:col-span-6 space-y-4">
           {cart.map((item: CartItemWithProductType) => {
-
+            console.log("Rendering cart item:", item); 
             const matchedImage =
               item.variant?.product?.productImages?.find(
                 (img) => img.color === item.variant?.color
@@ -242,9 +242,10 @@ export const CartSections = ({ coupons }: CouponProps) => {
             const safeImage = matchedImage || "/fallback.png";
 
             return (
-              <div
+              <Link
+                href={`/products/${item.variant.product.id}`}
                 key={item.id ?? `cart-${Math.random()}`}
-                className="relative z-20 flex justify-between light:bg-white light:shadow-lg rounded-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
+                className="relative z-20 flex justify-between light:bg-white light:shadow-lg hover:border-second/30 bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -311,7 +312,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     ${(item.variant?.product?.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
-              </div>
+              </Link>
             );
           })}
           {
@@ -504,7 +505,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             </div>
 
             {/* BUTTON */}
-            {/* /checkout?${appliedCoupon?.code ? coupon=${appliedCoupon?.code} : ''} */}
+
             <button onClick={() => router.push(`/checkout?${appliedCoupon?.code ? `coupon=${appliedCoupon?.code}` : ''}`)} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
