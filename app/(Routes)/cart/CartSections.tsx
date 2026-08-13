@@ -233,7 +233,6 @@ export const CartSections = ({ coupons }: CouponProps) => {
         {/* ================= LEFT PANEL ================= */}
         <div className="md:col-span-6 space-y-4">
           {cart.map((item: CartItemWithProductType) => {
-            console.log("Rendering cart item:", item); 
             const matchedImage =
               item.variant?.product?.productImages?.find(
                 (img) => img.color === item.variant?.color
@@ -242,8 +241,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             const safeImage = matchedImage || "/fallback.png";
 
             return (
-              <Link
-                href={`/products/${item.variant.product.id}`}
+              <div
                 key={item.id ?? `cart-${Math.random()}`}
                 className="relative z-20 flex justify-between light:bg-white light:shadow-lg hover:border-second/30 bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
@@ -270,9 +268,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
                 {/* DETAILS */}
                 <div className="flex-1 px-6">
-                  <h3 className="text-lg font-semibold uppercase tracking-wide text-white light:text-zinc-900">
+                  <Link
+                    href={`/products/${item.variant?.product?.id}`}
+                    className="text-lg font-semibold uppercase tracking-wide text-white light:text-zinc-900">
                     {item.variant?.product?.name}
-                  </h3>
+                  </Link>
 
                   <p className="text-sm text-zinc-400 light:text-zinc-500 mt-1">
                     {item.variant?.product?.category?.name} {'//'} {item.variant?.size}
@@ -312,7 +312,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     ${(item.variant?.product?.price * item.quantity).toFixed(2)}
                   </p>
                 </div>
-              </Link>
+              </div>
             );
           })}
           {
