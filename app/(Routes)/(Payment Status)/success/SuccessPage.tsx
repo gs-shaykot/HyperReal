@@ -181,7 +181,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
                 <p className="text-xs uppercase tracking-[4px]">Method</p>
               </div>
 
-              <p className="font-medium light:text-zinc-700 uppercase">Standard</p>
+              <p className="font-medium light:text-zinc-700 uppercase">{order.payments[0]?.shippingMethod}</p>
             </div>
 
             <div className="flex flex-col">

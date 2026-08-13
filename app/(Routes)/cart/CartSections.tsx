@@ -243,7 +243,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             return (
               <div
                 key={item.id ?? `cart-${Math.random()}`}
-                className="relative z-20 flex justify-between light:bg-white light:shadow-lg hover:border-second/30 bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
+                className="relative z-20 flex justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -270,7 +270,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 <div className="flex-1 px-6">
                   <Link
                     href={`/products/${item.variant?.product?.id}`}
-                    className="text-lg font-semibold uppercase tracking-wide text-white light:text-zinc-900">
+                    className="text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900">
                     {item.variant?.product?.name}
                   </Link>
 
