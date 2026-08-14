@@ -5,9 +5,12 @@ import {
   CardExpiryElement,
   CardCvcElement,
 } from "@stripe/react-stripe-js";
+import { StripeCardNumberElementOptions } from "@stripe/stripe-js";
 import { useState } from "react";
 
-const stripeElementOptions = {
+const stripeElementOptions: StripeCardNumberElementOptions = {
+  showIcon: true,
+  iconStyle: "default",
   style: {
     base: {
       color: "#ffffff",

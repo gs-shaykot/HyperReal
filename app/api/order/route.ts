@@ -80,6 +80,7 @@ export async function POST(req: Request) {
                             discount: discount,
                             shippingCost: shippingCost,
                             country: country.shortName,
+                            shippingMethod: deliveryOption,
                             couponCode: coupon || null
                         }
                     }

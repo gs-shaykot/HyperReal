@@ -305,6 +305,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             setIsSubmitting(false);
         }
     }
+     
 
     return (
         <div className=' bg-main light:bg-white py-10'>
