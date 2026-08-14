@@ -33,6 +33,11 @@ export async function POST(req: Request) {
         switch (event.type) {
             case "payment_intent.succeeded": {
                 const paymentIntent = event.data.object as Stripe.PaymentIntent;
+                const paymentIntentWithCharge = await stripe.paymentIntents.retrieve(paymentIntent.id, {
+                    expand: ["latest_charge"]
+                });
+                const charge = paymentIntentWithCharge.latest_charge as Stripe.Charge;
+
                 console.log(
                     `[Stripe Webhook] PaymentIntent succeeded: ${paymentIntent.id}`
                 );
@@ -75,7 +80,13 @@ export async function POST(req: Request) {
                     return new NextResponse("Order not found", { status: 404 });
                 }
                 console.log("[Stripe Webhook] Order found:", order);
-                await completePayment(order, { paymentIntentId: paymentIntent.id });
+                await completePayment(order, {
+                    paymentIntentId: paymentIntent.id,
+                    stripeChargeId: charge?.id!,
+                    cardBrand: charge?.payment_method_details?.card?.brand!,
+                    last4: charge?.payment_method_details?.card?.last4!,
+                    receiptUrl: charge?.receipt_url!,
+                });
 
                 console.log(
                     "[Stripe Webhook] Payment completed:",

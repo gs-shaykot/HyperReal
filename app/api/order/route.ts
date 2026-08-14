@@ -168,7 +168,7 @@ export async function POST(req: Request) {
                         paymentIntentId: paymentIntent.id,
                     },
                 });
-                console.log("[Stripe] PaymentIntent created:", paymentIntent.client_secret, 'order ID: ', order.id);
+                
                 return NextResponse.json({
                     success: true,
                     orderId: order.id,
@@ -182,9 +182,7 @@ export async function POST(req: Request) {
             }
 
         }
-
-        console.log("Order created successfully:", order);
-
+        
         return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
     }
     catch (error) {
