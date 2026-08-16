@@ -30,7 +30,18 @@ export const fetchCartApi = async () => {
 
 export const countCartItems = async () => {
     try {
+        console.log(
+            "🛒 countCartItems REQUEST:",
+            new Date().toISOString()
+        );
+
         const res = await axios.get("/api/cart/cartCount");
+
+        console.log(
+            "🛒 countCartItems RESPONSE:",
+            res.data?.data?.count,
+            new Date().toISOString()
+        );
 
         if (!res.data.success) {
             throw new Error(res.data.message);
@@ -84,6 +95,6 @@ export const fetchCouponsApi = async () => {
     }
 
     const body = await res.json();
- 
+
     return body?.data ?? [];
 }

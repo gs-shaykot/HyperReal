@@ -9,6 +9,8 @@ import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import validator from 'validator';
 
+const DEFAULT_AVATAR_URL = "https://res.cloudinary.com/dloasaxt1/image/upload/v1759951379/User_Avatar_abmwcj.png";
+
 const Register = () => {
     const router = useRouter();
 
@@ -72,16 +74,17 @@ const Register = () => {
 
         try {
             setSendingOtp(true);
-
+            console.log("[register] sending OTP to:", email);
             const res = await axios.post("/api/sendOtp", { email });
-            
+
             if (res.status === 200) {
                 setOtpSent(true);
-                setCooldown(60); 
+                setCooldown(60);
                 toast.success(res.data.message);
             }
 
         } catch (error: any) {
+            console.log("[register] failed to send OTP:", error);
             toast.error(error.response?.data?.message || "Failed to send OTP");
         } finally {
             setSendingOtp(false);
@@ -128,7 +131,7 @@ const Register = () => {
             return toast.error("Enter valid OTP");
         }
 
-        
+
         try {
             setLoading(true);
 
@@ -137,7 +140,7 @@ const Register = () => {
                 email: email.toLowerCase(),
                 password,
                 role: 'USER',
-                PhotoUrl: imageUrl,
+                PhotoUrl: imageUrl || DEFAULT_AVATAR_URL,
                 otp,
             };
 
@@ -323,8 +326,8 @@ const Register = () => {
 
                                     }
                                 </button>
-                            </div> 
-                            
+                            </div>
+
                             <p className="text-[10px] text-zinc-500 font-mono tracking-wider">
                                 WE WILL SEND A VERIFICATION CODE TO YOUR EMAIL
                             </p>
