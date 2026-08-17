@@ -73,7 +73,7 @@ export const Identity = () => {
         });
     }
     return (
-        <div className="border border-neutral-700 bg-[#0f0f0f] p-3">
+        <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-white p-3">
             <div className="flex justify-between items-start mb-3">
                 <h2 className="text-xl font-bold">
                     IDENTITY MATRIX
@@ -113,7 +113,7 @@ export const Identity = () => {
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <User size={18} strokeWidth={0.75} />
-                        <p className="text-neutral-500 text-sm">
+                        <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Full Name
                         </p>
                     </div>
@@ -133,7 +133,7 @@ export const Identity = () => {
                 <div className="border-b border-zinc-800">
                     <div className="flex items-center gap-2 mb-3 ">
                         <Shield size={18} strokeWidth={0.75} />
-                        <p className="text-neutral-500 text-sm">
+                        <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Role
                         </p>
                     </div>
@@ -144,7 +144,7 @@ export const Identity = () => {
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <Mail size={18} strokeWidth={0.75} />
-                        <p className="text-neutral-500 text-sm">
+                        <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Email
                         </p>
                     </div>
@@ -164,7 +164,7 @@ export const Identity = () => {
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
                         <Phone size={18} strokeWidth={0.75} />
-                        <p className="text-neutral-500 text-sm">
+                        <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Phone
                         </p>
                     </div>

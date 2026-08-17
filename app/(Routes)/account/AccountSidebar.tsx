@@ -33,21 +33,21 @@ const menus = [
 
 export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: number; TotalPayment: number }) => {
   const pathname = usePathname();
-
+  console.log("[Profile:] TotalPayment: ", TotalPayment)
   return (
     <div className="lg:sticky lg:top-19.5 lg:self-start">
-      <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2 mb-3'>
+      <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 mb-3'>
         <ul className='flex flex-col gap-2'>
           {menus.map((menu) => (
             <li key={menu.title}>
               <Link
                 href={menu.href}
                 className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors ${pathname === menu.href
-                  ? "bg-second text-zinc-900 font-bold font-sans"
-                  : "text-white hover:bg-zinc-800 hover:text-white"
+                  ? "bg-second text-zinc-900 light:text-white font-bold font-sans"
+                  : "text-white light:text-zinc-900 hover:bg-zinc-800 hover:text-white"
                   }`}
               >
-                <menu.icon className={`h-5 w-5 text-white ${pathname === menu.href ? "text-zinc-900" : ""}`}/>
+                <menu.icon className={`h-5 w-5 ${pathname === menu.href ? "" : ""}`} />
                 {menu.title}
               </Link>
             </li>
@@ -55,18 +55,18 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
         </ul>
       </div>
 
-      <div className='w-full bg-[#0f0f0f] border border-zinc-800 p-2'>
+      <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2'>
         <ul>
           <li className="p-2 py-3 border-b border-zinc-800">
-            <h2 className="mb-2">TOTAL SPENT</h2>
-            <span className="text-second">${TotalPayment?.toFixed(2)}</span>
+            <h2 className="mb-2 text-white light:text-zinc-800">TOTAL SPENT</h2>
+            <span className="text-second">${TotalPayment ? TotalPayment?.toFixed(2) : "00"}</span>
           </li>
           <li className="p-2 py-3 border-b border-zinc-800">
-            <h2 className="mb-2">ORDERS</h2>
+            <h2 className="mb-2 text-white light:text-zinc-800">ORDERS</h2>
             <span className="text-second">{orderCount}</span>
           </li>
           <li className="p-2 py-3">
-            <h2 className="mb-2">TIER</h2>
+            <h2 className="mb-2 text-white light:text-zinc-800">TIER</h2>
             <span className="text-second">BRONZE</span>
           </li>
         </ul>

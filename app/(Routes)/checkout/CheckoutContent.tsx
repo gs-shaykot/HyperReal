@@ -429,25 +429,25 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                         </h3>
                                                     </button>
                                                 ))}
+                                                {/* New Address Card */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setAddNewAddress((prev) => ({
+                                                            isChecked: prev.addNew ? true : false,
+                                                            addNew: !prev.addNew,
+                                                        }));
+                                                        setUseSavedAddress(null);
+                                                    }}
+                                                    className={`btn h-26 rounded-none border ${addNewAddress.addNew
+                                                        ? "bg-second/15 border-second"
+                                                        : "bg-transparent border-zinc-700"
+                                                        } hover:border-second border-dashed flex flex-col shadow-none`}
+                                                >
+                                                    <Plus size={18} />
+                                                    NEW ADDRESS
+                                                </button>
                                             </div>
-                                            {/* New Address Card */}
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setAddNewAddress((prev) => ({
-                                                        isChecked: prev.addNew ? true : false,
-                                                        addNew: !prev.addNew,
-                                                    }));
-                                                    setUseSavedAddress(null);
-                                                }}
-                                                className={`btn h-26 rounded-none border ${addNewAddress.addNew
-                                                    ? "bg-second/15 border-second"
-                                                    : "bg-transparent border-zinc-700"
-                                                    } hover:border-second border-dashed flex flex-col shadow-none`}
-                                            >
-                                                <Plus size={18} />
-                                                NEW ADDRESS
-                                            </button>
                                             {/* Show All / Show Less */}
                                             {addressesCount > 4 && (
                                                 <button

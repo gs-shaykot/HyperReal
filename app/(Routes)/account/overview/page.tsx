@@ -56,7 +56,7 @@ export default async function OverviewPage() {
 
       <Identity />
 
-      <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
+      <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-white p-6">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">
