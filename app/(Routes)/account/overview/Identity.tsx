@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react'
 
 export const Identity = () => {
-    const { data: session } = useSession();
+    const { update } = useSession();
     const updateProfileMutation = useProfile();
     const { data: profile, isLoading } = useQuery({
         queryKey: ["profile"],
@@ -19,7 +19,7 @@ export const Identity = () => {
         email: "",
         phone: "",
     });
-
+    console.log("[Profile Identity] profile", profile);
     useEffect(() => {
         if (profile) {
             setFormData({
@@ -48,7 +48,7 @@ export const Identity = () => {
             </div>
         );
     }
-    const handleSave = () => {
+    const handleSave = async () => {
         const profileData = {
             id: profile?.id,
             name: formData.name,
@@ -66,8 +66,9 @@ export const Identity = () => {
         }
 
         updateProfileMutation.mutate(profileData, {
-            onSuccess: () => {
+            onSuccess: async () => {
                 setIsEditing(false);
+                await update();
             }
         });
     }
@@ -137,7 +138,7 @@ export const Identity = () => {
                         </p>
                     </div>
 
-                    <h3 className="pb-2 text-sm">{profile?.authProvider}</h3>
+                    <h3 className="pb-2 text-sm">{profile?.role}</h3>
                 </div>
 
                 <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>

@@ -7,11 +7,12 @@ import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
 import { countCartItems } from "@/lib/cartAPIs"
 import { getProfile } from "@/lib/profileApi"
+import { useEffect } from "react"
 
 export const Navbar = () => {
-    const { data: session } = useSession();
+    const { data: session, update } = useSession();
     const { theme, setTheme } = useTheme();
-    
+
     const { data: cartCount = 0 } = useQuery({
         queryKey: ["cartCount"],
         queryFn: countCartItems,

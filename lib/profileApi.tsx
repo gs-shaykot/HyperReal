@@ -13,6 +13,6 @@ export const ProfileEdit = async ({ email, name, phone }: { id: string; email: s
     }
 }
 export const getProfile = async () => {
-    const res = await axios.get("/api/user/profile"); 
+    const res = await axios.get("/api/user/profile");
     return res.data.profile;
 };

@@ -1,3 +1,4 @@
+// i want if the light:text-zinc-900 & normally text-white in the input fields(also in the stripe elements)
 "use client";
 
 import {
@@ -6,32 +7,8 @@ import {
   CardCvcElement,
 } from "@stripe/react-stripe-js";
 import { StripeCardNumberElementOptions } from "@stripe/stripe-js";
-import { useState } from "react";
-
-const stripeElementOptions: StripeCardNumberElementOptions = {
-  showIcon: true,
-  iconStyle: "default",
-  style: {
-    base: {
-      color: "#ffffff",
-      fontSize: "14px",
-      fontFamily: "monospace",
-      fontSmoothing: "antialiased",
-      textTransform: "uppercase",
-      "::placeholder": {
-        color: "#52525b",
-      },
-    },
-
-    invalid: {
-      color: "#ef4444",
-
-      "::placeholder": {
-        color: "#ffffff",
-      },
-    },
-  },
-};
+import { useState, useMemo } from "react";
+import { useTheme } from "next-themes";
 
 type FocusedField = "number" | "expiry" | "cvc" | null;
 interface StripeCardFormProps {
@@ -41,6 +18,32 @@ interface StripeCardFormProps {
 
 export default function StripeCardForm({ cardHolderName, onCardHolderNameChange }: StripeCardFormProps) {
   const [focusedField, setFocusedField] = useState<FocusedField>(null);
+  const { theme } = useTheme();
+
+  const stripeElementOptions: StripeCardNumberElementOptions = useMemo(() => ({
+    showIcon: true,
+    iconStyle: "default",
+    style: {
+      base: {
+        color: theme === "light" ? "#18181b" : "#ffffff",
+        fontSize: "14px",
+        fontFamily: "monospace",
+        fontSmoothing: "antialiased",
+        textTransform: "uppercase",
+        "::placeholder": {
+          color: "#52525b",
+        },
+      },
+
+      invalid: {
+        color: "#ef4444",
+
+        "::placeholder": {
+          color: theme === "light" ? "#18181b" : "#ffffff",
+        },
+      },
+    },
+  }), [theme]);
 
   return (
     <div className="mt-6 space-y-5">
@@ -132,3 +135,4 @@ export default function StripeCardForm({ cardHolderName, onCardHolderNameChange 
     </div>
   );
 }
+

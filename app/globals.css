@@ -1,5 +1,4 @@
- 
-@import "tailwindcss";
+ @import "tailwindcss";
 @variant light (&:where([data-theme="light"], [data-theme="light"] *)); 
 @plugin "daisyui";
 

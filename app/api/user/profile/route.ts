@@ -5,12 +5,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
     try {
-        const session = await getServerSession(authOptions); 
+        const session = await getServerSession(authOptions);
 
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
-        
+
         const user = await prisma.user.findUnique({
             where: { id: session.user?.id },
             select: {
@@ -19,9 +19,10 @@ export async function GET(req: Request) {
                 email: true,
                 phone: true,
                 PhotoUrl: true,
+                role: true,
                 authProvider: true,
             },
-        }) 
+        })
         return NextResponse.json({ success: true, profile: user }, { status: 200 });
     }
     catch (error) {

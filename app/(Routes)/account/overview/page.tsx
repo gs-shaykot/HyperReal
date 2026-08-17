@@ -95,7 +95,7 @@ export default async function OverviewPage() {
                               ৳ {payment.paidAmountInBDT.toFixed(2)}
                             </p>
                           ) : (
-                            <p className="text-sm font-semibold">
+                            <p key={index} className="text-sm font-semibold">
                               ${payment.totalProductPriceInUSD.toFixed(2)}
                             </p>
                           )
