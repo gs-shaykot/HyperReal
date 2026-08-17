@@ -17,7 +17,7 @@ const stripeElementOptions: StripeCardNumberElementOptions = {
       fontSize: "14px",
       fontFamily: "monospace",
       fontSmoothing: "antialiased",
-
+      textTransform: "uppercase",
       "::placeholder": {
         color: "#52525b",
       },
@@ -42,7 +42,6 @@ interface StripeCardFormProps {
 export default function StripeCardForm({ cardHolderName, onCardHolderNameChange }: StripeCardFormProps) {
   const [focusedField, setFocusedField] = useState<FocusedField>(null);
 
-
   return (
     <div className="mt-6 space-y-5">
 
@@ -59,7 +58,7 @@ export default function StripeCardForm({ cardHolderName, onCardHolderNameChange 
           defaultValue={cardHolderName}
           onChange={(e) => onCardHolderNameChange(e.target.value)}
           required
-          className="input w-full py-3.5 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+          className="input w-full py-3.5 bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600 uppercase"
         />
       </div>
 
@@ -70,7 +69,7 @@ export default function StripeCardForm({ cardHolderName, onCardHolderNameChange 
         </label>
 
         <div
-          className={`w-full px-4 py-3.5 bg-black border rounded-none focus:outline-none ${focusedField === "number" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
+          className={`w-full px-4 py-3.5 bg-black light:bg-white  border rounded-none focus:outline-none ${focusedField === "number" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
           <CardNumberElement
             options={stripeElementOptions}
             onFocus={() =>
@@ -93,7 +92,7 @@ export default function StripeCardForm({ cardHolderName, onCardHolderNameChange 
           </label>
 
           <div
-            className={`w-full px-4 py-3.5 bg-black border rounded-none focus:outline-none ${focusedField === "expiry" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
+            className={`w-full px-4 py-3.5 bg-black light:bg-white border rounded-none focus:outline-none ${focusedField === "expiry" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
             <CardExpiryElement
               options={stripeElementOptions}
               onFocus={() =>
@@ -115,7 +114,7 @@ export default function StripeCardForm({ cardHolderName, onCardHolderNameChange 
           </label>
 
           <div
-            className={`w-full px-4 py-3.5 bg-black border rounded-none focus:outline-none ${focusedField === "cvc" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
+            className={`w-full px-4 py-3.5 bg-black light:bg-white border rounded-none focus:outline-none ${focusedField === "cvc" ? "border-second" : "border-gray-900"} text-sm tracking-wide placeholder:text-red-500`}>
             <CardCvcElement
               options={stripeElementOptions}
               onFocus={() =>

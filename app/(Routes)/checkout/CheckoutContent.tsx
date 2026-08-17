@@ -305,7 +305,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             setIsSubmitting(false);
         }
     }
-     
 
     return (
         <div className=' bg-main light:bg-white py-10'>
@@ -333,21 +332,21 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         className="md:col-span-8"
                     >
                         {/* Delivery Coordinates */}
-                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800 mb-8">
+                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
 
                             {/* Saved Addresses */}
                             <div>
-                                <h3 className="mb-2 text-sm text-zinc-500">
+                                <h3 className="mb-2 text-sm text-zinc-500 light:text-zinc-700">
                                     // Use Saved Address
                                 </h3>
 
                                 {/* No saved addresses */}
                                 {addressesCount === 0 && (
                                     <div className="border border-zinc-800 p-4 mb-3">
-                                        <p className="text-xs text-zinc-500">
+                                        <p className="text-xs text-zinc-500 light:text-zinc-700">
                                             No saved addresses found. Please add an address in your profile.
                                         </p>
                                     </div>
@@ -373,69 +372,64 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 )}
 
                                 {/* Saved address cards */}
-                                {addressesCount > 0 && !isAddressesLoading && (
-                                    <>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-                                            {(showAllAddresses
-                                                ? addresses
-                                                : addresses.slice(0, 3)
-                                            ).map((address: AddressType) => (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (useSavedAddress?.id === address.id) {
-                                                            setUseSavedAddress(null);
-                                                            return;
-                                                        }
-
-                                                        setUseSavedAddress(address);
-                                                        setAddNewAddress((prev) => ({
-                                                            ...prev,
-                                                            addNew: false,
-                                                            isChecked: false,
-                                                        }));
-
-                                                        const savedCountry = Countries.find(
-                                                            (country) => country.name === address.country
-                                                        );
-
-                                                        if (savedCountry) {
-                                                            setSelectedCountry(savedCountry);
-                                                        }
-                                                    }}
-                                                    key={address.id}
-                                                    className={`${address.id === useSavedAddress?.id
-                                                        ? "border-second bg-second/10"
-                                                        : "border-zinc-800 bg-transparent"
-                                                        } border p-3 cursor-pointer btn flex flex-col h-auto rounded-none items-start hover:border-second relative`}
-                                                >
-                                                    <div className="flex items-center justify-start gap-2">
-                                                        <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
-                                                            <MapPin
-                                                                size={14}
-                                                                className="text-second"
-                                                            />
-                                                            {address.label?.toUpperCase()}
+                                <div>
+                                    {addressesCount > 0 && !isAddressesLoading && (
+                                        <>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                                                {(showAllAddresses
+                                                    ? addresses
+                                                    : addresses.slice(0, 3)
+                                                ).map((address: AddressType) => (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            if (useSavedAddress?.id === address.id) {
+                                                                setUseSavedAddress(null);
+                                                                return;
+                                                            }
+                                                            setUseSavedAddress(address);
+                                                            setAddNewAddress((prev) => ({
+                                                                ...prev,
+                                                                addNew: false,
+                                                                isChecked: false,
+                                                            }));
+                                                            const savedCountry = Countries.find(
+                                                                (country) => country.name === address.country
+                                                            );
+                                                            if (savedCountry) {
+                                                                setSelectedCountry(savedCountry);
+                                                            }
+                                                        }}
+                                                        key={address.id}
+                                                        className={`${address.id === useSavedAddress?.id
+                                                            ? "border-second bg-second/10"
+                                                            : "border-zinc-800 bg-transparent"
+                                                            } border p-3 cursor-pointer btn flex flex-col h-auto rounded-none items-start hover:border-second relative`}
+                                                    >
+                                                        <div className="flex items-center justify-start gap-2">
+                                                            <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
+                                                                <MapPin
+                                                                    size={14}
+                                                                    className="text-second"
+                                                                />
+                                                                {address.label?.toUpperCase()}
+                                                            </h3>
+                                                            {address.isDefault && (
+                                                                <span className="text-xs text-second">
+                                                                    {/* PRIMARY */}
+                                                                    PRIMARY
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <h3 className="text-sm">
+                                                            {address.fullName}
                                                         </h3>
-
-                                                        {address.isDefault && (
-                                                            <span className="text-xs text-second">
-                                                                {/* PRIMARY */}
-                                                                PRIMARY
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <h3 className="text-sm">
-                                                        {address.fullName}
-                                                    </h3>
-
-                                                    <h3 className="text-xs text-start">
-                                                        {address.house}, {address.street}. {address.city}
-                                                    </h3>
-                                                </button>
-                                            ))}
-
+                                                        <h3 className="text-xs text-start">
+                                                            {address.house}, {address.street}. {address.city}
+                                                        </h3>
+                                                    </button>
+                                                ))}
+                                            </div>
                                             {/* New Address Card */}
                                             <button
                                                 type="button"
@@ -454,22 +448,44 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 <Plus size={18} />
                                                 NEW ADDRESS
                                             </button>
-                                        </div>
+                                            {/* Show All / Show Less */}
+                                            {addressesCount > 4 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowAllAddresses((prev) => !prev)}
+                                                    className="btn w-full rounded-none border border-zinc-700 bg-transparent hover:border-second text-xs tracking-[0.3em]"
+                                                >
+                                                    {showAllAddresses
+                                                        ? "SHOW LESS"
+                                                        : `SHOW ALL ADDRESSES (${addressesCount})`}
+                                                </button>
+                                            )}
+                                        </>
+                                    )}
 
-                                        {/* Show All / Show Less */}
-                                        {addressesCount > 4 && (
+                                    {
+                                        addressesCount === 0 && (
                                             <button
                                                 type="button"
-                                                onClick={() => setShowAllAddresses((prev) => !prev)}
-                                                className="btn w-full rounded-none border border-zinc-700 bg-transparent hover:border-second text-xs tracking-[0.3em]"
+                                                onClick={() => {
+                                                    setAddNewAddress((prev) => ({
+                                                        isChecked: prev.addNew ? true : false,
+                                                        addNew: !prev.addNew,
+                                                    }));
+                                                    setUseSavedAddress(null);
+                                                }}
+                                                className={`btn w-full h-26 rounded-none border ${addNewAddress.addNew
+                                                    ? "bg-second/15 light:bg-second/30 border-second"
+                                                    : "bg-transparent border-zinc-700"
+                                                    } hover:border-second border-dashed flex flex-col shadow-none`}
                                             >
-                                                {showAllAddresses
-                                                    ? "SHOW LESS"
-                                                    : `SHOW ALL ADDRESSES (${addressesCount})`}
+                                                <Plus size={18} />
+                                                NEW ADDRESS
                                             </button>
-                                        )}
-                                    </>
-                                )}
+                                        )
+                                    }
+
+                                </div>
                             </div>
 
                             {/* User Details */}
@@ -478,7 +494,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                             >
                                 {/* Full Name */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Full Name
                                     </label>
 
@@ -492,13 +508,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         }
                                         placeholder="JANE DOE"
                                         required
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* Email */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Email
                                     </label>
 
@@ -508,13 +524,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         defaultValue={session?.user.email ?? ""}
                                         placeholder="USER@GRID.NET"
                                         required
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* Street */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Street
                                     </label>
 
@@ -523,13 +539,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         name="street"
                                         type="text"
                                         placeholder='42 NEON ST, SECTOR 7'
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* House / Apartment */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         House / Apartment
                                     </label>
 
@@ -538,13 +554,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         name="house"
                                         type="text"
                                         placeholder='APT 42B'
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* City */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         City
                                     </label>
 
@@ -554,13 +570,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         defaultValue={useSavedAddress?.city ?? ""}
                                         placeholder="YOUR ORBITAL CITY"
                                         required
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* Postal Code */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Postal Code
                                     </label>
 
@@ -570,13 +586,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         defaultValue={useSavedAddress?.zipCode ?? ""}
                                         placeholder="00000"
                                         required
-                                        className="input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                        className="input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                     />
                                 </div>
 
                                 {/* Country */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Delivery Country
                                     </label>
 
@@ -591,7 +607,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                     (country) => country.value === e.target.value) || Countries[0]
                                             )
                                         }}
-                                        className="select w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"
+                                        className="select w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm"
                                     >
                                         {Countries.map((country) => (
                                             <option
@@ -612,7 +628,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                     </label>
 
                                     <div className="flex w-full">
-                                        <div className="flex items-center px-3 bg-black border border-r-0 border-gray-900 text-sm text-second">
+                                        <div className="flex items-center px-3 bg-black light:bg-white border border-r-0 border-gray-900 text-sm text-second">
                                             {selectedCountryCode}
                                         </div>
 
@@ -622,7 +638,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             defaultValue={useSavedAddress?.phone.replace(selectedCountryCode, '') ?? ""}
                                             placeholder="PHONE NUMBER"
                                             required
-                                            className="input flex-1 bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                            className="input flex-1 bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                         />
                                     </div>
                                 </div>
@@ -636,7 +652,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         transition={{ duration: 0.3 }}
                                         className='mt-4 mb-3 border-t border-zinc-800 border-dashed'>
                                         <label
-                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] cursor-pointer">
+                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] light:bg-[#f5f6f8] cursor-pointer">
                                             <input
                                                 onClick={() => setAddNewAddress((prev) => ({ ...prev, isChecked: !prev.isChecked }))}
                                                 type="checkbox"
@@ -646,11 +662,11 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             />
 
                                             <div>
-                                                <h3 className="text-xs font-bold tracking-widest uppercase text-zinc-100">
+                                                <h3 className="text-xs font-bold tracking-widest uppercase text-zinc-100 light:text-zinc-800">
                                                     Save this address for later autofill
                                                 </h3>
 
-                                                <p className="text-xs text-zinc-500 tracking-widest uppercase mt-1">
+                                                <p className="text-xs text-zinc-500 light:text-zinc-600 tracking-widest uppercase mt-1">
                                                     Stored in your profile → Addresses
                                                 </p>
                                             </div>
@@ -666,7 +682,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         transition={{ duration: 0.3 }}
                                     >
                                         <div>
-                                            <label className="label label-text text-xs text-gray-400 uppercase">
+                                            <label className="label label-text text-xs text-gray-400 light:text-gray-700  uppercase">
                                                 LABEL (OPTIONAL)
                                             </label>
 
@@ -674,7 +690,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 name="label"
                                                 type="text"
                                                 placeholder="HOME / OFFICE / DROPZONE"
-                                                className="uppercase input w-full bg-black border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
+                                                className="uppercase input w-full bg-black light:bg-white border border-gray-900 rounded-none focus:outline-none focus:border-second text-sm tracking-wide placeholder:text-zinc-600"
                                             />
                                         </div>
                                     </motion.div>
@@ -683,20 +699,21 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Delivery Options */}
-                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800 mb-8">
+                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
-                                — 02 // DELIVERY COORDINATES
+                                — 02 // DELIVERY METHODS
                             </h2>
+
                             <div className='grid grid-cols-2 gap-4'>
                                 {
                                     DeliveryOptions.map((option, index) => (
                                         <button key={index} type={'button'}
-                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 border-second' : 'bg-main hover:bg-second/10 hover:border-second'}`}
+                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 light:bg-second/30 border-second' : 'bg-main light:bg-white hover:bg-second/10 hover:border-second'}`}
                                             onClick={() => setSelectedDeliveryOption(option)}
                                         >
                                             <div>
                                                 <h3>{option.label}</h3>
-                                                <h3 className='text-zinc-400 text-xs mt-2 font-extralight'>ETA // {option.estimatedDelivery} Days</h3>
+                                                <h3 className='text-zinc-400 light:text-zinc-700 text-xs mt-2 font-extralight'>ETA // {option.estimatedDelivery} Days</h3>
                                             </div>
                                             <h3 className='self-end'>${option.cost}</h3>
                                         </button>
@@ -706,7 +723,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Payment Options */}
-                        <div className="bg-[#0f0f0f] p-6 border border-zinc-800">
+                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800">
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 03 // Payment Gateway
                             </h2>
@@ -740,17 +757,17 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 setSelectedPaymentMethod(method.value)
                                             }
                                             className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                ? "bg-second/15 border-second"
-                                                : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
+                                                ? "bg-second/15 light:bg-second/25 border-second"
+                                                : "bg-second/5 light:bg-white border-second/5 hover:bg-second/10 hover:border-second"
                                                 } border`}
                                         >
                                             <div className="w-14 h-14 flex justify-center items-center border border-second">
                                                 {method.icon}
                                             </div>
 
-                                            <div className="flex-1 text-start">
+                                            <div className="flex-1 text-white light:text-zinc-700 text-start">
                                                 <h3>{method.label}</h3>
-                                                <p className="text-xs text-gray-400">
+                                                <p className="text-xs ">
                                                     {method.desc}
                                                 </p>
                                             </div>
@@ -838,7 +855,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                     {/* RIGHT PANEL */}
                     <div className='md:col-span-4 lg:sticky lg:top-19.5 lg:self-start '>
-                        <div className='bg-[#0f0f0f] p-6 border border-zinc-800'>
+                        <div className='bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800'>
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — Manifest
                             </h2>
@@ -848,7 +865,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         <div key={item.id} className='mb-2 border-zinc-800 border p-2 flex items-center justify-between'>
                                             <div>
                                                 <h3 className='text-xs'>{item.variant.product.name}</h3>
-                                                <p className='text-xs text-zinc-400'>{item.quantity} x ${item.variant.product.price.toFixed(2)}</p>
+                                                <p className='text-xs text-zinc-400 light:text-zinc-600'>{item.quantity} x ${item.variant.product.price.toFixed(2)}</p>
                                             </div>
                                             <div className="text-right">
                                                 <p className='text-second text-xs'>
@@ -857,7 +874,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                                                 {
                                                     selectedCountry.value !== 'usd' && (
-                                                        <p className="text-[10px] text-second/70">
+                                                        <p className="text-[10px] text-second/70 light:text-second">
                                                             ~ {
                                                                 formatCurrency(
                                                                     convertPrice(item.variant.product.price * item.quantity) || 0,

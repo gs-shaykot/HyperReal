@@ -185,6 +185,7 @@ const Register = () => {
             setLoading(false);
         }
     };
+    
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
             <div className={`light:bg-gray-100/80 light:border-t-0 light:border-zinc-800 bg-zinc-900/90 relative w-full max-w-md backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>
