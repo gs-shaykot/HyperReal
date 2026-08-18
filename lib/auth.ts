@@ -108,6 +108,8 @@ export const authOptions: AuthOptions = {
                 });
 
                 if (dbUser) {
+                    token.name = dbUser.name;
+                    token.email = dbUser.email;
                     token.role = dbUser.role;
                     token.picture =
                         dbUser.PhotoUrl ??

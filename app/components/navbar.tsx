@@ -111,7 +111,7 @@ export const Navbar = () => {
                                             <ul
                                                 tabIndex={-1}
                                                 className="menu menu-sm dropdown-content light:bg-white bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1">
-                                                <li><a>{profile?.name}</a></li>
+                                                <li><a>{session.user?.name}</a></li>
                                                 <li>
                                                     {
                                                         session?.user ? <Link href="/account">Profile</Link> : <Link href="/login">Login</Link>
