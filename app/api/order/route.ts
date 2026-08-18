@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import { calculateOrder } from "@/lib/service/orderService";
+import { completePayment } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
 import axios from "axios";
 import { getServerSession } from "next-auth";
@@ -82,6 +83,20 @@ export async function POST(req: Request) {
                             country: country.shortName,
                             shippingMethod: deliveryOption,
                             couponCode: coupon || null
+                        }
+                    }
+                },
+                include: {
+                    orderItems: {
+                        select: {
+                            variantId: true,
+                            quantity: true,
+                        }
+                    },
+                    payments: {
+                        select: {
+                            status: true,
+                            couponCode: true,
                         }
                     }
                 }
@@ -168,7 +183,7 @@ export async function POST(req: Request) {
                         paymentIntentId: paymentIntent.id,
                     },
                 });
-                
+
                 return NextResponse.json({
                     success: true,
                     orderId: order.id,
@@ -177,12 +192,12 @@ export async function POST(req: Request) {
                 });
             }
             case "COD": {
-
+                await completePayment(order, undefined, "COD");
                 break;
             }
 
         }
-        
+
         return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
     }
     catch (error) {

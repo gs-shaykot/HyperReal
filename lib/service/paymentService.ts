@@ -50,10 +50,12 @@ export async function completePayment(
         cardBrand?: string;
         last4?: string;
         receiptUrl?: string;
-    }
+    },
+    paymentMethod?: string
 ) {
-    console.log("[paymentService] Completing payment for order ID:", order.id);
+    console.log("[paymentService] Completing payment for order ID:", order.id); 
     console.log("[paymentService] Stripe details:", stripeDetails);
+    console.log("[paymentService] Payment method:", paymentMethod);
 
     const payment = order.payments[0];
 
@@ -71,7 +73,7 @@ export async function completePayment(
         await tx.payment.updateMany({
             where: { orderId: order.id },
             data: {
-                status: PaymentStatus.SUCCESS,
+                status: paymentMethod === "COD" ? PaymentStatus.PENDING : PaymentStatus.SUCCESS,
                 transactionId,
                 ...(
                     stripeDetails?.paymentIntentId && { paymentIntentId: stripeDetails.paymentIntentId }
