@@ -7,7 +7,7 @@ const hudson = localFont({
 
 const loading = () => {
     return (
-        <div className="max-w-7xl mx-auto px-4 text-white pb-20">
+        <div className="max-w-7xl mx-auto px-4 text-white light:text-zinc-900 pb-20">
             <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide`}>
                 CARGO <span className="text-second">HOLD</span>
             </h2>
@@ -17,12 +17,12 @@ const loading = () => {
                     {[1, 2, 3].map((item) => (
                         <div
                             key={item}
-                            className="h-32 bg-[#1a1a1a] border border-zinc-800 animate-pulse"
+                            className="h-32 bg-[#1a1a1a] light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 animate-pulse"
                         />
                     ))}
                 </div>
 
-                <div className="md:col-span-6 h-96 bg-[#1a1a1a] border border-zinc-800 animate-pulse" />
+                <div className="md:col-span-6 h-96 bg-[#1a1a1a] light:bg-zinc-100 border border-zinc-800 light:border-zinc-300 animate-pulse" />
             </div>
         </div>
     )
