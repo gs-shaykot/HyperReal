@@ -9,7 +9,7 @@ export default function Loading() {
                 {[Package, CircleCheckBig, Heart].map((Icon, index) => (
                     <div
                         key={index}
-                        className="border border-neutral-700 bg-[#0f0f0f] p-5"
+                        className="border border-neutral-700 bg-[#0f0f0f] light:bg-[#f5f6f8]  p-5"
                     >
                         <div className="flex justify-between items-start">
                             <div className="space-y-3">
@@ -29,7 +29,7 @@ export default function Loading() {
             </div>
 
             {/* Identity */}
-            <div className="border border-neutral-700 bg-[#0f0f0f] p-5">
+            <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-[#f5f6f8] p-5">
                 <div className="flex justify-between items-center mb-6">
                     <div className="h-6 w-44 bg-zinc-800 rounded" />
                     <div className="h-9 w-20 bg-zinc-800 rounded" />
@@ -49,7 +49,7 @@ export default function Loading() {
             </div>
 
             {/* Recent Orders */}
-            <div className="border border-neutral-700 bg-[#0f0f0f] p-6">
+            <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-[#f5f6f8] p-6">
                 <div className="flex justify-between items-center mb-6">
                     <div className="h-6 w-44 bg-zinc-800 rounded" />
                     <div className="h-4 w-16 bg-zinc-800 rounded" />

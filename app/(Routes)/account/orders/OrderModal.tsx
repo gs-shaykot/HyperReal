@@ -61,15 +61,15 @@ export const OrderModal = ({
         (stat) => stat.status === order.status
     );
 
-    const StatusIcon = currentStatus?.icon; 
+    const StatusIcon = currentStatus?.icon;
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box max-w-2xl max-h-[90vh] rounded-none border border-zinc-700 bg-main p-0 shadow-xl">
+            <div className="modal-box max-w-2xl max-h-[90vh] rounded-none border border-zinc-700 light:border-zinc-200 bg-main light:bg-white p-0 shadow-xl text-white light:text-zinc-900">
 
                 {/* Header */}
-                <div className="border-b-2 border-zinc-800 p-5 sticky top-0 bg-main z-10">
+                <div className="border-b-2 border-zinc-800 light:border-zinc-200 p-5 sticky top-0 bg-main light:bg-white z-10">
                     <div className="flex items-center justify-between mb-1">
-                        <h2 className="text-xl font-bold uppercase tracking-widest">
+                        <h2 className="text-xl font-bold uppercase tracking-widest light:text-zinc-900 text-white">
                             Order Transmission
                         </h2>
                         {currentStatus && StatusIcon && (
@@ -91,7 +91,7 @@ export const OrderModal = ({
                         )}
                     </div>
 
-                    <div className="w-64 flex items-center gap-2 text-sm text-zinc-300">
+                    <div className="w-64 flex items-center gap-2 text-sm text-zinc-300 light:text-zinc-700">
                         <h3>
                             {order.orderCode}
                         </h3>
@@ -107,16 +107,16 @@ export const OrderModal = ({
                 </div>
 
                 <div className="p-5 pb-0">
-                    <div className="flex justify-between items-center mb-1">
-                        <h3 className="text-sm text-zinc-400">
+                    <div className="flex justify-between items-center mb-1 gap-3">
+                        <h3 className="text-sm text-zinc-400 light:text-zinc-700">
                             Order Placed
                         </h3>
-                        <h3 className="text-xs">
+                        <h3 className="text-xs light:text-zinc-700 text-zinc-300">
                             {currentStatus?.description}
                         </h3>
                     </div>
 
-                    <div className="w-full h-2 bg-zinc-800 overflow-hidden mb-2">
+                    <div className="w-full h-2 bg-zinc-800 light:bg-zinc-200 overflow-hidden mb-2">
                         <div
                             className={`
                                 h-full
@@ -132,7 +132,7 @@ export const OrderModal = ({
                             }}
                         />
                     </div>
-                    <div className="flex justify-between items-center text-zinc-400 text-xs">
+                    <div className="flex justify-between items-center text-zinc-400 light:text-zinc-600 text-xs">
                         <h3 className='flex justify-between items-center gap-1'>
                             <Truck size={18} />
                             Tracking: {order?.orderCode}
@@ -143,23 +143,23 @@ export const OrderModal = ({
 
                 {/* Product Details */}
                 <div className="p-5">
-                    <h3 className='text-zinc-200 uppercase mb-3'>Items Manifest</h3>
+                    <h3 className='text-zinc-200 light:text-zinc-800 uppercase mb-3'>Items Manifest</h3>
                     <div>
                         {
                             order.orderItems.map((item) => (
-                                <div key={item.id} className='mb-2 bg-[#0f0f0f] border-2 border-zinc-800 p-2 flex justify-between items-start'>
+                                <div key={item.id} className='mb-2 bg-[#0f0f0f] light:bg-zinc-50 border-2 border-zinc-800 light:border-zinc-200 p-2 flex justify-between items-start rounded-sm'>
                                     <div className='flex items-start gap-3'>
                                         <img
-                                            className="w-24 h-3w-24 object-cover"
+                                            className="w-24 h-24 object-cover"
                                             src={item.variant.product.productImages.find((img) => img.color === item.variant.color)?.imageUrl || ""} alt="" />
-                                        <div className='text-zinc-300 text-sm'>
-                                            <h3>{item.variant.product.name}</h3>
+                                        <div className='text-zinc-300 light:text-zinc-700 text-sm'>
+                                            <h3 className="light:text-zinc-900">{item.variant.product.name}</h3>
                                             <h3>{item.variant.color} / {item.variant.size} / QTY: {item.quantity}</h3>
                                         </div>
                                     </div>
-                                    <div className='text-white mt-1'>
+                                    <div className='text-white light:text-zinc-900 mt-1'>
                                         <h3 className="text-sm">${(item.priceAtPurchase * item.quantity).toFixed(2)}</h3>
-                                        <h3 className="text-zinc-400">${item.priceAtPurchase} each</h3>
+                                        <h3 className="text-zinc-400 light:text-zinc-600">${item.priceAtPurchase} each</h3>
                                     </div>
                                 </div>
                             ))
@@ -168,15 +168,15 @@ export const OrderModal = ({
                 </div>
 
                 {/* COST BREAKDOWN */}
-                <div className="p-5 pt-0 bg-[#0f0f0f]">
-                    <div className='border-2 border-zinc-800 p-3'>
-                        <h3 className='text-zinc-400 text-sm mb-3'>COST BREAKDOWN</h3>
+                <div className="p-5 pt-0 bg-[#0f0f0f] light:bg-zinc-50">
+                    <div className='border-2 border-zinc-800 light:border-zinc-200 p-3'>
+                        <h3 className='text-zinc-400 light:text-zinc-700 text-sm mb-3'>COST BREAKDOWN</h3>
                         <div className='flex justify-between items-center mt-2'>
                             <h3>Subtotal</h3>
                             <h3>${order.payments[0]?.totalProductPriceInUSD.toFixed(2)}</h3>
                         </div>
 
-                        <div className='flex justify-between items-center mt-2 pb-2 border-b border-zinc-600'>
+                        <div className='flex justify-between items-center mt-2 pb-2 border-b border-zinc-600 light:border-zinc-300'>
                             <h3>Shipping</h3>
                             <h3>${order.payments[0]?.shippingCost.toFixed(2)}</h3>
                         </div>
@@ -185,7 +185,7 @@ export const OrderModal = ({
                             <h3>TOTAL</h3>
                             <h3 className='text-second'>${(order.payments[0]?.totalProductPriceInUSD + order.payments[0]?.shippingCost).toFixed(2)}</h3>
                         </div>
-                    </div> 
+                    </div>
                 </div>
             </div>
 

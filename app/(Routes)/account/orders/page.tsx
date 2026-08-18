@@ -4,7 +4,8 @@ import prisma from '@/lib/prisma';
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect';
 import { getServerSession } from 'next-auth';
 
-const page = async () => {  
+const page = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const session = await getServerSession(authOptions);
 
     const orders = await prisma.order.findMany({

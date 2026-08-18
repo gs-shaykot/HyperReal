@@ -46,8 +46,8 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
         <div>
             {/* Header */}
             <div className='flex justify-between items-center mb-3'>
-                <h2 className='text-2xl font-bold italic'>Order<span className='text-second'> History</span></h2>
-                <h2 className='text-xs text-zinc-500'>{orders?.length} TRANSMISSIONS</h2>
+                <h2 className='text-2xl font-bold italic light:text-zinc-900 text-white'>Order<span className='text-second'> History</span></h2>
+                <h2 className='text-xs text-zinc-500 light:text-zinc-800'>{orders?.length} TRANSMISSIONS</h2>
             </div>
             <OrderModal open={open} onCloseAction={() => setOpen(false)} order={selectedOrder} />
             {
@@ -59,7 +59,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                     <div key={order.id} className='flex justify-between items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
                                         <div className='flex flex-col space-y-2'>
                                             <div className='flex items-center gap-2 w-68'>
-                                                <h2 className='font-bold'>{order.orderCode}</h2>
+                                                <h2 className='font-bold light:text-zinc-900 text-white'>{order.orderCode}</h2>
                                                 <h3 className='flex justify-start gap-1'>
                                                     {
                                                         OrderStatus?.map((stat, idx) => (
@@ -74,7 +74,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                 </h3>
                                             </div>
 
-                                            <div className='flex items-center gap-4 text-zinc-400 text-sm'>
+                                            <div className='flex items-center gap-4 text-zinc-400 light:text-zinc-700 text-sm'>
                                                 <h3 className='flex justify-between items-center gap-1'>
                                                     <CalendarDays size={16} />
                                                     {order.createdAt.toLocaleDateString("en-US", {
@@ -90,7 +90,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                             <div className='flex items-center gap-2'>
                                                 {
                                                     order.orderItems.map((item) => (
-                                                        <div key={item.id} className='flex items-center text-sm text-zinc-400 bg-zinc-900 px-2 py-1'>
+                                                        <div key={item.id} className='flex items-center text-sm text-zinc-400 light:text-zinc-900 bg-zinc-900 light:bg-zinc-200 px-2 py-1'>
                                                             <h3>{item.variant.product.name}</h3>
                                                         </div>
                                                     ))

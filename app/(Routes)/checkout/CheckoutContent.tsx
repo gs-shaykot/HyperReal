@@ -332,7 +332,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         className="md:col-span-8"
                     >
                         {/* Delivery Coordinates */}
-                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800 mb-8">
+                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
@@ -402,12 +402,12 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                         }}
                                                         key={address.id}
                                                         className={`${address.id === useSavedAddress?.id
-                                                            ? "border-second bg-second/10"
+                                                            ? "border-second bg-second/20"
                                                             : "border-zinc-800 bg-transparent"
                                                             } border p-3 cursor-pointer btn flex flex-col h-auto rounded-none items-start hover:border-second relative`}
                                                     >
                                                         <div className="flex items-center justify-start gap-2">
-                                                            <h3 className="text-xs text-zinc-400 flex items-center gap-2 mb-1">
+                                                            <h3 className="text-xs text-zinc-400 light:text-zinc-700 flex items-center gap-2 mb-1">
                                                                 <MapPin
                                                                     size={14}
                                                                     className="text-second"
@@ -440,7 +440,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                         setUseSavedAddress(null);
                                                     }}
                                                     className={`btn h-26 rounded-none border ${addNewAddress.addNew
-                                                        ? "bg-second/15 border-second"
+                                                        ? "bg-second/20 border-second"
                                                         : "bg-transparent border-zinc-700"
                                                         } hover:border-second border-dashed flex flex-col shadow-none`}
                                                 >
@@ -652,7 +652,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         transition={{ duration: 0.3 }}
                                         className='mt-4 mb-3 border-t border-zinc-800 border-dashed'>
                                         <label
-                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] light:bg-[#f5f6f8] cursor-pointer">
+                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] light:bg-white cursor-pointer">
                                             <input
                                                 onClick={() => setAddNewAddress((prev) => ({ ...prev, isChecked: !prev.isChecked }))}
                                                 type="checkbox"
@@ -699,7 +699,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Delivery Options */}
-                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800 mb-8">
+                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 02 // DELIVERY METHODS
                             </h2>
@@ -708,7 +708,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 {
                                     DeliveryOptions.map((option, index) => (
                                         <button key={index} type={'button'}
-                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 light:bg-second/30 border-second' : 'bg-main light:bg-white hover:bg-second/10 hover:border-second'}`}
+                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 light:bg-second/30 border-second' : 'bg-main light:bg-white hover:bg-second/10 hover:border-second border-zinc-600'}`}
                                             onClick={() => setSelectedDeliveryOption(option)}
                                         >
                                             <div>
@@ -723,7 +723,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Payment Options */}
-                        <div className="bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800">
+                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800">
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 03 // Payment Gateway
                             </h2>
@@ -758,7 +758,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             }
                                             className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
                                                 ? "bg-second/15 light:bg-second/25 border-second"
-                                                : "bg-second/5 light:bg-white border-second/5 hover:bg-second/10 hover:border-second"
+                                                : "bg-second/5 light:bg-white border-second/50 hover:bg-second/10 hover:border-second"
                                                 } border`}
                                         >
                                             <div className="w-14 h-14 flex justify-center items-center border border-second">
@@ -855,7 +855,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                     {/* RIGHT PANEL */}
                     <div className='md:col-span-4 lg:sticky lg:top-19.5 lg:self-start '>
-                        <div className='bg-[#0f0f0f] light:bg-[#f5f6f8] p-6 border border-zinc-800'>
+                        <div className='bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800'>
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — Manifest
                             </h2>

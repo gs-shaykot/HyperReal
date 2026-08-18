@@ -2,12 +2,15 @@ import { Identity } from "@/app/(Routes)/account/overview/Identity";
 import StatCard from "@/app/(Routes)/account/StatCard";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { ArrowRight, CircleCheckBig, Clock, Heart, Mail, Package, Phone, Shield, SquarePen, User, } from "lucide-react";
+import { ArrowRight, CircleCheckBig, Clock, Heart, Package, } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 
-export default async function OverviewPage() {  
+export default async function OverviewPage() {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
   const session = await getServerSession(authOptions);
+
   const orders = await prisma.order.findMany({
     where: {
       userId: session?.user.id
@@ -31,7 +34,6 @@ export default async function OverviewPage() {
       }
     }
   })
-
 
   return (
     <div className="space-y-6 ">
