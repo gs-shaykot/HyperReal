@@ -417,7 +417,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                             {address.isDefault && (
                                                                 <span className="text-xs text-second">
                                                                     {/* PRIMARY */}
-                                                                    PRIMARY
+                                                                    // PRIMARY
                                                                 </span>
                                                             )}
                                                         </div>
