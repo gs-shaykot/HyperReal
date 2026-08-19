@@ -73,9 +73,9 @@ export const Identity = () => {
         });
     }
     return (
-        <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-white p-3">
+        <div className="border border-neutral-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white p-3">
             <div className="flex justify-between items-start mb-3">
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold light:text-zinc-900 text-white">
                     IDENTITY MATRIX
                 </h2>
 
@@ -83,7 +83,7 @@ export const Identity = () => {
                     {
                         isEditing && (
                             <div className='flex items-center justify-between'>
-                                <button onClick={() => setIsEditing(false)} className="mr-2 btn btn-sm btn-outline rounded-none border-0 bg-transparent hover:bg-[#262626] light:hover:bg-zinc-900 hover:text-white">
+                                <button onClick={() => setIsEditing(false)} className="mr-2 btn btn-sm btn-outline rounded-none border-0 bg-transparent light:text-zinc-900 text-white hover:bg-[#262626] light:hover:bg-zinc-100 light:hover:text-zinc-900 hover:text-white">
                                     <X size={16} />
                                     Cancel
                                 </button>
@@ -99,7 +99,7 @@ export const Identity = () => {
                     }
                     {
                         !isEditing && (
-                            <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline rounded-none hover:bg-white light:hover:bg-zinc-900 hover:text-zinc-900">
+                            <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
                                 <SquarePen size={16} />
                                 Edit
                             </button>
@@ -110,73 +110,73 @@ export const Identity = () => {
 
             <div className="grid grid-cols-2 gap-8">
 
-                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
+                <div className={`${isEditing ? "" : "border-b border-zinc-800 light:border-zinc-300"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
-                        <User size={18} strokeWidth={0.75} />
+                        <User size={18} strokeWidth={0.75} className="light:text-zinc-700 text-zinc-400" />
                         <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Full Name
                         </p>
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{formData.name}</h3>
+                            <h3 className="pb-2 text-sm light:text-zinc-900 text-white">{formData.name}</h3>
                         )
                     }
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
                         )
                     }
                 </div>
 
-                <div className="border-b border-zinc-800">
+                <div className="border-b border-zinc-800 light:border-zinc-300">
                     <div className="flex items-center gap-2 mb-3 ">
-                        <Shield size={18} strokeWidth={0.75} />
+                        <Shield size={18} strokeWidth={0.75} className="light:text-zinc-700 text-zinc-400" />
                         <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Role
                         </p>
                     </div>
 
-                    <h3 className="pb-2 text-sm">{profile?.role}</h3>
+                    <h3 className="pb-2 text-sm light:text-zinc-900 text-white">{profile?.role}</h3>
                 </div>
 
-                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
+                <div className={`${isEditing ? "" : "border-b border-zinc-800 light:border-zinc-300"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
-                        <Mail size={18} strokeWidth={0.75} />
+                        <Mail size={18} strokeWidth={0.75} className="light:text-zinc-700 text-zinc-400" />
                         <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Email
                         </p>
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{formData.email}</h3>
+                            <h3 className="pb-2 text-sm light:text-zinc-900 text-white">{formData.email}</h3>
                         )
                     }
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, email: e.target.value })} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, email: e.target.value })} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0 disabled:cursor-not-allowed disabled:opacity-80" />
                         )
                     }
                 </div>
 
-                <div className={`${isEditing ? "" : "border-b border-zinc-800"}`}>
+                <div className={`${isEditing ? "" : "border-b border-zinc-800 light:border-zinc-300"}`}>
                     <div className="flex items-center gap-2 mb-3 ">
-                        <Phone size={18} strokeWidth={0.75} />
+                        <Phone size={18} strokeWidth={0.75} className="light:text-zinc-700 text-zinc-400" />
                         <p className="text-neutral-500 light:text-zinc-800 text-sm">
                             Phone
                         </p>
                     </div>
                     {
                         !isEditing && (
-                            <h3 className="pb-2 text-sm">{formData.phone || "+8801XXXXXXXXX"}</h3>
+                            <h3 className="pb-2 text-sm light:text-zinc-900 text-white">{formData.phone || "+8801XXXXXXXXX"}</h3>
                         )
                     }
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, phone: e.target.value })} value={formData.phone || "+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-main rounded-none" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, phone: e.target.value })} value={formData.phone || "+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
                         )
                     }
                 </div>
