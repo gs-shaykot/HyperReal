@@ -99,7 +99,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                         </div>
                                         <div className='flex justify-between items-center gap-3'>
                                             <div className='flex flex-col justify-center items-center'>
-                                                <h3 className='text-zinc-400'>TOTAL</h3>
+                                                <h3 className='text-zinc-400 light:text-zinc-700'>TOTAL</h3>
                                                 <h3 className='text-second'>${order.payments[0]?.totalProductPriceInUSD.toFixed(2)}</h3>
                                             </div>
                                             <button
@@ -107,7 +107,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                     setSelectedOrder(order);
                                                     setOpen(true);
                                                 }}
-                                                className='btn btn-sm rounded-none bg-transparent hover:bg-white hover:text-zinc-900 border-white'>
+                                                 className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
                                                 <Eye />
                                                 VIEW
                                             </button>

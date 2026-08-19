@@ -7,7 +7,7 @@ import { getServerSession } from "next-auth";
 import Link from "next/link";
 
 export default async function OverviewPage() {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
+  // await new Promise((resolve) => setTimeout(resolve, 3000));
 
   const session = await getServerSession(authOptions);
 

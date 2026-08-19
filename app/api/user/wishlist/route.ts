@@ -12,6 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
         if (!productId) {
+            console.log(["Wishlist POST Error: Product ID is required.", productId]);
             return NextResponse.json({ success: false, message: 'Product ID is required.' }, { status: 400 });
         }
         const wishlistItem = await prisma.wishlist.create({

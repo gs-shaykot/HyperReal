@@ -43,8 +43,6 @@ export const Banner = () => {
                         </button>
                     </Link>
 
-
-                    {/* ${theme === 'light' ? 'text-white hover:bg-white ' : 'text-zinc-900 hover:text-white  border-zinc-900 hover:bg-black'} */}
                     <button className={`btn shadow-none rounded-none bg-transparent hover:scale-105 transition-all duration-500 font-bold border-2 light:border-zinc-900 border-white light:hover:bg-black hover:bg-white light:hover:text-white hover:text-zinc-900`}>
                         VIEW LOOKBOOK
                         <ArrowRight />
