@@ -7,44 +7,40 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(uuid())
-  name  String
-  email String  @unique
-  phone String?
-
-  password   String?
-  PhotoUrl   String?
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  isVerified Boolean  @default(false)
-
+  id           String       @id @default(uuid())
+  name         String
+  email        String       @unique
+  password     String?
+  PhotoUrl     String?
+  role         Role         @default(USER)
+  createdAt    DateTime     @default(now())
+  isVerified   Boolean      @default(false)
   otp          String?
   otpExpiry    DateTime?
   isNewUser    Boolean      @default(true)
+  phone        String?
   authProvider AuthProvider @default(EMAIL)
-
-  cart      Cart?
-  orders    Order[]
-  addresses Address[]
-  wishlist  Wishlist[]
+  cart         Cart?
+  orders       Order[]
+  wishlist     Wishlist[]
+  addresses    Address[]
 
   @@map("user")
 }
 
 model Address {
-  id       String  @id @default(uuid())
-  userId   String
-  label    String?
-  fullName String
-  street   String
-  city     String
-  house    String
-  zipCode  String
-  country  String
-  phone    String
-
-  isDefault Boolean  @default(false)
+  id        String   @id @default(uuid())
+  userId    String
+  street    String
+  city      String
+  zipCode   String
+  country   String
   createdAt DateTime @default(now())
+  fullName  String
+  isDefault Boolean  @default(false)
+  label     String?
+  phone     String
+  house     String
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("address")
@@ -84,7 +80,8 @@ model ProductVariant {
   stock      Int
   cartItems  CartItem[]
   orderItems OrderItem[]
-  product    Product     @relation(fields: [productId], references: [id]) 
+  product    Product     @relation(fields: [productId], references: [id])
+  wishlists  Wishlist[]
 
   @@unique([productId, size, color])
 }
@@ -129,16 +126,15 @@ model Coupon {
 }
 
 model Order {
-  id        String      @id @unique @default(uuid())
-  userId    String
-  status    OrderStatus @default(PENDING)
-  orderCode String      @unique
-  createdAt DateTime    @default(now())
-
+  id           String        @id @unique @default(uuid())
+  userId       String
+  status       OrderStatus   @default(PENDING)
+  orderCode    String        @unique
+  createdAt    DateTime      @default(now())
   user         User          @relation(fields: [userId], references: [id])
+  orderHistory OrderHistory?
   orderItems   OrderItem[]
   payments     Payment[]
-  orderHistory OrderHistory?
 }
 
 model OrderItem {
@@ -152,9 +148,8 @@ model OrderItem {
 }
 
 model OrderHistory {
-  id      String @id @default(uuid())
-  orderId String @unique
-
+  id       String @id @default(uuid())
+  orderId  String @unique
   fullName String
   street   String
   city     String
@@ -166,41 +161,36 @@ model OrderHistory {
 }
 
 model Payment {
-  id      String        @id @default(uuid())
-  orderId String
-  method  PaymentMethod
-  country String        @default("Bangladesh")
-  status  PaymentStatus @default(PENDING)
-
-  transactionId String? @unique
-
-  // Stripe
-  paymentIntentId String? @unique
-  stripeChargeId  String? @unique
-  cardBrand       String?
-  last4           String?
-  receiptUrl      String?
-
-  // Existing fields
-  paidAmountInBDT        Float   @default(0)
-  totalProductPriceInUSD Float   @default(0)
-  discount               Float   @default(0)
-  shippingCost           Float   @default(0)
-  shippingMethod         String? @default("Standard Drop")
+  id                     String        @id @default(uuid())
+  orderId                String
+  method                 PaymentMethod
+  country                String        @default("Bangladesh")
+  status                 PaymentStatus @default(PENDING)
+  transactionId          String?       @unique
+  paidAmountInBDT        Float         @default(0)
+  totalProductPriceInUSD Float         @default(0)
+  discount               Float         @default(0)
+  shippingCost           Float         @default(0)
+  createdAt              DateTime      @default(now())
+  shippingMethod         String?       @default("Standard Drop")
   couponCode             String?
-
-  createdAt DateTime @default(now())
-  order     Order    @relation(fields: [orderId], references: [id])
+  cardBrand              String?
+  last4                  String?
+  paymentIntentId        String?       @unique
+  receiptUrl             String?
+  stripeChargeId         String?       @unique
+  order                  Order         @relation(fields: [orderId], references: [id])
 }
 
 model Wishlist {
   id               String         @id @default(uuid())
   userId           String
   productId        String
-  createdAt        DateTime       @default(now()) 
-
+  createdAt        DateTime       @default(now())
+  productVariantId String
+  product          Product        @relation(fields: [productId], references: [id])
+  variant          ProductVariant @relation(fields: [productVariantId], references: [id])
   user             User           @relation(fields: [userId], references: [id])
-  product          Product        @relation(fields: [productId], references: [id]) 
 
   @@unique([userId, productId])
 }

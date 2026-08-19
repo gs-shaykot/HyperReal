@@ -19,12 +19,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const { data: wishlistItems } = useQuery({
         queryKey: ["wishlist"],
         queryFn: Getwishlist
-    })
-
+    }) 
+    
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some((item: any) => item?.product?.id === product.id);
     }, [wishlistItems, product.id]);
-
+ 
 
     //EXTRACTED UNIQUE COLRS
     let Extractedcolor = useMemo(
@@ -188,7 +188,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         toggleWishlistMutation.mutate({ productId: product.id, isWishlisted, variantId: ExtractedVariant?.id as string });
                                     }}
                                     whileTap={{ scale: 0.98 }}
-                                    className={`border hover:border-white light:hover:border-zinc-900 py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted ? 'bg-second/30 border-second text-second' : 'border-zinc-600 light:border-zinc-400'}`}>
+                                    className={`border  hover:border-white py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted ? 'bg-second/30 border-second text-second' : 'border-zinc-600'}`}>
                                     <HeartPlus />
                                 </motion.button>
                             </div>
