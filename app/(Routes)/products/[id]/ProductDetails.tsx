@@ -150,8 +150,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
-                                        if (!session?.user) {
-                                            // toast.error("Please sign in to add items to your cart");
+                                        if (!session?.user) { 
                                             toast.custom((t) => (
                                                 <div className='bg-zinc-900! light:bg-white! text-second! text-sm light:text-zinc-900! light:shadow border border-zinc-800 light:border-0 px-4 py-2 rounded shadow flex items-center gap-2'>
                                                     <X className='text-red-500' />
@@ -223,7 +222,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                         <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 light:text-zinc-900 text-white/90" aria-label="SHIPPING" defaultChecked />
                         <div className="tab-content light:text-zinc-900 text-white/70 font-light mt-3 text-sm">
-                            <p>Free worldwide shipping on orders over $150. Standard delivery 5-7 business days. Express available at checkout.</p>
+                            <p>Free worldwide shipping on orders over $2500. Standard delivery 5-7 business days. Express available at checkout.</p>
                         </div>
 
                         <input type="radio" name="my_tabs_2" className="tab px-5 pl-0 light:text-zinc-900 text-white/90" aria-label="RETURNS" />
