@@ -5,7 +5,7 @@ import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
-import CyberpunkLoader from "@/app/components/CyberpunkLoader"; 
+import CyberpunkLoader from "@/app/components/CyberpunkLoader";
 import Footer from "@/app/components/Footer";
 import { Toaster } from 'react-hot-toast';
 
@@ -40,7 +40,12 @@ export default function RootLayout({
           <Navbar />
           <main className="relative">
             {children}
-            <Toaster position="top-center" />
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className: "bg-zinc-900! text-second! light:bg-white! light:text-zinc-900! light:shadow",
+              }}
+            />
           </main>
           <Footer />
         </Providers>

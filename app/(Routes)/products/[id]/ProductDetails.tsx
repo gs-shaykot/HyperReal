@@ -153,7 +153,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         if (!session?.user) {
                                             // toast.error("Please sign in to add items to your cart");
                                             toast.custom((t) => (
-                                                <div className='bg-zinc-900 light:bg-white text-second text-sm light:text-black light:border-0 border border-zinc-800 px-4 py-2 rounded shadow flex items-center gap-2'>
+                                                <div className='bg-zinc-900! light:bg-white! text-second! text-sm light:text-zinc-900! light:shadow border border-zinc-800 light:border-0 px-4 py-2 rounded shadow flex items-center gap-2'>
                                                     <X className='text-red-500' />
                                                     Please sign in to add items <br /> to your cart
 

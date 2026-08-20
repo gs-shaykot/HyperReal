@@ -1,6 +1,7 @@
 import { CartItemType } from "@/app/types/cartType";
 import { addToCartApi } from "@/lib/cartAPIs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 
 export const useCart = () => {
@@ -31,6 +32,10 @@ export const useCart = () => {
             if (context?.previousCartItem) {
                 queryClient.setQueryData(["cartItems"], context.previousCartItem);
             }
+        },
+
+        onSuccess: () => {
+            toast.success("Item added to cart successfully.");
         },
 
         onSettled: () => {
