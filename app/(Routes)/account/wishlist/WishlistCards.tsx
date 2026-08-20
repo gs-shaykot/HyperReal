@@ -9,7 +9,6 @@ import { useQuery } from '@tanstack/react-query'
 import { Eye, Heart, Package, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import React, { useMemo } from 'react'
 
 export const WishlistCards = () => {
     const { data: wishlistItems, isLoading } = useQuery({
@@ -52,11 +51,11 @@ export const WishlistCards = () => {
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
                                 <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm border hover:border-second border-zinc-700 light:border-zinc-300 light:bg-white transition-all group cursor-pointer">
-                                    <figure>
+                                    <figure className="aspect-square overflow-hidden bg-black">
                                         <Image
                                             width={600}
                                             height={600}
-                                            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-300"
+                                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                                             src={
                                                 item?.product?.productImages.find(img => img.color === item.variant.color)?.imageUrl ||
                                                 item?.product?.productImages[0]?.imageUrl

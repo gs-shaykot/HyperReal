@@ -9,6 +9,8 @@ export const useWishlist = () => {
     const toggleWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
         mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => {
+            console.log("Toggling wishlist for productId: ", productId, "isWishlisted: ", isWishlisted, "variantId: ", variantId);
+
             if (isWishlisted) {
                 return DeleteWishlist({ productId });
             }
@@ -35,6 +37,8 @@ export const useWishlist = () => {
         onError: (error, __, context) => {
             console.log("Error occurred while toggling wishlist: ", error);
 
+            toast.error("Failed to update wishlist.");
+
             queryClient.setQueryData(
                 ['wishlist'],
                 context?.previousWishlist
@@ -44,6 +48,7 @@ export const useWishlist = () => {
         onSuccess: (_, variables) => {
             if (variables.isWishlisted) {
                 toast.success("Item removed from wishlist successfully.");
+                return;
             }
             toast.success("Item added to wishlist successfully.");
         },

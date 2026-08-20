@@ -1,7 +1,4 @@
-import { WishlistCards } from '@/app/(Routes)/account/wishlist/WishlistCards';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
+import { WishlistCards } from '@/app/(Routes)/account/wishlist/WishlistCards'; 
 
 const page = async () => {  
     return (

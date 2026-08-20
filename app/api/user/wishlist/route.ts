@@ -6,13 +6,16 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { productId, variantId } = await req.json(); 
+        const { productId, variantId } = await req.json();
 
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
         if (!productId) {
             return NextResponse.json({ success: false, message: 'Product ID is required.' }, { status: 400 });
+        }
+        if (!variantId) {
+            return NextResponse.json({ success: false, message: 'Product variant ID is required.' }, { status: 400 });
         }
         const wishlistItem = await prisma.wishlist.create({
             data: {
@@ -87,7 +90,7 @@ export async function DELETE(req: Request) {
                 { status: 200 }
             );
         }
-        
+
         const res = await prisma.wishlist.deleteMany({
             where: {
                 userId: session?.user.id,
