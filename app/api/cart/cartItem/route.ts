@@ -163,6 +163,7 @@ export async function PUT(req: Request) {
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
+        
         const { itemId, quantity } = await req.json();
 
         if (!itemId) {

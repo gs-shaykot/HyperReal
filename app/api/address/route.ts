@@ -5,8 +5,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const address = await req.json();
         const session = await getServerSession(authOptions);
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
+        const address = await req.json();
 
         const existingAddress = await prisma.address.count({
             where: { userId: session?.user.id }
@@ -19,7 +23,7 @@ export async function POST(req: Request) {
                 isDefault: existingAddress === 0
             }
         });
-        
+
 
         return NextResponse.json({ message: "Address added successfully.", data: res }, { status: 200 });
     }
@@ -32,6 +36,11 @@ export async function POST(req: Request) {
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
+
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
         const res = await prisma.address.findMany({
             where: {
                 userId: session?.user.id
@@ -57,6 +66,11 @@ export async function DELETE(req: Request) {
     try {
         const { id } = await req.json();
         const session = await getServerSession(authOptions);
+
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
         const res = await prisma.address.delete({
             where: {
                 id,

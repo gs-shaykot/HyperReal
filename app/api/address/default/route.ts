@@ -7,9 +7,13 @@ export async function PATCH(req: Request) {
     try {
         const { id } = await req.json();
         const session = await getServerSession(authOptions);
- 
+
+        if (!session?.user.id) {
+            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        }
+
         await prisma.$transaction(async (tx) => {
-            // set all addresses of the user to isDefault: false except the id'th address.
+            
             await tx.address.updateMany({
                 where: {
                     userId: session?.user.id,
@@ -18,8 +22,7 @@ export async function PATCH(req: Request) {
                     isDefault: false
                 }
             });
-
-            // Make the "id" address the default address
+            
             await tx.address.updateMany({
                 where: { id, userId: session?.user.id },
                 data: {

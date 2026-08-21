@@ -6,11 +6,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        const { productId, variantId } = await req.json();
-
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
+
+        const { productId, variantId } = await req.json();
+
         if (!productId) {
             return NextResponse.json({ success: false, message: 'Product ID is required.' }, { status: 400 });
         }
@@ -39,6 +40,7 @@ export async function GET(req: Request) {
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
+        
         const wishlistItems = await prisma.wishlist.findMany({
             where: { userId: session.user.id },
             select: {
