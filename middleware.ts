@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set(
         "callbackUrl",
         `${request.nextUrl.pathname}${request.nextUrl.search}`,
-    );
+    ); 
 
     return NextResponse.redirect(loginUrl);
 }

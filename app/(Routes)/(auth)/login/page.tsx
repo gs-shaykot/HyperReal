@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { Eye, EyeOff, TriangleAlert, UserRoundCheck } from 'lucide-react';
 
@@ -75,17 +75,21 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
 };
 
 export default function Login() {
+    const searchParams = useSearchParams();
     const router = useRouter();
+
     const [state, action, isPending] = useActionState(LoginAction, initialState);
     const [ShowPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (state.success) {
             setTimeout(() => {
-                router.push('/');
+                const callbackUrl = searchParams.get('callbackUrl') || '/';
+
+                router.push(callbackUrl);
             }, 1000);
         }
-    }, [state.success, router]);
+    }, [state.success, router, searchParams]);
 
     return (
         <div className={`min-h-screen flex items-center justify-center px-4`}>
@@ -203,7 +207,13 @@ export default function Login() {
                                 'INITIALIZE SESSION'
                             )}
                         </button>
-                        <button type='button' className='btn w-full shadow-none border-second bg-transparent hover:bg-second hover:text-zinc-900' onClick={() => signIn("google", { callbackUrl: "/" })}>
+                        
+                        <button type='button' className='btn w-full shadow-none border-second bg-transparent hover:bg-second hover:text-zinc-900'
+                            onClick={() => {
+                                const callbackUrl = searchParams.get("callbackUrl") || "/";
+                                signIn("google", { callbackUrl });
+                            }}
+                        >
                             SIGN IN WITH GOOGLE
                         </button>
                     </form>
