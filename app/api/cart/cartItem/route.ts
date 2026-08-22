@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-    try { 
+    try {
         const session = await getServerSession(authOptions);
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
@@ -143,11 +143,14 @@ export async function DELETE(req: Request) {
             where: {
                 id: itemId,
                 cartId: cart.id,
+                cart: {
+                    userId: session.user.id
+                }
             }
         });
 
         if (deleted.count === 0) {
-            return NextResponse.json({ success: false, message: "Item not found" }, { status: 404 });
+            return NextResponse.json({ success: false, message: "Item not found or not authorized to delete" }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, message: "Item removed from cart" }, { status: 200 });
@@ -163,7 +166,7 @@ export async function PUT(req: Request) {
         if (!session?.user.id) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
-        
+
         const { itemId, quantity } = await req.json();
 
         if (!itemId) {
@@ -182,7 +185,10 @@ export async function PUT(req: Request) {
         const updateCartItem = await prisma.cartItem.updateMany({
             where: {
                 id: itemId,
-                cartId: cart.id
+                cartId: cart.id,
+                cart: {
+                    userId: session.user.id
+                }
             },
             data: {
                 quantity,
@@ -190,7 +196,7 @@ export async function PUT(req: Request) {
         });
 
         if (updateCartItem.count === 0) {
-            return NextResponse.json({ success: false, message: "Item not found" }, { status: 404 });
+            return NextResponse.json({ success: false, message: "Item not found or not authorized to update" }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, message: "Cart item updated" }, { status: 200 });
