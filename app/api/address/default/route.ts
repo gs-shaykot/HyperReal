@@ -12,8 +12,8 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
-        await prisma.$transaction(async (tx) => {
-            
+        const result = await prisma.$transaction(async (tx) => {
+
             await tx.address.updateMany({
                 where: {
                     userId: session?.user.id,
@@ -22,14 +22,19 @@ export async function PATCH(req: Request) {
                     isDefault: false
                 }
             });
-            
-            await tx.address.updateMany({
+
+            return await tx.address.updateMany({
                 where: { id, userId: session?.user.id },
                 data: {
                     isDefault: true
                 }
             })
+
         });
+        
+        if (result.count === 0) {
+            return NextResponse.json({ message: "Address not found or not authorized to update." }, { status: 404 });
+        }
 
         return NextResponse.json({ message: "Address updated successfully." }, { status: 200 });
     }

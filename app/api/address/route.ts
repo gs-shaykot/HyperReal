@@ -71,16 +71,31 @@ export async function DELETE(req: Request) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
-        const res = await prisma.address.delete({
+        const result = await prisma.address.deleteMany({
             where: {
                 id,
-                userId: session?.user.id
-            }
+                userId: session.user.id,
+            },
         });
-        return NextResponse.json({ message: "Address deleted successfully.", data: res }, { status: 200 });
+        
+        if (result.count === 0) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Address not found or you are not authorized to delete it.",
+                },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({ message: "Address deleted successfully.", data: result }, { status: 200 });
     }
     catch (error) {
         console.error("Error occurred while deleting address: ", error);
         return NextResponse.json({ message: "Error occurred while deleting address." }, { status: 500 });
     }
 }
+
+
+
+

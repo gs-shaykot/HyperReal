@@ -3,7 +3,7 @@ import React from 'react'
 
 export const Upcoming = () => {
     let product_name = "VOID RUNNER V3";
-    const launchDate = "2026-04-25T00:00:00";
+    const launchDate = "2026-09-25T00:00:00";
     return (
         <section className='w-full py-10 bg-second flex items-center justify-center'>
             <div className='max-w-7xl h-full mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-5 '>
@@ -13,7 +13,7 @@ export const Upcoming = () => {
                         <h1>UPCOMING RELEASE</h1>
                     </div>
 
-                    <h1 className='text-8xl font-bold font-inter!'>
+                    <h1 className='text-7xl font-bold font-inter!'>
                         {
                             product_name.split(" ").map((word, idx) => (
                                 idx === product_name.split(" ").length - 1

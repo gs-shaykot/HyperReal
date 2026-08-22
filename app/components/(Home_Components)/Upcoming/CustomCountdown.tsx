@@ -46,7 +46,7 @@ export default function LaunchCountdown({ targetDate, storageKey = DEFAULT_STORA
 
     const renderer = ({ days, hours, minutes, seconds }: { days: number; hours: number; minutes: number; seconds: number }) => {
         return (
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-6">
 
                 {/* DAYS */}
                 <div className="flex flex-col items-center">
