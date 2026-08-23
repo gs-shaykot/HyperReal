@@ -5,7 +5,6 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
     const defaultUrl = "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png";
 
     if (!file) return defaultUrl;
-
     const formData = new FormData();
     formData.append("file", file);
 
@@ -18,9 +17,17 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
             },
         });
 
+        console.log("Upload response:", res.data);
+        const uploadResult = res.data.data ?? res.data;
+        const imageUrl = uploadResult.secure_url || uploadResult.url;
 
-        return res.data.secure_url || res.data.url || defaultUrl;
-    } catch (error) { 
-        return defaultUrl;
+        if (!imageUrl) {
+            throw new Error("Upload response did not contain an image URL");
+        }
+
+        return imageUrl;
+    } catch (error) {
+        console.error("Image upload failed:", error);
+        throw error;
     }
 };

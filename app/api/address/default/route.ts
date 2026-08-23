@@ -13,6 +13,19 @@ export async function PATCH(req: Request) {
         }
 
         const result = await prisma.$transaction(async (tx) => {
+            const address = await tx.address.findFirst({
+                where: {
+                    id,
+                    userId: session?.user.id
+                },
+                select: {
+                    id: true
+                }
+            });
+
+            if(!address) {
+                return { count: 0 };
+            }
 
             await tx.address.updateMany({
                 where: {
@@ -31,7 +44,7 @@ export async function PATCH(req: Request) {
             })
 
         });
-        
+
         if (result.count === 0) {
             return NextResponse.json({ message: "Address not found or not authorized to update." }, { status: 404 });
         }

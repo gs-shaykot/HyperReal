@@ -41,13 +41,29 @@ const Register = () => {
         return () => clearInterval(interval);
     }, [cooldown]);
 
-
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        if (!file.type.startsWith("image/")) {
-            toast.error("Only image files allowed");
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
+
+        const ALLOWED_TYPES = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+        ];
+
+        // File type validation
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            toast.error("Only JPG, PNG, and WebP images are allowed.");
+            e.target.value = "";
+            return;
+        } 
+
+        // File size validation
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error("Image size must not exceed 2 MB.");
+            e.target.value = "";
             return;
         }
 
@@ -55,6 +71,7 @@ const Register = () => {
         setProgress(0);
         try {
             const url = await uploadImage(file, setProgress);
+            console.log("[registered Image:] Image uploaded to:", url);
             setImageUrl(url);
         } catch (err) {
             toast.error("Upload failed");
@@ -139,7 +156,6 @@ const Register = () => {
                 name: fullName.toUpperCase(),
                 email: email.toLowerCase(),
                 password,
-                role: 'USER',
                 PhotoUrl: imageUrl || DEFAULT_AVATAR_URL,
                 otp,
             };
@@ -185,7 +201,7 @@ const Register = () => {
             setLoading(false);
         }
     };
-    
+
     return (
         <div className={`min-h-screen light:bg-white bg-main/95 flex items-center justify-center  px-4`}>
             <div className={`light:bg-gray-100/80 light:border-t-0 light:border-zinc-800 bg-zinc-900/90 relative w-full max-w-md backdrop-blur-md border border-zinc-800 rounded-lg shadow-xl`}>

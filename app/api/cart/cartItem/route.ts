@@ -12,6 +12,23 @@ export async function POST(req: Request) {
         }
 
         const { variantId, quantity } = await req.json();
+        console.log("Received data:", { variantId, quantity });
+
+        if (!variantId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Variant id is required",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity <= 0) {
+            return NextResponse.json(
+                { success: false, message: "Quantity must be a positive integer" }, { status: 400 }
+            );
+        }
 
         let cart = await prisma.cart.findUnique({
             where: { userId: session.user.id }
@@ -27,6 +44,23 @@ export async function POST(req: Request) {
 
         const cartId = cart.id;
 
+        const variant = await prisma.productVariant.findUnique({
+            where: {
+                id: variantId
+            },
+            include: {
+                product: true
+            }
+        })
+
+        if (!variant) {
+            return NextResponse.json({ success: false, message: "Selected variant is not available" }, { status: 400 });
+        }
+
+        if (!variant.product.isAvailable) {
+            return NextResponse.json({ success: false, message: "Associated product is not available" }, { status: 400 });
+        }
+
         const existingCart = await prisma.cartItem.findUnique({
             where: {
                 cartId_variantId: {
@@ -36,23 +70,29 @@ export async function POST(req: Request) {
             }
         });
 
-        if (existingCart) {
-            await prisma.cartItem.update({
-                where: { id: existingCart.id },
-                data: {
-                    quantity: existingCart.quantity + quantity,
-                }
-            })
+        const newQuantity = existingCart ? existingCart.quantity + quantity : quantity;
+
+        if (newQuantity > variant.stock) {
+            return NextResponse.json({ success: false, message: "Requested quantity exceeds available stock" }, { status: 400 });
         }
-        else {
-            await prisma.cartItem.create({
-                data: {
-                    cartId,
-                    variantId,
-                    quantity,
-                }
-            })
-        }
+
+            if (existingCart) {
+                await prisma.cartItem.update({
+                    where: { id: existingCart.id },
+                    data: {
+                        quantity: newQuantity,
+                    }
+                })
+            }
+            else {
+                await prisma.cartItem.create({
+                    data: {
+                        cartId,
+                        variantId,
+                        quantity: newQuantity,
+                    }
+                })
+            }
 
         return NextResponse.json({ success: true, message: "Item added to cart" }, { status: 200 });
     }

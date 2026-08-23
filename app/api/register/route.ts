@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password, role, PhotoUrl, otp } = await req.json();
+        const { name, email, password, PhotoUrl, otp } = await req.json();
 
         if(!email || !password || !name  ) {
             return NextResponse.json({ success: false, message: 'Name, email and password are required.' }, { status: 400 });
@@ -38,8 +38,7 @@ export async function POST(req: Request) {
             data: {
                 name,
                 email: email.toLowerCase(),
-                password: hashPassword,
-                role,
+                password: hashPassword, 
                 PhotoUrl,
                 otp: null,
                 otpExpiry: null,

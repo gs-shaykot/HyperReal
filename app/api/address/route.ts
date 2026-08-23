@@ -16,7 +16,7 @@ export async function POST(req: Request) {
             where: { userId: session?.user.id }
         })
 
-        const res = await prisma.address.create({
+        const result = await prisma.address.create({
             data: {
                 userId: session?.user.id,
                 ...address,
@@ -24,8 +24,11 @@ export async function POST(req: Request) {
             }
         });
 
+        if(!result) {
+            return NextResponse.json({ message: "Error occurred while adding address." }, { status: 500 });
+        }
 
-        return NextResponse.json({ message: "Address added successfully.", data: res }, { status: 200 });
+        return NextResponse.json({ message: "Address added successfully.", data: result }, { status: 200 });
     }
     catch (error) {
         console.error("Error occurred while adding address: ", error);
