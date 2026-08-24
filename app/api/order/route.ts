@@ -146,16 +146,20 @@ export async function POST(req: Request) {
             return order;
         });
 
+
         switch (paymentMethod) {
             case "SSLC": {
                 const tran_id = order.orderCode;
-
+                const orderId = order.id;
+                console.log('[IN SSLC] Order ID:', orderId);
+                
                 const sslData = {
                     store_id: process.env.SSLC_STORE_ID,
                     store_passwd: process.env.SSLC_STORE_PASSWORD,
                     total_amount: finalTotal,
                     currency: "BDT",
-                    tran_id,
+                    tran_id, 
+                    orderId,
                     success_url: `${process.env.BASE_URL}/api/payment/success`,
                     fail_url: `${process.env.BASE_URL}/api/payment/fail`,
                     cancel_url: `${process.env.BASE_URL}/api/payment/cancel`,
