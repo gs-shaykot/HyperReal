@@ -1,26 +1,65 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"; 
 
 export async function POST(req: Request) {
-    const formData = await req.formData();
-    const tran_id = formData.get("tran_id") as string;
+    try {
+        const formData = await req.formData();
 
-    const order = await prisma.order.findUnique({
-        where: { orderCode: tran_id },
-        select: { id: true },
-    })
+        const tran_id = formData.get("tran_id")?.toString();
 
-    const orderId = order?.id ?? null;
+        if (!tran_id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid transaction.",
+                },
+                { status: 400 }
+            );
+        }
 
-    if (orderId) {
+        const order = await prisma.order.findUnique({
+            where: {
+                orderCode: tran_id,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        if (!order) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Order not found.",
+                },
+                { status: 404 }
+            );
+        }
+
         await prisma.payment.updateMany({
-            where: { orderId: orderId },
+            where: {
+                orderId: order.id,
+                status: "PENDING",
+            },
             data: {
                 status: "FAILED",
                 transactionId: tran_id,
-             },
+            },
         });
-    }
 
-    return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        return NextResponse.redirect(
+            `${process.env.BASE_URL}/failed?orderId=${order.id}`
+        );
+
+    } catch (error) {
+        console.error("SSLCOMMERZ fail callback error:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Payment failure processing failed.",
+            },
+            { status: 500 }
+        );
+    }
 }
