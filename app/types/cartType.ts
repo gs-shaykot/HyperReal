@@ -28,7 +28,7 @@ export type CartItemWithProductType = CartItemType & {
             },
             productImages: {
                 imageUrl: string;
-                color: string;
+                color: string | null;
             }[]
         }
     }

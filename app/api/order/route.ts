@@ -2,6 +2,7 @@ import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
+import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
 import { calculateOrder } from "@/lib/service/orderService";
 import { completePayment } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
@@ -17,9 +18,25 @@ export async function POST(req: Request) {
         }
 
         // Parsing requested body: 
-        const body = await req.json();
-        const { cartItems, country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
+        const body = await req.json(); 
+        const { country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
 
+        const cart = await prisma.cart.findUnique({
+            where: {
+                userId: session.user.id,
+            },
+            select: cartItemsSelect,
+        });
+
+        if (!cart || cart.cartItems.length === 0) {
+            return NextResponse.json(
+                { success: false, message: "Cart is empty" },
+                { status: 400 }
+            );
+        }
+
+        const cartItems = cart.cartItems;
+        
         // Calculating Order total & others: 
         const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);

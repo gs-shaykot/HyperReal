@@ -70,6 +70,8 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         enabled: status === 'authenticated',
     });
 
+    console.log("[checkout] Cart Items:", cart);
+
     const { data: coupons = [] } = useQuery({
         queryKey: ['coupons'],
         queryFn: fetchCouponsApi,
@@ -172,7 +174,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             const fullPhoneNumber = `${selectedCountryCode}${nationalPhone}`;
 
             const paymentData = {
-                cartItems: cart,
+                // cartItems: cart,
                 country: selectedCountry,
                 coupon: appliedCoupon?.code,
                 paymentMethod: selectedPaymentMethod,

@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -12,7 +13,6 @@ export async function POST(req: Request) {
         }
 
         const { variantId, quantity } = await req.json();
-        console.log("Received data:", { variantId, quantity });
 
         if (!variantId) {
             return NextResponse.json(
@@ -76,23 +76,23 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, message: "Requested quantity exceeds available stock" }, { status: 400 });
         }
 
-            if (existingCart) {
-                await prisma.cartItem.update({
-                    where: { id: existingCart.id },
-                    data: {
-                        quantity: newQuantity,
-                    }
-                })
-            }
-            else {
-                await prisma.cartItem.create({
-                    data: {
-                        cartId,
-                        variantId,
-                        quantity: newQuantity,
-                    }
-                })
-            }
+        if (existingCart) {
+            await prisma.cartItem.update({
+                where: { id: existingCart.id },
+                data: {
+                    quantity: newQuantity,
+                }
+            })
+        }
+        else {
+            await prisma.cartItem.create({
+                data: {
+                    cartId,
+                    variantId,
+                    quantity: newQuantity,
+                }
+            })
+        }
 
         return NextResponse.json({ success: true, message: "Item added to cart" }, { status: 200 });
     }
@@ -111,42 +111,7 @@ export async function GET() {
 
         const cart = await prisma.cart.findUnique({
             where: { userId: session.user.id },
-            select: {
-                cartItems: {
-                    select: {
-                        id: true,
-                        cartId: true,
-                        variantId: true,
-                        quantity: true,
-                        variant: {
-                            select: {
-                                size: true,
-                                color: true,
-                                product: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        price: true,
-                                        isAvailable: true,
-                                        category: {
-                                            select: {
-                                                name: true
-                                            }
-                                        },
-                                        productImages: {
-                                            select: {
-                                                imageUrl: true,
-                                                color: true,
-                                            }
-                                        }
-                                    },
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            select: cartItemsSelect
         })
 
 
