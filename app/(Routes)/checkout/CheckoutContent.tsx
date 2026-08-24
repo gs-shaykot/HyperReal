@@ -70,7 +70,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         enabled: status === 'authenticated',
     });
 
-    console.log("[checkout] Cart Items:", cart);
 
     const { data: coupons = [] } = useQuery({
         queryKey: ['coupons'],
@@ -254,20 +253,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                     if (paymentIntent.status === "succeeded") {
 
-                        console.log(
-                            "[Stripe] PaymentIntent succeeded:",
-                            paymentIntent.id
-                        );
-
-                        console.log(
-                            "[Stripe] Order ID:",
-                            data.orderId
-                        );
-
-                        console.log(
-                            "[Stripe] Redirect URL:",
-                            `/success?orderId=${data.orderId}`
-                        );
                         const redirectUrl = `/success?orderId=${encodeURIComponent(data.orderId)}`;
 
                         toast.success("Payment Successfully Done");

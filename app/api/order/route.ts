@@ -151,7 +151,6 @@ export async function POST(req: Request) {
             case "SSLC": {
                 const tran_id = order.orderCode;
                 const orderId = order.id;
-                console.log('[IN SSLC] Order ID:', orderId);
                 
                 const sslData = {
                     store_id: process.env.SSLC_STORE_ID,

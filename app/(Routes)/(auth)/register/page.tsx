@@ -71,7 +71,6 @@ const Register = () => {
         setProgress(0);
         try {
             const url = await uploadImage(file, setProgress);
-            console.log("[registered Image:] Image uploaded to:", url);
             setImageUrl(url);
         } catch (err) {
             toast.error("Upload failed");
@@ -91,7 +90,6 @@ const Register = () => {
 
         try {
             setSendingOtp(true);
-            console.log("[register] sending OTP to:", email);
             const res = await axios.post("/api/sendOtp", { email });
 
             if (res.status === 200) {
@@ -101,7 +99,6 @@ const Register = () => {
             }
 
         } catch (error: any) {
-            console.log("[register] failed to send OTP:", error);
             toast.error(error.response?.data?.message || "Failed to send OTP");
         } finally {
             setSendingOtp(false);

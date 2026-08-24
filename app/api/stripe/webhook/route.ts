@@ -5,8 +5,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
-    const signature = req.headers.get("stripe-signature");
-    console.log("[Stripe Webhook] Received webhook event");
+    const signature = req.headers.get("stripe-signature"); 
     if (!signature) {
         console.error(
             "[Stripe Webhook] Missing stripe-signature header"
@@ -37,18 +36,14 @@ export async function POST(req: Request) {
                     expand: ["latest_charge"]
                 });
                 const charge = paymentIntentWithCharge.latest_charge as Stripe.Charge;
-
-                console.log(
-                    `[Stripe Webhook] PaymentIntent succeeded: ${paymentIntent.id}`
-                );
+ 
 
                 const orderId = paymentIntent.metadata.orderId;
                 if (!orderId) {
                     console.error("[Stripe Webhook] Missing orderId in paymentIntent metadata");
                     return NextResponse.json({ success: false, message: "Missing orderId in paymentIntent metadata" }, { status: 400 });
                 }
-
-                console.log("[Stripe Webhook] orderId:", orderId);
+ 
 
                 const order = await prisma.order.findUnique({
                     where: {
@@ -78,8 +73,7 @@ export async function POST(req: Request) {
                     console.error("[Stripe Webhook] Order not found:", orderId);
 
                     return new NextResponse("Order not found", { status: 404 });
-                }
-                console.log("[Stripe Webhook] Order found:", order);
+                } 
                 await completePayment(order, {
                     paymentIntentId: paymentIntent.id,
                     stripeChargeId: charge?.id!,
@@ -87,15 +81,7 @@ export async function POST(req: Request) {
                     last4: charge?.payment_method_details?.card?.last4!,
                     receiptUrl: charge?.receipt_url!,
                 });
-
-                console.log(
-                    "[Stripe Webhook] Payment completed:",
-                    {
-                        orderId,
-                        paymentIntentId:
-                            paymentIntent.id,
-                    }
-                );
+ 
 
                 break;
             }

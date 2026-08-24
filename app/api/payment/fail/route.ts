@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     })
 
     const orderId = order?.id ?? null;
-    console.log("[Payment Fail] Order ID:", orderId, "Transaction ID:", tran_id);
 
     if (orderId) {
         await prisma.payment.updateMany({

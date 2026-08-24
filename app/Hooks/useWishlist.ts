@@ -8,8 +8,7 @@ export const useWishlist = () => {
 
     const toggleWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
-        mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => {
-            console.log("Toggling wishlist for productId: ", productId, "isWishlisted: ", isWishlisted, "variantId: ", variantId);
+        mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => { 
 
             if (isWishlisted) {
                 return DeleteWishlist({ productId });

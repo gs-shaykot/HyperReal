@@ -5,7 +5,6 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        console.log("[payment/success] Route hit");
 
         const formData = await req.formData();
         const tran_id = formData.get("tran_id") as string;

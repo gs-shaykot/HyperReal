@@ -16,8 +16,7 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
                 onProgress?.(percent);
             },
         });
-
-        console.log("Upload response:", res.data);
+ 
         const uploadResult = res.data.data ?? res.data;
         const imageUrl = uploadResult.secure_url || uploadResult.url;
 

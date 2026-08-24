@@ -33,7 +33,6 @@ const menus = [
 
 export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: number; TotalPayment: number }) => {
   const pathname = usePathname();
-  console.log("[Profile:] TotalPayment: ", TotalPayment)
   return (
     <div className="lg:sticky lg:top-19.5 lg:self-start">
       <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 mb-3'>

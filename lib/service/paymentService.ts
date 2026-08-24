@@ -52,11 +52,7 @@ export async function completePayment(
         receiptUrl?: string;
     },
     paymentMethod?: string
-) {
-    console.log("[paymentService] Completing payment for order ID:", order.id); 
-    console.log("[paymentService] Stripe details:", stripeDetails);
-    console.log("[paymentService] Payment method:", paymentMethod);
-
+) { 
     const payment = order.payments[0];
 
     if (payment && payment.status === PaymentStatus.SUCCESS) {

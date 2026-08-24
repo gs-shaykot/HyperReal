@@ -19,7 +19,6 @@ export const Identity = () => {
         email: "",
         phone: "",
     });
-    console.log("[Profile Identity] profile", profile);
     useEffect(() => {
         if (profile) {
             setFormData({
