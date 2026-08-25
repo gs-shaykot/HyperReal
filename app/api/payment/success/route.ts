@@ -24,6 +24,7 @@ export async function POST(req: Request) {
             select: {
                 id: true,
                 userId: true,
+                orderCode: true,
                 orderItems: {
                     select: {
                         quantity: true,
@@ -44,6 +45,24 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
+        if (validationData.status !== "VALID" ) {
+            await markPaymentFailed(order.id);
+
+            return NextResponse.redirect(
+                `${process.env.BASE_URL}/failed`
+            );
+        }
+
+        if (validationData.tran_id !== order.orderCode) {
+            await markPaymentFailed(order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        }
+
+        if (validationData.currency !== "BDT") {
+            await markPaymentFailed(order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        }
+
         const payment = order.payments[0];
 
         if (!payment) {
@@ -55,7 +74,7 @@ export async function POST(req: Request) {
         }
 
         if (validationData.status !== "VALID") {
-            await markPaymentFailed(order.id); 
+            await markPaymentFailed(order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
