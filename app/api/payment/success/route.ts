@@ -71,12 +71,7 @@ export async function POST(req: Request) {
 
         if (payment.status === "SUCCESS") {
             return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
-        }
-
-        if (validationData.status !== "VALID") {
-            await markPaymentFailed(order.id);
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
-        }
+        } 
 
         const validationAmount = Number(validationData.amount).toFixed(2);
         const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
