@@ -1,8 +1,12 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
+import { authOptions } from "@/lib/auth";
 import { getDiscount } from "@/lib/Discount_Calculation_funcs";
 import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth";
 
 export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string, deliveryOption?: string) {
+
+    const session = await getServerSession(authOptions);
 
     const variantIds = cartItems.map(item => item.variantId);
 
@@ -25,7 +29,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
     ]
 
     let subTotal = 0;
-    
+
     const OrderedItem = cartItems.map(item => {
         const variant = variants.find(v => v.id === item.variantId);
         if (!variant) {
@@ -47,7 +51,7 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
             price: productPrice,
         }
     });
-    
+
     const shippingCost = deliveryOption ? DeliveryOptions.find(option => option.label === deliveryOption)?.cost || 0 : 0;
     let discount = 0;
 
@@ -57,7 +61,19 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
         });
 
         if (Appliedcoupon) {
-            discount = Appliedcoupon ? getDiscount(Appliedcoupon, subTotal) : 0;
+            if (Appliedcoupon.expiryDate && Appliedcoupon.expiryDate < new Date()) {
+                throw new Error('This coupon has expired');
+            }
+
+            if (Appliedcoupon.newUserOnly && session?.user?.isNewUser !== true) {
+                throw new Error('This coupon is only available for new users');
+            }
+
+            if (Appliedcoupon.limit !== null && Appliedcoupon.usedCount >= Appliedcoupon.limit) {
+                throw new Error('This coupon has reached its usage limit');
+            }
+
+            discount = getDiscount(Appliedcoupon, subTotal, session?.user?.isNewUser === true);
         }
     }
 

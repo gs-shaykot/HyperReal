@@ -91,7 +91,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         )
     }, [cart]);
 
-    const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
+    const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal, session?.user?.isNewUser === true) : 0;
 
     const shippingCost = selectedDeliveryOption ? selectedDeliveryOption.cost : 0;
 

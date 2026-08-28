@@ -128,9 +128,9 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
   const nextBestCoupon = useMemo(() => {
     return getNextBestCoupon(coupons, subtotal, isNewUser);
-  }, [subtotal, coupons]);
+  }, [subtotal, coupons, isNewUser]);
 
-  const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal) : 0;
+  const discount = appliedCoupon ? getDiscount(appliedCoupon, subtotal, isNewUser) : 0;
 
   const total = subtotal - discount;
 
