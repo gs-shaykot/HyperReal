@@ -60,25 +60,28 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
         const Appliedcoupon = await prisma.coupon.findUnique({
             where: { code: coupon }
         });
+
         if (!Appliedcoupon) {
             throw new CouponError("Invalid coupon code");
         }
-        
-        if (Appliedcoupon) {
-            if (Appliedcoupon.expiryDate && Appliedcoupon.expiryDate < new Date()) {
-                throw new CouponError('This coupon has expired');
-            }
 
-            if (Appliedcoupon.newUserOnly && session?.user?.isNewUser !== true) {
-                throw new CouponError('This coupon is only available for new users');
-            }
-
-            if (Appliedcoupon.limit !== null && Appliedcoupon.usedCount >= Appliedcoupon.limit) {
-                throw new CouponError('This coupon has reached its usage limit');
-            }
-
-            discount = getDiscount(Appliedcoupon, subTotal, session?.user?.isNewUser === true);
+        if (Appliedcoupon.expiryDate && Appliedcoupon.expiryDate < new Date()) {
+            throw new CouponError('This coupon has expired');
         }
+
+        if (Appliedcoupon.newUserOnly && session?.user?.isNewUser !== true) {
+            throw new CouponError('This coupon is only available for new users');
+        }
+
+        if (Appliedcoupon.limit !== null && Appliedcoupon.usedCount >= Appliedcoupon.limit) {
+            throw new CouponError('This coupon has reached its usage limit');
+        }
+
+        if (Appliedcoupon.minSpend !== null && subTotal < Appliedcoupon.minSpend) {
+            throw new CouponError(`Minimum purchase of $${Appliedcoupon.minSpend} is required for this coupon`);
+        }
+
+        discount = getDiscount(Appliedcoupon, subTotal, session?.user?.isNewUser === true);
 
     }
 
