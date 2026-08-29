@@ -1,6 +1,7 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { getDiscount } from "@/lib/Discount_Calculation_funcs";
+import { CouponError } from "@/lib/errors/CouponError";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 
@@ -59,22 +60,26 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
         const Appliedcoupon = await prisma.coupon.findUnique({
             where: { code: coupon }
         });
-
+        if (!Appliedcoupon) {
+            throw new CouponError("Invalid coupon code");
+        }
+        
         if (Appliedcoupon) {
             if (Appliedcoupon.expiryDate && Appliedcoupon.expiryDate < new Date()) {
-                throw new Error('This coupon has expired');
+                throw new CouponError('This coupon has expired');
             }
 
             if (Appliedcoupon.newUserOnly && session?.user?.isNewUser !== true) {
-                throw new Error('This coupon is only available for new users');
+                throw new CouponError('This coupon is only available for new users');
             }
 
             if (Appliedcoupon.limit !== null && Appliedcoupon.usedCount >= Appliedcoupon.limit) {
-                throw new Error('This coupon has reached its usage limit');
+                throw new CouponError('This coupon has reached its usage limit');
             }
 
             discount = getDiscount(Appliedcoupon, subTotal, session?.user?.isNewUser === true);
         }
+
     }
 
     const USD_finalTotal = subTotal + shippingCost - discount;

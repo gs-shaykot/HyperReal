@@ -1,5 +1,6 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
+import { CouponError } from "@/lib/errors/CouponError";
 import { generateCustomId } from "@/lib/generateCustomId";
 import prisma from "@/lib/prisma";
 import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
         }
 
         // Parsing requested body: 
-        const body = await req.json(); 
+        const body = await req.json();
         const { country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
 
         const cart = await prisma.cart.findUnique({
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
         }
 
         const cartItems = cart.cartItems;
-        
+
         // Calculating Order total & others: 
         const { label, fullName, street, city, house, zipCode, phone } = address;
         const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);
@@ -151,13 +152,13 @@ export async function POST(req: Request) {
             case "SSLC": {
                 const tran_id = order.orderCode;
                 const orderId = order.id;
-                
+
                 const sslData = {
                     store_id: process.env.SSLC_STORE_ID,
                     store_passwd: process.env.SSLC_STORE_PASSWORD,
                     total_amount: finalTotal,
                     currency: "BDT",
-                    tran_id, 
+                    tran_id,
                     orderId,
                     success_url: `${process.env.BASE_URL}/api/payment/success`,
                     fail_url: `${process.env.BASE_URL}/api/payment/fail`,
@@ -221,6 +222,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
     }
     catch (error) {
+        if (error instanceof CouponError) {
+            return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+        }
+
         console.error('Error creating order:', error);
         return NextResponse.json({ success: false, message: "Failed to create order" }, { status: 500 });
     }
