@@ -22,6 +22,31 @@ export async function POST(req: Request) {
         const body = await req.json();
         const { country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
 
+        const allowedPaymentMethods = [
+            "SSLC",
+            "STRIPE",
+            "COD",
+        ] as const;
+
+        if (!allowedPaymentMethods.includes(paymentMethod)) {
+            return NextResponse.json({ success: false, message: "Invalid payment method" }, { status: 400 });
+        }
+
+        const allowedDeliveryOptions = [
+            "Standard Drop",
+            "Express Drop",
+        ] as const;
+
+        if (!allowedDeliveryOptions.includes(deliveryOption)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid delivery option",
+                },
+                { status: 400 }
+            );
+        }
+
         const cart = await prisma.cart.findUnique({
             where: {
                 userId: session.user.id,
