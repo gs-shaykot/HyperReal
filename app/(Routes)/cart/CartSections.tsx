@@ -15,6 +15,7 @@ import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
 import { CartSkeleton } from '@/app/(Routes)/cart/CartSkeleton';
 import { useRouter } from 'next/navigation';
+import { validateCouponApi } from '@/lib/couponAPIs';
 
 
 type CouponProps = {
@@ -36,7 +37,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const [mounted, setMounted] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
-
+  const [applyingCoupon, setApplyingCoupon] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
@@ -199,27 +200,31 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(null);
   };
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async () => { 
+    if (applyingCoupon) return;
+
     const code = couponInput.trim().toUpperCase();
-    const foundCoupon = coupons.find(c => c.code.toUpperCase() === code);
-    if (!foundCoupon) {
-      toast.error('Invalid coupon code.');
+
+    if (!code) {
+      toast.error("Enter a coupon code.");
       return;
     }
 
-    if (foundCoupon.newUserOnly && !isNewUser) {
-      toast.error('This coupon is for new users only.');
-      return;
+    setApplyingCoupon(true);
+    try {
+      const result = await validateCouponApi(code);
+      setAppliedCoupon(result.data.coupon);
+      toast.success(result.message);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to validate coupon"
+      );
+    } finally {
+      setApplyingCoupon(false);
     }
-
-    if (subtotal < foundCoupon.minSpend) {
-      toast.error(`Minimum spend $${foundCoupon.minSpend}`);
-      return;
-    }
-
-    setAppliedCoupon(foundCoupon);
-    toast.success(`${foundCoupon.code} applied successfully.`);
-  }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 text-white pb-20 ">
@@ -469,9 +474,9 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
                 <button
                   onClick={handleApplyCoupon}
-                  className="bg-second text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition"
+                  className={`${appliedCoupon ? 'bg-second/50' : 'bg-second'} text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition`}
                 >
-                  APPLY
+                  {applyingCoupon ? 'Applying...' : 'Apply'}
                 </button>
               </div>
             </div>
