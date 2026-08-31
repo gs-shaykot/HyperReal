@@ -99,10 +99,10 @@ export const Identity = () => {
             toast.error('Name, email and phone are required.');
             return;
         }
-
+        
         const emailChanged = profileData.email.toLowerCase() !== profile?.email?.toLowerCase();
 
-        if (!emailChanged) {
+        if (!emailChanged) { 
             await handleSave(profileData);
             return;
         }
