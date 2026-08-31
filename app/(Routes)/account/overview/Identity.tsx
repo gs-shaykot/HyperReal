@@ -1,10 +1,20 @@
 'use client'
+import { EmailVerification } from '@/app/(Routes)/account/overview/EmailVerification';
 import { useProfile } from '@/app/Hooks/useProfile';
 import { getProfile } from '@/lib/profileApi';
 import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
 import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import toast from 'react-hot-toast';
+
+type PendingProfile = {
+    id?: string;
+    name: string;
+    email: string;
+    phone: string;
+};
 
 export const Identity = () => {
     const { update } = useSession();
@@ -14,20 +24,14 @@ export const Identity = () => {
         queryFn: getProfile,
     });
     const [isEditing, setIsEditing] = useState(false)
+    const [open, setOpen] = useState(false);
+    const [pendingProfileData, setPendingProfileData] = useState<PendingProfile | null>(null);
     const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        phone: "",
+        name: profile?.name ?? "",
+        email: profile?.email ?? "",
+        phone: profile?.phone ?? "",
     });
-    useEffect(() => {
-        if (profile) {
-            setFormData({
-                name: profile.name ?? "",
-                email: profile.email ?? "",
-                phone: profile.phone ?? "",
-            });
-        }
-    }, [profile]);
+
     if (isLoading) {
         return (
             <div className="border border-neutral-700 bg-[#0f0f0f] p-5 animate-pulse">
@@ -47,30 +51,76 @@ export const Identity = () => {
             </div>
         );
     }
-    const handleSave = async () => {
-        const profileData = {
-            id: profile?.id,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone
-        }
 
+    const sendOtpToNewEmail = async (email: string) => {
+        if (!profile?.id) return;
+
+        await axios.post('/api/sendOtp', {
+            email,
+            purpose: 'PROFILE_UPDATE',
+            userId: profile.id,
+        });
+    };
+
+    const handleSave = async (payload: PendingProfile, otp?: string) => {
         if (
-            profileData.name === profile?.name &&
-            profileData.email === profile?.email &&
-            profileData.phone === profile?.phone
+            payload.name === profile?.name &&
+            payload.email === profile?.email &&
+            payload.phone === profile?.phone
         ) {
             setIsEditing(false);
+            setOpen(false);
+            setPendingProfileData(null);
             return;
         }
 
-        updateProfileMutation.mutate(profileData, {
+        updateProfileMutation.mutate({ ...payload, otp }, {
             onSuccess: async () => {
                 setIsEditing(false);
+                setOpen(false);
+                setPendingProfileData(null);
                 await update();
+            },
+            onError: () => {
+                setPendingProfileData(null);
             }
         });
-    }
+    };
+
+    const handleSaveClick = async () => {
+        const profileData = {
+            id: profile?.id,
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+        };
+
+        if (!profileData.name || !profileData.email || !profileData.phone) {
+            toast.error('Name, email and phone are required.');
+            return;
+        }
+
+        const emailChanged = profileData.email.toLowerCase() !== profile?.email?.toLowerCase();
+
+        if (!emailChanged) {
+            await handleSave(profileData);
+            return;
+        }
+
+        setPendingProfileData(profileData);
+
+        try {
+            await sendOtpToNewEmail(profileData.email);
+            setOpen(true);
+            toast.success('Verification code sent to your new email.');
+        } catch (error: unknown) {
+            setOpen(false);
+            setPendingProfileData(null);
+            const err = error as { response?: { data?: { message?: string } } };
+            toast.error(err.response?.data?.message || 'Failed to send verification code.');
+        }
+    };
+
     return (
         <div className="border border-neutral-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white p-3">
             <div className="flex justify-between items-start mb-3">
@@ -86,7 +136,7 @@ export const Identity = () => {
                                     <X size={16} />
                                     Cancel
                                 </button>
-                                <button onClick={handleSave} className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
+                                <button onClick={handleSaveClick} className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
 
                                     <span className={` flex items-center gap-2`}>
                                         <Save size={16} strokeWidth={2} />
@@ -96,14 +146,42 @@ export const Identity = () => {
                             </div>
                         )
                     }
+
+                    {open && pendingProfileData && (
+                        <EmailVerification
+                            email={pendingProfileData.email}
+                            open={open}
+                            onCloseAction={() => {
+                                setOpen(false);
+                                setPendingProfileData(null);
+                            }}
+                            onResend={async () => {
+                                await sendOtpToNewEmail(pendingProfileData.email);
+                            }}
+                            onVerify={async (otp) => {
+                                await handleSave(pendingProfileData, otp);
+                            }}
+                        />
+                    )}
+
                     {
                         !isEditing && (
-                            <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
+                            <button onClick={() => {
+                                setIsEditing(true);
+                                if (profile) {
+                                    setFormData({
+                                        name: profile.name ?? "",
+                                        email: profile.email ?? "",
+                                        phone: profile.phone ?? "",
+                                    });
+                                }
+                            }} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
                                 <SquarePen size={16} />
                                 Edit
                             </button>
                         )
                     }
+
                 </div>
             </div>
 

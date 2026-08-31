@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 
@@ -38,27 +38,52 @@ export async function PATCH(req: Request) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
 
-        const { name, email, phone } = await req.json();
+        const { name, email, phone, otp } = await req.json();
+        const normalizedEmail = email?.toLowerCase();
 
-        if (!email || !name || !phone) {
+        if (!normalizedEmail || !name || !phone) {
             return NextResponse.json({ success: false, message: 'Name, email and phone are required.' }, { status: 400 });
         }
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email: email.toLowerCase() },
-        })
+        const currentUser = await prisma.user.findUnique({
+            where: { id: session.user.id },
+        });
 
-        if (existingUser && existingUser.id !== session.user.id) {
-            return NextResponse.json({ success: false, message: 'Email is already in use by another user.' }, { status: 400 });
+        if (!currentUser) {
+            return NextResponse.json({ success: false, message: 'User not found.' }, { status: 404 });
         }
 
+        const emailChanged = currentUser.email.toLowerCase() !== normalizedEmail;
+
+        if (emailChanged) {
+            if (!otp || String(otp).length !== 6) {
+                return NextResponse.json({ success: false, message: 'A valid 6-digit OTP is required to change your email.' }, { status: 400 });
+            }
+
+            if (!currentUser.otp || currentUser.otp !== String(otp)) {
+                return NextResponse.json({ success: false, message: 'Invalid OTP. Please try again.' }, { status: 400 });
+            }
+
+            if (!currentUser.otpExpiry || new Date() > new Date(currentUser.otpExpiry)) {
+                return NextResponse.json({ success: false, message: 'OTP has expired. Please request a new one.' }, { status: 400 });
+            }
+
+            const existingUser = await prisma.user.findUnique({
+                where: { email: normalizedEmail },
+            });
+
+            if (existingUser && existingUser.id !== session.user.id) {
+                return NextResponse.json({ success: false, message: 'Email is already in use by another user.' }, { status: 400 });
+            }
+        }
 
         await prisma.user.update({
             where: { id: session.user.id },
             data: {
                 name,
-                email: email.toLowerCase(),
+                email: normalizedEmail,
                 phone,
+                ...(emailChanged ? { otp: null, otpExpiry: null } : {}),
             }
         });
 

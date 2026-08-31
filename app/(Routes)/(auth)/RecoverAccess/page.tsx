@@ -158,7 +158,7 @@ const RecoverAccess = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@gmail.com"
 
-              className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
+              className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700`}
               disabled={resettingPassword}
             />
           </div>
@@ -214,7 +214,7 @@ const RecoverAccess = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="ENTER NEW PASSCODE"
-                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
+                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700`}
                     disabled={resettingPassword}
                   />
                   <button
@@ -238,7 +238,7 @@ const RecoverAccess = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="RE-ENTER PASSCODE"
-                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700 lowercase`}
+                    className={`light:bg-white bg-black focus-within:outline-second placeholder:text-zinc-700 placeholder:font-normal light:text-zinc-800 text-second light:font-bold input w-full border border-zinc-700`}
                     disabled={resettingPassword}
                   />
                   <button
@@ -257,7 +257,7 @@ const RecoverAccess = () => {
           <button
             type="submit"
             disabled={resettingPassword}
-            className={`w-full py-3 font-semibold uppercase tracking-[2px] transition ${resettingPassword
+            className={`w-full py-3 font-semibold uppercase tracking-[2px] transition cursor-pointer ${resettingPassword
               ? "cursor-not-allowed bg-lime-200 text-black/60"
               : "bg-second text-black hover:bg-second"
               }`}

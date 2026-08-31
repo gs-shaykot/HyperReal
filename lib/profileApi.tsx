@@ -1,11 +1,11 @@
 import axios from "axios";
 
-export const ProfileEdit = async ({ email, name, phone }: { id: string; email: string; name: string; phone: string }) => {
+export const ProfileEdit = async ({ email, name, phone, otp }: { id?: string; email: string; name: string; phone: string; otp?: string }) => {
     try {
         if (!email || !name || !phone) {
             throw new Error('Name, email and phone are required.');
         }
-        const res = await axios.patch('/api/user/profile', { email, name, phone });
+        const res = await axios.patch('/api/user/profile', { email, name, phone, otp });
         return res.data;
     }
     catch (error: unknown) {
