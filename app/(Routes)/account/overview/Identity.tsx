@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
 import { useSession } from 'next-auth/react';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
 
 type PendingProfile = {
@@ -25,12 +25,27 @@ export const Identity = () => {
     });
     const [isEditing, setIsEditing] = useState(false)
     const [open, setOpen] = useState(false);
+    const [isSendingOtp, setIsSendingOtp] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
     const [pendingProfileData, setPendingProfileData] = useState<PendingProfile | null>(null);
     const [formData, setFormData] = useState({
         name: profile?.name ?? "",
         email: profile?.email ?? "",
         phone: profile?.phone ?? "",
     });
+
+    useEffect(() => {
+        if (profile) {
+            setFormData({
+                name: profile.name ?? "",
+                email: profile.email ?? "",
+                phone: profile.phone ?? "",
+            });
+        }
+    }, [profile]);
+
+    const isEmailChanged = formData.email.trim().toLowerCase() !== (profile?.email?.trim().toLowerCase() ?? "");
+    const saveButtonText = !isEmailChanged ? "SAVE" : isSendingOtp ? "SENDING OTP" : otpSent ? "OTP SENT" : "SEND OTP";
 
     if (isLoading) {
         return (
@@ -99,27 +114,36 @@ export const Identity = () => {
             toast.error('Name, email and phone are required.');
             return;
         }
-        
         const emailChanged = profileData.email.toLowerCase() !== profile?.email?.toLowerCase();
 
-        if (!emailChanged) { 
+        if (!emailChanged) {
             await handleSave(profileData);
             return;
         }
 
         setPendingProfileData(profileData);
+        setIsSendingOtp(true);
 
         try {
             await sendOtpToNewEmail(profileData.email);
+            setOtpSent(true);
             setOpen(true);
             toast.success('Verification code sent to your new email.');
-        } catch (error: unknown) {
+        }
+        catch (error: unknown) {
             setOpen(false);
             setPendingProfileData(null);
+            setOtpSent(false);
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(err.response?.data?.message || 'Failed to send verification code.');
         }
+        finally {
+            setIsSendingOtp(false);
+        }
     };
+    console.log('profile', profile);
+    console.log('formData', formData);
+    console.log('pendingProfileData', pendingProfileData);
 
     return (
         <div className="border border-neutral-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white p-3">
@@ -136,11 +160,13 @@ export const Identity = () => {
                                     <X size={16} />
                                     Cancel
                                 </button>
-                                <button onClick={handleSaveClick} className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
+                                <button
+                                    disabled={isSendingOtp}
+                                    onClick={handleSaveClick} className='light:text-white text-black group relative flex btn btn-sm bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105 disabled:opacity-75'>
 
                                     <span className={` flex items-center gap-2`}>
                                         <Save size={16} strokeWidth={2} />
-                                        SAVE
+                                        {saveButtonText}
                                     </span>
                                 </button>
                             </div>
@@ -154,9 +180,16 @@ export const Identity = () => {
                             onCloseAction={() => {
                                 setOpen(false);
                                 setPendingProfileData(null);
+                                setOtpSent(false);
                             }}
                             onResend={async () => {
-                                await sendOtpToNewEmail(pendingProfileData.email);
+                                setIsSendingOtp(true);
+                                try {
+                                    await sendOtpToNewEmail(pendingProfileData.email);
+                                    setOtpSent(true);
+                                } finally {
+                                    setIsSendingOtp(false);
+                                }
                             }}
                             onVerify={async (otp) => {
                                 await handleSave(pendingProfileData, otp);
@@ -168,6 +201,8 @@ export const Identity = () => {
                         !isEditing && (
                             <button onClick={() => {
                                 setIsEditing(true);
+                                setOtpSent(false);
+                                setIsSendingOtp(false);
                                 if (profile) {
                                     setFormData({
                                         name: profile.name ?? "",
@@ -233,7 +268,10 @@ export const Identity = () => {
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, email: e.target.value })} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0 disabled:cursor-not-allowed disabled:opacity-80" />
+                            <input type="text" onChange={(e) => {
+                                setOtpSent(false);
+                                setFormData({ ...formData, email: e.target.value });
+                            }} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0 disabled:cursor-not-allowed disabled:opacity-80" />
                         )
                     }
                 </div>

@@ -2,7 +2,7 @@ import { Mail, Shield, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type AddressModalProps = {
+type EmailVerificationProps = {
     open: boolean;
     email: string;
     onCloseAction: () => void;
@@ -10,7 +10,7 @@ type AddressModalProps = {
     onVerify: (otp: string) => Promise<void> | void;
 };
 
-export const EmailVerification = ({ open, email, onCloseAction, onResend, onVerify }: AddressModalProps) => {
+export const EmailVerification = ({ open, email, onCloseAction, onResend, onVerify }: EmailVerificationProps) => {
     const [code, setCode] = useState<string[]>(Array(6).fill(""));
     const [cooldown, setCooldown] = useState(120);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,7 +50,7 @@ export const EmailVerification = ({ open, email, onCloseAction, onResend, onVeri
         }
     };
 
-    const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyBack = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Backspace" && !code[index] && index > 0) {
             document.getElementById(`otp-${index - 1}`)?.focus();
         }
@@ -66,10 +66,12 @@ export const EmailVerification = ({ open, email, onCloseAction, onResend, onVeri
             setCooldown(120);
             setCode(Array(6).fill(""));
             toast.success('A new verification code was sent.');
-        } catch (error: unknown) {
+        }
+        catch (error: unknown) {
             const err = error as { response?: { data?: { message?: string } } };
             toast.error(err.response?.data?.message || 'Failed to resend code.');
-        } finally {
+        }
+        finally {
             setIsResending(false);
         }
     };
@@ -80,11 +82,11 @@ export const EmailVerification = ({ open, email, onCloseAction, onResend, onVeri
             toast.error('Enter the 6-digit verification code.');
             return;
         }
-
         setIsSubmitting(true);
         try {
             await onVerify(otp);
-        } finally {
+        }
+        finally {
             setIsSubmitting(false);
         }
     };
@@ -128,7 +130,7 @@ export const EmailVerification = ({ open, email, onCloseAction, onResend, onVeri
                             id={`otp-${index}`}
                             value={digit}
                             onChange={(e) => handleChange(index, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(index, e)}
+                            onKeyDown={(e) => handleKeyBack(index, e)}
                             maxLength={1}
                             inputMode="numeric"
                             autoComplete="one-time-code"
