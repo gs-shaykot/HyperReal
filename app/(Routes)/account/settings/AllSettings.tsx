@@ -1,4 +1,7 @@
 'use client';
+import { ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
+import { ChangePassModal } from '@/app/(Routes)/account/settings/ChangePassModal';
+import { DeleteAccountModal } from '@/app/(Routes)/account/settings/DeleteAccountModal';
 import axios from 'axios';
 import {
     ArrowRight,
@@ -15,79 +18,100 @@ import {
     Trash2,
     UserRound,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-const settingsSections = [
-    {
-        icon: Bell,
-        label: 'Notification Preferences',
-        description: 'Choose what you want to be notified about.',
-        rows: [
-            {
-                icon: Mail,
-                title: 'Marketing emails',
-                description: 'Updates about new projects, features and more.',
-                kind: 'toggle',
-            },
-            {
-                icon: PackageCheck,
-                title: 'Order notifications',
-                description: 'Updates about your orders and deliveries.',
-                kind: 'toggle',
-            },
-        ],
-    },
-    {
-        icon: Shield,
-        label: 'Security',
-        description: 'Keep your account and data secure.',
-        rows: [
-            {
-                icon: LockKeyhole,
-                title: 'Change password',
-                description: 'Update your account password.',
-                kind: 'button',
-            },
-            {
-                icon: MonitorSmartphone,
-                title: 'Active sessions & devices',
-                description: 'Manage your active sessions and devices.',
-                kind: 'button',
-            }
-        ],
-    },
-    {
-        icon: UserRound,
-        label: 'Account',
-        description: 'Manage your account and privacy.',
-        rows: [
-            {
-                icon: Trash2,
-                title: 'Delete account',
-                description: 'Permanently delete your account and all data.',
-                kind: 'button',
-            },
-            {
-                icon: Download,
-                title: 'Account data & privacy',
-                description: 'Download your data or manage privacy settings.',
-                kind: 'button',
-            },
-        ],
-    },
-];
+
+type ModalType = | 'change-password' | 'active-sessions' | 'delete-account' | 'account-data' | null;
+type settingRowType = {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    kind: 'toggle' | 'button';
+    modal?: Exclude<ModalType, null>;
+}
+
+const settingsSections: {
+    icon: React.ElementType;
+    label: string;
+    description: string;
+    rows: settingRowType[];
+}[] = [
+        {
+            icon: Bell,
+            label: 'Notification Preferences',
+            description: 'Choose what you want to be notified about.',
+            rows: [
+                {
+                    icon: Mail,
+                    title: 'Marketing emails',
+                    description: 'Updates about new projects, features and more.',
+                    kind: 'toggle',
+                },
+                {
+                    icon: PackageCheck,
+                    title: 'Order notifications',
+                    description: 'Updates about your orders and deliveries.',
+                    kind: 'toggle',
+                },
+            ],
+        },
+
+        {
+            icon: Shield,
+            label: 'Security',
+            description: 'Keep your account and data secure.',
+            rows: [
+                {
+                    icon: LockKeyhole,
+                    title: 'Change password',
+                    description: 'Update your account password.',
+                    kind: 'button',
+                    modal: 'change-password',
+                },
+                {
+                    icon: MonitorSmartphone,
+                    title: 'Active sessions & devices',
+                    description: 'Manage your active sessions and devices.',
+                    kind: 'button',
+                    modal: 'active-sessions',
+                },
+            ],
+        },
+
+        {
+            icon: UserRound,
+            label: 'Account',
+            description: 'Manage your account and privacy.',
+            rows: [
+                {
+                    icon: Trash2,
+                    title: 'Delete account',
+                    description: 'Permanently delete your account and all data.',
+                    kind: 'button',
+                    modal: 'delete-account',
+                },
+                {
+                    icon: Download,
+                    title: 'Account data & privacy',
+                    description: 'Download your data or manage privacy settings.',
+                    kind: 'button',
+                    modal: 'account-data',
+                },
+            ],
+        },
+    ];
+
 
 export const AllSettings = ({ userNotifications: { marketingNotifications, orderNotifications } }: { userNotifications: { marketingNotifications: boolean; orderNotifications: boolean } }) => {
+
     const [notifications, setNotifications] = useState({
         marketingEmails: marketingNotifications ?? true,
         orderNotifications: orderNotifications ?? true,
         isSaving: false
     });
-
-    useEffect(() => {
-        console.log('notifications', notifications);
-    }, [notifications, setNotifications])
+    const [open, setOpen] = useState(false);
+    const [activeModal, setActiveModal] = useState<ModalType>(null);
 
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
         setNotifications((prev) => ({
@@ -142,7 +166,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                                     </div>
                                 </div>
                                 <div>
-                                    {rows.map(({ icon: RowIcon, title, description: rowDescription, kind }) => {
+                                    {rows.map(({ icon: RowIcon, title, description: rowDescription, kind, modal }) => {
                                         const toggleKey =
                                             title === 'Marketing emails' ? 'marketingEmails' :
                                                 title === 'Order notifications' ? 'orderNotifications' : null;
@@ -176,18 +200,22 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                                                     </div>
                                                 ) : (
                                                     <button
+                                                        onClick={() => {
+                                                            if (modal) {
+                                                                setActiveModal(modal);
+                                                            }
+                                                        }}
                                                         type="button"
-                                                        aria-label={"Jhingalala"}
+                                                        aria-label={`Open ${title}`}
                                                         className="btn border border-[#3a3f45] light:border-zinc-300 bg-zinc-950 light:bg-zinc-100 text-white light:text-zinc-900 hover:bg-zinc-800 light:hover:bg-zinc-200"
                                                     >
-                                                        CLICK
+                                                        <ChevronRight size={24} />
                                                     </button>
                                                 )}
                                             </div>
                                         );
                                     })}
                                 </div>
-
                                 {
                                     idx === 0 && (
                                         <button
@@ -200,6 +228,22 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                             </div>
                         </div>
                     ))}
+                    {/* type ModalType = | 'change-password' | 'active-sessions' | 'sign-out-sessions' | 'delete-account' | 'account-data' | null; */}
+                    {
+                        activeModal === 'change-password' && (
+                            <ChangePassModal open={true} onCloseAction={() => setActiveModal(null)} />
+                        )
+                    }
+                    {
+                        activeModal === 'active-sessions' && (
+                            <ActiveSessionsModal open={true} onCloseAction={() => setActiveModal(null)} />
+                        )
+                    }
+                    {
+                        activeModal === 'delete-account' && (
+                            <DeleteAccountModal open={true} onCloseAction={() => setActiveModal(null)} />
+                        )
+                    }
 
                     <div className="grid overflow-hidden border border-[#2a2d30] light:border-black bg-[#0f0f0f] light:bg-white md:grid-cols-[250px_minmax(0,1fr)]">
                         <div className="flex items-center gap-3 border-b border-[#2a2d30] light:border-black p-5 md:border-b-0 md:border-r">
@@ -227,4 +271,4 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
             </div>
         </section>
     );
-};
+};  

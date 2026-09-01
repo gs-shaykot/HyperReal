@@ -140,10 +140,7 @@ export const Identity = () => {
         finally {
             setIsSendingOtp(false);
         }
-    };
-    console.log('profile', profile);
-    console.log('formData', formData);
-    console.log('pendingProfileData', pendingProfileData);
+    }; 
 
     return (
         <div className="border border-neutral-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white p-3">
