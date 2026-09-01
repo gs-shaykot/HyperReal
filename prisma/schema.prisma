@@ -7,23 +7,25 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(uuid())
-  name         String
-  email        String       @unique
-  password     String?
-  PhotoUrl     String?
-  role         Role         @default(USER)
-  createdAt    DateTime     @default(now())
-  isVerified   Boolean      @default(false)
-  otp          String?
-  otpExpiry    DateTime?
-  isNewUser    Boolean      @default(true)
-  phone        String?
-  authProvider AuthProvider @default(EMAIL)
-  cart         Cart?
-  orders       Order[]
-  wishlist     Wishlist[]
-  addresses    Address[]
+  id                     String       @id @default(uuid())
+  name                   String
+  email                  String       @unique
+  password               String?
+  PhotoUrl               String?
+  role                   Role         @default(USER)
+  createdAt              DateTime     @default(now())
+  isVerified             Boolean      @default(false)
+  otp                    String?
+  otpExpiry              DateTime?
+  isNewUser              Boolean      @default(true)
+  phone                  String?
+  orderNotifications     Boolean      @default(true)
+  marketingNotifications Boolean      @default(true)
+  authProvider           AuthProvider @default(EMAIL)
+  cart                   Cart?
+  orders                 Order[]
+  wishlist               Wishlist[]
+  addresses              Address[]
 
   @@map("user")
 }

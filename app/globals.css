@@ -201,4 +201,7 @@ body {
     top: -2px;
     right: -1.5px;
 }
- 
+
+:is(.toggle:checked, .toggle[aria-checked="true"]):before {
+    background-color: #000;
+}

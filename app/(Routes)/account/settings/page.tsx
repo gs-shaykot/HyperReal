@@ -1,17 +1,27 @@
-import React from 'react';
+import { AllSettings } from '@/app/(Routes)/account/settings/AllSettings';
+import { authOptions } from '@/lib/auth';
+import prisma from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
 
-const page = () => {
+const page = async () => {
+    const session = await getServerSession(authOptions);
+    const userNotifications = await prisma.user.findUnique({
+        where: {
+            id: session?.user.id,
+        },
+        select: {
+            marketingNotifications: true,
+            orderNotifications: true,
+        }
+    });
+    
+    if(!userNotifications) {
+        return redirect("/account/overview");
+    }
+
     return (
-        <section className='space-y-4 p-6 text-zinc-100'>
-            <div>
-                <h1 className='text-2xl font-bold'>Settings</h1>
-                <p className='mt-2 text-sm text-zinc-400'>Update your account preferences, security options, and notification settings.</p>
-            </div>
-
-            <div className='border border-zinc-800 bg-[#0f0f0f] p-4'>
-                <p className='text-zinc-300'>Settings controls can be added here when you are ready to wire up the forms.</p>
-            </div>
-        </section>
+        <AllSettings userNotifications={userNotifications} />
     );
 };
 
