@@ -1,5 +1,5 @@
 'use client';
-import { ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
+import { ActiveSession, ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
 import { ChangePassModal } from '@/app/(Routes)/account/settings/ChangePassModal';
 import { DeleteAccountModal } from '@/app/(Routes)/account/settings/DeleteAccountModal';
 import axios from 'axios';
@@ -10,7 +10,6 @@ import {
     Download,
     HelpCircle,
     LockKeyhole,
-    LogOut,
     Mail,
     MonitorSmartphone,
     PackageCheck,
@@ -18,7 +17,7 @@ import {
     Trash2,
     UserRound,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 
@@ -110,8 +109,30 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
         orderNotifications: orderNotifications ?? true,
         isSaving: false
     });
-    const [open, setOpen] = useState(false);
+    const [sessions, setSessions] = useState<ActiveSession[]>([]);
     const [activeModal, setActiveModal] = useState<ModalType>(null);
+
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchSessions = async () => {
+            try {
+                const res = await axios.get<{ sessions: ActiveSession[] }>('/api/account/sessions');
+                if (isMounted) {
+                    setSessions(res.data.sessions);
+                }
+            }
+            catch (error) {
+                console.error('Error fetching active sessions:', error);
+            }
+        };
+
+        fetchSessions();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
         setNotifications((prev) => ({
@@ -236,7 +257,11 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                     }
                     {
                         activeModal === 'active-sessions' && (
-                            <ActiveSessionsModal open={true} onCloseAction={() => setActiveModal(null)} />
+                            <ActiveSessionsModal
+                                open={true}
+                                onCloseAction={() => setActiveModal(null)}
+                                sessions={sessions}
+                            />
                         )
                     }
                     {

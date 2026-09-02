@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/auth";
+import { parseDevice } from "@/lib/auth/device";
 import { hashSessionId } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -57,17 +58,30 @@ export async function GET(req: Request) {
                 lastUsed: "desc",
             },
         });
-
+        console.log("GET /account/sessions sessions:", sessions);
         return NextResponse.json({
-            sessions: sessions.map((item) => ({
-                id: item.id,
-                userAgent: item.userAgent,
-                ipAddress: item.ipAddress,
-                createdAt: item.createdAt,
-                lastUsed: item.lastUsed,
-                expiresAt: item.expiresAt,
-                isCurrent: item.tokenHash === currentSessionHash,
-            })),
+            sessions: sessions.map((item) => {
+                const device = parseDevice(item.userAgent);
+
+                return {
+                    id: item.id,
+
+                    userAgent: item.userAgent,
+                    ipAddress: item.ipAddress,
+
+                    deviceType: device.deviceType,
+                    deviceName: device.deviceName,
+                    browser: device.browser,
+                    os: device.os,
+
+                    createdAt: item.createdAt,
+                    lastUsed: item.lastUsed,
+                    expiresAt: item.expiresAt,
+
+                    isCurrent:
+                        item.tokenHash === currentSessionHash,
+                };
+            }),
         });
     }
     catch (error) {
@@ -124,7 +138,7 @@ export async function POST(req: Request) {
                 }
             );
         }
- 
+
         if (currentSession.userId !== session.user.id) {
             return NextResponse.json(
                 {
@@ -135,7 +149,7 @@ export async function POST(req: Request) {
                     status: 403,
                 }
             );
-        } 
+        }
 
         await prisma.session.update({
             where: {
