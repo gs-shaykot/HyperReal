@@ -132,7 +132,6 @@ export const authOptions: AuthOptions = {
                     token.authProvider = dbUser.authProvider;
                 }
             }
-
             if (!token.sessionId && token.id) {
                 const { sessionId } = await createSessionRecord(token.id as string);
                 token.sessionId = sessionId;
@@ -152,7 +151,7 @@ export const authOptions: AuthOptions = {
                     return token;
                 }
 
-                if (Date.now() - sessionRecord.lastUsed.getTime() > 5 * 60 * 1000) {
+                if (Date.now() - sessionRecord.lastUsed.getTime() > 2 * 60 * 1000) {
                     await prisma.session.update({
                         where: {
                             id: sessionRecord.id,
@@ -175,11 +174,21 @@ export const authOptions: AuthOptions = {
                 session.user.createdAt = token.createdAt as Date;
                 session.user.authProvider = token.authProvider as string;
             }
-            // console.log("Session in callback: ", session, "Token: ", token);
 
             session.sessionId = token.sessionId as string;
 
             return session;
+        }
+    },
+    events: {
+        async signOut({ token }) {
+            if (token.sessionId) {
+                await prisma.session.deleteMany({
+                    where: {
+                        tokenHash: hashSessionId(token.sessionId)
+                    }
+                })
+            }
         }
     },
     pages: {

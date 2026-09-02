@@ -9,22 +9,15 @@ export async function GET(req: Request) {
         const session = await getServerSession(authOptions);
 
         if (!session?.user?.id || !session.sessionId) {
-            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-        }
+            return NextResponse.json(
+                { message: "Unauthorized" },
+                { status: 401 }
+            );
+        } 
 
-        const sessions = await prisma.session.findMany({
-            where: {
-                userId: session.user.id,
-                expiresAt: {
-                    gt: new Date(),
-                }
-            },
-            orderBy: {
-                lastUsed: 'desc',
-            }
-        });
-
-        const currentSessionHash = hashSessionId(session.sessionId);
+        const currentSessionHash = hashSessionId(
+            session.sessionId
+        ); 
 
         const userAgent = req.headers.get("user-agent");
 
@@ -33,12 +26,12 @@ export async function GET(req: Request) {
         const realIp = req.headers.get("x-real-ip");
 
         const ipAddress = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? null;
-
+ 
         const currentSession = await prisma.session.findUnique({
             where: {
                 tokenHash: currentSessionHash,
             },
-        });
+        }); 
 
         if (currentSession) {
             await prisma.session.update({
@@ -52,6 +45,19 @@ export async function GET(req: Request) {
                 },
             });
         }
+ 
+        const sessions = await prisma.session.findMany({
+            where: {
+                userId: session.user.id,
+                expiresAt: {
+                    gt: new Date(),
+                },
+            },
+            orderBy: {
+                lastUsed: "desc",
+            },
+        });
+ 
         return NextResponse.json({
             sessions: sessions.map((item) => ({
                 id: item.id,
@@ -59,8 +65,8 @@ export async function GET(req: Request) {
                 ipAddress: item.ipAddress,
                 createdAt: item.createdAt,
                 lastUsed: item.lastUsed,
-                isCurrent:
-                    item.tokenHash === currentSessionHash,
+                expiresAt: item.expiresAt,
+                isCurrent: item.tokenHash === currentSessionHash,
             })),
         });
     }
@@ -68,8 +74,12 @@ export async function GET(req: Request) {
         console.error("GET /account/sessions:", error);
 
         return NextResponse.json(
-            { message: "Failed to fetch sessions" },
-            { status: 500 }
+            {
+                message: "Failed to fetch sessions",
+            },
+            {
+                status: 500,
+            }
         );
     }
 }
