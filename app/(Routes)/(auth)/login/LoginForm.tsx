@@ -207,7 +207,7 @@ export default function LoginForm() {
                                 'INITIALIZE SESSION'
                             )}
                         </button>
-                        
+
                         <button type='button' className='btn w-full shadow-none border-second bg-transparent hover:bg-second hover:text-zinc-900'
                             onClick={() => {
                                 const callbackUrl = searchParams.get("callbackUrl") || "/";

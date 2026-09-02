@@ -13,11 +13,11 @@ export async function GET(req: Request) {
                 { message: "Unauthorized" },
                 { status: 401 }
             );
-        } 
+        }
 
         const currentSessionHash = hashSessionId(
             session.sessionId
-        ); 
+        );
 
         const userAgent = req.headers.get("user-agent");
 
@@ -26,12 +26,12 @@ export async function GET(req: Request) {
         const realIp = req.headers.get("x-real-ip");
 
         const ipAddress = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? null;
- 
+
         const currentSession = await prisma.session.findUnique({
             where: {
                 tokenHash: currentSessionHash,
             },
-        }); 
+        });
 
         if (currentSession) {
             await prisma.session.update({
@@ -45,7 +45,7 @@ export async function GET(req: Request) {
                 },
             });
         }
- 
+
         const sessions = await prisma.session.findMany({
             where: {
                 userId: session.user.id,
@@ -57,7 +57,7 @@ export async function GET(req: Request) {
                 lastUsed: "desc",
             },
         });
- 
+
         return NextResponse.json({
             sessions: sessions.map((item) => ({
                 id: item.id,
@@ -76,6 +76,93 @@ export async function GET(req: Request) {
         return NextResponse.json(
             {
                 message: "Failed to fetch sessions",
+            },
+            {
+                status: 500,
+            }
+        );
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user?.id || !session.sessionId) {
+            return NextResponse.json(
+                { message: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        const currentSessionHash = hashSessionId(
+            session.sessionId
+        );
+
+        const userAgent = req.headers.get("user-agent");
+
+        const forwardedFor = req.headers.get("x-forwarded-for");
+
+        const realIp = req.headers.get("x-real-ip");
+
+        const ipAddress = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? null;
+
+        const currentSession = await prisma.session.findUnique({
+            where: {
+                tokenHash: currentSessionHash,
+            },
+        });
+
+        if (!currentSession) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Session not found",
+                },
+                {
+                    status: 404,
+                }
+            );
+        }
+ 
+        if (currentSession.userId !== session.user.id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Forbidden",
+                },
+                {
+                    status: 403,
+                }
+            );
+        } 
+
+        await prisma.session.update({
+            where: {
+                id: currentSession.id,
+            },
+            data: {
+                userAgent,
+                ipAddress,
+                lastUsed: new Date(),
+            },
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: "Session information saved successfully.",
+        });
+
+    } catch (error) {
+        console.error(
+            "POST /account/sessions:",
+            error
+        );
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to save session information",
             },
             {
                 status: 500,

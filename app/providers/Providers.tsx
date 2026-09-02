@@ -1,4 +1,5 @@
 'use client';
+import SessionTracker from "@/app/components/SessionTracker";
 import ReduxProvider from "@/app/redux/provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
@@ -17,6 +18,7 @@ export default function Providers({ children }: { children: ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
+          <SessionTracker />
           <ReduxProvider>
             {children}
           </ReduxProvider>
