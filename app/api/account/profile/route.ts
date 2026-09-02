@@ -6,8 +6,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
-
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
 
@@ -34,7 +33,7 @@ export async function GET() {
 export async function PATCH(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: 'User not authenticated.' }, { status: 401 });
         }
 

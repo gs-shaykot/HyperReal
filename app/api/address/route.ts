@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
             }
         });
 
-        if(!result) {
+        if (!result) {
             return NextResponse.json({ message: "Error occurred while adding address." }, { status: 500 });
         }
 
@@ -40,7 +40,7 @@ export async function GET() {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -70,7 +70,7 @@ export async function DELETE(req: Request) {
         const { id } = await req.json();
         const session = await getServerSession(authOptions);
 
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -80,7 +80,7 @@ export async function DELETE(req: Request) {
                 userId: session.user.id,
             },
         });
-        
+
         if (result.count === 0) {
             return NextResponse.json(
                 {

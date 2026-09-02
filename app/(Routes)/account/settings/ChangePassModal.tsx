@@ -97,7 +97,7 @@ export const ChangePassModal = ({ open, onCloseAction }: ChangePassModalProps) =
 
         try {
             setIsSubmitting(true);
-            const res = await axios.post('/api/user/changePassword', {
+            const res = await axios.post('/api/account/changePassword', {
                 currentPassword,
                 newPassword,
             });

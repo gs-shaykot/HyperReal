@@ -3,6 +3,11 @@ import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import argon2 from 'argon2';
+import crypto from "crypto";
+import {
+    createSessionRecord,
+    hashSessionId,
+} from "@/lib/auth/session";
 
 type UserRole = "USER" | "ADMIN";
 
@@ -91,6 +96,8 @@ export const authOptions: AuthOptions = {
 
                 if (dbUser) {
                     token.id = dbUser.id;
+                    token.name = dbUser.name;
+                    token.email = dbUser.email;
                     token.role = dbUser.role;
                     token.picture =
                         dbUser.PhotoUrl ??
@@ -99,6 +106,11 @@ export const authOptions: AuthOptions = {
                     token.isNewUser = dbUser.isNewUser;
                     token.createdAt = dbUser.createdAt;
                     token.authProvider = dbUser.authProvider;
+
+                    if (!token.sessionId) {
+                        const { sessionId } = await createSessionRecord(dbUser.id);
+                        token.sessionId = sessionId;
+                    }
                 }
             }
 
@@ -121,6 +133,37 @@ export const authOptions: AuthOptions = {
                 }
             }
 
+            if (!token.sessionId && token.id) {
+                const { sessionId } = await createSessionRecord(token.id as string);
+                token.sessionId = sessionId;
+            }
+
+            if (token.sessionId) {
+                const sessionRecord = await prisma.session.findFirst({
+                    where: {
+                        tokenHash: hashSessionId(token.sessionId),
+                        expiresAt: {
+                            gt: new Date(),
+                        }
+                    }
+                });
+
+                if (!sessionRecord) {
+                    return token;
+                }
+
+                if (Date.now() - sessionRecord.lastUsed.getTime() > 5 * 60 * 1000) {
+                    await prisma.session.update({
+                        where: {
+                            id: sessionRecord.id,
+                        },
+                        data: {
+                            lastUsed: new Date(),
+                        },
+                    });
+                }
+            }
+
             return token;
         },
         async session({ session, token }: any) {
@@ -132,6 +175,10 @@ export const authOptions: AuthOptions = {
                 session.user.createdAt = token.createdAt as Date;
                 session.user.authProvider = token.authProvider as string;
             }
+            // console.log("Session in callback: ", session, "Token: ", token);
+
+            session.sessionId = token.sessionId as string;
+
             return session;
         }
     },

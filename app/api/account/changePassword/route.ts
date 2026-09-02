@@ -7,7 +7,7 @@ import argon2 from 'argon2';
 export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
         const { currentPassword, newPassword } = await request.json();

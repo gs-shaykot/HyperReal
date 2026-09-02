@@ -10,6 +10,7 @@ declare module "next-auth" {
             createdAt: string;
             authProvider: "GOOGLE" | "EMAIL";
         } & DefaultSession["user"];
+        sessionId: string;
     }
 
     interface User {
@@ -27,5 +28,6 @@ declare module "next-auth/jwt" {
         isNewUser: boolean;
         createdAt: Date;
         authProvider: "GOOGLE" | "EMAIL";
+        sessionId: string;
     }
 }

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -125,7 +125,7 @@ export async function GET() {
 export async function DELETE(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -168,7 +168,7 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 

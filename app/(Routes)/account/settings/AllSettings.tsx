@@ -123,7 +123,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
     const handleNotificationChange = async () => {
         try {
             setNotifications((prev) => ({ ...prev, isSaving: true }));
-            const res = await axios.post('/api/user/setting', {
+            const res = await axios.post('/api/account/setting', {
                 marketingEmails: notifications.marketingEmails,
                 orderNotifications: notifications.orderNotifications,
             });

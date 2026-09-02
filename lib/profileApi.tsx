@@ -5,7 +5,7 @@ export const ProfileEdit = async ({ email, name, phone, otp }: { id?: string; em
         if (!email || !name || !phone) {
             throw new Error('Name, email and phone are required.');
         }
-        const res = await axios.patch('/api/user/profile', { email, name, phone, otp });
+        const res = await axios.patch('/api/account/profile', { email, name, phone, otp });
         return res.data;
     }
     catch (error: unknown) {
@@ -13,6 +13,6 @@ export const ProfileEdit = async ({ email, name, phone, otp }: { id?: string; em
     }
 }
 export const getProfile = async () => {
-    const res = await axios.get("/api/user/profile");
+    const res = await axios.get("/api/account/profile");
     return res.data.profile;
 };

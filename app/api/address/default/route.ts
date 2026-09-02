@@ -8,7 +8,7 @@ export async function PATCH(req: Request) {
         const { id } = await req.json();
         const session = await getServerSession(authOptions);
 
-        if (!session?.user.id) {
+        if (!session?.user.id || !session.sessionId) {
             return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         }
 
@@ -23,7 +23,7 @@ export async function PATCH(req: Request) {
                 }
             });
 
-            if(!address) {
+            if (!address) {
                 return { count: 0 };
             }
 
