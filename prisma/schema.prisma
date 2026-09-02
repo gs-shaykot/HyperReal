@@ -26,8 +26,25 @@ model User {
   orders                 Order[]
   wishlist               Wishlist[]
   addresses              Address[]
+  sessions               Session[]
 
   @@map("user")
+}
+
+model Session {
+  id        String @id @default(uuid())
+  userId    String
+  tokenHash String @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+  lastUsed  DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
 }
 
 model Address {
