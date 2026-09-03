@@ -41,7 +41,7 @@ export default function SessionTracker() {
             try {
                 const result = await update();
 
-                if (!result) {
+                if (!result?.sessionRevoked) {
                     await signOut({
                         callbackUrl: "/login",
                     });

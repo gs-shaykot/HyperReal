@@ -182,6 +182,7 @@ export const authOptions: AuthOptions = {
             }
 
             session.sessionId = token.sessionId as string;
+            session.sessionRevoked = Boolean(token.sessionRevoked);
 
             return session;
         }
