@@ -83,11 +83,10 @@ export default function LoginForm() {
 
     useEffect(() => {
         if (state.success) {
-            setTimeout(() => {
-                const callbackUrl = searchParams.get('callbackUrl') || '/';
+            const callbackUrl = searchParams.get('callbackUrl') || '/';
 
-                router.push(callbackUrl);
-            }, 1000);
+            router.push(callbackUrl);
+            router.refresh();
         }
     }, [state.success, router, searchParams]);
 

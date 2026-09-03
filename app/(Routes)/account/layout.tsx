@@ -1,19 +1,17 @@
 import { AccountHeader } from '@/app/(Routes)/account/AccountHeader';
 import { AccountSidebar } from '@/app/(Routes)/account/AccountSidebar'
 import { authOptions } from '@/lib/auth';
+import { requireSession } from '@/lib/auth/requireSession';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
 import React from 'react'
 
 const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
 
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-        redirect('/login');
-    }
+    const sessions = await getServerSession(authOptions);
+    const session = await requireSession("/account");
 
-    const { id, name, email } = session?.user || {};
+    const { id, name, email } = sessions?.user || {};
 
     const [orderCount, TotalPayment] = await prisma.$transaction([
         prisma.order.count({
