@@ -87,7 +87,6 @@ export const authOptions: AuthOptions = {
             return true;
         },
         async jwt({ token, user, trigger }) {
-            const hashedToken = await hashSessionId(token.sessionId || "");
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {
@@ -139,6 +138,8 @@ export const authOptions: AuthOptions = {
             }
 
             if (token.sessionId) {
+                const hashedToken = await hashSessionId(token.sessionId);
+
                 const sessionRecord = await prisma.session.findFirst({
                     where: {
                         tokenHash: hashedToken,
@@ -189,15 +190,18 @@ export const authOptions: AuthOptions = {
     },
     events: {
         async signOut({ token }) {
-            const hashedToken = await hashSessionId(token.sessionId || "");
-            if (token.sessionId) {
-                await prisma.session.deleteMany({
-                    where: {
-                        tokenHash: hashedToken,
-                    }
-                })
+            if (!token.sessionId) {
+                return;
             }
-        }
+
+            const hashedToken = await hashSessionId(token.sessionId);
+
+            await prisma.session.deleteMany({
+                where: {
+                    tokenHash: hashedToken,
+                },
+            });
+        },
     },
     pages: {
         signIn: "/login",
