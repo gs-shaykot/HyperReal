@@ -155,6 +155,8 @@ export const authOptions: AuthOptions = {
                     return token;
                 }
 
+                token.sessionRevoked = false;
+
                 if (Date.now() - sessionRecord.lastUsed.getTime() > 2 * 60 * 1000) {
                     await prisma.session.update({
                         where: {
@@ -169,7 +171,7 @@ export const authOptions: AuthOptions = {
 
             return token;
         },
-        async session({ session, token }: any) {  
+        async session({ session, token }: any) {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
