@@ -1,5 +1,5 @@
 import { authOptions } from "@/lib/auth";
-import { hashSessionId } from "@/lib/auth/session";
+import { hashSessionId } from "@/lib/auth/hashSessionId";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -11,7 +11,7 @@ export async function DELETE(_request: Request, { params, }: { params: Promise<{
         if (!session?.user?.id || !session.sessionId) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
-        const currentSessionHash = hashSessionId(session.sessionId);
+        const currentSessionHash = await hashSessionId(session.sessionId);
 
         const { sessionId } = await params;
 

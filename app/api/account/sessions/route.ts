@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { parseDevice } from "@/lib/auth/device";
-import { hashSessionId } from "@/lib/auth/session";
+import { hashSessionId } from "@/lib/auth/hashSessionId";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -16,9 +16,7 @@ export async function GET(req: Request) {
             );
         }
 
-        const currentSessionHash = hashSessionId(
-            session.sessionId
-        );
+        const currentSessionHash = await hashSessionId(session.sessionId);
 
         const userAgent = req.headers.get("user-agent");
 
@@ -109,9 +107,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const currentSessionHash = hashSessionId(
-            session.sessionId
-        );
+        const currentSessionHash = await hashSessionId(session.sessionId);
 
         const userAgent = req.headers.get("user-agent");
 

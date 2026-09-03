@@ -1,6 +1,5 @@
 import { AllSettings } from '@/app/(Routes)/account/settings/AllSettings';
 import { authOptions } from '@/lib/auth';
-import { hashSessionId } from '@/lib/auth/session';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';

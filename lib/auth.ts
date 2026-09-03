@@ -6,8 +6,8 @@ import argon2 from 'argon2';
 import crypto from "crypto";
 import {
     createSessionRecord,
-    hashSessionId,
 } from "@/lib/auth/session";
+import { hashSessionId } from "@/lib/auth/hashSessionId";
 
 type UserRole = "USER" | "ADMIN";
 
@@ -87,6 +87,7 @@ export const authOptions: AuthOptions = {
             return true;
         },
         async jwt({ token, user, trigger }) {
+            const hashedToken = await hashSessionId(token.sessionId || "");
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {
@@ -140,7 +141,7 @@ export const authOptions: AuthOptions = {
             if (token.sessionId) {
                 const sessionRecord = await prisma.session.findFirst({
                     where: {
-                        tokenHash: hashSessionId(token.sessionId),
+                        tokenHash: hashedToken,
                         expiresAt: {
                             gt: new Date(),
                         },
@@ -171,7 +172,7 @@ export const authOptions: AuthOptions = {
             if (token.sessionRevoked) {
                 return null;
             }
-            
+
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
@@ -188,10 +189,11 @@ export const authOptions: AuthOptions = {
     },
     events: {
         async signOut({ token }) {
+            const hashedToken = await hashSessionId(token.sessionId || "");
             if (token.sessionId) {
                 await prisma.session.deleteMany({
                     where: {
-                        tokenHash: hashSessionId(token.sessionId)
+                        tokenHash: hashedToken,
                     }
                 })
             }
