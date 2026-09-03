@@ -169,11 +169,7 @@ export const authOptions: AuthOptions = {
 
             return token;
         },
-        async session({ session, token }: any) {
-            if (token.sessionRevoked) {
-                return null;
-            }
-
+        async session({ session, token }: any) {  
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
