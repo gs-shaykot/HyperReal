@@ -29,7 +29,7 @@ export async function DELETE(_request: Request, { params, }: { params: Promise<{
         if (targetSession.tokenHash === currentSessionHash) {
             return NextResponse.json({ success: false, message: "You cannot remove your current session.", }, { status: 400 });
         }
-
+ 
         await prisma.session.delete({
             where: {
                 id: targetSession.id,
