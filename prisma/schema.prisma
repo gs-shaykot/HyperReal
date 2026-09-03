@@ -43,6 +43,7 @@ model Session {
   createdAt DateTime @default(now())
   lastUsed  DateTime @default(now())
   expiresAt DateTime
+  sessionRevoked Boolean @default(false)
 
   @@index([userId])
 }
