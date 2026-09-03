@@ -11,6 +11,7 @@ declare module "next-auth" {
             authProvider: "GOOGLE" | "EMAIL";
         } & DefaultSession["user"];
         sessionId: string;
+        sessionRevoked?: boolean;
     }
 
     interface User {
@@ -29,5 +30,6 @@ declare module "next-auth/jwt" {
         createdAt: Date;
         authProvider: "GOOGLE" | "EMAIL";
         sessionId: string;
+        sessionRevoked?: boolean;
     }
 }

@@ -1,3 +1,5 @@
+import { hashSessionId } from "@/lib/auth/session";
+import prisma from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,7 +9,28 @@ export async function middleware(request: NextRequest) {
         secret: process.env.AUTH_SECRET,
     });
 
-    if (token) {
+    if (token?.sessionId) {
+        const sessionRecord = await prisma.session.findFirst({
+            where: {
+                tokenHash: hashSessionId(token.sessionId),
+                expiresAt: {
+                    gt: new Date(),
+                },
+                sessionRevoked: false,
+            },
+        });
+
+        if (!sessionRecord) {
+            const response = NextResponse.redirect(
+                new URL("/login", request.url)
+            );
+
+            response.cookies.delete("next-auth.session-token");
+            response.cookies.delete("__Secure-next-auth.session-token");
+
+            return response;
+        }
+
         return NextResponse.next();
     }
 
@@ -15,7 +38,7 @@ export async function middleware(request: NextRequest) {
     loginUrl.searchParams.set(
         "callbackUrl",
         `${request.nextUrl.pathname}${request.nextUrl.search}`,
-    ); 
+    );
 
     return NextResponse.redirect(loginUrl);
 }
@@ -27,6 +50,6 @@ export const config = {
         "/checkout/:path*",
         "/success/:path*",
         "/failed/:path*",
-        "/cancel/:path*", 
+        "/cancel/:path*",
     ],
 };

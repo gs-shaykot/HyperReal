@@ -20,18 +20,22 @@ export async function DELETE() {
             .update(session.sessionId)
             .digest("hex");
 
-        const result = await prisma.session.deleteMany({
+        const result = await prisma.session.updateMany({
             where: {
                 userId: session.user.id,
                 tokenHash: {
                     not: currentSessionHash,
                 },
+                sessionRevoked: false,
+            },
+            data: {
+                sessionRevoked: true,
             },
         });
 
         return NextResponse.json({
             success: true,
-            deletedCount: result.count,
+            revokedCount: result.count,
         });
     } catch (error) {
         console.error(

@@ -143,11 +143,13 @@ export const authOptions: AuthOptions = {
                         tokenHash: hashSessionId(token.sessionId),
                         expiresAt: {
                             gt: new Date(),
-                        }
+                        },
+                        sessionRevoked: false,
                     }
                 });
 
                 if (!sessionRecord) {
+                    token.sessionRevoked = true;
                     return token;
                 }
 
@@ -166,6 +168,10 @@ export const authOptions: AuthOptions = {
             return token;
         },
         async session({ session, token }: any) {
+            if (token.sessionRevoked) {
+                return null;
+            }
+            
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
