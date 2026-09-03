@@ -1,20 +1,22 @@
-import { hashSessionId } from "@/lib/auth/hashSessionId";
+import { hashSessionId } from "@/lib/auth/session";
 import prisma from "@/lib/prisma";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const token = await getToken({
         req: request,
         secret: process.env.AUTH_SECRET,
     });
 
-    const hashedToken = await hashSessionId(token?.sessionId || "");
-
     if (token?.sessionId) {
+        const currentSessionHash = hashSessionId(
+            token.sessionId
+        );
+
         const sessionRecord = await prisma.session.findFirst({
             where: {
-                tokenHash: hashedToken,
+                tokenHash: currentSessionHash,
                 expiresAt: {
                     gt: new Date(),
                 },
@@ -27,8 +29,13 @@ export async function middleware(request: NextRequest) {
                 new URL("/login", request.url)
             );
 
-            response.cookies.delete("next-auth.session-token");
-            response.cookies.delete("__Secure-next-auth.session-token");
+            response.cookies.delete(
+                "next-auth.session-token"
+            );
+
+            response.cookies.delete(
+                "__Secure-next-auth.session-token"
+            );
 
             return response;
         }
@@ -37,9 +44,10 @@ export async function middleware(request: NextRequest) {
     }
 
     const loginUrl = new URL("/login", request.url);
+
     loginUrl.searchParams.set(
         "callbackUrl",
-        `${request.nextUrl.pathname}${request.nextUrl.search}`,
+        `${request.nextUrl.pathname}${request.nextUrl.search}`
     );
 
     return NextResponse.redirect(loginUrl);

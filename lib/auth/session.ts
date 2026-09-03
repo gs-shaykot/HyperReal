@@ -2,7 +2,10 @@ import crypto from "crypto";
 import prisma from "@/lib/prisma";
 
 export function hashSessionId(sessionId: string) {
-    return crypto.createHash("sha256").update(sessionId).digest("hex");
+    return crypto
+        .createHash("sha256")
+        .update(sessionId)
+        .digest("hex");
 }
 
 export async function createSessionRecord(userId: string) {
