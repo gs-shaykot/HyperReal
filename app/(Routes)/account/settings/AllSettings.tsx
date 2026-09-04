@@ -2,6 +2,8 @@
 import { ActiveSession, ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
 import { ChangePassModal } from '@/app/(Routes)/account/settings/ChangePassModal';
 import { DeleteAccountModal } from '@/app/(Routes)/account/settings/DeleteAccountModal';
+import { getSessions } from '@/lib/signoutSession';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import {
     ArrowRight,
@@ -109,30 +111,13 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
         orderNotifications: orderNotifications ?? true,
         isSaving: false
     });
-    const [sessions, setSessions] = useState<ActiveSession[]>([]);
     const [activeModal, setActiveModal] = useState<ModalType>(null);
 
-    useEffect(() => {
-        let isMounted = true;
+    const { data: sessions, isLoading: sessionsLoading } = useQuery({
+        queryKey: ['sessions'],
+        queryFn: getSessions
+    })
 
-        const fetchSessions = async () => {
-            try {
-                const res = await axios.get<{ sessions: ActiveSession[] }>('/api/account/sessions');
-                if (isMounted) {
-                    setSessions(res.data.sessions);
-                }
-            }
-            catch (error) {
-                console.error('Error fetching active sessions:', error);
-            }
-        };
-
-        fetchSessions();
-
-        return () => {
-            isMounted = false;
-        };
-    }, []);
 
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
         setNotifications((prev) => ({
