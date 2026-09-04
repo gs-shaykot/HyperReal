@@ -2,6 +2,7 @@
 import { ActiveSession, ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
 import { ChangePassModal } from '@/app/(Routes)/account/settings/ChangePassModal';
 import { DeleteAccountModal } from '@/app/(Routes)/account/settings/DeleteAccountModal';
+import { useSessionQuery } from '@/app/Hooks/useSessionQuery';
 import { getSessions } from '@/lib/signoutSession';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -114,9 +115,10 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
     const [activeModal, setActiveModal] = useState<ModalType>(null);
 
     const { data: sessions, isLoading: sessionsLoading } = useQuery({
-        queryKey: ['sessions'],
-        queryFn: getSessions
-    })
+        queryKey: ["sessions"],
+        queryFn: getSessions,
+    });
+    const signoutMutation = useSessionQuery();
 
 
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
@@ -234,7 +236,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                             </div>
                         </div>
                     ))}
-                    {/* type ModalType = | 'change-password' | 'active-sessions' | 'sign-out-sessions' | 'delete-account' | 'account-data' | null; */}
+
                     {
                         activeModal === 'change-password' && (
                             <ChangePassModal open={true} onCloseAction={() => setActiveModal(null)} />
@@ -246,6 +248,8 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                                 open={true}
                                 onCloseAction={() => setActiveModal(null)}
                                 sessions={sessions}
+                                onSignoutSession={(sessionId) => signoutMutation.mutate({ type: "single", sessionId })}
+                                onSignoutAllSessions={() => signoutMutation.mutate({ type: "all" })}
                             />
                         )
                     }

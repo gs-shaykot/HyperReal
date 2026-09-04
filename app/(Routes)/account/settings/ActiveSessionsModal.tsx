@@ -16,6 +16,8 @@ type ActiveSessionsModalProps = {
     open: boolean;
     onCloseAction: () => void;
     sessions: ActiveSession[];
+    onSignoutSession: (sessionId: string) => void;
+    onSignoutAllSessions: () => void;
 };
 
 export type ActiveSession = {
@@ -134,6 +136,8 @@ export const ActiveSessionsModal = ({
     open,
     onCloseAction,
     sessions,
+    onSignoutSession,
+    onSignoutAllSessions,
 }: ActiveSessionsModalProps) => {
 
     const handleSignout = async (sessionId: string | null, signoutType: 'single' | 'all') => {
