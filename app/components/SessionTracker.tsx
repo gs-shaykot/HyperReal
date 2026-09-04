@@ -1,10 +1,11 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { signOut, useSession } from "next-auth/react";
+import { useEffect, useRef } from "react";
 
+// okay implement the React Query
 export default function SessionTracker() {
     const { status, update } = useSession();
+    const queryClient = useQueryClient();
 
     const hasTracked = useRef(false);
 
@@ -22,13 +23,12 @@ export default function SessionTracker() {
         fetch("/api/account/sessions", {
             method: "POST",
             credentials: "include",
-        })
-            .catch((error) => {
-                console.error(
-                    "Failed to save session information:",
-                    error
-                );
-            });
+        }).catch((error) => {
+            console.error(
+                "Failed to save session information:",
+                error
+            );
+        });
     }, [status]);
 
     // Check whether the current session is still valid
@@ -45,7 +45,14 @@ export default function SessionTracker() {
                     await signOut({
                         callbackUrl: "/login",
                     });
+
+                    return;
                 }
+
+                // Refresh the active sessions query
+                queryClient.invalidateQueries({
+                    queryKey: ["sessions"],
+                });
             } catch (error) {
                 console.error(
                     "Failed to validate session:",
@@ -60,7 +67,7 @@ export default function SessionTracker() {
         );
 
         return () => clearInterval(interval);
-    }, [status, update]);
+    }, [status, update, queryClient]);
 
     return null;
 }

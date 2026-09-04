@@ -307,10 +307,7 @@ export const ActiveSessionsModal = ({
                         )}
 
 
-                    {/* ================================================= */}
-                    {/* SECURITY INFORMATION */}
-                    {/* ================================================= */}
-
+                    {/* Security warning + session refresh information */}
                     <div
                         className="mt-7 flex gap-4 rounded-lg border border-zinc-800 bg-zinc-900/30 px-5 py-5 light:border-zinc-200 light:bg-zinc-50"
                     >
@@ -324,17 +321,18 @@ export const ActiveSessionsModal = ({
                         </div>
 
                         <div>
-                            <p
-                                className="text-sm font-medium text-second"
-                            >
+                            <p className="text-sm font-medium text-second">
                                 Don't recognize a device?
                             </p>
 
-                            <p
-                                className="mt-1.5 text-sm leading-6 text-zinc-400 light:text-zinc-500"
-                            >
-                                We recommend signing out of all other
-                                sessions and changing your password.
+                            <p className="mt-1.5 text-sm leading-6 text-zinc-400 light:text-zinc-500">
+                                We recommend signing out of all other sessions and
+                                changing your password.
+                            </p>
+
+                            <p className="mt-2 text-xs leading-5 text-zinc-500 light:text-zinc-400">
+                                New sessions may take up to 10 seconds to appear in this
+                                list.
                             </p>
                         </div>
                     </div>
