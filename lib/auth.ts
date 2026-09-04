@@ -195,9 +195,12 @@ export const authOptions: AuthOptions = {
 
             const hashedToken = await hashSessionId(token.sessionId);
 
-            await prisma.session.deleteMany({
+            await prisma.session.update({
                 where: {
                     tokenHash: hashedToken,
+                },
+                data: {
+                    sessionRevoked: true,
                 },
             });
         },
