@@ -35,6 +35,7 @@ export async function DELETE() {
 
         return NextResponse.json({
             success: true,
+            message: "Successfully logged out of other sessions",
             revokedCount: result.count,
         });
     } catch (error) {

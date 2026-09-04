@@ -136,9 +136,15 @@ export const ActiveSessionsModal = ({
     sessions,
 }: ActiveSessionsModalProps) => {
 
-    const handleSignout = async (sessionId: string, signoutType: 'single' | 'all') => {
+    const handleSignout = async (sessionId: string | null, signoutType: 'single' | 'all') => {
         if (signoutType === 'single') {
             const res = await axios.delete(`/api/account/sessions/${sessionId}`);
+            if (res?.data.success) {
+                toast.success(res.data.message);
+            }
+        }
+        if (signoutType === 'all') {
+            const res = await axios.delete(`/api/account/sessions/others`);
             if (res?.data.success) {
                 toast.success(res.data.message);
             }
@@ -226,9 +232,7 @@ export const ActiveSessionsModal = ({
                                             •
                                         </span>
 
-                                        {getLocation(
-                                            session
-                                        )}
+                                        {getLocation(session)}
                                     </p>
 
 
@@ -284,8 +288,9 @@ export const ActiveSessionsModal = ({
                         (session) => !session.isCurrent
                     ) && (
                             <button
+                                onClick={() => handleSignout(null, 'all')}
                                 type="button"
-                                className="mt-5 flex w-full items-center justify-center gap-3 rounded-none border border-zinc-500 bg-transparent px-5 py-4 text-base font-semibold tracking-wide text-white transition hover:bg-zinc-800 light:border-zinc-400 light:text-zinc-900 light:hover:bg-zinc-100"
+                                className="cursor-pointer mt-5 flex w-full items-center justify-center gap-3 rounded-none border border-zinc-500 bg-transparent px-5 py-4 text-base font-semibold tracking-wide text-white transition hover:bg-zinc-800 light:border-zinc-400 light:text-zinc-900 light:hover:bg-zinc-100"
                             >
                                 <LogOut
                                     size={22}
