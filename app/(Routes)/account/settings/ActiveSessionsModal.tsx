@@ -22,6 +22,9 @@ export type ActiveSession = {
     id: string;
     userAgent: string | null;
     ipAddress: string | null;
+    country: string | null;
+    region: string | null;
+    city: string | null;
     deviceType: string;
     deviceName: string;
     browser: string;
@@ -111,24 +114,20 @@ const formatLastActive = (
     );
 };
 
-
-// ============================================================
-// LOCATION
-// ============================================================
-//
-// For now your API gives us IP address.
-// Once you implement IP geolocation, replace this function
-// with the returned city/country value.
-// ============================================================
-
 const getLocation = (
-    ipAddress: string | null
+    session: ActiveSession
 ) => {
-    if (!ipAddress) {
+    const parts = [
+        session.city,
+        session.region,
+        session.country,
+    ].filter(Boolean);
+
+    if (parts.length === 0) {
         return "Location unavailable";
     }
 
-    return ipAddress;
+    return parts.join(", ");
 };
 
 export const ActiveSessionsModal = ({
@@ -145,6 +144,8 @@ export const ActiveSessionsModal = ({
             }
         }
     }
+
+    console.log("ActiveSessionsModal sessions:", sessions);
 
     if (!open) return null;
     return (
@@ -226,7 +227,7 @@ export const ActiveSessionsModal = ({
                                         </span>
 
                                         {getLocation(
-                                            session.ipAddress
+                                            session
                                         )}
                                     </p>
 

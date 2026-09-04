@@ -37,6 +37,10 @@ model Session {
   tokenHash String @unique
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  country String?
+  region  String?
+  city    String?
 
   userAgent String?
   ipAddress String?

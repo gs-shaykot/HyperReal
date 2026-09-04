@@ -1,6 +1,7 @@
 import { authOptions } from "@/lib/auth";
 import { parseDevice } from "@/lib/auth/device";
 import { hashSessionId } from "@/lib/auth/hashSessionId";
+import { getIpLocation } from "@/lib/auth/geolocation";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -56,7 +57,7 @@ export async function GET(req: Request) {
                 lastUsed: "desc",
             },
         });
-        console.log("GET /account/sessions sessions:", sessions);
+
         return NextResponse.json({
             sessions: sessions.map((item) => {
                 const device = parseDevice(item.userAgent);
@@ -67,6 +68,10 @@ export async function GET(req: Request) {
                     userAgent: item.userAgent,
                     ipAddress: item.ipAddress,
 
+                    country: item.country,
+                    region: item.region,
+                    city: item.city,
+
                     deviceType: device.deviceType,
                     deviceName: device.deviceName,
                     browser: device.browser,
@@ -75,6 +80,7 @@ export async function GET(req: Request) {
                     createdAt: item.createdAt,
                     lastUsed: item.lastUsed,
                     expiresAt: item.expiresAt,
+
 
                     isCurrent:
                         item.tokenHash === currentSessionHash,
@@ -116,7 +122,9 @@ export async function POST(req: Request) {
         const realIp = req.headers.get("x-real-ip");
 
         const ipAddress = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? null;
-
+        const location = await getIpLocation("104.28.208.85");
+        console.log("IP location:", location);
+        
         const currentSession = await prisma.session.findUnique({
             where: {
                 tokenHash: currentSessionHash,
@@ -155,6 +163,9 @@ export async function POST(req: Request) {
                 userAgent,
                 ipAddress,
                 lastUsed: new Date(),
+                country: location.country,
+                region: location.region,
+                city: location.city,
             },
         });
 
