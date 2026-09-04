@@ -155,7 +155,6 @@ export const ActiveSessionsModal = ({
         }
     }
 
-    console.log("ActiveSessionsModal sessions:", sessions);
 
     if (!open) return null;
     return (
@@ -265,7 +264,7 @@ export const ActiveSessionsModal = ({
                                             CURRENT
                                         </span>
                                     ) : (
-                                        <button onClick={() => handleSignout(session.id, 'single')} type="button" className="cursor-pointer group/logout flex items-center gap-2 text-sm font-semibold text-red-400 transition hover:text-red-300" >
+                                        <button onClick={() => onSignoutSession(session.id)} type="button" className="cursor-pointer group/logout flex items-center gap-2 text-sm font-semibold text-red-400 transition hover:text-red-300" >
                                             <span>
                                                 SIGN OUT
                                             </span>
@@ -292,7 +291,7 @@ export const ActiveSessionsModal = ({
                         (session) => !session.isCurrent
                     ) && (
                             <button
-                                onClick={() => handleSignout(null, 'all')}
+                                onClick={() => onSignoutAllSessions()}
                                 type="button"
                                 className="cursor-pointer mt-5 flex w-full items-center justify-center gap-3 rounded-none border border-zinc-500 bg-transparent px-5 py-4 text-base font-semibold tracking-wide text-white transition hover:bg-zinc-800 light:border-zinc-400 light:text-zinc-900 light:hover:bg-zinc-100"
                             >

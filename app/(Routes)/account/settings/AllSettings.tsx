@@ -1,5 +1,5 @@
 'use client';
-import { ActiveSession, ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
+import { ActiveSessionsModal } from '@/app/(Routes)/account/settings/ActiveSessionsModal';
 import { ChangePassModal } from '@/app/(Routes)/account/settings/ChangePassModal';
 import { DeleteAccountModal } from '@/app/(Routes)/account/settings/DeleteAccountModal';
 import { useSessionQuery } from '@/app/Hooks/useSessionQuery';
@@ -120,6 +120,9 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
     });
     const signoutMutation = useSessionQuery();
 
+    useEffect(() => {
+        console.log("ActiveSessions sessions:", sessions);
+    }, [sessions, sessionsLoading]);
 
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
         setNotifications((prev) => ({
