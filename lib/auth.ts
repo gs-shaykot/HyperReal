@@ -195,7 +195,7 @@ export const authOptions: AuthOptions = {
 
             const hashedToken = await hashSessionId(token.sessionId);
 
-            await prisma.session.update({
+            await prisma.session.updateMany({
                 where: {
                     tokenHash: hashedToken,
                 },

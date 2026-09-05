@@ -9,7 +9,6 @@ export default function SessionTracker() {
 
     const hasTracked = useRef(false);
 
-    // Save session information once
     useEffect(() => {
         if (
             status !== "authenticated" ||
@@ -31,7 +30,6 @@ export default function SessionTracker() {
         });
     }, [status]);
 
-    // Check whether the current session is still valid
     useEffect(() => {
         if (status !== "authenticated") {
             return;
@@ -49,7 +47,6 @@ export default function SessionTracker() {
                     return;
                 }
 
-                // Refresh the active sessions query
                 queryClient.invalidateQueries({
                     queryKey: ["sessions"],
                 });

@@ -10,6 +10,7 @@ import {
     Trash,
     X,
 } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 type DeleteAccountModalType = {
     open: boolean;
@@ -26,8 +27,10 @@ export const DeleteAccountModal = ({
         try {
             const res = await axios.delete("/api/account/delete");
             // yet not implemented.
-            if (res.status === 200) { 
-                window.location.href = "/";
+            if (res.status === 200) {
+                await signOut({
+                    callbackUrl: "/login",
+                })
             }
         }
         catch (error) {

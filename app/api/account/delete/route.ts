@@ -14,15 +14,7 @@ export async function DELETE(req: Request) {
                 id: session.user.id,
             },
         });
-        
-        const sessionDelete = await prisma.session.updateMany({
-            where: {
-                userId: session.user.id,
-            },
-            data: {
-                sessionRevoked: true,
-            }
-        });
+         
 
         return NextResponse.json({ success: true, message: "Account deleted successfully" }, { status: 200 });
     }

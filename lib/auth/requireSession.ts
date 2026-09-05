@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 export async function requireSession(callbackUrl?: string) {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) {
+    if (!session?.user?.id || session.sessionRevoked) {
         const loginUrl = callbackUrl
             ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
             : "/login";
