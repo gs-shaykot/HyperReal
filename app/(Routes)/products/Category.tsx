@@ -1,14 +1,30 @@
+'use client';
 import { ProductLayoutProps } from '@/app/types/Category';
 import { ChevronDown, Funnel, Search } from 'lucide-react'
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type CategoryProps = ProductLayoutProps & {
     categoryId?: string | null;
 };
 
 export const Category = ({ categories, categoryId }: CategoryProps) => {
-    const activeCategoryClass = (isActive: boolean) => `
-        transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const updateFilter = (key: string, value: string | null) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (!value) {
+            params.delete(key);
+        } else {
+            params.set(key, value);
+        }
+
+        router.push(`/products?${params.toString()}`);
+    };
+
+    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
 
     return (
         <div className="space-y-3">
@@ -34,17 +50,19 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                 </summary>
                 <ul className="mt-3 space-y-2">
                     <li>
-                        <Link href="/products" className={`${activeCategoryClass(categoryId === null)} text-xs text-zinc-300 hover:text-second`}>
+                        <button onClick={() => updateFilter('category', null)} className={`${activeCategoryClass(categoryId === null)} text-xs text-zinc-300 hover:text-second`}>
                             All
-                        </Link>
+                        </button>
                     </li>
                     {categories.map((category) => {
                         const isActive = categoryId === category.id;
                         return (
                             <li key={category.id}>
-                                <Link href={`/products?category=${category.id}`} className={`${activeCategoryClass(isActive)} text-xs text-zinc-300 hover:text-second`}>
+                                <button
+                                    onClick={() => updateFilter('category', category.id)}
+                                    className={`${activeCategoryClass(isActive)} text-xs text-zinc-300 hover:text-second`}>
                                     {category.name}
-                                </Link>
+                                </button>
                             </li>
                         );
                     })}
