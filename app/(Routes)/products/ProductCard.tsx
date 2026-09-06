@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 export const ProductCard = ({ products }: ProductProps) => {
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {products?.map((product, index) => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                     <motion.div
@@ -25,11 +25,11 @@ export const ProductCard = ({ products }: ProductProps) => {
                             y: -6,
                             boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                             borderColor: "#8fb300",
-                        }} 
-                        className={`bg-zinc-900 border-transparent light:bg-white light:border-zinc-200 light:shadow-xs border-2 overflow-hidden cursor-pointer group`}
+                        }}
+                        className="overflow-hidden border border-zinc-800 bg-zinc-950 cursor-pointer group"
                     >
                         {/* IMAGE */}
-                        <div className="relative z-10 h-80 w-full overflow-hidden">
+                        <div className="relative z-10 aspect-square w-full overflow-hidden bg-black">
                             <motion.div
                                 whileHover={{ scale: 1.09 }}
                                 transition={{ duration: 0.2, ease: "easeOut" }}
@@ -42,7 +42,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                                     }
                                     alt={product.name}
                                     fill
-                                    className="object-cover"
+                                    className="object-contain"
                                     sizes="(max-width: 768px) 100vw, 33vw"
                                 />
                             </motion.div>
@@ -52,26 +52,26 @@ export const ProductCard = ({ products }: ProductProps) => {
                         </div>
 
                         {/* CONTENT */}
-                        <div className="px-3 py-2 text-sm">
-                            <div className="flex justify-between items-center"> 
+                        <div className="bg-zinc-900 px-3 py-2 text-sm light:bg-white">
+                            <div className="flex justify-between items-center">
                                 <h3
-                                    className={`font-semibold `}
+                                    className="truncate text-xs font-bold uppercase"
                                 >
                                     {product.name}
                                 </h3>
 
                                 <div className="flex items-center gap-1">
-                                    <h3 className="text-second font-bold">
+                                    <h3 className="text-xs font-bold text-second">
                                         &#36;{product.price}
                                     </h3>
                                     <ArrowUpRight
                                         className="text-zinc-400 group-hover:text-second"
-                                        size={18}
+                                        size={14}
                                     />
                                 </div>
                             </div>
 
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-[10px] uppercase text-gray-500">
                                 {product.category.name}
                             </p>
                         </div>
