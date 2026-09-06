@@ -1,9 +1,24 @@
+'use client';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Category } from '@/app/(Routes)/products/Category';
 import { ProductCard } from '@/app/(Routes)/products/ProductCard';
 import { ProductLayoutProps } from '@/app/types/Category';
 import { ArrowDownUp } from 'lucide-react';
 
 export const ProductLayout = ({ categories, categoryId, products }: ProductLayoutProps) => {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    const currentSort = searchParams.get('sort') ?? 'newest';
+
+    const updateSort = (sort: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        params.set('sort', sort);
+
+        router.push(`/products?${params.toString()}`);
+    };
+
     return (
         <main className={`light:bg-white/90 bg-main/80`}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
@@ -26,19 +41,19 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
                             <span className="font-mono text-[10px] uppercase text-zinc-400">{products?.length ?? 0} units</span>
                             <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Sort products">
                                 <ArrowDownUp size={14} className="text-second" aria-hidden="true" />
-                                <button type="button" className="border border-second bg-second px-3 py-2 text-[10px] font-bold uppercase text-black">
+                                <button onClick={() => updateSort('newest')} type="button" className="border border-second bg-second px-3 py-2 text-[10px] font-bold uppercase text-black">
                                     Newest
                                 </button>
-                                <button type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button onClick={() => updateSort('price-low')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
                                     Price: Low - High
                                 </button>
-                                <button type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button onClick={() => updateSort('price-high')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
                                     Price: High - Low
                                 </button>
-                                <button type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button onClick={() => updateSort('most-sold')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
                                     Most Sold
                                 </button>
-                                <button type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button onClick={() => updateSort('most-liked')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
                                     Most Liked
                                 </button>
                             </div>
