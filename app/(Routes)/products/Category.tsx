@@ -41,13 +41,7 @@ export const Category = ({
     };
 
     const activeCategoryClass = (isActive: boolean) => ` 
-        cursor-pointer 
-        transition-all duration-300 ease-out 
-        ${isActive ? ` 
-            lg:before:w-2 lg:before:h-2 lg:before:bg-second
-            lg:before:rounded-full lg:before:inline-block lg:before:mr-2
-            lg:translate-x-2
-            bg-second lg:bg-transparent ` : ''}`;
+        cursor-pointer transition-all duration-300 ease-out ${isActive ? `lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent ` : ''}`;
 
 
     return (
