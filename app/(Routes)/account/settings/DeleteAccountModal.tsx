@@ -11,6 +11,8 @@ import {
     X,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 type DeleteAccountModalType = {
     open: boolean;
@@ -21,13 +23,16 @@ export const DeleteAccountModal = ({
     open,
     onCloseAction,
 }: DeleteAccountModalType) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+
     if (!open) return null;
 
     const handleDeleteAccount = async () => {
+        setIsDeleting(true);
         try {
             const res = await axios.delete("/api/account/delete");
-            // yet not implemented.
             if (res.status === 200) {
+                toast.success("Account deleted successfully. Redirecting to login page...");
                 await signOut({
                     callbackUrl: "/login",
                 })
@@ -35,6 +40,9 @@ export const DeleteAccountModal = ({
         }
         catch (error) {
             console.error(error);
+        }
+        finally {
+            setIsDeleting(false);
         }
     }
 
@@ -224,12 +232,13 @@ export const DeleteAccountModal = ({
                     </button>
 
                     <button
+                        disabled={isDeleting}
                         onClick={handleDeleteAccount}
                         type="button"
-                        className=" cursor-pointer flex h-10 items-center gap-2 rounded-none bg-red-500 px-5 text-sm font-medium text-white transition hover:bg-red-600 active:scale-[0.98]"
+                        className={` ${isDeleting ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} flex h-10 items-center gap-2 rounded-none bg-red-500 px-5 text-sm font-medium text-white transition hover:bg-red-600 active:scale-[0.98]`}
                     >
                         <Trash size={17} />
-                        Delete account
+                        {isDeleting ? "Deleting..." : "Delete account"}
                     </button>
 
                 </div>
