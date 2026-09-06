@@ -36,6 +36,7 @@ export interface ProductProps {
 
 export interface ProductLayoutProps {
   categories: Category[];
+  categoryId?: string | null;
   products?: ProductType[];
 }
 

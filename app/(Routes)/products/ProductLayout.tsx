@@ -3,7 +3,7 @@ import { ProductCard } from '@/app/(Routes)/products/ProductCard';
 import { ProductLayoutProps } from '@/app/types/Category';
 import { ArrowDownUp } from 'lucide-react';
 
-export const ProductLayout = ({ categories, products }: ProductLayoutProps) => {
+export const ProductLayout = ({ categories, categoryId, products }: ProductLayoutProps) => {
     return (
         <main className={`light:bg-white/90 bg-main/80`}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
@@ -18,7 +18,7 @@ export const ProductLayout = ({ categories, products }: ProductLayoutProps) => {
 
                 <div className="grid grid-cols-1 gap-10 lg:grid-cols-[220px_1fr]">
                     <aside className="lg:sticky lg:top-19.5 lg:self-start ">
-                        <Category categories={categories} />
+                        <Category categories={categories} categoryId={categoryId} />
                     </aside>
 
                     <section>

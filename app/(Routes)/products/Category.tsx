@@ -1,7 +1,15 @@
 import { ProductLayoutProps } from '@/app/types/Category';
 import { ChevronDown, Funnel, Search } from 'lucide-react'
+import Link from 'next/link';
 
-export const Category = ({ categories }: ProductLayoutProps) => { 
+type CategoryProps = ProductLayoutProps & {
+    categoryId?: string | null;
+};
+
+export const Category = ({ categories, categoryId }: CategoryProps) => {
+    const activeCategoryClass = (isActive: boolean) => `
+        transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
+
     return (
         <div className="space-y-3">
             <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
@@ -25,13 +33,18 @@ export const Category = ({ categories }: ProductLayoutProps) => {
                     <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
                 </summary>
                 <ul className="mt-3 space-y-2">
-                    <li className="cursor-default text-xs text-zinc-300">All</li>
+                    <li>
+                        <Link href="/products" className={`${activeCategoryClass(categoryId === null)} text-xs text-zinc-300 hover:text-second`}>
+                            All
+                        </Link>
+                    </li>
                     {categories.map((category) => {
+                        const isActive = categoryId === category.id;
                         return (
                             <li key={category.id}>
-                                <span className="cursor-default text-xs text-zinc-300">
+                                <Link href={`/products?category=${category.id}`} className={`${activeCategoryClass(isActive)} text-xs text-zinc-300 hover:text-second`}>
                                     {category.name}
-                                </span>
+                                </Link>
                             </li>
                         );
                     })}
