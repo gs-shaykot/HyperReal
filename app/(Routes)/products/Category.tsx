@@ -1,7 +1,8 @@
 'use client';
 import { ProductLayoutProps } from '@/app/types/Category';
-import { ChevronDown, Funnel, Search } from 'lucide-react' 
+import { ChevronDown, Funnel, Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 type CategoryProps = ProductLayoutProps & {
     categoryId?: string | null;
@@ -14,18 +15,101 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
     const updateFilter = (key: string, value: string | null) => {
         const params = new URLSearchParams(searchParams.toString());
 
-        if (!value) {
-            params.delete(key);
-        } else {
+        if (value) {
             params.set(key, value);
+        } else {
+            params.delete(key);
         }
 
         router.push(`/products?${params.toString()}`);
     };
+
     const search = searchParams.get('search') ?? '';
     const minPrice = searchParams.get('minPrice') ?? '';
     const maxPrice = searchParams.get('maxPrice') ?? '';
     const inStock = searchParams.get('inStock') === 'true';
+
+    const isFirstRender = useRef(true);
+    const userChangedFilters = useRef(false);
+
+    const [inputState, setInputState] = useState<{
+        searchInput: string;
+        minPriceInput: string;
+        maxPriceInput: string;
+    }>({
+        searchInput: search,
+        minPriceInput: minPrice,
+        maxPriceInput: maxPrice,
+    });
+
+    useEffect(() => {
+        setInputState({
+            searchInput: search,
+            minPriceInput: minPrice,
+            maxPriceInput: maxPrice,
+        });
+    }, [search, minPrice, maxPrice]);
+
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+        if (!userChangedFilters.current) return
+
+        const timeout = setTimeout(() => {
+            const params = new URLSearchParams(searchParams.toString());
+
+            const currentSearch = params.get('search') ?? '';
+            const currentMinPrice = params.get('minPrice') ?? '';
+            const currentMaxPrice = params.get('maxPrice') ?? '';
+
+            if (inputState.searchInput !== currentSearch) {
+                if (inputState.searchInput.trim()) {
+                    params.set('search', inputState.searchInput.trim());
+                }
+                else {
+                    params.delete('search');
+                }
+            }
+
+            if (inputState.minPriceInput !== currentMinPrice) {
+                if (inputState.minPriceInput.trim()) {
+                    params.set('minPrice', inputState.minPriceInput.trim());
+                } else {
+                    params.delete('minPrice');
+                }
+            }
+
+            if (inputState.maxPriceInput !== currentMaxPrice) {
+                if (inputState.maxPriceInput.trim()) {
+                    params.set('maxPrice', inputState.maxPriceInput.trim());
+                } else {
+                    params.delete('maxPrice');
+                }
+            }
+
+
+            const nextQuery = params.toString();
+            const currentQuery = searchParams.toString();
+
+            if (nextQuery !== currentQuery) {
+                router.replace(`/products?${nextQuery}`);
+            }
+
+            userChangedFilters.current = false;
+        }, 400);
+        return () => clearTimeout(timeout);
+    }, [
+        inputState.searchInput,
+        inputState.minPriceInput,
+        inputState.maxPriceInput,
+        searchParams,
+        router
+    ]);
+
+
+
 
     const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
 
@@ -42,7 +126,14 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                 </h2>
                 <label className="mt-3 flex items-center gap-2 border border-zinc-800 px-2 py-2 text-zinc-400 focus-within:border-second">
                     <Search size={14} />
-                    <input value={search} onChange={(e) => updateFilter('search', e.target.value)} placeholder="SEARCH GEAR..." aria-label="Search products" className="min-w-0 w-full bg-transparent text-[10px] uppercase outline-none placeholder:text-zinc-600" />
+                    <input
+                        value={inputState.searchInput}
+                        onChange={(e) => {
+                            userChangedFilters.current = true;
+                            setInputState((prev) => ({ ...prev, searchInput: e.target.value }));
+                        }}
+                        placeholder="SEARCH GEAR..." aria-label="Search products"
+                        className="min-w-0 w-full bg-transparent text-[10px] uppercase outline-none placeholder:text-zinc-600" />
                 </label>
             </div>
 
@@ -81,11 +172,25 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                 </summary>
                 <div className="mt-3 flex items-center gap-2">
                     <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500">
-                        $<input value={minPrice} onChange={(e) => updateFilter('minPrice', e.target.value)} defaultValue="25" aria-label="Minimum price" inputMode="decimal" className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
+                        $<input
+                            value={inputState.minPriceInput}
+                            onChange={(e) => {
+                                userChangedFilters.current = true;
+                                setInputState((prev) => ({ ...prev, minPriceInput: e.target.value }));
+                            }}
+                            placeholder="25" aria-label="Minimum price" inputMode="decimal"
+                            className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
                     </label>
                     <span className="text-zinc-600">-</span>
                     <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500">
-                        $<input value={maxPrice} onChange={(e) => updateFilter('maxPrice', e.target.value)} defaultValue="285" aria-label="Maximum price" inputMode="decimal" className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
+                        $<input
+                            value={inputState.maxPriceInput}
+                            onChange={(e) => {
+                                userChangedFilters.current = true;
+                                setInputState((prev) => ({ ...prev, maxPriceInput: e.target.value }));
+                            }}
+                            placeholder="285" aria-label="Maximum price" inputMode="decimal"
+                            className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
                     </label>
                 </div>
             </details>
