@@ -41,19 +41,29 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
                             <span className="font-mono text-[10px] uppercase text-zinc-400">{products?.length ?? 0} units</span>
                             <div className="flex flex-wrap items-center justify-end gap-2" aria-label="Sort products">
                                 <ArrowDownUp size={14} className="text-second" aria-hidden="true" />
-                                <button onClick={() => updateSort('newest')} type="button" className="border border-second bg-second px-3 py-2 text-[10px] font-bold uppercase text-black">
+                                <button
+                                    onClick={() => updateSort('newest')} type="button"
+                                    className={`${currentSort === 'newest' ? 'border border-second bg-second text-zinc-900' : 'border border-zinc-800'} cursor-pointer px-3 py-2 text-[10px] font-bold uppercase text-zinc-400`}>
                                     Newest
                                 </button>
-                                <button onClick={() => updateSort('price-low')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button
+                                    onClick={() => updateSort('price-low')} type="button"
+                                    className={` ${currentSort === 'price-low' ? 'border border-second bg-second text-zinc-900' : 'border border-zinc-800'} cursor-pointer px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second`}>
                                     Price: Low - High
                                 </button>
-                                <button onClick={() => updateSort('price-high')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button
+                                    onClick={() => updateSort('price-high')} type="button"
+                                    className={` ${currentSort === 'price-high' ? 'border border-second bg-second text-zinc-900' : 'border border-zinc-800'} cursor-pointer px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second`}>
                                     Price: High - Low
                                 </button>
-                                <button onClick={() => updateSort('most-sold')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button
+                                    onClick={() => updateSort('most-sold')} type="button"
+                                    className={`${currentSort === 'most-sold' ? 'border border-second bg-second text-zinc-900' : 'border border-zinc-800'} cursor-pointer px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second`}>
                                     Most Sold
                                 </button>
-                                <button onClick={() => updateSort('most-liked')} type="button" className="border border-zinc-800 px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second hover:text-second">
+                                <button
+                                    onClick={() => updateSort('most-liked')} type="button"
+                                    className={` ${currentSort === 'most-liked' ? 'border border-second bg-second text-zinc-900' : 'border border-zinc-800'} cursor-pointer px-3 py-2 text-[10px] font-bold uppercase text-zinc-400 transition-colors hover:border-second`}>
                                     Most Liked
                                 </button>
                             </div>
