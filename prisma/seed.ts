@@ -29,6 +29,382 @@ const CATEGORIES = [
   { name: "Tech Gear", slug: "techgear" },
 ];
 
+const SEARCH_KEYWORDS: Record<string, string[]> = {
+  // ─────────────────────────────────────────
+  // FOOTWEAR
+  // ─────────────────────────────────────────
+  "stealth-slip": [
+    "shoe",
+    "shoes",
+    "sneaker",
+    "sneakers",
+    "slip on",
+    "slip-on",
+    "footwear",
+    "trainer",
+    "trainers",
+    "wearing",
+  ],
+
+  "platform-high": [
+    "shoe",
+    "shoes",
+    "sneaker",
+    "sneakers",
+    "high top",
+    "high-top",
+    "platform",
+    "footwear",
+    "trainer",
+    "trainers",
+    "wearing",
+  ],
+
+  "trail-runner": [
+    "shoe",
+    "shoes",
+    "sneaker",
+    "sneakers",
+    "running shoe",
+    "running shoes",
+    "runner",
+    "trail",
+    "footwear",
+    "trainer",
+    "trainers",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // TOPS
+  // ─────────────────────────────────────────
+  "neural-hoodie": [
+    "hoodie",
+    "hoodies",
+    "sweatshirt",
+    "top",
+    "tops",
+    "shirt",
+    "wearing",
+  ],
+
+  "geo-longsleeve": [
+    "long sleeve",
+    "longsleeve",
+    "shirt",
+    "shirts",
+    "top",
+    "tops",
+    "wearing",
+  ],
+
+  "mesh-tank": [
+    "tank",
+    "tank top",
+    "tanktop",
+    "shirt",
+    "top",
+    "tops",
+    "wearing",
+  ],
+
+  "tech-polo": [
+    "polo",
+    "polo shirt",
+    "shirt",
+    "shirts",
+    "t shirt",
+    "t-shirt",
+    "tee",
+    "top",
+    "tops",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // BOTTOMS
+  // ─────────────────────────────────────────
+  "cargo-pant": [
+    "pant",
+    "pants",
+    "cargo",
+    "cargo pant",
+    "cargo pants",
+    "trouser",
+    "trousers",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+  "stealth-jogger": [
+    "jogger",
+    "joggers",
+    "pant",
+    "pants",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+  "wide-trouser": [
+    "trouser",
+    "trousers",
+    "pant",
+    "pants",
+    "wide leg",
+    "wide-leg",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+  "utility-shorts": [
+    "short",
+    "shorts",
+    "cargo shorts",
+    "pant",
+    "pants",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+  "articulated-pant": [
+    "pant",
+    "pants",
+    "trouser",
+    "trousers",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // OUTERWEAR
+  // ─────────────────────────────────────────
+  "cyber-parka": [
+    "parka",
+    "jacket",
+    "jackets",
+    "coat",
+    "coats",
+    "outerwear",
+    "wearing",
+  ],
+
+  "tactical-vest": [
+    "vest",
+    "outerwear",
+    "jacket",
+    "wearing",
+  ],
+
+  "stealth-bomber": [
+    "bomber",
+    "bomber jacket",
+    "jacket",
+    "jackets",
+    "outerwear",
+    "wearing",
+  ],
+
+  "asymm-windbreaker": [
+    "windbreaker",
+    "wind breaker",
+    "jacket",
+    "jackets",
+    "outerwear",
+    "wearing",
+  ],
+
+  "insulated-gilet": [
+    "gilet",
+    "vest",
+    "jacket",
+    "outerwear",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // ACCESSORIES
+  // ─────────────────────────────────────────
+  "protocol-socks": [
+    "sock",
+    "socks",
+    "accessory",
+    "accessories",
+    "wearing",
+  ],
+
+  "crossbody-bag": [
+    "bag",
+    "bags",
+    "crossbody",
+    "crossbody bag",
+    "accessory",
+    "accessories",
+  ],
+
+  "ribbed-beanie": [
+    "beanie",
+    "hat",
+    "winter hat",
+    "accessory",
+    "accessories",
+    "wearing",
+  ],
+
+  "utility-belt": [
+    "belt",
+    "utility belt",
+    "accessory",
+    "accessories",
+    "wearing",
+  ],
+
+  "tech-gloves": [
+    "glove",
+    "gloves",
+    "accessory",
+    "accessories",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // BAGS
+  // ─────────────────────────────────────────
+  "tactical-messenger": [
+    "bag",
+    "bags",
+    "messenger",
+    "messenger bag",
+    "carry",
+  ],
+
+  "stealth-sling": [
+    "bag",
+    "bags",
+    "sling",
+    "sling bag",
+    "crossbody",
+    "carry",
+  ],
+
+  "modular-backpack": [
+    "bag",
+    "bags",
+    "backpack",
+    "backpacks",
+    "carry",
+  ],
+
+  "utility-waist-bag": [
+    "bag",
+    "bags",
+    "waist bag",
+    "belt bag",
+    "fanny pack",
+    "carry",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // LAYERING
+  // ─────────────────────────────────────────
+  "base-layer-top": [
+    "base layer",
+    "base-layer",
+    "top",
+    "tops",
+    "shirt",
+    "t shirt",
+    "t-shirt",
+    "tee",
+    "wearing",
+  ],
+
+  "mid-layer-fleece": [
+    "fleece",
+    "fleece jacket",
+    "jacket",
+    "mid layer",
+    "mid-layer",
+    "layering",
+    "outerwear",
+    "wearing",
+  ],
+
+  "thermal-leggings": [
+    "leggings",
+    "legging",
+    "thermal",
+    "thermal leggings",
+    "base layer",
+    "layering",
+    "bottom",
+    "bottoms",
+    "wearing",
+  ],
+
+  "puffer-liner": [
+    "puffer",
+    "puffer jacket",
+    "jacket",
+    "liner",
+    "layering",
+    "outerwear",
+    "wearing",
+  ],
+
+
+  // ─────────────────────────────────────────
+  // TECH GEAR
+  // ─────────────────────────────────────────
+  "cyber-watch": [
+    "watch",
+    "watches",
+    "smartwatch",
+    "tech",
+    "technology",
+    "tech gear",
+  ],
+
+  "tactical-shades": [
+    "shades",
+    "sunglasses",
+    "glasses",
+    "eyewear",
+    "tech",
+    "tech gear",
+  ],
+
+  "tech-mask": [
+    "mask",
+    "masks",
+    "face mask",
+    "tech",
+    "tech gear",
+  ],
+
+  "wireless-pods": [
+    "earbuds",
+    "earbud",
+    "pods",
+    "wireless",
+    "wireless earbuds",
+    "headphones",
+    "tech",
+    "tech gear",
+  ],
+};
+
+
 const COUPONS = [
   {
     code: "SAVE3000",
@@ -587,16 +963,27 @@ async function main() {
       where: { name: item.name },
     });
 
-    if (existing) continue;
+    let product;
 
-    const product = await prisma.product.create({
-      data: {
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        categoryId: category.id,
-      },
-    });
+    if (existing) {
+      product = await prisma.product.update({
+        where: { id: existing.id },
+        data: {
+          searchKeywords: SEARCH_KEYWORDS[item.slug] ?? [],
+        },
+      });
+    }
+    else {
+      product = await prisma.product.create({
+        data: {
+          name: item.name,
+          description: item.description,
+          searchKeywords: SEARCH_KEYWORDS[item.slug] ?? [],
+          price: item.price,
+          categoryId: category.id,
+        },
+      });
+    }
 
     const imageSet = IMAGE_MAP[item.slug];
 

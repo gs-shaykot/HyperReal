@@ -84,6 +84,7 @@ model Product {
   id              String           @id @default(uuid())
   name            String
   description     String
+  searchKeywords  String[]         @default([])
   price           Float
   isAvailable     Boolean          @default(true)
   categoryId      String
