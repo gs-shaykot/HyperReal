@@ -1,6 +1,6 @@
 'use client';
 import { ProductLayoutProps } from '@/app/types/Category';
-import { ChevronDown, Funnel, Search } from 'lucide-react'
+import { ChevronDown, Funnel, Search, Trash } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -22,6 +22,17 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
         }
 
         router.push(`/products?${params.toString()}`);
+    };
+
+    const clearFilters = () => {
+        const params = new URLSearchParams(searchParams.toString());
+
+        ['search', 'minPrice', 'maxPrice', 'inStock', 'category'].forEach((key) => {
+            params.delete(key);
+        });
+
+        const nextQuery = params.toString();
+        router.replace(nextQuery ? `/products?${nextQuery}` : '/products');
     };
 
     const search = searchParams.get('search') ?? '';
@@ -106,7 +117,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
         inputState.maxPriceInput,
         searchParams,
         router
-    ]); 
+    ]);
 
     const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
 
@@ -115,6 +126,15 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
             <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
                 <Funnel size={14} className="text-second" />
                 <h2 className="text-xs font-bold uppercase text-second">Filters</h2>
+
+                <button
+                    type="button"
+                    onClick={clearFilters}
+                    aria-label="Clear all filters"
+                    className="ml-auto cursor-pointer text-[10px] font-bold uppercase text-zinc-400 hover:text-second"
+                >
+                    <Trash size={18}/>  
+                </button>
             </div>
             {/* Search Box */}
             <div className="border-b border-zinc-800 pb-3">
