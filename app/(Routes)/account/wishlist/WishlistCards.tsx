@@ -6,11 +6,14 @@ import { useWishlist } from '@/app/Hooks/useWishlist'
 import { wishlistWithProduct } from '@/app/types/Product'
 import { Getwishlist } from '@/lib/wishlistAPI'
 import { useQuery } from '@tanstack/react-query'
-import { Eye, Heart, Package, Trash2 } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useSession } from 'next-auth/react'
+import { Eye, Heart, Package, Trash2, X } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
 export const WishlistCards = () => {
+    const { data: session } = useSession();
     const { data: wishlistItems, isLoading } = useQuery({
         queryKey: ["wishlist"],
         queryFn: Getwishlist
@@ -18,6 +21,31 @@ export const WishlistCards = () => {
     const mutation = useCart();
     const toggleWishlistMutation = useWishlist();
     const clearWishlistMutation = useClearWishlist();
+
+    const handlePrimaryAction = (item: wishlistWithProduct) => {
+        const isOutOfStock = item.variant.stock <= 0;
+
+        if (!session?.user) {
+            toast.custom(() => (
+                <div className='bg-zinc-900! light:bg-white! text-second! text-sm light:text-zinc-900! light:shadow border border-zinc-800 light:border-0 px-4 py-2 rounded shadow flex items-center gap-2'>
+                    <X className='text-red-500' />
+                    {isOutOfStock ? (
+                        <>Please sign in to get notified <br /> when this item is back in stock</>
+                    ) : (
+                        <>Please sign in to add items <br /> to your cart</>
+                    )}
+                </div>
+            ));
+            return;
+        }
+
+        if (isOutOfStock) {
+            toast.success("We'll notify you when this item is back in stock.");
+            return;
+        }
+
+        mutation.mutate({ variantId: item.variant.id, quantity: 1 });
+    };
 
     if (isLoading) {
         return <WishlistSkeleton />
@@ -74,8 +102,28 @@ export const WishlistCards = () => {
                                             </span>
                                         </div>
                                         <p className="text-lg font-bold text-second">${item.product.price?.toFixed(2)}</p>
+                                        {
+                                            item.variant.stock > 0 ? (
+                                                <div className='flex items-center gap-2 my-2 text-xs'>
+                                                    <span className='w-2 h-2 rounded-full bg-second' />
+                                                    <span className='text-zinc-400'>IN STOCK</span>
+                                                    <span className='text-zinc-500'>·</span>
+                                                    <span className='text-zinc-400'>{item.variant.stock} UNITS AVAILABLE</span>
+                                                </div>
+                                            ) : (
+                                                <div className='bg-red-500/20 border border-red-500 px-3 py-2 my-2'>
+                                                    <div className='flex items-center gap-2 text-red-400 text-sm'>
+                                                        <Package size={18} />
+                                                        <p className='font-bold'>OUT OF STOCK</p>
+                                                    </div>
+                                                    <p className='text-zinc-500 text-sm mt-1'>// Restock unscheduled</p>
+                                                </div>
+                                            )
+                                        }
                                         <div className="card-actions justify-between items-center">
-                                            <button onClick={() => { mutation.mutate({ variantId: item.variant.id as string, quantity: 1 }) }} className="flex-1 btn rounded-none bg-second shadow-none text-zinc-900 cursor-pointer">Add To Cart</button>
+                                            <button onClick={() => handlePrimaryAction(item)} className="flex-1 btn rounded-none bg-second shadow-none text-zinc-900 cursor-pointer">
+                                                {item.variant.stock > 0 ? 'Add To Cart' : 'Notify Me'}
+                                            </button>
                                             <Link href={`/products/${item.product.id}`} className='border border-zinc-700 light:border-zinc-300 p-2 btn rounded-none bg-transparent light:hover:border-zinc-900 hover:border-white light:text-zinc-900 text-white transition-all hover:scale-105'>
                                                 <Eye className='group-hover:text-second' />
                                             </Link>

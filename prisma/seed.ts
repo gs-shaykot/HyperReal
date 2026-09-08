@@ -1,5 +1,3 @@
-
-
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
@@ -994,6 +992,7 @@ async function main() {
           imageUrl: imageSet.neon,
           color: COLOR_MAP.neon,
         },
+        
       });
     }
 
@@ -1025,6 +1024,7 @@ async function main() {
 
     await prisma.productVariant.createMany({
       data: variants,
+      skipDuplicates: true,
     });
   }
 
@@ -1037,6 +1037,7 @@ main()
     await pool.end();
   })
   .catch(async (e) => {
+    console.error(e);
     await prisma.$disconnect();
     await pool.end();
     process.exit(1);

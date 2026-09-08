@@ -1,6 +1,6 @@
 "use client"
 import { ProductDetailsProps } from '@/app/types/Category'
-import { Check, HeartPlus, Minus, Plus, X } from 'lucide-react';
+import { Check, HeartPlus, Minus, Package, Plus, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from "framer-motion";
 import { useCart } from '@/app/Hooks/useCart';
@@ -12,6 +12,7 @@ import { Getwishlist } from '@/lib/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const { data: session } = useSession();
+    const [isSizeSelected, setIsSizeSelected] = useState(false);
 
     const mutation = useCart();
     const toggleWishlistMutation = useWishlist();
@@ -39,6 +40,8 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
 
+    console.log("Selected Size:", selectedSize);
+
     //EXTRACTED SIZES BASED ON SELECTED COLOR
     let ExtractedSize = useMemo(
         () => [...new Set(product.productVariants?.filter(variant => variant.color === selectedColor))],
@@ -49,6 +52,8 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
         () => product.productVariants?.find(variant => variant.color === selectedColor && variant.size === selectedSize),
         [product.productVariants, selectedColor, selectedSize]
     );
+    const extractedStock = ExtractedVariant?.stock ?? 0;
+    const isOutOfStock = selectedSize !== null && extractedStock <= 0;
 
     //SELECTED IMAGES BASED ON SELECTED COLOR
     let SelectedImage = useMemo(() => {
@@ -56,6 +61,43 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
             product.productImages?.find((img) => img.color === selectedColor)?.imageUrl ?? product.productImages[1]?.imageUrl
         );
     }, [product.productImages, selectedColor])
+
+    const handlePrimaryAction = () => {
+        if (!session?.user) {
+            toast.custom(() => (
+                <div className='bg-zinc-900! light:bg-white! text-second! text-sm light:text-zinc-900! light:shadow border border-zinc-800 light:border-0 px-4 py-2 rounded shadow flex items-center gap-2'>
+                    <X className='text-red-500' />
+                    {isOutOfStock ? (
+                        <>Please sign in to get notified <br /> when this item is back in stock</>
+                    ) : (
+                        <>Please sign in to add items <br /> to your cart</>
+                    )}
+                </div>
+            ));
+            return;
+        }
+
+        if (!selectedSize) {
+            toast.error("Please select a size");
+            return;
+        }
+
+        if (isOutOfStock) {
+            toast.success("We'll notify you when this item is back in stock.");
+            return;
+        }
+
+        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
+        if (!selectedVariant) {
+            toast.error("Selected variant not available");
+            return;
+        }
+
+        mutation.mutate({
+            variantId: selectedVariant.id,
+            quantity
+        })
+    };
 
     return (
         <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
@@ -79,6 +121,34 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                         </h1>
                         <h1 className='light:text-zinc-900 text-white mt-3 text-3xl md:text-4xl font-bold uppercase italic mb-4'>{product.name}</h1>
                         <h2 className='light:text-zinc-900 font-bold text-white text-2xl'>&#x24;{product.price}</h2>
+                        {
+                            selectedSize === null ? (
+                                <div className='flex items-center text-zinc-400 mt-2 py-1.5'>
+                                    <span className='w-2 h-2 rounded-full bg-second mr-2' /> <p>Select a size to see availability</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    {
+                                        extractedStock > 0 ?
+                                            (
+                                                <div className='flex items-center gap-3 my-2'>
+                                                    <p className='text-second font-bold'>In Stock: </p>
+                                                    <p>{extractedStock} in stock</p>
+                                                </div>
+                                            ) : (
+                                                <div className='bg-red-500/20 border border-red-500 px-3 py-2 my-2'>
+                                                    <div className=' flex items-center gap-2  text-red-400 text-sm'>
+                                                        <Package size={18} className='' />
+                                                        <p className='font-bold'>Out of Stock</p>
+                                                    </div>
+                                                    <p className='text-zinc-500 text-sm mt-1'>// This unit is depleted. Restock unscheduled — join the transmission list to get notified.</p>
+                                                </div>
+                                            )
+                                    }
+                                </div>
+                            )
+                        }
+
                         <p className='light:text-zinc-800 text-zinc-200 mt-2'>{product.description}</p>
                     </div>
 
@@ -149,35 +219,9 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <div className='flex-1'>
                                 <motion.button
                                     whileTap={{ scale: 0.98 }}
-                                    onClick={() => {
-                                        if (!session?.user) { 
-                                            toast.custom((t) => (
-                                                <div className='bg-zinc-900! light:bg-white! text-second! text-sm light:text-zinc-900! light:shadow border border-zinc-800 light:border-0 px-4 py-2 rounded shadow flex items-center gap-2'>
-                                                    <X className='text-red-500' />
-                                                    Please sign in to add items <br /> to your cart
-
-                                                </div>
-                                            ));
-                                            return;
-                                        }
-
-                                        if (!selectedSize) {
-                                            toast.error("Please select a size");
-                                            return;
-                                        }
-                                        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
-                                        if (!selectedVariant) {
-                                            toast.error("Selected variant not available");
-                                            return;
-                                        }
-
-                                        mutation.mutate({
-                                            variantId: selectedVariant.id,
-                                            quantity
-                                        })
-                                    }}
+                                    onClick={handlePrimaryAction}
                                     className="cursor-pointer w-full bg-second py-1.5 shadow-none rounded-none font-semibold light:text-white text-black">
-                                    Add to Cart
+                                    {isOutOfStock ? 'Notify me' : 'Add to Cart'}
                                 </motion.button>
                             </div>
 
@@ -232,6 +276,6 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
