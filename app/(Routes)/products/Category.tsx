@@ -131,7 +131,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     type="button"
                     onClick={clearFilters}
                     aria-label="Clear all filters"
-                    className="ml-auto cursor-pointer text-[10px] font-bold uppercase text-zinc-400 hover:text-second"
+                    className="ml-auto cursor-pointer text-[10px] font-bold uppercase text-zinc-400 hover:text-red-400"
                 >
                     <Trash size={18}/>  
                 </button>
