@@ -6,18 +6,18 @@ import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
 import { countCartItems } from "@/lib/cartAPIs"
-import { getProfile } from "@/lib/profileApi" 
+import { getProfile } from "@/lib/profileApi"
 
 export const Navbar = () => {
-    const { data: session, update } = useSession();
+    const { data: session } = useSession();
     const { theme, setTheme } = useTheme();
-
-    const { data: cartCount = 0 } = useQuery({
-        queryKey: ["cartCount"],
-        queryFn: countCartItems,
-        enabled: !!session?.user
-    })
     
+    const { data: cartCount = 0 } = useQuery({
+        queryKey: ["cartCount", session?.user?.id],
+        queryFn: countCartItems,
+        enabled: !!session?.user?.id,
+    });
+
     console.log("session: ", session)
 
     const navLinks =
