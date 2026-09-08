@@ -1,7 +1,15 @@
 import LoginForm from '@/app/(Routes)/(auth)/login/LoginForm'
 import React, { Suspense } from 'react'
 
-const page = () => {
+type LoginPageProps = {
+    searchParams: Promise<{
+        callbackUrl?: string;
+        sessionRevoked?: string;
+    }>;
+};
+
+const page = async ({ searchParams }: LoginPageProps) => {
+    const params = await searchParams;
     return (
         <Suspense
             fallback={
@@ -9,7 +17,10 @@ const page = () => {
                     Loading...
                 </div>
             }>
-            <LoginForm />
+            <LoginForm 
+                callbackUrl={params.callbackUrl}
+                sessionRevoked={params.sessionRevoked === 'true'}
+            />
         </Suspense>
     )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
@@ -14,6 +14,11 @@ type LoginState = {
         email?: string;
         password?: string;
     };
+};
+
+type LoginProps = {
+    callbackUrl?: string;
+    sessionRevoked?: boolean;
 };
 
 const initialState: LoginState = {
@@ -74,7 +79,7 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
     }
 };
 
-export default function LoginForm() {
+export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
 
@@ -89,6 +94,20 @@ export default function LoginForm() {
             router.refresh();
         }
     }, [state.success, router, searchParams]);
+
+    useEffect(() => {
+        if (!sessionRevoked) {
+            return;
+        }
+
+        const clearRevokedSession = async () => {
+            await signOut({
+                redirect: false,
+            });
+        };
+
+        clearRevokedSession();
+    }, [sessionRevoked]);
 
     return (
         <div className={`min-h-screen flex items-center justify-center px-4`}>
