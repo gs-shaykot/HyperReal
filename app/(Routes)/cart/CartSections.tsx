@@ -322,7 +322,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
           })}
           {
             nextBestCoupon && (
-              <div className='relative w-full h-31 bg-second/10 light:bg-second/20 border-2 border-second/30 corners z-10'>
+              <div className='relative w-full min-h-31 h-auto bg-second/10 light:bg-second/20 border-2 border-second/30 corners z-10'>
                 {/* CORNER DESIGNS */}
                 <div>
                   <span className='w-7 h-7 absolute -top-4 -left-4 bg-main light:bg-white transform rotate-45' />
@@ -337,7 +337,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   <span className='w-0.5 h-4 bottom-4 right-0 transform translate-x-[1.9px] bg-second absolute' />
                 </div>
 
-                <div className='p-2 w-full h-full flex items-start gap-2'>
+                <div className='p-2 w-full h-full flex  items-start gap-2'>
                   <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color={accentColor} />
                   {/* INFO */}
                   <div className='w-full'>

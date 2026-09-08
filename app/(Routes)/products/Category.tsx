@@ -119,7 +119,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
         router
     ]);
 
-    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent' : ''}`;
+    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent text-zinc-900 p-1 hover:text-zinc-900' : ''}`;
 
     return (
         <div className="space-y-3">

@@ -83,6 +83,8 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         enabled: addressesCount > 0,
     });
 
+    console.log("Addresses: ", addresses);
+
     const appliedCoupon = coupons.find((coupon: couponType) => coupon.code === couponCode);
 
     const subtotal = useMemo(() => {
@@ -304,7 +306,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     <h2 className={`${hudson.className} text-5xl light:text-zinc-900`} style={{ wordSpacing: '10px' }}>
                         SECURE <span className="text-second">TRANSFER</span>
                     </h2>
-                    <div className='text-xs flex items-center py-3 text-zinc-400 mt-1 w-4/12' style={{ wordSpacing: '5px' }}>
+                    <div className='text-xs flex items-center py-3 text-zinc-400 mt-1' style={{ wordSpacing: '5px' }}>
                         <Lock size={16} className='mr-1' />
                         <h3>Encrypted Payment Protocol // 256-BIT</h3>
                     </div>
@@ -426,7 +428,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                         }));
                                                         setUseSavedAddress(null);
                                                     }}
-                                                    className={`btn h-26 rounded-none border ${addNewAddress.addNew
+                                                    className={`btn min-h-26 h-full rounded-none border ${addressesCount % 2 === 0 ? "md:col-span-2" : ""} ${addNewAddress.addNew
                                                         ? "bg-second/20 border-second"
                                                         : "bg-transparent border-zinc-700"
                                                         } hover:border-second border-dashed flex flex-col shadow-none`}
@@ -436,7 +438,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 </button>
                                             </div>
                                             {/* Show All / Show Less */}
-                                            {addressesCount > 4 && (
+                                            {addresses.length > 3 && (
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowAllAddresses((prev) => !prev)}
@@ -444,14 +446,14 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 >
                                                     {showAllAddresses
                                                         ? "SHOW LESS"
-                                                        : `SHOW ALL ADDRESSES (${addressesCount})`}
+                                                        : `SHOW ALL ADDRESSES (${addresses.length})`}
                                                 </button>
                                             )}
                                         </>
                                     )}
 
                                     {
-                                        addressesCount === 0 && (
+                                        addresses.length === 0 && (
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -691,7 +693,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 — 02 // DELIVERY METHODS
                             </h2>
 
-                            <div className='grid grid-cols-2 gap-4'>
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                 {
                                     DeliveryOptions.map((option, index) => (
                                         <button key={index} type={'button'}
