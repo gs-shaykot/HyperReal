@@ -56,8 +56,10 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                         <div>
                             {
                                 orders?.map((order) => (
-                                    <div key={order.id} className='flex justify-between items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
-                                        <div className='flex flex-col space-y-2'>
+                                    <div key={order.id} className='flex flex-col md:flex-row md:justify-between items-start md:items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
+
+                                        <div className='flex flex-col space-y-2 md:space-y-2'>
+
                                             <div className='flex items-center gap-2 w-68'>
                                                 <h2 className='font-bold light:text-zinc-900 text-white'>{order.orderCode}</h2>
                                                 <h3 className='flex justify-start gap-1'>
@@ -85,21 +87,22 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                 </h3>
                                                 <span className='w-2 h-2 rounded-full border border-second' />
                                                 <h3>{order.orderItems.length} ITEMS</h3>
-                                            </div>
+                                            </div> 
 
                                             <div className='flex items-center gap-2'>
                                                 {
                                                     order.orderItems.map((item) => (
-                                                        <div key={item.id} className='flex items-center text-sm text-zinc-400 light:text-zinc-900 bg-zinc-900 light:bg-zinc-200 px-2 py-1'>
+                                                        <div key={item.id} className='flex items-center text-xs text-zinc-400 light:text-zinc-900 bg-zinc-900 light:bg-zinc-200 px-2 py-1'>
                                                             <h3>{item.variant.product.name}</h3>
                                                         </div>
                                                     ))
                                                 }
                                             </div>
                                         </div>
-                                        <div className='flex justify-between items-center gap-3'>
-                                            <div className='flex flex-col justify-center items-center'>
-                                                <h3 className='text-zinc-400 light:text-zinc-700'>TOTAL</h3>
+
+                                        <div className='flex justify-between items-center gap-3 mt-2 md:mt-0 text-sm md:text-base'>
+                                            <div className='flex md:flex-col justify-center items-center'>
+                                                <h3 className='text-zinc-400 light:text-zinc-700'>TOTAL:</h3>
                                                 <h3 className='text-second'>${order.payments[0]?.totalProductPriceInUSD.toFixed(2)}</h3>
                                             </div>
                                             <button
@@ -107,11 +110,12 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                     setSelectedOrder(order);
                                                     setOpen(true);
                                                 }}
-                                                 className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
-                                                <Eye />
+                                                 className="btn btn-xs md:btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
+                                                <Eye className='w-4 h-4 md:w-auto md:h-auto'/>
                                                 VIEW
                                             </button>
                                         </div>
+
                                     </div>
                                 ))
                             }

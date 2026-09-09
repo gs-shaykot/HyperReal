@@ -8,7 +8,6 @@ import {
     Smartphone,
     Tablet,
     Trash2,
-    X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -160,15 +159,15 @@ export const ActiveSessionsModal = ({
     return (
         <dialog className="modal modal-open">
             <div
-                className="modal-box max-w-6xl rounded-none border border-zinc-600 bg-main p-0 text-white shadow-2xl light:bg-white light:text-zinc-900 light:border-zinc-300">
+                className="modal-box max-h-[90vh] w-[calc(100%-1rem)] max-w-6xl overflow-y-auto rounded-none border border-zinc-600 bg-main p-0 text-white shadow-2xl light:border-zinc-300 light:bg-white light:text-zinc-900 sm:w-[calc(100%-2rem)]">
 
-                <div className="relative px-4 py-4 border-b border-zinc-800 light:border-zinc-300">
-                    <div className="flex justify-between  items-start">
+                <div className="relative border-b border-zinc-800 px-4 py-4 light:border-zinc-300 sm:px-6">
+                    <div className="flex items-start justify-between gap-3 pr-8">
 
-                        <div className="flex justify-between items-start gap-3">
+                        <div className="flex min-w-0 items-start gap-3">
                             <MonitorDot size={24} strokeWidth={1.8} className="text-second" />
-                            <div>
-                                <h1 className='text-lg font-bold ' >
+                            <div className="min-w-0">
+                                <h1 className="text-lg font-bold">
                                     ACTIVE SESSIONS & DEVICES
                                 </h1>
 
@@ -181,12 +180,12 @@ export const ActiveSessionsModal = ({
                 </div>
 
                 <div className=" px-4 py-4  ">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
 
                         {sessions.map((session) => (
                             <div
                                 key={session.id}
-                                className={`group relative flex items-center gap-5 px-4 py-2 rounded-none border transition-all ${session.isCurrent ? "border-second bg-second/4.5 llight:bg-second/4" : "border-zinc-80 bg-transparent hover:border-zinc-600 light:border-zinc-300 light:hover:border-zinc-400"}`}
+                                className={`group relative flex items-start gap-3 rounded-none border px-3 py-3 transition-all sm:items-center sm:gap-5 sm:px-4 sm:py-2 ${session.isCurrent ? "border-second bg-second/4.5 llight:bg-second/4" : "border-zinc-80 bg-transparent hover:border-zinc-600 light:border-zinc-300 light:hover:border-zinc-400"}`}
                             >
                                 {session.isCurrent && (
                                     <span className="absolute left-2 top-3 h-2 w-2 -translate-y-1/2 rounded-full bg-second ring-4 ring-[#090d10] light:ring-white" />
@@ -209,7 +208,7 @@ export const ActiveSessionsModal = ({
                                     <div
                                         className="flex flex-wrap items-center gap-x-2 gap-y-1"
                                     >
-                                        <h2 className="text-base font-bold tracking-wide" >
+                                        <h2 className="text-sm font-bold tracking-wide sm:text-base">
                                             {session.deviceName}
                                         </h2>
 
@@ -228,7 +227,7 @@ export const ActiveSessionsModal = ({
 
 
                                     {/* Browser + location */}
-                                    <p className="mt-2 truncate text-sm text-zinc-300 light:text-zinc-600" >
+                                    <p className="mt-2 wrap-break-word text-sm text-zinc-300 light:text-zinc-600">
                                         {session.browser}
 
                                         <span className="mx-2 text-zinc-600">
@@ -256,16 +255,14 @@ export const ActiveSessionsModal = ({
                                 {/* CURRENT BADGE / SIGN OUT */}
                                 {/* ================================= */}
 
-                                <div
-                                    className="ml-auto shrink-0"
-                                >
+                                <div className="ml-auto shrink-0 self-center">
                                     {session.isCurrent ? (
                                         <span className="inline-flex items-center rounded-md bg-second/10 px-3 py-2 text-xs font-bold tracking-wide text-second" >
                                             CURRENT
                                         </span>
                                     ) : (
                                         <button onClick={() => onSignoutSession(session.id)} type="button" className="cursor-pointer group/logout flex items-center gap-2 text-sm font-semibold text-red-400 transition hover:text-red-300" >
-                                            <span>
+                                            <span className="hidden sm:inline">
                                                 SIGN OUT
                                             </span>
 
@@ -293,7 +290,7 @@ export const ActiveSessionsModal = ({
                             <button
                                 onClick={() => onSignoutAllSessions()}
                                 type="button"
-                                className="cursor-pointer mt-5 flex w-full items-center justify-center gap-3 rounded-none border border-zinc-500 bg-transparent px-5 py-4 text-base font-semibold tracking-wide text-white transition hover:bg-zinc-800 light:border-zinc-400 light:text-zinc-900 light:hover:bg-zinc-100"
+                                className="mt-5 flex w-full cursor-pointer items-center justify-center gap-3 rounded-none border border-zinc-500 bg-transparent px-4 py-3 text-sm font-semibold tracking-wide text-white transition hover:bg-zinc-800 sm:px-5 sm:py-4 sm:text-base light:border-zinc-400 light:text-zinc-900 light:hover:bg-zinc-100"
                             >
                                 <LogOut
                                     size={22}
@@ -309,7 +306,7 @@ export const ActiveSessionsModal = ({
 
                     {/* Security warning + session refresh information */}
                     <div
-                        className="mt-7 flex gap-4 rounded-lg border border-zinc-800 bg-zinc-900/30 px-5 py-5 light:border-zinc-200 light:bg-zinc-50"
+                        className="mt-7 flex gap-3 rounded-lg border border-zinc-800 bg-zinc-900/30 px-4 py-4 light:border-zinc-200 light:bg-zinc-50 sm:gap-4 sm:px-5 sm:py-5"
                     >
                         {/* Info icon */}
                         <div className="shrink-0 pt-0.5">

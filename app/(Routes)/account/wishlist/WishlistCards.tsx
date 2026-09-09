@@ -52,7 +52,7 @@ export const WishlistCards = () => {
     }
 
     return (
-        <section>
+        <section className='w-full'>
             <div className='flex justify-between items-center mb-3'>
                 <h2 className='text-2xl font-bold italic light:text-zinc-900 text-white'>SAVED <span className='text-second'>ITEMS</span></h2>
                 <div className='flex justify-between items-center gap-3'>
@@ -78,7 +78,7 @@ export const WishlistCards = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                         {
                             wishlistItems?.map((item: wishlistWithProduct, idx: any) => (
-                                <div key={idx} className="card rounded-none bg-base-100 w-full max-w-96 shadow-sm border hover:border-second border-zinc-700 light:border-zinc-300 light:bg-white transition-all group cursor-pointer">
+                                <div key={idx} className="card rounded-none bg-base-100 w-full md:max-w-96 mb-5 md:mb-0 shadow-sm border hover:border-second border-zinc-700 light:border-zinc-300 light:bg-white transition-all group cursor-pointer">
                                     <figure className="aspect-square overflow-hidden bg-black">
                                         <Image
                                             width={600}

@@ -41,7 +41,7 @@ const settingsSections: {
 }[] = [
         {
             icon: Bell,
-            label: 'Notification Preferences',
+            label: 'Notifications',
             description: 'Choose what you want to be notified about.',
             rows: [
                 {
@@ -226,7 +226,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                                     idx === 0 && (
                                         <button
                                             onClick={() => handleNotificationChange()}
-                                            className={`btn mt-2 col-span-2 m-2 rounded-none bg-second text-zinc-900 light:text-white`}>{
+                                            className={`btn mt-2 md:col-span-2 m-2 rounded-none bg-second text-zinc-900 light:text-white`}>{
                                                 notifications.isSaving ? 'Saving...' : 'Save Changes'
                                             }</button>
                                     )
