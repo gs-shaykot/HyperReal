@@ -40,7 +40,6 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
 
-    console.log("Selected Size:", selectedSize);
 
     //EXTRACTED SIZES BASED ON SELECTED COLOR
     let ExtractedSize = useMemo(

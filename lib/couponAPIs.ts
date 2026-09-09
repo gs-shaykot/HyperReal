@@ -2,7 +2,6 @@ import axios from "axios";
 
 export async function validateCouponApi(code: string) {
     try {
-        console.log("Validating coupon code:", code);
         const response = await axios.post("/api/coupons/validate", { code });
         return response.data;
     }

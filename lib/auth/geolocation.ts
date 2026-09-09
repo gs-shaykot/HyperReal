@@ -26,10 +26,8 @@ function isPublicIp(ipAddress: string): boolean {
 }
 
 export async function getIpLocation(ipAddress: string | null): Promise<GeoLocation> {
-    console.log("getIpLocation called with ipAddress:", ipAddress);
 
     if (!isPublicIp(ipAddress as string)) {
-        console.log("IP address is not public or is null:", ipAddress);
         return {
             country: null,
             region: null,
@@ -40,8 +38,6 @@ export async function getIpLocation(ipAddress: string | null): Promise<GeoLocati
     try {
         
         const res = await axios.get(`https://ipapi.co/${ipAddress}/json/`)
-        console.log("IP geolocation response:", res.data);
-
         if (!res.status || res.status !== 200) {
             console.error(`IP geolocation failed with status ${res.status}`);
 

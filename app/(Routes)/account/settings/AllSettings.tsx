@@ -120,10 +120,6 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
     });
     const signoutMutation = useSessionQuery();
 
-    useEffect(() => {
-        console.log("ActiveSessions sessions:", sessions);
-    }, [sessions, sessionsLoading]);
-
     const handleToggle = (key: 'marketingEmails' | 'orderNotifications') => {
         setNotifications((prev) => ({
             ...prev,
@@ -138,7 +134,6 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                 marketingEmails: notifications.marketingEmails,
                 orderNotifications: notifications.orderNotifications,
             });
-            console.log('Notification settings updated:', res.data);
             if (res.data.success) {
                 toast.success(res.data.message || 'Notification settings updated successfully');
             }

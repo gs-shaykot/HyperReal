@@ -124,8 +124,6 @@ export async function POST(req: Request) {
 
         const ipAddress = forwardedFor?.split(",")[0]?.trim() ?? realIp ?? null;
         const location = await getIpLocation("104.28.208.85");
-        console.log("IP location:", location);
-
         const currentSession = await prisma.session.findUnique({
             where: {
                 tokenHash: currentSessionHash,

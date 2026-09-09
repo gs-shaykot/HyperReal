@@ -18,7 +18,6 @@ export const Navbar = () => {
         enabled: !!session?.user?.id,
     });
 
-    console.log("session: ", session)
 
     const navLinks =
         <>

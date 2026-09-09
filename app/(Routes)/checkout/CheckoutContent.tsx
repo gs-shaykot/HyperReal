@@ -83,8 +83,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         enabled: addressesCount > 0,
     });
 
-    console.log("Addresses: ", addresses);
-
     const appliedCoupon = coupons.find((coupon: couponType) => coupon.code === couponCode);
 
     const subtotal = useMemo(() => {

@@ -20,7 +20,6 @@ export async function POST(req: Request) {
         }
 
         const { code } = await req.json();
-        console.log("Received coupon code:", code);
 
         if (!code || typeof code !== "string") {
             return NextResponse.json(
