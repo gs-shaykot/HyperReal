@@ -38,7 +38,7 @@ export default async function OverviewPage() {
   return (
     <div className="space-y-6 ">
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <StatCard
           title="Orders"
           value={orders.length}
@@ -78,6 +78,7 @@ export default async function OverviewPage() {
               {
                 orders.map((order) => (
                   <div key={order.id} className="flex justify-between items-center border border-zinc-800 hover:border-second p-3 mb-2">
+                    
                     <div className="flex items-center gap-3">
                       <Clock size={18} className="text-second" />
                       <div>

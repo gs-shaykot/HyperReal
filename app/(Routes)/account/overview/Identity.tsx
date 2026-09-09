@@ -217,7 +217,7 @@ export const Identity = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                 <div className={`${isEditing ? "" : "border-b border-zinc-800 light:border-zinc-300"}`}>
                     <div className="flex items-center gap-2 mb-3 ">

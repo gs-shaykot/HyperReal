@@ -32,12 +32,12 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
     ]);
 
     return (
-        <main className='max-w-7xl mx-auto px-4 '>
+        <main className='max-w-7xl mx-auto px-4'>
             {/* Account Header */}
             <AccountHeader />
-            <div className='grid grid-cols-[260px_1fr] gap-6 py-7'>
+            <div className='grid grid-cols-1 gap-6 py-7 lg:grid-cols-[260px_1fr]'>
                 <AccountSidebar orderCount={orderCount as number} TotalPayment={TotalPayment._sum.totalProductPriceInUSD as number} />
-                <section>
+                <section className='min-w-0'>
                     {children}
                 </section>
             </div>

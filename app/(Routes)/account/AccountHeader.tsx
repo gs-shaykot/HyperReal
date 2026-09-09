@@ -16,9 +16,8 @@ export const AccountHeader = () => {
     });
 
     return (
-        <div className='flex justify-between items-center px-4 py-6 bg-[#0f0f0f] light:bg-white shadow-2xl border-t-3 border-second overflow-hidden mt-8'>
-
-            <div className='flex justify-between gap-5 items-center'>
+        <div className='relative flex-col md:flex-row flex justify-between items-center px-4 md:py-6 py-3 bg-[#0f0f0f] light:bg-white shadow-2xl border-t-3 border-second overflow-hidden mt-8'> 
+            <div className='w-full md:w-auto flex gap-5  md:justify-start items-center'>
                 <div className='w-28 h-28 bg-second overflow-hidden'>
                     <Image src={session?.user?.image || '/default-image.jpg'} alt="User Image" width={112} height={112} />
                 </div>
@@ -30,14 +29,11 @@ export const AccountHeader = () => {
             </div>
 
             {/* Signout Button */}
-            <div className='relative'>
-                <h1 className='text-9xl text-second/5 light:text-second/15 font-bold absolute -right-3 -bottom-20 z-5'>ID</h1>
-
-                <button onClick={() => signOut({ callbackUrl: "/login" })} className="relative z-10 btn btn-sm btn-outline rounded-none hover:bg-white light:hover:bg-zinc-900 hover:text-zinc-900 light:hover:text-white">
-                    <LogOut size={16} />
-                    Sign Out
-                </button>
-            </div>
+            <button onClick={() => signOut({ callbackUrl: "/login" })} className="relative w-full mt-5 md:w-auto z-10 btn btn-sm btn-outline rounded-none hover:bg-white light:hover:bg-zinc-900 hover:text-zinc-900 light:hover:text-white">
+                <LogOut size={16} />
+                Sign Out
+            </button>
+            <h1 className='text-9xl text-second/5 light:text-second/15 font-bold absolute -right-3 bottom-0 z-5'>ID</h1>
         </div >
     )
 }

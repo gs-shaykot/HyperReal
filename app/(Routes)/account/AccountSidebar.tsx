@@ -33,28 +33,31 @@ const menus = [
 
 export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: number; TotalPayment: number }) => {
   const pathname = usePathname();
+
   return (
-    <div className="lg:sticky lg:top-19.5 lg:self-start">
+    <div className="w-full lg:sticky lg:top-19.5 lg:self-start">
+      {/* Menu */}
       <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 mb-3'>
-        <ul className='flex flex-col gap-2'>
+        <ul className='scrollbar-hidden flex flex-row flex-nowrap gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0'>
           {menus.map((menu) => (
-            <li key={menu.title}>
+            <li key={menu.title} className='shrink-0 lg:w-full'>
               <Link
                 href={menu.href}
-                className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors ${pathname === menu.href
+                className={`flex items-center gap-3 p-2 text-sm font-medium transition-colors whitespace-nowrap lg:justify-start justify-center ${pathname === menu.href
                   ? "bg-second text-zinc-900 light:text-white font-bold font-sans"
                   : "text-white light:text-zinc-900 hover:bg-zinc-800 hover:text-white"
                   }`}
               >
-                <menu.icon className={`h-5 w-5 ${pathname === menu.href ? "" : ""}`} />
-                {menu.title}
+                <menu.icon className='h-5 w-5' />
+                <span>{menu.title}</span>
               </Link>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2'>
+      {/* Stats */}
+      <div className='hidden w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 lg:block'>
         <ul>
           <li className="p-2 py-3 border-b border-zinc-800">
             <h2 className="mb-2 text-white light:text-zinc-800">TOTAL SPENT</h2>
