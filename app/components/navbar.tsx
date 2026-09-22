@@ -87,7 +87,7 @@ export const Navbar = () => {
                             <div className="indicator">
                                 <Link href='/cart'>
                                     <ShoppingBag size={18} strokeWidth={1.2} />
-                                    <span className="badge badge-xs indicator-item border border-gray-500/85">{cartCount}</span>
+                                    <span className="badge badge-xs p-1 indicator-item border border-gray-500/85">{cartCount}</span>
                                 </Link>
                             </div>
                         </div>

@@ -70,10 +70,10 @@ export function AppSidebar() {
     return (
         <Sidebar
             collapsible="icon"
-            className="border-r"
+            className="border-r border-zinc-800 light:border-zinc-300"
         >
             {/* Sidebar Header */}
-            <SidebarHeader className="h-13 border-b">
+            <SidebarHeader className="h-13 border-b border-zinc-800 light:border-zinc-300">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <div className="flex h-8 items-center gap-2">
