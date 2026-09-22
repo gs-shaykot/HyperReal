@@ -2,6 +2,7 @@ import { Instagram, Globe, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 const Footer = () => {
+
     return (
         <footer className="border-t border-border bg-background">
             <div className='max-w-7xl mx-auto px-4'>

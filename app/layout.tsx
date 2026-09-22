@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { Inter, Space_Mono } from "next/font/google";
+import { Inter, Space_Mono, Geist } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/app/components/navbar";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
 import CyberpunkLoader from "@/app/components/CyberpunkLoader";
-import Footer from "@/app/components/Footer";
+import SiteChrome from "@/app/components/SiteChrome";
 import { Toaster } from 'react-hot-toast';
+import { cn } from "@/lib/utils";
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "HYPERREAL",
@@ -31,23 +33,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
       <body className={`${spaceMono.variable} ${inter.variable}`}>
         <Providers>
           {/* <CyberpunkLoader />  */}
           <ThemeConnector />
           <ThemeBackground />
-          <Navbar />
-          <main className="relative">
-            {children}
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                className: "bg-zinc-900! text-second! light:bg-white! light:text-zinc-900! light:shadow",
-              }}
-            />
-          </main>
-          <Footer />
+          <SiteChrome>
+            <main className="relative">
+              {children}
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  className: "bg-zinc-900! text-second! light:bg-white! light:text-zinc-900! light:shadow",
+                }}
+              />
+            </main>
+          </SiteChrome>
         </Providers>
       </body>
     </html>

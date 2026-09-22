@@ -11,14 +11,14 @@ import { getProfile } from "@/lib/profileApi"
 export const Navbar = () => {
     const { data: session } = useSession();
     const { theme, setTheme } = useTheme();
-    
+
     const { data: cartCount = 0 } = useQuery({
         queryKey: ["cartCount", session?.user?.id],
         queryFn: countCartItems,
         enabled: !!session?.user?.id,
     });
 
-
+    
     const navLinks =
         <>
             <li><Link href="/products" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>Shop All</Link></li>
