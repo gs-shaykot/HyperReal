@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
+    Archive,
     BarChart3,
     LayoutDashboard,
     Package,
@@ -85,15 +86,13 @@ export function AppSidebar() {
                                     href="/admin"
                                     className="flex items-center gap-2"
                                 >
-                                    <div className="flex size-5 items-center justify-center rounded-sm bg-lime-400">
-                                        <span className="text-[10px] font-black text-black">
-                                            H
-                                        </span>
+                                    <div className="flex size-5 items-center justify-center rounded-sm text-second">
+                                        <Archive size={16} />
                                     </div>
 
                                     <span className="text-[13px] font-bold tracking-[0.12em]">
                                         HYPER{" "}
-                                        <span className="text-lime-500 italic">
+                                        <span className="text-second italic">
                                             ADMIN
                                         </span>
                                     </span>
@@ -112,7 +111,8 @@ export function AppSidebar() {
 
                         const isActive =
                             pathname === item.href ||
-                            pathname.startsWith(`${item.href}/`)
+                            (item.href !== "/admin" &&
+                                pathname.startsWith(`${item.href}/`))
 
                         return (
                             <SidebarMenuItem key={item.href}>
@@ -120,7 +120,7 @@ export function AppSidebar() {
                                     render={<Link href={item.href} />}
                                     isActive={isActive}
                                     tooltip={item.title}
-                                    className=" h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] transition-none data-[active=true]:bg-lime-50 data-[active=true]:text-lime-600 data-[active=true]:border-r-2 data-[active=true]:border-lime-500 hover:bg-gray-50">
+                                    className=" h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] transition-none   hover:bg-second hover:text-zinc-900">
                                     <Icon className="size-3.75" />
                                     <span>{item.title}</span>
                                 </SidebarMenuButton>
