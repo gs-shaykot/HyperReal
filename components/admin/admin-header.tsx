@@ -1,5 +1,4 @@
 "use client"
-
 import { usePathname } from "next/navigation"
 import { Bell, ChevronDown, Moon, Sun } from "lucide-react"
 
@@ -7,6 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useTheme } from "next-themes"
+import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 const pageTitles: Record<string, string> = {
   "/admin/dashboard": "DASHBOARD",
@@ -28,6 +30,7 @@ const pageTitles: Record<string, string> = {
 export function AdminHeader() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname()
+  const { data: session } = useSession();
 
   const pageTitle =
     pageTitles[pathname] ??
@@ -66,8 +69,8 @@ export function AdminHeader() {
               }}
             />
 
-              {/* sun icon */}
-              <Sun
+            {/* sun icon */}
+            <Sun
               size={20}
               strokeWidth={1.2}
               className='swap-on fill-current'
@@ -93,9 +96,11 @@ export function AdminHeader() {
             size-9
             items-center
             justify-center
-            text-gray-600
+            light:text-zinc-600
+            text-white
             transition-colors
-            hover:text-gray-950
+            light:hover:text-zinc-800
+            cursor-pointer
           "
         >
           <Bell className="size-4" />
@@ -132,12 +137,16 @@ export function AdminHeader() {
             </Avatar>
 
             <div className="hidden text-left sm:block">
-              <p className="text-[10px] font-bold leading-none text-gray-900">
-                Ryu Tanaka
+              <p className="text-xs font-bold leading-none light:text-gray-900 text-white">
+                {
+                  session?.user?.name
+                }
               </p>
 
-              <p className="mt-0.75 text-[9px] leading-none text-gray-500">
-                Admin
+              <p className="mt-0.75 text-[9px] leading-none text-zinc-400">
+                {
+                  session?.user.role
+                }
               </p>
             </div>
 
@@ -147,30 +156,46 @@ export function AdminHeader() {
           <DropdownMenuContent
             align="end"
             sideOffset={8}
-            className="w-44 rounded-none"
+            className="w-52 rounded-none"
           >
-            <DropdownMenuLabel className="text-xs">
-              My Account
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuLabel className="px-3 py-2">
+                <p className="text-xs font-bold text-foreground">
+                  {
+                    session?.user?.name
+                  }
+                </p>
+
+                <p className="mt-1 text-xs font-normal text-zinc-300">
+                  {
+                    session?.user?.email
+                  }
+                </p>
+              </DropdownMenuLabel>
+            </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
-              Profile
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem className={'rounded-none cursor-pointer'}>
+                <Link href="/admin/settings">Settings</Link>
+              </DropdownMenuItem>
 
-            <DropdownMenuItem>
-              Settings
-            </DropdownMenuItem>
+              <DropdownMenuItem className={'rounded-none cursor-pointer'}>
+                <Link href="/">View Store</Link>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
-              Sign out
-            </DropdownMenuItem>
+            <DropdownMenuGroup>
+              <DropdownMenuItem variant="destructive" className={'rounded-none cursor-pointer'}>
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>
+    </header >
   )
 }
