@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Payment" ADD COLUMN     "paidAmountInUSD" DOUBLE PRECISION NOT NULL DEFAULT 0;

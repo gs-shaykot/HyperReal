@@ -33,6 +33,8 @@ const DashboardPage = () => {
             icon: Package,
         },
     ]
+
+    
     return (
         <div className="bg-main light:bg-white min-h-screen ">
             <div className="w-full p-4 shadow-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
