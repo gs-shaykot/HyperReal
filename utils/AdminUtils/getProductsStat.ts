@@ -1,7 +1,7 @@
-import prisma from '@/lib/prisma';
-import { addMonths, startOfMonth, subMonths } from 'date-fns';
+import prisma from "@/lib/prisma";
+import { addMonths, startOfMonth, subMonths } from "date-fns";
 
-export async function getOrderStats() {
+export async function getProductsStat() {
     const now = new Date();
 
     // Current month 
@@ -15,21 +15,12 @@ export async function getOrderStats() {
     const previousMonth = subMonths(now, 1);
     const previousMonthStart = startOfMonth(previousMonth);
 
-    // 1. Lifetime orders
-    const total = await prisma.order.count({
-        where: {
-            status: {
-                not: "CANCELLED",
-            },
-        },
-    });
+    // 1. Total products
+    const total = await prisma.product.count();
 
-    // 2. Current-month orders
-    const thisMonth = await prisma.order.count({
+    // 2. Products created this month
+    const thisMonth = await prisma.product.count({
         where: {
-            status: {
-                not: "CANCELLED",
-            },
             createdAt: {
                 gte: currentMonthStart,
                 lt: nextMonthStart,
@@ -37,12 +28,9 @@ export async function getOrderStats() {
         },
     });
 
-    // 3. Previous-month orders
-    const previousMonthOrders = await prisma.order.count({
+    // 3. Products created previous month
+    const previousMonthProducts = await prisma.product.count({
         where: {
-            status: {
-                not: "CANCELLED",
-            },
             createdAt: {
                 gte: previousMonthStart,
                 lt: currentMonthStart,
@@ -51,16 +39,16 @@ export async function getOrderStats() {
     });
 
     // 4. Calculate growth
-    const growth = previousMonthOrders === 0 ? null :
+    const growth = previousMonthProducts === 0 ? null :
         Number(
-            (((thisMonth - previousMonthOrders) / previousMonthOrders) * 100).toFixed(1)
+            (((thisMonth - previousMonthProducts) / previousMonthProducts) * 100).toFixed(1)
         )
 
     // 5. Return dashboard data
     return {
         total: total.toFixed(0),
         thisMonth: thisMonth.toFixed(0),
-        previousMonth: previousMonthOrders.toFixed(0),
+        previousMonth: previousMonthProducts.toFixed(0),
         growth,
-    };
+    }
 }

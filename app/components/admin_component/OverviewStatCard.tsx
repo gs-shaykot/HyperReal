@@ -30,9 +30,12 @@ export const OverviewStatCard = ({ title, value, subtitle, change, icon }: statC
                 <p className='mt-2 font-mono text-sm text-white/60 light:text-main/60'>
                     {subtitle}
                 </p>
-                <p className='mt-4 font-mono text-sm font-bold tracking-wide text-second'>
-                    <span aria-hidden='true'>{change >= 0 ? '▲' : '▼'} </span>
-                    {change >= 0 ? '+' : ''}{change}% vs last month
+                <p className={`${change >= 0 ? 'text-second' : 'text-red-500'} mt-4 font-mono text-sm font-bold tracking-wide `}>
+                    {/* colorize the change ▲ or ▼ using css based on its value */}
+                    <span aria-hidden='true'>
+                        {change >= 0 ? '▲ ' : '▼ '}
+                    </span>
+                     {change >= 0 ? '+' : ''}{change}% vs last month
                 </p>
             </div>
         </article>

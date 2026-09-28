@@ -1,49 +1,49 @@
 import { OverviewStatCard } from '@/app/components/admin_component/OverviewStatCard'
 import { getOrderStats } from '@/utils/AdminUtils/getOrderStats'
+import { getProductsStat } from '@/utils/AdminUtils/getProductsStat'
 import { getRevenueStats } from '@/utils/AdminUtils/getRevenueStats'
+import { getUserStats } from '@/utils/AdminUtils/getUserStats'
 import { ChartNoAxesCombined, Package, ShoppingCart, UsersRound } from 'lucide-react'
-import React from 'react'
 
 const DashboardPage = async () => {
+
+    const [revenue, orders, users, products] = await Promise.all([
+        getRevenueStats(),
+        getOrderStats(),
+        getUserStats(),
+        getProductsStat()
+    ]);
+
     const stats = [
         {
             title: "TOTAL REVENUE",
-            value: "$748,290",
-            subtitle: "$64k this month",
-            change: 18.2,
+            value: `$${revenue.totalRevenue}`,
+            subtitle: `$${revenue.thisMonthRevenue} this month`,
+            change: revenue.growth ?? 0, 
             icon: ChartNoAxesCombined,
         },
         {
             title: "TOTAL ORDERS",
-            value: "3,284",
-            subtitle: "421 this month",
-            change: 12.5,
+            value: orders.total,
+            subtitle: `${orders.thisMonth} this month`,
+            change: orders.growth ?? 0,
             icon: ShoppingCart,
         },
         {
             title: "ACTIVE USERS",
-            value: "6,841",
-            subtitle: "43 new this week",
-            change: 5.3,
+            value: users.total,
+            subtitle: `${users.newThisWeek} new this week`,
+            change: users.growth ?? 0,
             icon: UsersRound,
         },
         {
             title: "TOTAL PRODUCTS",
-            value: "38",
-            subtitle: "8 new arrivals",
-            change: 3.1,
+            value: products.total,
+            subtitle: `${products.thisMonth} this month`,
+            change: products.growth ?? 0,
             icon: Package,
         },
-    ]
-    const [revenue, orders] = await Promise.all([
-        getRevenueStats(),
-        getOrderStats(),
-    ])
-    const revenueStats = await getRevenueStats();
-    console.log("Revenue Stats:", revenueStats);
-
-    const orderStats = await getOrderStats();
-    console.log("Order Stats:", orderStats);
+    ];
 
     return (
         <div className="bg-main light:bg-white min-h-screen ">

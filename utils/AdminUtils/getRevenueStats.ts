@@ -69,14 +69,14 @@ export async function getRevenueStats() {
     // 4. Calculate growth
     const growth = lastMonthRevenue === 0 ? null :
         Number(
-            (((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100).toFixed(1)
+            (((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100).toFixed(2)
         )
 
     // 5. Return clean dashboard data
     return {
-        totalRevenue,
-        thisMonthRevenue,
-        lastMonthRevenue,
+        totalRevenue: totalRevenue.toFixed(1),
+        thisMonthRevenue: thisMonthRevenue.toFixed(1),
+        lastMonthRevenue: lastMonthRevenue.toFixed(1),
         growth,
     }
 }   
