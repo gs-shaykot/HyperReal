@@ -402,7 +402,6 @@ const SEARCH_KEYWORDS: Record<string, string[]> = {
   ],
 };
 
-
 const COUPONS = [
   {
     code: "SAVE3000",
@@ -602,7 +601,6 @@ const IMAGE_MAP: Record<
     black: "https://res.cloudinary.com/dloasaxt1/image/upload/v1771323781/wireless-pods_cphprn.jpg",
   },
 };
-
 
 const PRODUCTS = [
   // FOOTWEAR
@@ -927,7 +925,6 @@ const PRODUCTS = [
     sizes: ["ONE SIZE"],
   },
 ];
-
 
 async function main() {
   console.log("🌱 Seeding started...");
