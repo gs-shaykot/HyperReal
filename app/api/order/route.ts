@@ -120,7 +120,7 @@ export async function POST(req: Request) {
                             method: paymentMethod,
                             status: "PENDING",
                             paidAmountInBDT: finalTotal,
-                            paidAmountInUSD: paymentMethod === "STRIPE" ? USD_finalTotal : 0,
+                            paidAmountInUSD: USD_finalTotal,
                             totalProductPriceInUSD: subTotal,
                             discount: discount,
                             shippingCost: shippingCost,

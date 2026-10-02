@@ -123,6 +123,18 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
     ]
 
     useEffect(() => {
+        const isBangladesh = selectedCountry.value === 'bdt';
+
+        setSelectedDeliveryOption((currentOption) => ({
+            ...currentOption,
+            cost: currentOption.label === 'Express Drop'
+                ? (isBangladesh ? 2.5 : 30)
+                : (isBangladesh ? 1.2 : 15),
+            estimatedDelivery: currentOption.label === 'Express Drop'
+                ? (isBangladesh ? "1-2" : "5-7")
+                : (isBangladesh ? "3-5" : "10-15"),
+        }));
+
         if (selectedCountry.value === 'bdt') {
             if (selectedPaymentMethod !== 'SSLC' && selectedPaymentMethod !== 'COD') {
                 setSelectedPaymentMethod('SSLC')
