@@ -21,7 +21,6 @@ export async function POST(req: Request) {
         // Parsing requested body: 
         const body = await req.json();
         const { country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
-
         const allowedPaymentMethods = [
             "SSLC",
             "STRIPE",
@@ -76,7 +75,8 @@ export async function POST(req: Request) {
         // Converting currency:
         const res = await axios.get('https://open.er-api.com/v6/latest/USD');
         const rates = res.data.rates;
-        const finalTotal = country.value === 'bdt' ? USD_finalTotal * rates.BDT : USD_finalTotal;
+        // const finalTotal = USD_finalTotal * rates.BDT;
+        const finalTotal = paymentMethod === "SSLC" ? USD_finalTotal * rates.BDT : 0;
 
         if (saveAddress) {
             const addressCount = await prisma.address.count({
@@ -120,10 +120,11 @@ export async function POST(req: Request) {
                             method: paymentMethod,
                             status: "PENDING",
                             paidAmountInBDT: finalTotal,
+                            paidAmountInUSD: paymentMethod === "STRIPE" ? USD_finalTotal : 0,
                             totalProductPriceInUSD: subTotal,
                             discount: discount,
                             shippingCost: shippingCost,
-                            country: country.shortName,
+                            country: country.name,
                             shippingMethod: deliveryOption,
                             couponCode: coupon || null
                         }
