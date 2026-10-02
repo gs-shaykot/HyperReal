@@ -1,17 +1,21 @@
 import { OverviewStatCard } from '@/app/components/admin_component/OverviewStatCard'
+import { RevenueOverview } from '@/app/components/admin_component/RevenueOverview'
 import { getOrderStats } from '@/utils/AdminUtils/getOrderStats'
 import { getProductsStat } from '@/utils/AdminUtils/getProductsStat'
 import { getRevenueStats } from '@/utils/AdminUtils/getRevenueStats'
 import { getUserStats } from '@/utils/AdminUtils/getUserStats'
+import { getRevenueChartData } from "@/utils/AdminUtils/getRevenueChartData";
 import { ChartNoAxesCombined, Package, ShoppingCart, UsersRound } from 'lucide-react'
 
 const DashboardPage = async () => {
 
-    const [revenue, orders, users, products] = await Promise.all([
+    const [revenue, orders, users, products, monthlyRevenue, weeklyRevenue,] = await Promise.all([
         getRevenueStats(),
         getOrderStats(),
         getUserStats(),
-        getProductsStat()
+        getProductsStat(),
+        getRevenueChartData("monthly"),
+        getRevenueChartData("weekly"),
     ]);
 
     const stats = [
@@ -19,7 +23,7 @@ const DashboardPage = async () => {
             title: "TOTAL REVENUE",
             value: `$${revenue.totalRevenue}`,
             subtitle: `$${revenue.thisMonthRevenue} this month`,
-            change: revenue.growth ?? 0, 
+            change: revenue.growth ?? 0,
             icon: ChartNoAxesCombined,
         },
         {
@@ -61,6 +65,7 @@ const DashboardPage = async () => {
                     ))
                 }
             </div>
+            <RevenueOverview monthlyData={monthlyRevenue} weeklyData={weeklyRevenue} />
         </div>
     )
 }
