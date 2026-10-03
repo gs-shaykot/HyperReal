@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import argon2 from "argon2";
+import { seedOctoberData } from "@/prisma/seed_october";
 
 // ✅ Use SAME pattern as /lib/prisma.ts
 const pool = new Pool({
@@ -926,6 +928,8 @@ const PRODUCTS = [
   },
 ];
 
+
+
 async function main() {
   console.log("🌱 Seeding started...");
 
@@ -989,7 +993,7 @@ async function main() {
           imageUrl: imageSet.neon,
           color: COLOR_MAP.neon,
         },
-        
+
       });
     }
 
@@ -1024,6 +1028,9 @@ async function main() {
       skipDuplicates: true,
     });
   }
+
+  await seedOctoberData();
+  console.log("✅ October data seeded");
 
   console.log("✅ Seeding completed");
 }
