@@ -331,7 +331,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         className="md:col-span-8"
                     >
                         {/* Delivery Coordinates */}
-                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800 mb-8">
+                        <div className="bg-dark light:bg-white p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 01 // DELIVERY COORDINATES
                             </h2>
@@ -651,7 +651,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         transition={{ duration: 0.3 }}
                                         className='mt-4 mb-3 border-t border-zinc-800 border-dashed'>
                                         <label
-                                            className="flex items-start pt-3 gap-5 bg-[#0f0f0f] light:bg-white cursor-pointer">
+                                            className="flex items-start pt-3 gap-5 bg-dark light:bg-white cursor-pointer">
                                             <input
                                                 onClick={() => setAddNewAddress((prev) => ({ ...prev, isChecked: !prev.isChecked }))}
                                                 type="checkbox"
@@ -698,7 +698,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Delivery Options */}
-                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800 mb-8">
+                        <div className="bg-dark light:bg-white p-6 border border-zinc-800 mb-8">
                             <h2 className="text-sm tracking-widest text-second mb-5 font-mono">
                                 — 02 // DELIVERY METHODS
                             </h2>
@@ -722,7 +722,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         </div>
 
                         {/* Payment Options */}
-                        <div className="bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800">
+                        <div className="bg-dark light:bg-white p-6 border border-zinc-800">
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — 03 // Payment Gateway
                             </h2>
@@ -854,7 +854,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                     {/* RIGHT PANEL */}
                     <div className='md:col-span-4 lg:sticky lg:top-19.5 lg:self-start '>
-                        <div className='bg-[#0f0f0f] light:bg-white p-6 border border-zinc-800'>
+                        <div className='bg-dark light:bg-white p-6 border border-zinc-800'>
                             <h2 className="text-sm tracking-widest text-second mb-6 font-mono">
                                 — Manifest
                             </h2>
