@@ -8,10 +8,14 @@ import { getRevenueChartData } from "@/utils/AdminUtils/getRevenueChartData";
 import { ChartNoAxesCombined, Package, ShoppingCart, UsersRound } from 'lucide-react'
 import { getSalesByCategory } from '@/utils/AdminUtils/getSalesByCategory'
 import { SalesByCategory } from '@/app/components/admin_component/SalesByCategory'
+import { getRecentOrders } from '@/utils/AdminUtils/getRecentOrders'
+import { getTopProducts } from '@/utils/AdminUtils/getTopProducts'
+import { RecentOrders } from '@/app/components/admin_component/RecentOrders'
+import { TopProducts } from '@/app/components/admin_component/TopProducts'
 
 const DashboardPage = async () => {
 
-    const [revenue, orders, users, products, monthlyRevenue, weeklyRevenue, salesByCategory,] = await Promise.all([
+    const [revenue, orders, users, products, monthlyRevenue, weeklyRevenue, salesByCategory, recentOrders, topProducts,] = await Promise.all([
         getRevenueStats(),
         getOrderStats(),
         getUserStats(),
@@ -19,6 +23,8 @@ const DashboardPage = async () => {
         getRevenueChartData("monthly"),
         getRevenueChartData("weekly"),
         getSalesByCategory(),
+        getRecentOrders(),
+        getTopProducts(),
     ]);
 
     const stats = [
@@ -73,6 +79,17 @@ const DashboardPage = async () => {
                 <RevenueOverview monthlyData={monthlyRevenue} weeklyData={weeklyRevenue} />
                 <SalesByCategory
                     data={salesByCategory}
+                />
+            </div>
+
+            <div className="w-full grid grid-cols-1 md:grid-cols-[1fr_1fr] gap-4 mt-4">
+                <RecentOrders
+                    orders={recentOrders.orders}
+                    total={recentOrders.total}
+                />
+
+                <TopProducts
+                    data={topProducts}
                 />
             </div>
         </div>
