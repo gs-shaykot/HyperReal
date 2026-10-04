@@ -1,12 +1,6 @@
 "use client";
 
-import { Funnel, Search } from "lucide-react";
-import {
-    usePathname,
-    useRouter,
-    useSearchParams,
-} from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChevronDown, Funnel, Search } from "lucide-react";
 
 type Category = {
     id: string;
@@ -14,118 +8,22 @@ type Category = {
 };
 
 type ProductsToolbarProps = {
+    searchProduct: string;
+    category: string;
     categories: Category[];
+    onSearchChangeAction: (value: string) => void;
+    onCategoryChangeAction: (value: string) => void;
 };
 
 export const ProductsToolbar = ({
+    searchProduct,
+    category,
     categories,
+    onSearchChangeAction,
+    onCategoryChangeAction,
 }: ProductsToolbarProps) => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-
-    const currentSearch =
-        searchParams.get("search") ?? "";
-
-    const currentCategory =
-        searchParams.get("category") ?? "";
-
-    const [search, setSearch] =
-        useState(currentSearch);
-
-    useEffect(() => {
-        setSearch(currentSearch);
-    }, [currentSearch]);
-
-    /*
-     * Update URL only after the user stops typing.
-     *
-     * IMPORTANT:
-     * We do NOT put searchParams in the effect dependency
-     * that performs router.replace().
-     *
-     * This prevents the navigation loop.
-     */
-    useEffect(() => {
-        const normalizedSearch = search.trim();
-
-        if (normalizedSearch === currentSearch) {
-            return;
-        }
-
-        const timeout = setTimeout(() => {
-            const params = new URLSearchParams(
-                searchParams.toString()
-            );
-
-            if (normalizedSearch) {
-                params.set(
-                    "search",
-                    normalizedSearch
-                );
-            } else {
-                params.delete("search");
-            }
-
-            /*
-             * A new search starts from page 1.
-             */
-            params.delete("page");
-
-            const query = params.toString();
-
-            router.replace(
-                query
-                    ? `${pathname}?${query}`
-                    : pathname,
-                {
-                    scroll: false,
-                }
-            );
-        }, 300);
-
-        return () => clearTimeout(timeout);
-    }, [
-        search,
-        currentSearch,
-        pathname,
-        router,
-        searchParams,
-    ]);
-
-    const updateCategory = (
-        value: string
-    ) => {
-        const params = new URLSearchParams(
-            searchParams.toString()
-        );
-
-        if (value) {
-            params.set("category", value);
-        } else {
-            params.delete("category");
-        }
-
-        /*
-         * Changing the category starts from page 1.
-         */
-        params.delete("page");
-
-        const query = params.toString();
-
-        router.replace(
-            query
-                ? `${pathname}?${query}`
-                : pathname,
-            {
-                scroll: false,
-            }
-        );
-    };
-
     return (
-        <div className="mt-6 flex gap-3">
-            {/* Search */}
+        <div className="my-6 flex gap-3">
             <div className="relative min-w-0 flex-1">
                 <Search
                     className="
@@ -136,13 +34,12 @@ export const ProductsToolbar = ({
                         -translate-y-1/2
                         text-zinc-500
                     "
-                    aria-hidden="true"
                 />
 
                 <input
-                    value={search}
+                    value={searchProduct}
                     onChange={(event) =>
-                        setSearch(
+                        onSearchChangeAction(
                             event.target.value
                         )
                     }
@@ -168,7 +65,6 @@ export const ProductsToolbar = ({
                 />
             </div>
 
-            {/* Category */}
             <div className="relative w-34 shrink-0">
                 <Funnel
                     className="
@@ -180,13 +76,11 @@ export const ProductsToolbar = ({
                         -translate-y-1/2
                         text-zinc-500
                     "
-                    aria-hidden="true"
                 />
-
                 <select
-                    value={currentCategory}
+                    value={category}
                     onChange={(event) =>
-                        updateCategory(
+                        onCategoryChangeAction(
                             event.target.value
                         )
                     }
@@ -224,6 +118,10 @@ export const ProductsToolbar = ({
                         )
                     )}
                 </select>
+                <ChevronDown
+                    size={16}
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                />
             </div>
         </div>
     );

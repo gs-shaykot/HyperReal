@@ -18,32 +18,32 @@ export async function getAdminProducts({
     const where = {
         ...(normalizedSearch
             ? {
-                  OR: [
-                      {
-                          name: {
-                              contains: normalizedSearch,
-                              mode: "insensitive" as const,
-                          },
-                      },
-                      {
-                          description: {
-                              contains: normalizedSearch,
-                              mode: "insensitive" as const,
-                          },
-                      },
-                      {
-                          searchKeywords: {
-                              has: normalizedSearch.toLowerCase(),
-                          },
-                      },
-                  ],
-              }
+                OR: [
+                    {
+                        name: {
+                            contains: normalizedSearch,
+                            mode: "insensitive" as const,
+                        },
+                    },
+                    {
+                        description: {
+                            contains: normalizedSearch,
+                            mode: "insensitive" as const,
+                        },
+                    },
+                    {
+                        searchKeywords: {
+                            has: normalizedSearch.toLowerCase(),
+                        },
+                    },
+                ],
+            }
             : {}),
 
         ...(categoryId
             ? {
-                  categoryId,
-              }
+                categoryId,
+            }
             : {}),
     };
 
@@ -97,11 +97,8 @@ export async function getAdminProducts({
             where,
         }),
     ]);
-
-    const totalPages = Math.max(
-        1,
-        Math.ceil(total / PRODUCTS_PER_PAGE)
-    );
+    
+    const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE));
 
     return {
         products,

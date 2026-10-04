@@ -88,7 +88,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             name="label"
                             type="text"
                             placeholder="HOME / OFFICE"
-                            className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 uppercase focus:outline-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                            className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 uppercase focus:outline-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                         />
                     </div>
 
@@ -101,7 +101,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                         <input
                             name="fullName"
                             type="text"
-                            className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                            className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                         />
                     </div>
 
@@ -116,7 +116,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             <input
                                 name="street"
                                 type="text"
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                                className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                             />
                         </div>
 
@@ -128,7 +128,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             <input
                                 name="house"
                                 type="text"
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                                className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                             />
                         </div>
 
@@ -145,7 +145,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             <input
                                 name="city"
                                 type="text"
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                                className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                             />
                         </div>
 
@@ -157,7 +157,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                             <input
                                 name="zipCode"
                                 type="text"
-                                className="input input-bordered w-full rounded-none bg-[#0f0f0f] light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
+                                className="input input-bordered w-full rounded-none bg-dark light:bg-white border-2 border-zinc-800 light:border-zinc-300 focus:border-second outline-0 light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400"
                             />
                         </div>
 
@@ -181,7 +181,7 @@ export default function AddressModal({ open, onCloseAction, }: AddressModalProps
                                         ) || Countries[0]
                                     )
                                 }
-                                className="select w-full bg-[#0f0f0f] light:bg-white border border-gray-900 light:border-zinc-300 rounded-none focus:outline-none focus:border-second text-sm light:text-zinc-900 text-white"
+                                className="select w-full bg-dark light:bg-white border border-gray-900 light:border-zinc-300 rounded-none focus:outline-none focus:border-second text-sm light:text-zinc-900 text-white"
                             >
                                 {Countries.map((country) => (
                                     <option

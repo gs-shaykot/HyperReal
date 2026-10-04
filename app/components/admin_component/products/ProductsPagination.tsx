@@ -9,51 +9,15 @@ import {
 type ProductsPaginationProps = {
     page: number;
     totalPages: number;
+    onPageChangeAction: (page: number) => void;
 };
 
 export const ProductsPagination = ({
     page,
     totalPages,
+    onPageChangeAction,
 }: ProductsPaginationProps) => {
-    const router = useRouter();
-    const pathname = usePathname();
-    const searchParams = useSearchParams();
-
-    const updatePage = (
-        nextPage: number
-    ) => {
-        if (
-            nextPage < 1 ||
-            nextPage > totalPages ||
-            nextPage === page
-        ) {
-            return;
-        }
-
-        const params = new URLSearchParams(
-            searchParams.toString()
-        );
-
-        if (nextPage === 1) {
-            params.delete("page");
-        } else {
-            params.set(
-                "page",
-                String(nextPage)
-            );
-        }
-
-        const query = params.toString();
-
-        router.replace(
-            query
-                ? `${pathname}?${query}`
-                : pathname,
-            {
-                scroll: false,
-            }
-        );
-    };
+ 
 
     return (
         <div className="flex items-center justify-between py-4">
@@ -66,7 +30,7 @@ export const ProductsPagination = ({
                     type="button"
                     disabled={page === 1}
                     onClick={() =>
-                        updatePage(page - 1)
+                        onPageChangeAction(page - 1)
                     }
                     className="
                         cursor-pointer
@@ -94,7 +58,7 @@ export const ProductsPagination = ({
                         page === totalPages
                     }
                     onClick={() =>
-                        updatePage(page + 1)
+                        onPageChangeAction(page + 1)
                     }
                     className="
                         cursor-pointer

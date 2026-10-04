@@ -1,20 +1,6 @@
-"use client";
-
+"use client"; 
 import { AdminProduct } from "@/app/types/AdminProduct";
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
 import { ProductRow } from "./ProductRow";
-
-type ProductsResponse = {
-    success: boolean;
-    data: {
-        products: AdminProduct[];
-        total: number;
-        page: number;
-        totalPages: number;
-        pageSize: number;
-    };
-};
 
 type ProductsTableProps = {
     products: AdminProduct[];
@@ -23,88 +9,8 @@ type ProductsTableProps = {
 export const ProductsTable = ({
     products,
 }: ProductsTableProps) => {
-
-    const searchParams = useSearchParams();
-
-    const search =
-        searchParams.get("search") ?? "";
-
-    const category =
-        searchParams.get("category") ?? "";
-
-    const page =
-        Number(searchParams.get("page") ?? "1");
-
-    const queryString =
-        new URLSearchParams({
-            ...(search
-                ? { search }
-                : {}),
-            ...(category
-                ? { category }
-                : {}),
-            page: String(page),
-        }).toString();
-
-    const { data, isFetching } =
-        useQuery<ProductsResponse>({
-            queryKey: [
-                "admin-products",
-                search,
-                category,
-                page,
-            ],
-
-            queryFn: async () => {
-                const response =
-                    await fetch(
-                        `/api/admin/products?${queryString}`
-                    );
-
-                if (!response.ok) {
-                    throw new Error(
-                        "Failed to fetch products"
-                    );
-                }
-
-                return response.json();
-            },
-
-            /*
-             * Initial server-rendered products.
-             */
-            initialData:
-                page === 1 &&
-                !search &&
-                !category
-                    ? {
-                          success: true,
-                          data: {
-                              products:
-                                  products,
-                              total:
-                                  products.length,
-                              page: 1,
-                              totalPages: 1,
-                              pageSize:
-                                  products.length,
-                          },
-                      }
-                    : undefined,
-
-            staleTime: 30_000,
-        });
- 
     return (
-        <div className="relative mt-5 overflow-x-auto border border-zinc-800 light:border-zinc-200">
-            {isFetching && (
-                <div className="absolute right-3 top-3 z-10">
-                    <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
-                        Updating...
-                    </span>
-                </div>
-            )}
-
+        <div className="overflow-x-auto border border-zinc-800 light:border-zinc-200">
             <table className="w-full min-w-205 border-collapse">
                 <thead>
                     <tr className="bg-white/2 light:bg-black/2">
@@ -136,28 +42,17 @@ export const ProductsTable = ({
 
                 <tbody>
                     {products.length > 0 ? (
-                        products.map(
-                            (product) => (
-                                <ProductRow
-                                    key={product.id}
-                                    product={
-                                        product
-                                    }
-                                />
-                            )
-                        )
+                        products.map((product) => (
+                            <ProductRow
+                                key={product.id}
+                                product={product}
+                            />
+                        ))
                     ) : (
                         <tr>
                             <td
                                 colSpan={6}
-                                className="
-                                    px-4
-                                    py-16
-                                    text-center
-                                    font-mono
-                                    text-xs
-                                    text-zinc-500
-                                "
+                                className="px-4 py-16 text-center font-mono text-xs text-zinc-500"
                             >
                                 NO PRODUCTS FOUND
                             </td>

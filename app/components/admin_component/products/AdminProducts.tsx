@@ -1,13 +1,7 @@
 "use client";
-
 import { AdminProduct } from "@/app/types/AdminProduct";
-import {
-    keepPreviousData, useQuery,
-} from "@tanstack/react-query";
-import { 
-    useSearchParams,
-} from "next/navigation";
-
+import { keepPreviousData, useQuery, } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { ProductsToolbar } from "./ProductsToolbar";
 import { ProductsTable } from "./ProductsTable";
 import { ProductsPagination } from "./ProductsPagination";
@@ -18,64 +12,75 @@ type Category = {
 };
 
 type AdminProductsProps = {
-    products: AdminProduct[];
+    initialProducts: AdminProduct[];
+    initialTotal: number;
+    initialTotalPages: number;
     categories: Category[];
 };
 
-type ProductsResponse = {
-    success: boolean;
-    data: {
-        products: AdminProduct[];
-        total: number;
-        page: number;
-        totalPages: number;
-        pageSize: number;
-    };
-};
-
 export const AdminProducts = ({
-    products: initialProducts,
+    initialProducts,
+    initialTotal,
+    initialTotalPages,
     categories,
 }: AdminProductsProps) => {
-    const searchParams = useSearchParams();
+    const [search, setSearch] =
+        useState("");
 
-    const search =
-        searchParams.get("search") ?? "";
+    const [category, setCategory] =
+        useState("");
 
-    const category =
-        searchParams.get("category") ?? "";
+    const [page, setPage] =
+        useState(1);
 
-    const page =
-        Number(
-            searchParams.get("page") ?? "1"
-        );
+    const [debouncedSearch, setDebouncedSearch] = useState("");
 
-    const queryString =
-        new URLSearchParams({
-            ...(search
-                ? { search }
-                : {}),
-            ...(category
-                ? { category }
-                : {}),
-            page: String(page),
-        }).toString();
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+            setPage(1);
+        }, 300);
 
-    const {
-        data,
-        isFetching,
-    } = useQuery<ProductsResponse>({
+        return () => clearTimeout(timer);
+    }, [search]);
+
+    const handleCategoryChange = (value: string) => {
+        setCategory(value);
+        setPage(1);
+    };
+
+    const { data, isFetching, } = useQuery({
         queryKey: [
             "admin-products",
-            search,
+            debouncedSearch,
             category,
             page,
         ],
 
         queryFn: async () => {
-            const response = await fetch(
-                `/api/admin/products?${queryString}`
+            const params = new URLSearchParams();
+
+            if (debouncedSearch) {
+                params.set(
+                    "search",
+                    debouncedSearch
+                );
+            }
+
+            if (category) {
+                params.set(
+                    "category",
+                    category
+                );
+            }
+
+            params.set(
+                "page",
+                String(page)
             );
+
+            const response =
+                await fetch(`/api/admin/products?${params}`);
 
             if (!response.ok) {
                 throw new Error(
@@ -83,78 +88,68 @@ export const AdminProducts = ({
                 );
             }
 
-            return response.json();
+            const result = await response.json();
+
+            return result.data;
         },
 
+        /*
+         * First page already came from SSR.
+         */
         initialData:
             page === 1 &&
-                !search &&
+                !debouncedSearch &&
                 !category
                 ? {
-                    success: true,
-                    data: {
-                        products:
-                            initialProducts,
-                        total:
-                            initialProducts.length,
-                        page: 1,
-                        totalPages: Math.max(
-                            1,
-                            Math.ceil(
-                                initialProducts.length /
-                                10
-                            )
-                        ),
-                        pageSize: 10,
-                    },
+                    products:
+                        initialProducts,
+                    total:
+                        initialTotal,
+                    page: 1,
+                    totalPages:
+                        initialTotalPages,
                 }
                 : undefined,
 
-        placeholderData:
-            keepPreviousData,
-
-        staleTime: 30_000,
+        placeholderData: keepPreviousData,
     });
 
-    const productData =
-        data?.data ?? {
-            products: initialProducts,
-            total: initialProducts.length,
-            page,
-            totalPages: 1,
-            pageSize: 10,
-        };
+    const products = data?.products ?? initialProducts;
+
+    const total = data?.total ?? initialTotal;
+
+    const totalPages = data?.totalPages ?? initialTotalPages;
 
     return (
-        <div className="min-h-screen bg-main px-4 py-6 light:bg-white">
-            <div className="w-full">
-                <ProductsToolbar
-                    categories={categories}
-                />
+        <div className="min-h-screen bg-main light:bg-white">
 
-                <div className="relative">
-                    {isFetching && (
-                        <div className="pointer-events-none absolute right-0 top-2 z-20">
-                            <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
-                                Updating...
-                            </span>
-                        </div>
-                    )}
+            <ProductsToolbar
+                searchProduct={search}
+                category={category}
+                categories={categories}
+                onSearchChangeAction={setSearch}
+                onCategoryChangeAction={handleCategoryChange}
+            />
 
-                    <ProductsTable
-                        products={
-                            productData.products
-                        }
-                    />
-                </div>
+            <div className="relative">
+                {isFetching && (
+                    <div className="absolute right-0 top-2 z-20">
+                        <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
+                            Updating...
+                        </span>
+                    </div>
+                )}
 
-                <ProductsPagination
-                    page={productData.page}
-                    totalPages={
-                        productData.totalPages
-                    }
+                <ProductsTable
+                    products={products}
                 />
             </div>
+
+            <ProductsPagination
+                page={page}
+                totalPages={totalPages}
+                onPageChangeAction={setPage}
+            />
         </div>
     );
 };
