@@ -59,8 +59,8 @@ const DashboardPage = async () => {
     ];
 
     return (
-        <div className="bg-main light:bg-white min-h-screen  p-4 ">
-            <div className="w-full shadow-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="min-h-screen bg-main p-4 light:bg-white">
+            <div className="grid w-full grid-cols-1 gap-4 shadow-md sm:grid-cols-2 lg:grid-cols-4">
                 {
                     stats.map((stat, index) => (
                         <OverviewStatCard

@@ -19,6 +19,25 @@
     --color-second: #8fb300;
     --color-main: #0a0a0a;
     --color-dark: #0f0f0f;
+    --admin-chart-grid: rgba(0, 0, 0, 0.12);
+    --admin-chart-axis: #666;
+    --admin-chart-label: #555;
+    --admin-chart-cursor: rgba(0, 0, 0, 0.04);
+    --admin-chart-tooltip: #fff;
+    --admin-chart-border: rgba(0, 0, 0, 0.12);
+    --admin-chart-tooltip-text: #111;
+    --admin-chart-tooltip-label: #666;
+  }
+
+  :root {
+    --admin-chart-grid: rgba(255, 255, 255, 0.08);
+    --admin-chart-axis: #666;
+    --admin-chart-label: #888;
+    --admin-chart-cursor: rgba(255, 255, 255, 0.03);
+    --admin-chart-tooltip: #111;
+    --admin-chart-border: rgba(255, 255, 255, 0.1);
+    --admin-chart-tooltip-text: #fff;
+    --admin-chart-tooltip-label: #888;
   }
   
   html {

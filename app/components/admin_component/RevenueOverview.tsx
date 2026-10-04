@@ -30,12 +30,12 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
     const data = period === "monthly" ? monthlyData : weeklyData;
 
     return (
-        <section className=" border border-white/10 bg-dark">
+        <section className="border border-white/10 bg-dark light:border-black/10 light:bg-white">
             {/* Header */}
             <div className="flex items-start justify-between p-4">
 
                 <div>
-                    <h2 className="text-sm font-bold tracking-widest text-white">
+                    <h2 className="text-sm font-bold tracking-widest text-white light:text-zinc-900">
                         REVENUE OVERVIEW
                     </h2>
 
@@ -45,13 +45,13 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                 </div>
 
                 {/* Period Toggle */}
-                <div className="flex items-center border border-white/10">
+                <div className="flex items-center border border-white/10 light:border-black/10">
                     <button
                         type="button"
                         onClick={() => setPeriod("weekly")}
                         className={`px-3 py-2 text-[10px] font-bold tracking-wider transition ${period === "weekly"
                             ? "bg-[#c6ff00] text-black"
-                            : "text-gray-500 hover:text-white"
+                            : "text-gray-500 hover:text-white light:hover:text-zinc-900"
                             }`}
                     >
                         WEEKLY
@@ -62,7 +62,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                         onClick={() => setPeriod("monthly")}
                         className={`px-3 py-2 text-[10px] font-bold tracking-wider transition ${period === "monthly"
                             ? "bg-[#c6ff00] text-black"
-                            : "text-gray-500 hover:text-white"
+                            : "text-gray-500 hover:text-white light:hover:text-zinc-900"
                             }`}
                     >
                         MONTHLY
@@ -108,7 +108,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                         </defs>
 
                         <CartesianGrid
-                            stroke="#ffffff"
+                            stroke="var(--admin-chart-grid)"
                             strokeOpacity={0.08}
                             strokeDasharray="3 3"
                             vertical={false}
@@ -119,7 +119,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                             axisLine={false}
                             tickLine={false}
                             tick={{
-                                fill: "#666",
+                                fill: "var(--admin-chart-axis)",
                                 fontSize: 10,
                             }}
                         />
@@ -129,7 +129,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                             tickLine={false}
                             width={45}
                             tick={{
-                                fill: "#666",
+                                fill: "var(--admin-chart-axis)",
                                 fontSize: 10,
                             }}
                             tickFormatter={(value) =>
@@ -139,13 +139,13 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
 
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: "#111",
-                                border: "1px solid rgba(255,255,255,0.1)",
+                                backgroundColor: "var(--admin-chart-tooltip)",
+                                border: "1px solid var(--admin-chart-border)",
                                 borderRadius: "4px",
-                                color: "#fff",
+                                color: "var(--admin-chart-tooltip-text)",
                             }}
                             labelStyle={{
-                                color: "#888",
+                                color: "var(--admin-chart-tooltip-label)",
                             }}
                             formatter={(value) => [
                                 `$${Number(value).toLocaleString()}`,
@@ -163,7 +163,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
                             activeDot={{
                                 r: 4,
                                 fill: "#c6ff00",
-                                stroke: "#111",
+                                stroke: "var(--admin-chart-tooltip)",
                                 strokeWidth: 2,
                             }}
                         />

@@ -24,11 +24,11 @@ export const TopProducts = ({
     data,
 }: TopProductsProps) => {
     return (
-        <section className="w-full border border-white/10 bg-dark p-6">
+        <section className="w-full border border-white/10 bg-dark p-6 light:border-black/10 light:bg-white">
 
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold tracking-widest text-white">
+                <h2 className="text-sm font-bold tracking-widest text-white light:text-zinc-900">
                     TOP PRODUCTS
                 </h2>
 
@@ -54,7 +54,7 @@ export const TopProducts = ({
                         }}
                     >
                         <CartesianGrid
-                            stroke="#ffffff"
+                            stroke="var(--admin-chart-grid)"
                             strokeOpacity={0.08}
                             strokeDasharray="3 3"
                             horizontal={false}
@@ -65,7 +65,7 @@ export const TopProducts = ({
                             axisLine={false}
                             tickLine={false}
                             tick={{
-                                fill: "#666",
+                                fill: "var(--admin-chart-axis)",
                                 fontSize: 10,
                             }}
                         />
@@ -77,22 +77,22 @@ export const TopProducts = ({
                             tickLine={false}
                             width={120}
                             tick={{
-                                fill: "#888",
+                                fill: "var(--admin-chart-label)",
                                 fontSize: 9,
                             }}
                         />
 
                         <Tooltip
                             cursor={{
-                                fill: "rgba(255,255,255,0.03)",
+                                fill: "var(--admin-chart-cursor)",
                             }}
                             contentStyle={{
-                                backgroundColor: "#111",
-                                border: "1px solid rgba(255,255,255,0.1)",
+                                backgroundColor: "var(--admin-chart-tooltip)",
+                                border: "1px solid var(--admin-chart-border)",
                                 borderRadius: "4px",
                             }}
                             labelStyle={{
-                                color: "#fff",
+                                color: "var(--admin-chart-tooltip-text)",
                                 fontSize: 11,
                                 fontWeight: 700,
                             }}

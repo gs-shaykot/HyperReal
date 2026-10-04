@@ -25,7 +25,7 @@ const statusStyles: Record<OrderStatus, string> = {
         "border-blue-500/40 bg-blue-500/10 text-blue-400",
 
     DELIVERED:
-        "border-lime-500/40 bg-lime-500/10 text-[#c6ff00]",
+        "border-second/40 bg-second/10 text-second",
 
     CANCELLED:
         "border-red-500/40 bg-red-500/10 text-red-500",
@@ -36,11 +36,11 @@ export const RecentOrders = ({
     total,
 }: RecentOrdersProps) => {
     return (
-        <section className="w-full border border-white/10 bg-dark p-6">
+        <section className="w-full border border-white/10 bg-dark p-6 light:border-black/10 light:bg-white">
 
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-                <h2 className="text-sm font-bold tracking-widest text-white">
+                <h2 className="text-sm font-bold tracking-widest text-white light:text-zinc-900">
                     RECENT ORDERS
                 </h2>
 
@@ -56,13 +56,13 @@ export const RecentOrders = ({
                         key={order.id}
                         className={`flex items-center justify-between py-1.5 ${
                             index !== orders.length - 1
-                                ? "border-b border-white/10"
+                                ? "border-b border-white/10 light:border-black/10"
                                 : ""
                         }`}
                     >
                         {/* Order information */}
                         <div className="min-w-0">
-                            <p className="text-xs font-bold text-white">
+                            <p className="text-xs font-bold text-white light:text-zinc-900">
                                 {order.orderCode}
                             </p>
 
@@ -74,7 +74,7 @@ export const RecentOrders = ({
                         {/* Amount + status */}
                         <div className="flex shrink-0 items-center gap-4">
 
-                            <span className="text-xs font-bold text-white">
+                            <span className="text-xs font-bold text-white light:text-zinc-900">
                                 $
                                 {order.amount.toLocaleString(
                                     "en-US",

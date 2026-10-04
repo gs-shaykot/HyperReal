@@ -29,10 +29,10 @@ export const SalesByCategory = ({
     data,
 }: SalesByCategoryProps) => {
     return (
-        <section className="w-full border border-white/10 bg-main p-4">
+        <section className="w-full border border-white/10 bg-main p-4 light:border-black/10 light:bg-white">
             {/* Header */}
             <div>
-                <h2 className="text-sm font-bold tracking-widest text-white">
+                <h2 className="text-sm font-bold tracking-widest text-white light:text-zinc-900">
                     SALES BY CATEGORY
                 </h2>
 
@@ -57,7 +57,7 @@ export const SalesByCategory = ({
                             innerRadius={45}
                             outerRadius={78}
                             paddingAngle={1}
-                            stroke="#111"
+                            stroke="var(--admin-chart-tooltip)"
                             strokeWidth={2}
                         >
                             {data.map((entry, index) => (
@@ -88,12 +88,12 @@ export const SalesByCategory = ({
                                 ];
                             }}
                             contentStyle={{
-                                backgroundColor: "#111",
-                                border: "1px solid rgba(255,255,255,0.1)",
+                                backgroundColor: "var(--admin-chart-tooltip)",
+                                border: "1px solid var(--admin-chart-border)",
                                 borderRadius: "4px",
                             }}
                             labelStyle={{
-                                color: "#888",
+                                color: "var(--admin-chart-tooltip-label)",
                             }}
                         />
                     </PieChart>
@@ -124,7 +124,7 @@ export const SalesByCategory = ({
                             </span>
                         </div>
 
-                        <span className="text-xs font-bold text-white">
+                        <span className="text-xs font-bold text-white light:text-zinc-900">
                             {category.percentage}%
                         </span>
                     </div>
