@@ -40,7 +40,7 @@ export function AdminHeader() {
     "ADMIN"
 
   return (
-    <header className="px-2 sticky top-0 flex h-13 shrink-0 items-center border-b border-zinc-800 light:border-zinc-300 bg-dark light:bg-white">
+    <header className="px-2 sticky top-0 z-20 flex h-13 shrink-0 items-center border-b border-zinc-800 light:border-zinc-300 bg-dark light:bg-white">
       {/* Left section */}
       <div className="flex h-full items-center">
         <SidebarTrigger className="ml-2 size-8 md:hidden" />
