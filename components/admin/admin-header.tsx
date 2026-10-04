@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation"
 import { Bell, ChevronDown, Moon, Sun } from "lucide-react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +37,7 @@ export function AdminHeader() {
     Object.entries(pageTitles).find(([path]) =>
       pathname.startsWith(`${path}/`)
     )?.[1] ??
-    "ADMIN"
+    "DASHBOARD"
 
   return (
     <header className="px-2 sticky top-0 z-20 flex h-13 shrink-0 items-center border-b border-zinc-800 light:border-zinc-300 bg-dark light:bg-white">
@@ -128,11 +128,14 @@ export function AdminHeader() {
             }
           >
             <Avatar className="size-5.5 rounded-none">
+              <AvatarImage
+                src={session?.user?.image ?? undefined}
+                alt={session?.user?.name ?? "User profile"}
+                className="rounded-none"
+              />
               <AvatarFallback
-                className="rounded-none bg-lime-100 text-[9px] font-bold text-lime-700
-                "
-              >
-                RT
+                className="rounded-none bg-lime-100 text-[9px] font-bold text-lime-700 w-5 h-5">
+                {session?.user?.name?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
 
