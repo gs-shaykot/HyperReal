@@ -42,7 +42,7 @@ export const SalesByCategory = ({
             </div>
 
             {/* Donut */}
-            <div className="mt-6 h-[180px] w-full">
+            <div className="mt-6 h-45 w-full">
                 <ResponsiveContainer
                     width="100%"
                     height="100%"
