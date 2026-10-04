@@ -1,0 +1,22 @@
+export type AdminProduct = {
+    id: string;
+    name: string;
+    price: number;
+    isAvailable: boolean;
+    totalSold: number;
+    totalLikes: number;
+    createdAt: Date;
+
+    category: {
+        id: string;
+        name: string;
+    };
+
+    productImages: {
+        imageUrl: string;
+    }[];
+
+    productVariants: {
+        size: string;
+    }[];
+};
