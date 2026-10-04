@@ -14,14 +14,8 @@ type ProductsPageProps = {
 const ProductPage = async ({
     searchParams,
 }: ProductsPageProps) => {
-    const params = await searchParams;
-
-    /*
-     * Only fetch initial SSR data.
-     *
-     * After hydration, TanStack Query handles
-     * search/category/pagination.
-     */
+    const params = await searchParams; 
+    
     const [categories, productData] =
         await Promise.all([
             getCategories(),

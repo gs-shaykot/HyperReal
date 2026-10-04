@@ -69,6 +69,7 @@ export const ProductsPagination = ({
                         updatePage(page - 1)
                     }
                     className="
+                        cursor-pointer
                         border
                         border-zinc-800
                         px-3
@@ -96,6 +97,7 @@ export const ProductsPagination = ({
                         updatePage(page + 1)
                     }
                     className="
+                        cursor-pointer
                         border
                         border-zinc-800
                         px-3

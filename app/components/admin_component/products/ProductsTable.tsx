@@ -17,12 +17,13 @@ type ProductsResponse = {
 };
 
 type ProductsTableProps = {
-    initialProducts: AdminProduct[];
+    products: AdminProduct[];
 };
 
 export const ProductsTable = ({
-    initialProducts,
+    products,
 }: ProductsTableProps) => {
+
     const searchParams = useSearchParams();
 
     const search =
@@ -80,24 +81,20 @@ export const ProductsTable = ({
                           success: true,
                           data: {
                               products:
-                                  initialProducts,
+                                  products,
                               total:
-                                  initialProducts.length,
+                                  products.length,
                               page: 1,
                               totalPages: 1,
                               pageSize:
-                                  initialProducts.length,
+                                  products.length,
                           },
                       }
                     : undefined,
 
             staleTime: 30_000,
         });
-
-    const products =
-        data?.data.products ??
-        initialProducts;
-
+ 
     return (
         <div className="relative mt-5 overflow-x-auto border border-zinc-800 light:border-zinc-200">
             {isFetching && (
