@@ -30,9 +30,9 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
     const data = period === "monthly" ? monthlyData : weeklyData;
 
     return (
-        <section className="w-225 border border-white/10 bg-main">
+        <section className=" border border-white/10 bg-dark">
             {/* Header */}
-            <div className="flex items-start justify-between px-4 pt-4">
+            <div className="flex items-start justify-between p-4">
 
                 <div>
                     <h2 className="text-sm font-bold tracking-widest text-white">

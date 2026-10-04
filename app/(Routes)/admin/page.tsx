@@ -50,8 +50,8 @@ const DashboardPage = async () => {
     ];
 
     return (
-        <div className="bg-main light:bg-white min-h-screen ">
-            <div className="w-full p-4 shadow-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-main light:bg-white min-h-screen  p-4 ">
+            <div className="w-full shadow-md grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {
                     stats.map((stat, index) => (
                         <OverviewStatCard
@@ -65,7 +65,16 @@ const DashboardPage = async () => {
                     ))
                 }
             </div>
-            <RevenueOverview monthlyData={monthlyRevenue} weeklyData={weeklyRevenue} />
+ 
+            <div className='w-full grid grid-cols-1 md:grid-cols-[13fr_7fr] gap-4 mt-4'>
+                <RevenueOverview monthlyData={monthlyRevenue} weeklyData={weeklyRevenue} />
+                <div className="border border-white/10 bg-dark p-4">
+                    <h2 className="text-sm font-semibold">Sales by Category</h2>
+                    <p className="text-xs text-muted-foreground">
+                        Revenue distribution
+                    </p>
+                </div>
+            </div>
         </div>
     )
 }
