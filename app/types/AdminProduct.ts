@@ -5,7 +5,7 @@ export type AdminProduct = {
     isAvailable: boolean;
     totalSold: number;
     totalLikes: number;
-    createdAt: Date;
+    createdAt: Date | string;
 
     category: {
         id: string;

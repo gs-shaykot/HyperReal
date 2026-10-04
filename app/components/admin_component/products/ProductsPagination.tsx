@@ -1,6 +1,10 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+    usePathname,
+    useRouter,
+    useSearchParams,
+} from "next/navigation";
 
 type ProductsPaginationProps = {
     page: number;
@@ -15,7 +19,9 @@ export const ProductsPagination = ({
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const updatePage = (nextPage: number) => {
+    const updatePage = (
+        nextPage: number
+    ) => {
         if (
             nextPage < 1 ||
             nextPage > totalPages ||
@@ -31,13 +37,21 @@ export const ProductsPagination = ({
         if (nextPage === 1) {
             params.delete("page");
         } else {
-            params.set("page", String(nextPage));
+            params.set(
+                "page",
+                String(nextPage)
+            );
         }
 
         const query = params.toString();
 
-        router.push(
-            query ? `${pathname}?${query}` : pathname
+        router.replace(
+            query
+                ? `${pathname}?${query}`
+                : pathname,
+            {
+                scroll: false,
+            }
         );
     };
 
@@ -51,7 +65,9 @@ export const ProductsPagination = ({
                 <button
                     type="button"
                     disabled={page === 1}
-                    onClick={() => updatePage(page - 1)}
+                    onClick={() =>
+                        updatePage(page - 1)
+                    }
                     className="
                         border
                         border-zinc-800
@@ -73,8 +89,12 @@ export const ProductsPagination = ({
 
                 <button
                     type="button"
-                    disabled={page === totalPages}
-                    onClick={() => updatePage(page + 1)}
+                    disabled={
+                        page === totalPages
+                    }
+                    onClick={() =>
+                        updatePage(page + 1)
+                    }
                     className="
                         border
                         border-zinc-800

@@ -1,7 +1,7 @@
-import { AdminProducts } from '@/app/components/admin_component/products/AdminProducts';
-import { getAdminProducts } from '@/utils/AdminUtils/getAdminProducts';
-import { getCategories } from '@/utils/getCategories';
-import { Plus } from 'lucide-react'
+import { AdminProducts } from "@/app/components/admin_component/products/AdminProducts";
+import { getAdminProducts } from "@/utils/AdminUtils/getAdminProducts";
+import { getCategories } from "@/utils/getCategories";
+import { Plus } from "lucide-react";
 
 type ProductsPageProps = {
     searchParams: Promise<{
@@ -11,25 +11,28 @@ type ProductsPageProps = {
     }>;
 };
 
-const ProductPage = async ({ searchParams }: ProductsPageProps) => {
+const ProductPage = async ({
+    searchParams,
+}: ProductsPageProps) => {
     const params = await searchParams;
 
-    const search = params.search ?? "";
-    const categoryId = params.category;
-    const page = Number(params.page ?? "1");
-
+    /*
+     * Only fetch initial SSR data.
+     *
+     * After hydration, TanStack Query handles
+     * search/category/pagination.
+     */
     const [categories, productData] =
         await Promise.all([
             getCategories(),
+
             getAdminProducts({
-                search,
-                categoryId,
-                page,
+                page: 1,
             }),
         ]);
 
     return (
-        <div className="bg-main light:bg-white min-h-screen p-4">
+        <div className="min-h-screen bg-main p-4 light:bg-white">
             <div className="flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-lg font-bold tracking-[0.08em] text-white light:text-zinc-900">
@@ -43,18 +46,36 @@ const ProductPage = async ({ searchParams }: ProductsPageProps) => {
 
                 <button
                     type="button"
-                    className="inline-flex h-8 items-center gap-2 bg-second px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition-opacity hover:opacity-90 cursor-pointer">
+                    className="
+                        inline-flex
+                        h-8
+                        items-center
+                        gap-2
+                        bg-second
+                        px-4
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-[0.14em]
+                        text-black
+                        transition-opacity
+                        hover:opacity-90
+                        cursor-pointer
+                    "
+                >
                     <Plus className="size-3.5" />
                     ADD PRODUCT
                 </button>
             </div>
+
             <AdminProducts
-                products={productData.products}
-                categories={categories} 
-                page={productData.page}
-                totalPages={productData.totalPages}
+                products={
+                    productData.products
+                }
+                categories={categories}
             />
         </div>
-    )
-}
-export default ProductPage
+    );
+};
+
+export default ProductPage;
