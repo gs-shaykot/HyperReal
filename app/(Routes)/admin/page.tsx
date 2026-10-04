@@ -6,16 +6,19 @@ import { getRevenueStats } from '@/utils/AdminUtils/getRevenueStats'
 import { getUserStats } from '@/utils/AdminUtils/getUserStats'
 import { getRevenueChartData } from "@/utils/AdminUtils/getRevenueChartData";
 import { ChartNoAxesCombined, Package, ShoppingCart, UsersRound } from 'lucide-react'
+import { getSalesByCategory } from '@/utils/AdminUtils/getSalesByCategory'
+import { SalesByCategory } from '@/app/components/admin_component/SalesByCategory'
 
 const DashboardPage = async () => {
 
-    const [revenue, orders, users, products, monthlyRevenue, weeklyRevenue,] = await Promise.all([
+    const [revenue, orders, users, products, monthlyRevenue, weeklyRevenue, salesByCategory,] = await Promise.all([
         getRevenueStats(),
         getOrderStats(),
         getUserStats(),
         getProductsStat(),
         getRevenueChartData("monthly"),
         getRevenueChartData("weekly"),
+        getSalesByCategory(),
     ]);
 
     const stats = [
@@ -65,15 +68,12 @@ const DashboardPage = async () => {
                     ))
                 }
             </div>
- 
+
             <div className='w-full grid grid-cols-1 md:grid-cols-[13fr_7fr] gap-4 mt-4'>
                 <RevenueOverview monthlyData={monthlyRevenue} weeklyData={weeklyRevenue} />
-                <div className="border border-white/10 bg-dark p-4">
-                    <h2 className="text-sm font-semibold">Sales by Category</h2>
-                    <p className="text-xs text-muted-foreground">
-                        Revenue distribution
-                    </p>
-                </div>
+                <SalesByCategory
+                    data={salesByCategory}
+                />
             </div>
         </div>
     )

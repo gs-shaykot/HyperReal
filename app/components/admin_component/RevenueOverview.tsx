@@ -71,7 +71,7 @@ export const RevenueOverview = ({ monthlyData, weeklyData }: RevenueOverviewProp
             </div>
 
             {/* Chart */}
-            <div className="mt-4 h-70 w-full px-2 pb-4">
+            <div className="mt-4 h-85 w-full px-2 pb-4">
                 <ResponsiveContainer
                     width="100%"
                     height="100%"
