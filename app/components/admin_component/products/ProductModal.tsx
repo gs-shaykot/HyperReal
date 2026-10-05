@@ -15,6 +15,8 @@ export type ProductModalData = {
     description?: string;
     badge?: string;
     sizes?: string[];
+    stock?: number;
+    stockBySize?: Record<string, number>;
     imageUrl?: string;
 };
 
@@ -69,6 +71,14 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
     const [sizes, setSizes] = useState<string[]>([]);
 
+    const [sameStockForEverySize, setSameStockForEverySize] =
+        useState(true);
+
+    const [sameStock, setSameStock] = useState("");
+
+    const [stockBySize, setStockBySize] =
+        useState<Record<string, string>>({});
+
     const [imageUrl, setImageUrl] = useState("");
  
     useEffect(() => {
@@ -93,8 +103,34 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                 product.badge ?? ""
             );
 
-            setSizes(
-                product.sizes ?? []
+            const productSizes = product.sizes ?? [];
+
+            setSizes(productSizes);
+
+            setSameStockForEverySize(true);
+
+            setSameStock(
+                product.stock !== undefined
+                    ? String(product.stock)
+                    : ""
+            );
+
+            setStockBySize(
+                product.stockBySize
+                    ? Object.fromEntries(
+                        Object.entries(product.stockBySize).map(
+                            ([size, stock]) => [
+                                size,
+                                String(stock),
+                            ]
+                        )
+                    )
+                    : Object.fromEntries(
+                        productSizes.map((size) => [
+                            size,
+                            "0",
+                        ])
+                    )
             );
 
             setImageUrl(
@@ -110,6 +146,9 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         setDescription("");
         setBadge("");
         setSizes([]);
+        setSameStockForEverySize(true);
+        setSameStock("");
+        setStockBySize({});
         setImageUrl("");
     }, [product, open]);
 
@@ -120,13 +159,48 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
     const toggleSize = (
         size: string
     ) => {
-        setSizes((current) =>
-            current.includes(size)
-                ? current.filter(
+        setSizes((current) => {
+            const selected = current.includes(size);
+
+            if (selected) {
+                setStockBySize((stocks) => {
+                    const next = { ...stocks };
+                    delete next[size];
+                    return next;
+                });
+
+                return current.filter(
                     (item) => item !== size
-                )
-                : [...current, size]
-        );
+                );
+            }
+
+            setStockBySize((stocks) => ({
+                ...stocks,
+                [size]: sameStock || "0",
+            }));
+
+            return [...current, size];
+        });
+    };
+
+    const handleSameStockChange = (
+        checked: boolean
+    ) => {
+        setSameStockForEverySize(checked);
+
+        if (!checked) {
+            setStockBySize((current) => {
+                const next = { ...current };
+
+                sizes.forEach((size) => {
+                    if (next[size] === undefined) {
+                        next[size] = sameStock || "0";
+                    }
+                });
+
+                return next;
+            });
+        }
     };
 
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
@@ -139,6 +213,22 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             description,
             badge,
             sizes,
+            stock: sameStockForEverySize
+                ? Number(sameStock)
+                : undefined,
+            stockBySize: sameStockForEverySize
+                ? Object.fromEntries(
+                    sizes.map((size) => [
+                        size,
+                        Number(sameStock),
+                    ])
+                )
+                : Object.fromEntries(
+                    sizes.map((size) => [
+                        size,
+                        Number(stockBySize[size] ?? 0),
+                    ])
+                ),
             imageUrl,
         };
 
@@ -536,6 +626,174 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 }
                             )}
                         </div>
+                    </div>
+
+                    {/* Stock */}
+                    <div className="mt-6">
+                        <div className="mb-2 flex items-center justify-between gap-4">
+                            <label
+                                className="
+                                    block
+                                    font-mono
+                                    text-[10px]
+                                    font-bold
+                                    uppercase
+                                    tracking-[0.12em]
+                                    text-zinc-400
+                                    light:text-zinc-700
+                                "
+                            >
+                                Stock
+                            </label>
+
+                            <label
+                                className="
+                                    flex
+                                    cursor-pointer
+                                    items-center
+                                    gap-2
+                                    font-mono
+                                    text-[9px]
+                                    font-bold
+                                    uppercase
+                                    tracking-[0.08em]
+                                    text-zinc-400
+                                    light:text-zinc-700
+                                "
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={sameStockForEverySize}
+                                    onChange={(event) =>
+                                        handleSameStockChange(
+                                            event.target.checked
+                                        )
+                                    }
+                                    className="
+                                        size-3.5
+                                        cursor-pointer
+                                        accent-second
+                                    "
+                                />
+
+                                Same stock for every size
+                            </label>
+                        </div>
+
+                        {sizes.length === 0 ? (
+                            <div
+                                className="
+                                    flex
+                                    min-h-11
+                                    items-center
+                                    border
+                                    border-dashed
+                                    border-zinc-800
+                                    px-4
+                                    font-mono
+                                    text-[10px]
+                                    text-zinc-500
+                                    light:border-zinc-300
+                                "
+                            >
+                                // Select sizes first to set stock
+                            </div>
+                        ) : sameStockForEverySize ? (
+                            <input
+                                type="number"
+                                min="0"
+                                value={sameStock}
+                                onChange={(event) =>
+                                    setSameStock(
+                                        event.target.value
+                                    )
+                                }
+                                className="
+                                    h-11
+                                    w-full
+                                    rounded-none
+                                    border
+                                    border-zinc-800
+                                    bg-dark
+                                    px-4
+                                    font-mono
+                                    text-sm
+                                    text-white
+                                    outline-none
+                                    focus:border-zinc-500
+                                    light:border-zinc-300
+                                    light:bg-white
+                                    light:text-zinc-900
+                                "
+                            />
+                        ) : (
+                            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                                {sizes.map((size) => (
+                                    <div
+                                        key={size}
+                                        className="
+                                            flex
+                                            h-11
+                                            border
+                                            border-zinc-800
+                                            bg-dark
+                                            light:border-zinc-300
+                                            light:bg-white
+                                        "
+                                    >
+                                        <div
+                                            className="
+                                                flex
+                                                w-12
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                border-r
+                                                border-zinc-800
+                                                font-mono
+                                                text-[10px]
+                                                font-bold
+                                                text-zinc-400
+                                                light:border-zinc-300
+                                                light:text-zinc-700
+                                            "
+                                        >
+                                            {size}
+                                        </div>
+
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={
+                                                stockBySize[
+                                                    size
+                                                ] ?? "0"
+                                            }
+                                            onChange={(event) =>
+                                                setStockBySize(
+                                                    (current) => ({
+                                                        ...current,
+                                                        [size]:
+                                                            event.target.value,
+                                                    })
+                                                )
+                                            }
+                                            className="
+                                                min-w-0
+                                                flex-1
+                                                bg-transparent
+                                                px-3
+                                                font-mono
+                                                text-sm
+                                                text-white
+                                                outline-none
+                                                light:text-zinc-900
+                                            "
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Image URL */}
