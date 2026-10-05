@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getDiscount } from "@/lib/Discount_Calculation_funcs";
+import { getDiscount } from "@/lib/order_helpers/Discount_Calculation_funcs";
 
 export async function POST(req: Request) {
     try {

@@ -1,8 +1,8 @@
 'use client'
 import { CartItemWithProductType } from '@/app/types/cartType';
 import { couponType } from '@/app/types/couponType';
-import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/cartAPIs'
-import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/Discount_Calculation_funcs';
+import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/order_helpers/cartAPIs'
+import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/order_helpers/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ArrowRight, ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -15,7 +15,7 @@ import localFont from "next/font/local";
 import { Octagon } from '@/app/components/Octagon';
 import { CartSkeleton } from '@/app/(Routes)/cart/CartSkeleton';
 import { useRouter } from 'next/navigation';
-import { validateCouponApi } from '@/lib/couponAPIs';
+import { validateCouponApi } from '@/lib/order_helpers/couponAPIs';
 
 
 type CouponProps = {
@@ -200,7 +200,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
     setAppliedCoupon(null);
   };
 
-  const handleApplyCoupon = async () => { 
+  const handleApplyCoupon = async () => {
     if (applyingCoupon) return;
 
     const code = couponInput.trim().toUpperCase();

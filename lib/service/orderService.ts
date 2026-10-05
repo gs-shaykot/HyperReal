@@ -1,6 +1,6 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
-import { getDiscount } from "@/lib/Discount_Calculation_funcs";
+import { getDiscount } from "@/lib/order_helpers/Discount_Calculation_funcs";
 import { CouponError } from "@/lib/errors/CouponError";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";

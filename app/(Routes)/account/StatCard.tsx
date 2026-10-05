@@ -12,7 +12,7 @@ export default function StatCard({
     icon,
 }: Props) {
     return (
-        <div className="border border-neutral-700 p-3 bg-[#0f0f0f] light:bg-white">
+        <div className="border border-neutral-700 p-3 bg-dark light:bg-white">
 
             {icon ? <div className="mb-2 text-lime-400">{icon}</div> : null}
 

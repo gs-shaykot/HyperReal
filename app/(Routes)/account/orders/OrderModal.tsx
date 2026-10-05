@@ -147,7 +147,7 @@ export const OrderModal = ({
                     <div>
                         {
                             order.orderItems.map((item) => (
-                                <div key={item.id} className='mb-2 bg-[#0f0f0f] light:bg-zinc-50 border-2 border-zinc-800 light:border-zinc-200 p-2 flex justify-between items-start rounded-sm'>
+                                <div key={item.id} className='mb-2 bg-dark light:bg-zinc-50 border-2 border-zinc-800 light:border-zinc-200 p-2 flex justify-between items-start rounded-sm'>
                                     <div className='flex items-start gap-3'>
                                         <img
                                             className="w-24 h-24 object-cover"
@@ -168,7 +168,7 @@ export const OrderModal = ({
                 </div>
 
                 {/* COST BREAKDOWN */}
-                <div className="p-5 pt-0 bg-[#0f0f0f] light:bg-zinc-50">
+                <div className="p-5 pt-0 bg-dark light:bg-zinc-50">
                     <div className='border-2 border-zinc-800 light:border-zinc-200 p-3'>
                         <h3 className='text-zinc-400 light:text-zinc-700 text-sm mb-3'>COST BREAKDOWN</h3>
                         <div className='flex justify-between items-center mt-2'>

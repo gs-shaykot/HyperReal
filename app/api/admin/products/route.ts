@@ -4,6 +4,40 @@ import { getAdminProducts } from "@/utils/AdminUtils/getAdminProducts";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+const productSelect = {
+    id: true,
+    name: true,
+    description: true,
+    price: true,
+    isAvailable: true,
+    totalSold: true,
+    totalLikes: true,
+    createdAt: true,
+
+    category: {
+        select: {
+            id: true,
+            name: true,
+        },
+    },
+
+    productImages: {
+        select: {
+            imageUrl: true,
+        },
+        take: 1,
+    },
+
+    productVariants: {
+        select: {
+            size: true,
+        },
+        orderBy: {
+            size: "asc" as const,
+        },
+    },
+};
+
 export async function GET(req: Request) {
     try {
         const session =
@@ -29,15 +63,87 @@ export async function GET(req: Request) {
             page,
         });
 
-        return NextResponse.json({
-            success: true,
-            data,
-        });
+        return NextResponse.json({ success: true, data, }, { status: 200 });
     } catch (error) {
         console.error("Admin products error:", error);
 
         return NextResponse.json(
             { success: false, message: "Failed to fetch products", }, { status: 500 }
+        );
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user || session.user.role !== "ADMIN") {
+            return NextResponse.json({ success: false, message: "Unauthorized", }, { status: 401 });
+        }
+
+        const body = await req.json();
+
+        const { name, description, price, categoryId, sizes = [], imageUrl = "", } = body;
+
+        if (
+            !name?.trim() ||
+            !description?.trim() ||
+            !categoryId ||
+            !Number.isFinite(price)
+        ) {
+            return NextResponse.json({ success: false, message: "Invalid product data.", }, { status: 400 });
+        }
+
+        const product =
+            await prisma.product.create({
+                data: {
+                    name: name.trim(),
+                    description:
+                        description.trim(),
+                    price: Number(price),
+                    categoryId,
+
+                    productImages:
+                        imageUrl.trim()
+                            ? {
+                                create: {
+                                    imageUrl: imageUrl.trim(),
+                                },
+                            }
+                            : undefined,
+
+                    productVariants: sizes.length > 0 ? {
+                        create: sizes.map(
+                            (size: string) => ({
+                                size,
+                                color: "Carbon Void",
+                                stock: 0,
+                            })
+                        ),
+                    }
+                        : undefined,
+                },
+
+                select: productSelect,
+            });
+
+        return Response.json({
+            success: true,
+            data: product,
+        });
+    } catch (error) {
+        console.error(
+            "Add admin product error:",
+            error
+        );
+
+        return Response.json(
+            {
+                success: false,
+                message:
+                    "Failed to add product.",
+            },
+            { status: 500 }
         );
     }
 }

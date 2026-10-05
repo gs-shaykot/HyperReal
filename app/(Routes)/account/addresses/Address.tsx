@@ -3,7 +3,7 @@ import AddressModal from '@/app/(Routes)/account/addresses/AddressModal';
 import { AddressSkeleton } from '@/app/components/skeletons/AddressSkeleton';
 import { useMakePrimary } from '@/app/Hooks/useAddress';
 import { AddressType } from '@/app/types/AddressType';
-import { getAddresses } from '@/lib/addressApi';
+import { getAddresses } from '@/lib/account_helpers/addressApi';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, Phone, Plus, Star, Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
@@ -44,7 +44,7 @@ export const Address = () => {
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         {
                             addresses?.map((address: AddressType, idx: any) => (
-                                <div key={idx} className={`border ${address.isDefault ? 'border-second' : 'border-zinc-700 light:border-zinc-300'} bg-[#0f0f0f] light:bg-white flex flex-col h-full relative transition-colors duration-200`}>
+                                <div key={idx} className={`border ${address.isDefault ? 'border-second' : 'border-zinc-700 light:border-zinc-300'} bg-dark light:bg-white flex flex-col h-full relative transition-colors duration-200`}>
                                     <div className='p-3 flex gap-2 items-start'>
                                         <MapPin size={20} className='inline text-second mt-1.5' />
                                         <div className='space-y-1.5 flex-1'>
@@ -93,7 +93,7 @@ export const Address = () => {
                         }
                     </div>
                 ) : (
-                    <div className='p-4 border border-dashed border-zinc-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white h-52 flex justify-center items-center flex-col gap-4'>
+                    <div className='p-4 border border-dashed border-zinc-700 light:border-zinc-300 bg-dark light:bg-white h-52 flex justify-center items-center flex-col gap-4'>
                         <MapPin className='light:text-zinc-700 text-zinc-400' />
                         <p className='light:text-zinc-600 text-zinc-400'>No saved drop locations yet.</p>
 

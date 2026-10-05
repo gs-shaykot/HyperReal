@@ -1,7 +1,7 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { CouponError } from "@/lib/errors/CouponError";
-import { generateCustomId } from "@/lib/generateCustomId";
+import { generateCustomId } from "@/lib/order_helpers/generateCustomId";
 import prisma from "@/lib/prisma";
 import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
 import { calculateOrder } from "@/lib/service/orderService";

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ProductsToolbar } from "./ProductsToolbar";
 import { ProductsTable } from "./ProductsTable";
 import { ProductsPagination } from "./ProductsPagination";
+import axios from "axios";
 
 type Category = {
     id: string;
@@ -24,14 +25,11 @@ export const AdminProducts = ({
     initialTotalPages,
     categories,
 }: AdminProductsProps) => {
-    const [search, setSearch] =
-        useState("");
+    const [search, setSearch] = useState("");
 
-    const [category, setCategory] =
-        useState("");
+    const [category, setCategory] = useState("");
 
-    const [page, setPage] =
-        useState(1);
+    const [page, setPage] = useState(1);
 
     const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -61,53 +59,32 @@ export const AdminProducts = ({
             const params = new URLSearchParams();
 
             if (debouncedSearch) {
-                params.set(
-                    "search",
-                    debouncedSearch
-                );
+                params.set("search", debouncedSearch);
             }
 
             if (category) {
-                params.set(
-                    "category",
-                    category
-                );
+                params.set("category", category);
             }
 
-            params.set(
-                "page",
-                String(page)
-            );
+            params.set("page", String(page));
 
-            const response =
-                await fetch(`/api/admin/products?${params}`);
-
-            if (!response.ok) {
-                throw new Error(
-                    "Failed to fetch products"
-                );
+            const res = await axios.get(`/api/admin/products?${params}`);
+            if (res.status !== 200) {
+                throw new Error("Failed to fetch products");
             }
-
-            const result = await response.json();
-
-            return result.data;
+  
+            return res.data.data;
         },
 
-        /*
-         * First page already came from SSR.
-         */
         initialData:
             page === 1 &&
                 !debouncedSearch &&
                 !category
                 ? {
-                    products:
-                        initialProducts,
-                    total:
-                        initialTotal,
+                    products: initialProducts,
+                    total: initialTotal,
                     page: 1,
-                    totalPages:
-                        initialTotalPages,
+                    totalPages: initialTotalPages,
                 }
                 : undefined,
 
@@ -115,8 +92,6 @@ export const AdminProducts = ({
     });
 
     const products = data?.products ?? initialProducts;
-
-    const total = data?.total ?? initialTotal;
 
     const totalPages = data?.totalPages ?? initialTotalPages;
 

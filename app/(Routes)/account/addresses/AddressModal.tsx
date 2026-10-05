@@ -1,6 +1,6 @@
 "use client";
 import { useAddress } from "@/app/Hooks/useAddress";
-import { getAddresses } from "@/lib/addressApi";
+import { getAddresses } from "@/lib/account_helpers/addressApi";
 import { useQuery } from "@tanstack/react-query";
 import { on } from "events";
 import { X, Save } from "lucide-react";

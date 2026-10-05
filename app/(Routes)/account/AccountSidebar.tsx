@@ -37,7 +37,7 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
   return (
     <div className="w-full lg:sticky lg:top-19.5 lg:self-start">
       {/* Menu */}
-      <div className='w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 mb-3'>
+      <div className='w-full bg-dark light:bg-white border border-zinc-800 p-2 mb-3'>
         <ul className='scrollbar-hidden flex flex-row flex-nowrap gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0'>
           {menus.map((menu) => (
             <li key={menu.title} className='shrink-0 lg:w-full'>
@@ -57,7 +57,7 @@ export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: numbe
       </div>
 
       {/* Stats */}
-      <div className='hidden w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 p-2 lg:block'>
+      <div className='hidden w-full bg-dark light:bg-white border border-zinc-800 p-2 lg:block'>
         <ul>
           <li className="p-2 py-3 border-b border-zinc-800">
             <h2 className="mb-2 text-white light:text-zinc-800">TOTAL SPENT</h2>

@@ -1,4 +1,4 @@
-import { generateCustomId } from '@/lib/generateCustomId';
+import { generateCustomId } from '@/lib/order_helpers/generateCustomId';
 import prisma from '@/lib/prisma';
 import { OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 
@@ -52,7 +52,7 @@ export async function completePayment(
         receiptUrl?: string;
     },
     paymentMethod?: string
-) { 
+) {
     const payment = order.payments[0];
 
     if (payment && payment.status === PaymentStatus.SUCCESS) {

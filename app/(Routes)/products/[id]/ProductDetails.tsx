@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { useWishlist } from '@/app/Hooks/useWishlist';
 import { useQuery } from '@tanstack/react-query';
-import { Getwishlist } from '@/lib/wishlistAPI';
+import { Getwishlist } from '@/lib/account_helpers/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
     const { data: session } = useSession();

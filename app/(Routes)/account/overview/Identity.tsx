@@ -1,7 +1,7 @@
 'use client'
 import { EmailVerification } from '@/app/(Routes)/account/overview/EmailVerification';
 import { useProfile } from '@/app/Hooks/useProfile';
-import { getProfile } from '@/lib/profileApi';
+import { getProfile } from '@/lib/account_helpers/profileApi';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Mail, Phone, Save, Shield, SquarePen, User, X } from 'lucide-react'
@@ -49,7 +49,7 @@ export const Identity = () => {
 
     if (isLoading) {
         return (
-            <div className="border border-neutral-700 bg-[#0f0f0f] p-5 animate-pulse">
+            <div className="border border-neutral-700 bg-dark p-5 animate-pulse">
                 <div className="flex justify-between items-center mb-6">
                     <div className="h-6 w-44 bg-zinc-800 rounded" />
                     <div className="h-9 w-20 bg-zinc-800 rounded" />
@@ -140,10 +140,10 @@ export const Identity = () => {
         finally {
             setIsSendingOtp(false);
         }
-    }; 
+    };
 
     return (
-        <div className="border border-neutral-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white p-3">
+        <div className="border border-neutral-700 light:border-zinc-300 bg-dark light:bg-white p-3">
             <div className="flex justify-between items-start mb-3">
                 <h2 className="text-xl font-bold light:text-zinc-900 text-white">
                     IDENTITY MATRIX
@@ -234,7 +234,7 @@ export const Identity = () => {
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-dark light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
                         )
                     }
                 </div>
@@ -268,7 +268,7 @@ export const Identity = () => {
                             <input type="text" onChange={(e) => {
                                 setOtpSent(false);
                                 setFormData({ ...formData, email: e.target.value });
-                            }} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0 disabled:cursor-not-allowed disabled:opacity-80" />
+                            }} readOnly={!(isEditing && profile?.authProvider === "EMAIL")} value={formData.email} placeholder="Medium" className="input input-md w-full bg-dark light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0 disabled:cursor-not-allowed disabled:opacity-80" />
                         )
                     }
                 </div>
@@ -288,7 +288,7 @@ export const Identity = () => {
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, phone: e.target.value })} value={formData.phone || "+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-[#0f0f0f] light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, phone: e.target.value })} value={formData.phone || "+8801XXXXXXXXX"} placeholder="Medium" className="input input-md w-full bg-dark light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
                         )
                     }
                 </div>

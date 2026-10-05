@@ -160,7 +160,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                     {settingsSections.map(({ icon: SectionIcon, label, description, rows }, idx) => (
                         <div key={label}>
                             <div
-                                className="grid overflow-hidden border border-[#2a2d30] light:border-black bg-[#0f0f0f] light:bg-white md:grid-cols-[250px_minmax(0,1fr)]"
+                                className="grid overflow-hidden border border-[#2a2d30] light:border-black bg-dark light:bg-white md:grid-cols-[250px_minmax(0,1fr)]"
                             >
                                 <div className="flex items-start gap-4 border-b border-[#2a2d30] light:border-black p-5 md:border-b-0 md:border-r">
                                     <div className="flex h-8 w-8 items-center justify-center rounded-full text-second">
@@ -257,7 +257,7 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                         )
                     }
 
-                    <div className="grid overflow-hidden border border-[#2a2d30] light:border-black bg-[#0f0f0f] light:bg-white md:grid-cols-[250px_minmax(0,1fr)]">
+                    <div className="grid overflow-hidden border border-[#2a2d30] light:border-black bg-dark light:bg-white md:grid-cols-[250px_minmax(0,1fr)]">
                         <div className="flex items-center gap-3 border-b border-[#2a2d30] light:border-black p-5 md:border-b-0 md:border-r">
                             <div className="flex h-8 w-8 items-center justify-center rounded-full text-second">
                                 <HelpCircle size={24} strokeWidth={2.2} />

@@ -1,5 +1,5 @@
 import { CartItemType } from "@/app/types/cartType";
-import { addToCartApi } from "@/lib/cartAPIs";
+import { addToCartApi } from "@/lib/order_helpers/cartAPIs";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 

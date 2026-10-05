@@ -1,6 +1,6 @@
 'use client'
 import LogoutButton from '@/app/components/LogoutButton';
-import { getProfile } from '@/lib/profileApi';
+import { getProfile } from '@/lib/account_helpers/profileApi';
 import { useQuery } from '@tanstack/react-query';
 import { LogOut } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react'
@@ -16,7 +16,7 @@ export const AccountHeader = () => {
     });
 
     return (
-        <div className='relative flex-col md:flex-row flex justify-between items-center px-4 md:py-6 py-3 bg-[#0f0f0f] light:bg-white shadow-2xl border-t-3 border-second overflow-hidden mt-8'> 
+        <div className='relative flex-col md:flex-row flex justify-between items-center px-4 md:py-6 py-3 bg-dark light:bg-white shadow-2xl border-t-3 border-second overflow-hidden mt-8'>
             <div className='w-full md:w-auto flex gap-5  md:justify-start items-center'>
                 <div className='w-28 h-28 bg-second overflow-hidden'>
                     <Image src={session?.user?.image || '/default-image.jpg'} alt="User Image" width={112} height={112} />

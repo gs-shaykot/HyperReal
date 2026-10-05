@@ -1,5 +1,5 @@
 import { wishlist } from "@/app/types/Product";
-import { DeleteWishlist, Postwishlist } from "@/lib/wishlistAPI";
+import { DeleteWishlist, Postwishlist } from "@/lib/account_helpers/wishlistAPI";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -8,7 +8,7 @@ export const useWishlist = () => {
 
     const toggleWishlistMutation = useMutation({
         mutationKey: ["wishlist"],
-        mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => { 
+        mutationFn: ({ productId, isWishlisted, variantId }: { productId: string; isWishlisted: boolean; variantId: string }) => {
 
             if (isWishlisted) {
                 return DeleteWishlist({ productId });

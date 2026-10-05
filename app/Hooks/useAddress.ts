@@ -1,5 +1,5 @@
 import { AddressType } from "@/app/types/AddressType";
-import { addAddress, makePrimaryAddress } from "@/lib/addressApi";
+import { addAddress, makePrimaryAddress } from "@/lib/account_helpers/addressApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -9,7 +9,7 @@ export const useAddress = () => {
     const addressMutation = useMutation({
         mutationKey: ["address"],
         mutationFn: addAddress,
-        onMutate: async (newAddress) => { 
+        onMutate: async (newAddress) => {
             await queryClient.cancelQueries({ queryKey: ['address'] });
 
             const previousAddress = queryClient.getQueryData(['address']);

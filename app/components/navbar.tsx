@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
-import { countCartItems } from "@/lib/cartAPIs"
-import { getProfile } from "@/lib/profileApi"
+import { countCartItems } from "@/lib/order_helpers/cartAPIs"
+import { getProfile } from "@/lib/account_helpers/profileApi"
 
 export const Navbar = () => {
     const { data: session } = useSession();
@@ -18,7 +18,7 @@ export const Navbar = () => {
         enabled: !!session?.user?.id,
     });
 
-    
+
     const navLinks =
         <>
             <li><Link href="/products" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>Shop All</Link></li>

@@ -1,4 +1,4 @@
-import { ClearWishlist } from "@/lib/wishlistAPI";
+import { ClearWishlist } from "@/lib/account_helpers/wishlistAPI";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 

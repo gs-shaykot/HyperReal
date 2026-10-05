@@ -1,4 +1,4 @@
-import { ProfileEdit } from "@/lib/profileApi";
+import { ProfileEdit } from "@/lib/account_helpers/profileApi";
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast";
 

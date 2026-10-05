@@ -58,7 +58,7 @@ export default async function OverviewPage() {
 
       <Identity />
 
-      <div className="border border-neutral-700 bg-[#0f0f0f] light:bg-white p-6">
+      <div className="border border-neutral-700 bg-dark light:bg-white p-6">
 
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">
@@ -78,7 +78,7 @@ export default async function OverviewPage() {
               {
                 orders.map((order) => (
                   <div key={order.id} className="flex justify-between items-center border border-zinc-800 hover:border-second p-3 mb-2">
-                    
+
                     <div className="flex items-center gap-3">
                       <Clock size={18} className="text-second" />
                       <div>

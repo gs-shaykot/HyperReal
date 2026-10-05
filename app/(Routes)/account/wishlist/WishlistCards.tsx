@@ -4,7 +4,7 @@ import { useCart } from '@/app/Hooks/useCart'
 import { useClearWishlist } from '@/app/Hooks/useClearWishlist'
 import { useWishlist } from '@/app/Hooks/useWishlist'
 import { wishlistWithProduct } from '@/app/types/Product'
-import { Getwishlist } from '@/lib/wishlistAPI'
+import { Getwishlist } from '@/lib/account_helpers/wishlistAPI'
 import { useQuery } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
@@ -142,7 +142,7 @@ export const WishlistCards = () => {
                     </div>
                 )
                     : (
-                        <div className='p-4 border border-dashed border-zinc-700 light:border-zinc-300 bg-[#0f0f0f] light:bg-white h-52 flex justify-center items-center flex-col gap-4'>
+                        <div className='p-4 border border-dashed border-zinc-700 light:border-zinc-300 bg-dark light:bg-white h-52 flex justify-center items-center flex-col gap-4'>
                             <Heart className='light:text-zinc-700 text-zinc-400' />
                             <p className='light:text-zinc-600 text-zinc-400'>Your wishlist is empty. Tap the heart on any product to save it here.</p>
                             <Link href="/products" className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
