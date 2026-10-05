@@ -63,6 +63,7 @@ export async function getAdminProducts({
                 id: true,
                 name: true,
                 price: true,
+                description: true,
                 isAvailable: true,
                 totalSold: true,
                 totalLikes: true,
@@ -97,7 +98,7 @@ export async function getAdminProducts({
             where,
         }),
     ]);
-    
+
     const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE));
 
     return {

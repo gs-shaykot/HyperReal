@@ -1,15 +1,15 @@
-"use client"; 
+"use client";
 import { AdminProduct } from "@/app/types/AdminProduct";
 import { ProductRow } from "./ProductRow";
+import { Category } from "@/app/components/admin_component/products/ProductsToolbar";
 
 type ProductsTableProps = {
     products: AdminProduct[];
+    categories: Category[];
 };
 
-export const ProductsTable = ({
-    products,
-}: ProductsTableProps) => {
-    
+export const ProductsTable = ({ products, categories }: ProductsTableProps) => {
+
     return (
         <div className="overflow-x-auto border border-zinc-800 light:border-zinc-200">
             <table className="w-full min-w-205 border-collapse">
@@ -45,6 +45,7 @@ export const ProductsTable = ({
                     {products.length > 0 ? (
                         products.map((product) => (
                             <ProductRow
+                                categories={categories}
                                 key={product.id}
                                 product={product}
                             />

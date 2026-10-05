@@ -141,6 +141,7 @@ export const AdminProducts = ({
                 )}
 
                 <ProductsTable
+                    categories={categories}
                     products={products}
                 />
             </div>

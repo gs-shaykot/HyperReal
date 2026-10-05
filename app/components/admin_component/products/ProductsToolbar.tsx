@@ -2,7 +2,7 @@
 
 import { ChevronDown, Funnel, Search } from "lucide-react";
 
-type Category = {
+export type Category = {
     id: string;
     name: string;
 };

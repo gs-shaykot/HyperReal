@@ -1,6 +1,7 @@
 export type AdminProduct = {
     id: string;
     name: string;
+    description: string;
     price: number;
     isAvailable: boolean;
     totalSold: number;
