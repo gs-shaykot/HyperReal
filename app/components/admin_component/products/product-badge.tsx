@@ -1,6 +1,6 @@
 type ProductBadgeProps = {
     totalSold: number;
-    createdAt: Date;
+    createdAt: Date | string;
     isAvailable: boolean;
 };
 

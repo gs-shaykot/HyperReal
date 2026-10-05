@@ -9,6 +9,7 @@ type ProductsTableProps = {
 export const ProductsTable = ({
     products,
 }: ProductsTableProps) => {
+    
     return (
         <div className="overflow-x-auto border border-zinc-800 light:border-zinc-200">
             <table className="w-full min-w-205 border-collapse">
