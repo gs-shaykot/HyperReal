@@ -70,13 +70,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
     const [sizes, setSizes] = useState<string[]>([]);
 
     const [imageUrl, setImageUrl] = useState("");
-
-    /*
-     * Fill the form when editing.
-     *
-     * When product is undefined, all fields
-     * are reset for Add Product.
-     */
+ 
     useEffect(() => {
         if (product) {
             setName(product.name ?? "");
