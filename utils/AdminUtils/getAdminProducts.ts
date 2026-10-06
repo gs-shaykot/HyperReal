@@ -75,21 +75,29 @@ export async function getAdminProducts({
                         name: true,
                     },
                 },
-
                 productImages: {
                     select: {
                         imageUrl: true,
+                        color: true,
                     },
-                    take: 1,
                 },
-
                 productVariants: {
                     select: {
+                        id: true,
                         size: true,
+                        color: true,
+                        stock: true,
+                        hex: true,
                     },
-                    orderBy: {
-                        size: "asc",
-                    },
+
+                    orderBy: [
+                        {
+                            color: "asc",
+                        },
+                        {
+                            size: "asc",
+                        },
+                    ],
                 },
             },
         }),

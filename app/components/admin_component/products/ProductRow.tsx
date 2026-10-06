@@ -145,7 +145,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                                 (variant) => variant.size
                             )
                         )
-                    ), 
+                    ),
                 }}
                 categories={categories}
             />

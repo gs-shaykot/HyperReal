@@ -102,6 +102,7 @@ model ProductVariant {
   productId  String
   size       String
   color      String
+  hex        String?
   stock      Int
   cartItems  CartItem[]
   orderItems OrderItem[]

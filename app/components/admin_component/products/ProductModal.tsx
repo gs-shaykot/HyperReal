@@ -20,14 +20,19 @@ type ProductColor = {
 };
 
 export type ProductModalData = {
+    id?: string;
+
     name?: string;
     category?: Category;
     price?: number;
     description?: string;
     badge?: string;
+
     sizes?: string[];
+
     stock?: number;
     stockBySize?: Record<string, number>;
+
     colors?: ProductColor[];
 };
 
@@ -116,11 +121,21 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
             setSizes(productSizes);
 
-            setSameStockForEverySize(true);
+            const existingStockBySize = product.stockBySize ?? {};
+
+            const stockValues = Object.values(existingStockBySize);
+
+            const allStocksAreSame =
+                stockValues.length > 0 &&
+                stockValues.every(
+                    (stock) => stock === stockValues[0]
+                );
+
+            setSameStockForEverySize(allStocksAreSame);
 
             setSameStock(
-                product.stock !== undefined
-                    ? String(product.stock)
+                allStocksAreSame && stockValues.length > 0
+                    ? String(stockValues[0])
                     : ""
             );
 
@@ -371,7 +386,9 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             description,
             badge,
             sizes,
+
             stock: sameStockForEverySize ? Number(sameStock) : undefined,
+
             stockBySize: sameStockForEverySize
                 ? Object.fromEntries(
                     sizes.map((size) => [
@@ -385,7 +402,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         Number(stockBySize[size] ?? 0),
                     ])
                 ),
-            colors
+            colors,
         };
 
         console.log(
