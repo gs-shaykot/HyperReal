@@ -74,15 +74,7 @@ export const OrderModal = ({
                         </h2>
                         {currentStatus && StatusIcon && (
                             <span
-                                className={`
-                                    flex items-center
-                                    text-xs
-                                    border
-                                    ${currentStatus.classname}
-                                    p-1
-                                    rounded-full
-                                    shrink-0
-                                `}
+                                className={` flex items-center text-xs border ${currentStatus.classname} p-1 rounded-full shrink-0 `}
                             >
                                 <StatusIcon className="h-4 w-4 inline-block mr-1" />
 
@@ -118,15 +110,7 @@ export const OrderModal = ({
 
                     <div className="w-full h-2 bg-zinc-800 light:bg-zinc-200 overflow-hidden mb-2">
                         <div
-                            className={`
-                                h-full
-                                transition-all
-                                duration-500
-                                ${order.status === "CANCELLED"
-                                    ? "bg-red-500"
-                                    : "bg-second"
-                                }
-                            `}
+                            className={` h-full transition-all duration-500 ${order.status === "CANCELLED" ? "bg-red-500" : "bg-second" } `}
                             style={{
                                 width: `${currentStatus?.percentage ?? 0}%`
                             }}

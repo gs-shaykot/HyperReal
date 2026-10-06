@@ -409,41 +409,14 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
     return createPortal(
         <dialog className="modal modal-open">
             <div
-                className="
-                    modal-box
-                    max-w-3xl
-                    rounded-none
-                    border
-                    border-zinc-800
-                    bg-main
-                    p-0
-                    text-white
-                    shadow-xl
-                    light:bg-white
-                    light:text-zinc-900
-                "
+                className="modal-box max-w-3xl rounded-none border border-zinc-800 bg-main p-0 text-white shadow-xl light:bg-white light:text-zinc-900"
             >
                 {/* Header */}
                 <div
-                    className="
-                        flex
-                        items-center
-                        justify-between
-                        border-b
-                        border-zinc-800
-                        px-6
-                        py-4
-                        light:border-zinc-300
-                    "
+                    className="flex items-center justify-between border-b border-zinc-800 px-6 py-4 light:border-zinc-300"
                 >
                     <h2
-                        className="
-                            font-mono
-                            text-base
-                            font-bold
-                            uppercase
-                            tracking-[0.12em]
-                        "
+                        className="font-mono text-base font-bold uppercase tracking-[0.12em]"
                     >
                         {isEdit
                             ? "EDIT PRODUCT"
@@ -453,13 +426,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <button
                         type="button"
                         onClick={onCloseAction}
-                        className="
-                            text-zinc-400
-                            transition-colors
-                            hover:text-white
-                            light:hover:text-zinc-900
-                            cursor-pointer
-                        "
+                        className="text-zinc-400 transition-colors hover:text-white light:hover:text-zinc-900 cursor-pointer"
                     >
                         <X className="size-4" />
                     </button>
@@ -473,17 +440,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     {/* Product Name */}
                     <div>
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-mono
-                                text-[10px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-zinc-400
-                                light:text-zinc-700
-                            "
+                            className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                         >
                             Product Name *
                         </label>
@@ -496,23 +453,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 )
                             }
                             required
-                            className="
-                                h-12
-                                w-full
-                                rounded-none
-                                border
-                                border-zinc-800
-                                bg-dark
-                                px-4
-                                font-mono
-                                text-sm
-                                text-white
-                                outline-none
-                                focus:border-zinc-500
-                                light:border-zinc-300
-                                light:bg-white
-                                light:text-zinc-900
-                            "
+                            className="h-12 w-full rounded-none border border-zinc-800 bg-dark px-4 font-mono text-sm text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                         />
                     </div>
 
@@ -520,17 +461,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
                             <label
-                                className="
-                                    mb-2
-                                    block
-                                    font-mono
-                                    text-[10px]
-                                    font-bold
-                                    uppercase
-                                    tracking-[0.12em]
-                                    text-zinc-400
-                                    light:text-zinc-700
-                                "
+                                className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                             >
                                 Category *
                             </label>
@@ -543,23 +474,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                     )
                                 }
                                 required
-                                className="
-                                    h-12
-                                    w-full
-                                    rounded-none
-                                    border
-                                    border-zinc-800
-                                    bg-dark
-                                    px-4
-                                    font-mono
-                                    text-sm
-                                    text-white
-                                    outline-none
-                                    focus:border-zinc-500
-                                    light:border-zinc-300
-                                    light:bg-white
-                                    light:text-zinc-900
-                                "
+                                className="h-12 w-full rounded-none border border-zinc-800 bg-dark px-4 font-mono text-sm text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                             >
                                 <option value="">
                                     Select category
@@ -577,17 +492,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
                         <div>
                             <label
-                                className="
-                                    mb-2
-                                    block
-                                    font-mono
-                                    text-[10px]
-                                    font-bold
-                                    uppercase
-                                    tracking-[0.12em]
-                                    text-zinc-400
-                                    light:text-zinc-700
-                                "
+                                className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                             >
                                 Price (USD) *
                             </label>
@@ -603,23 +508,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                     )
                                 }
                                 required
-                                className="
-                                    h-12
-                                    w-full
-                                    rounded-none
-                                    border
-                                    border-zinc-800
-                                    bg-dark
-                                    px-4
-                                    font-mono
-                                    text-sm
-                                    text-white
-                                    outline-none
-                                    focus:border-zinc-500
-                                    light:border-zinc-300
-                                    light:bg-white
-                                    light:text-zinc-900
-                                "
+                                className="h-12 w-full rounded-none border border-zinc-800 bg-dark px-4 font-mono text-sm text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                             />
                         </div>
                     </div>
@@ -627,17 +516,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     {/* Description */}
                     <div className="mt-5">
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-mono
-                                text-[10px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-zinc-400
-                                light:text-zinc-700
-                            "
+                            className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                         >
                             Description *
                         </label>
@@ -651,42 +530,14 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                             }
                             required
                             rows={4}
-                            className="
-                                w-full
-                                resize-none
-                                rounded-none
-                                border
-                                border-zinc-800
-                                bg-dark
-                                px-4
-                                py-3
-                                font-mono
-                                text-sm
-                                leading-relaxed
-                                text-white
-                                outline-none
-                                focus:border-zinc-500
-                                light:border-zinc-300
-                                light:bg-white
-                                light:text-zinc-900
-                            "
+                            className="w-full resize-none rounded-none border border-zinc-800 bg-dark px-4 py-3 font-mono text-sm leading-relaxed text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                         />
                     </div>
 
                     {/* Badge */}
                     <div className="mt-6">
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-mono
-                                text-[10px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-zinc-400
-                                light:text-zinc-700
-                            ">
+                            className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700">
                             Badge
                         </label>
 
@@ -697,23 +548,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         key={item}
                                         type="button"
                                         onClick={() => setBadge(badge === item ? "" : item)}
-                                        className={`
-                                            h-8
-                                            border
-                                            px-3
-                                            font-mono
-                                            text-[9px]
-                                            font-bold
-                                            uppercase
-                                            tracking-wider
-                                            transition-colors
-                                            cursor-pointer
-                                            ${badge ===
-                                                item
-                                                ? "border-second bg-second text-black"
-                                                : "border-zinc-800 text-zinc-400 hover:border-zinc-500"
-                                            }
-                                        `}
+                                        className={` h-8 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${badge === item ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500" } `}
                                     >
                                         {item}
                                     </button>
@@ -725,17 +560,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     {/* Sizes */}
                     <div className="mt-6">
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-mono
-                                text-[10px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-zinc-400
-                                light:text-zinc-700
-                            "
+                            className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                         >
                             Sizes
                         </label>
@@ -753,21 +578,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 size
                                             )
                                         }
-                                        className={`
-                                                min-w-11
-                                                h-8
-                                                border
-                                                px-3
-                                                font-mono
-                                                text-[9px]
-                                                font-bold
-                                                transition-colors
-                                                cursor-pointer
-                                                ${selected
-                                                ? "border-second bg-second text-black"
-                                                : "border-zinc-800 text-zinc-400 hover:border-zinc-500"
-                                            }
-                                            `}
+                                        className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500" } `}
                                     >
                                         {size}
                                     </button>
@@ -781,44 +592,19 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <div className="mt-6">
                         <div className="mb-2 flex items-center justify-between gap-4">
                             <label
-                                className="
-                                    block
-                                    font-mono
-                                    text-[10px]
-                                    font-bold
-                                    uppercase
-                                    tracking-[0.12em]
-                                    text-zinc-400
-                                    light:text-zinc-700
-                                "
+                                className="block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                             >
                                 Stock
                             </label>
 
                             <label
-                                className="
-                                    flex
-                                    cursor-pointer
-                                    items-center
-                                    gap-2
-                                    font-mono
-                                    text-[9px]
-                                    font-bold
-                                    uppercase
-                                    tracking-[0.08em]
-                                    text-zinc-400
-                                    light:text-zinc-700
-                                "
+                                className="flex cursor-pointer items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-zinc-400 light:text-zinc-700"
                             >
                                 <input
                                     type="checkbox"
                                     checked={sameStockForEverySize}
                                     onChange={(event) => handleSameStockChange(event.target.checked)}
-                                    className="
-                                        size-3.5
-                                        cursor-pointer
-                                        accent-second
-                                    "
+                                    className="size-3.5 cursor-pointer accent-second"
                                 />
 
                                 Same stock for every size
@@ -827,19 +613,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
                         {sizes.length === 0 ? (
                             <div
-                                className="
-                                    flex
-                                    min-h-11
-                                    items-center
-                                    border
-                                    border-dashed
-                                    border-zinc-800
-                                    px-4
-                                    font-mono
-                                    text-[10px]
-                                    text-zinc-500
-                                    light:border-zinc-300
-                                "
+                                className="flex min-h-11 items-center border border-dashed border-zinc-800 px-4 font-mono text-[10px] text-zinc-500 light:border-zinc-300"
                             >
                                 // Select sizes first to set stock
                             </div>
@@ -853,55 +627,17 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         event.target.value
                                     )
                                 }
-                                className="
-                                    h-11
-                                    w-full
-                                    rounded-none
-                                    border
-                                    border-zinc-800
-                                    bg-dark
-                                    px-4
-                                    font-mono
-                                    text-sm
-                                    text-white
-                                    outline-none
-                                    focus:border-zinc-500
-                                    light:border-zinc-300
-                                    light:bg-white
-                                    light:text-zinc-900
-                                "
+                                className="h-11 w-full rounded-none border border-zinc-800 bg-dark px-4 font-mono text-sm text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                             />
                         ) : (
                             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                                 {sizes.map((size) => (
                                     <div
                                         key={size}
-                                        className="
-                                            flex
-                                            h-11
-                                            border
-                                            border-zinc-800
-                                            bg-dark
-                                            light:border-zinc-300
-                                            light:bg-white
-                                        "
+                                        className="flex h-11 border border-zinc-800 bg-dark light:border-zinc-300 light:bg-white"
                                     >
                                         <div
-                                            className="
-                                                flex
-                                                w-12
-                                                shrink-0
-                                                items-center
-                                                justify-center
-                                                border-r
-                                                border-zinc-800
-                                                font-mono
-                                                text-[10px]
-                                                font-bold
-                                                text-zinc-400
-                                                light:border-zinc-300
-                                                light:text-zinc-700
-                                            "
+                                            className="flex w-12 shrink-0 items-center justify-center border-r border-zinc-800 font-mono text-[10px] font-bold text-zinc-400 light:border-zinc-300 light:text-zinc-700"
                                         >
                                             {size}
                                         </div>
@@ -922,17 +658,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                     })
                                                 )
                                             }
-                                            className="
-                                                min-w-0
-                                                flex-1
-                                                bg-transparent
-                                                px-3
-                                                font-mono
-                                                text-sm
-                                                text-white
-                                                outline-none
-                                                light:text-zinc-900
-                                            "
+                                            className="min-w-0 flex-1 bg-transparent px-3 font-mono text-sm text-white outline-none light:text-zinc-900"
                                         />
                                     </div>
                                 ))}
@@ -944,16 +670,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <div className="mt-6">
                         <div className="mb-2 flex items-center justify-between">
                             <label
-                                className="
-                block
-                font-mono
-                text-[10px]
-                font-bold
-                uppercase
-                tracking-[0.12em]
-                text-zinc-400
-                light:text-zinc-700
-            "
+                                className="block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700"
                             >
                                 Colors
                             </label>
@@ -961,20 +678,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                             <button
                                 type="button"
                                 onClick={handleAddColor}
-                                className="
-                flex
-                cursor-pointer
-                items-center
-                gap-1
-                font-mono
-                text-[9px]
-                font-bold
-                uppercase
-                tracking-[0.08em]
-                text-second
-                transition-opacity
-                hover:opacity-80
-            "
+                                className="flex cursor-pointer items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-[0.08em] text-second transition-opacity hover:opacity-80"
                             >
                                 <Plus className="size-3" />
                                 Add Color
@@ -983,19 +687,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
                         {colors.length === 0 ? (
                             <div
-                                className="
-                flex
-                min-h-11
-                items-center
-                border
-                border-dashed
-                border-zinc-800
-                px-4
-                font-mono
-                text-[10px]
-                text-zinc-500
-                light:border-zinc-300
-            "
+                                className="flex min-h-11 items-center border border-dashed border-zinc-800 px-4 font-mono text-[10px] text-zinc-500 light:border-zinc-300"
                             >
             // No colors — product will use default palette
                             </div>
@@ -1004,19 +696,10 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 {colors.map((color) => (
                                     <div
                                         key={color.id}
-                                        className="
-                        border
-                        border-zinc-800
-                        p-2
-                        light:border-zinc-300
-                    "
+                                        className="border border-zinc-800 p-2 light:border-zinc-300"
                                     >
                                         <div
-                                            className="
-                            flex
-                            items-center
-                            gap-2
-                        "
+                                            className="flex items-center gap-2"
                                         >
                                             {/* Color Picker */}
                                             <input
@@ -1028,15 +711,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                         event.target.value
                                                     )
                                                 }
-                                                className="
-                                size-9
-                                shrink-0
-                                cursor-pointer
-                                border
-                                border-zinc-700
-                                bg-transparent
-                                p-0
-                            "
+                                                className="size-9 shrink-0 cursor-pointer border border-zinc-700 bg-transparent p-0"
                                             />
 
                                             {/* Color Name */}
@@ -1051,46 +726,12 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 }
                                                 placeholder="Color name"
                                                 required
-                                                className="
-                                h-9
-                                min-w-0
-                                flex-1
-                                rounded-none
-                                border
-                                border-zinc-800
-                                bg-dark
-                                px-3
-                                font-mono
-                                text-[10px]
-                                text-white
-                                outline-none
-                                focus:border-zinc-500
-                                light:border-zinc-300
-                                light:bg-white
-                                light:text-zinc-900
-                            "
+                                                className="h-9 min-w-0 flex-1 rounded-none border border-zinc-800 bg-dark px-3 font-mono text-[10px] text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                                             />
 
                                             {/* Image Upload */}
                                             <label
-                                                className="
-                                flex
-                                h-9
-                                min-w-0
-                                flex-1
-                                cursor-pointer
-                                items-center
-                                gap-2
-                                border
-                                border-zinc-800
-                                px-3
-                                font-mono
-                                text-[10px]
-                                text-zinc-400
-                                hover:border-zinc-500
-                                light:border-zinc-300
-                                light:text-zinc-700
-                            "
+                                                className="flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 border border-zinc-800 px-3 font-mono text-[10px] text-zinc-400 hover:border-zinc-500 light:border-zinc-300 light:text-zinc-700"
                                             >
                                                 <Upload className="size-3 shrink-0" />
 
@@ -1122,13 +763,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                         color.id
                                                     )
                                                 }
-                                                className="
-                                shrink-0
-                                cursor-pointer
-                                text-zinc-500
-                                transition-colors
-                                hover:text-red-500
-                            "
+                                                className="shrink-0 cursor-pointer text-zinc-500 transition-colors hover:text-red-500"
                                             >
                                                 <Trash2 className="size-3.5" />
                                             </button>
@@ -1138,20 +773,10 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         {color.uploading && (
                                             <div className="mt-2">
                                                 <div
-                                                    className="
-                                    h-1
-                                    w-full
-                                    overflow-hidden
-                                    bg-zinc-800
-                                "
+                                                    className="h-1 w-full overflow-hidden bg-zinc-800"
                                                 >
                                                     <div
-                                                        className="
-                                        h-full
-                                        bg-second
-                                        transition-all
-                                        duration-200
-                                    "
+                                                        className="h-full bg-second transition-all duration-200"
                                                         style={{
                                                             width: `${color.progress ?? 0}%`,
                                                         }}
@@ -1159,12 +784,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 </div>
 
                                                 <p
-                                                    className="
-                                    mt-1
-                                    font-mono
-                                    text-[9px]
-                                    text-second
-                                "
+                                                    className="mt-1 font-mono text-[9px] text-second"
                                                 >
                                                     Uploading...{" "}
                                                     {color.progress ?? 0}%
@@ -1175,12 +795,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         {/* Uploaded Image Preview */}
                                         {color.imageUrl && !color.uploading && (
                                             <div
-                                                className="
-                                mt-2
-                                flex
-                                items-center
-                                gap-2
-                            "
+                                                className="mt-2 flex items-center gap-2"
                                             >
                                                 <img
                                                     src={color.imageUrl}
@@ -1188,21 +803,11 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                         color.name ||
                                                         "Color preview"
                                                     }
-                                                    className="
-                                    size-10
-                                    border
-                                    border-zinc-800
-                                    object-cover
-                                "
+                                                    className="size-10 border border-zinc-800 object-cover"
                                                 />
 
                                                 <span
-                                                    className="
-                                    truncate
-                                    font-mono
-                                    text-[8px]
-                                    text-zinc-500
-                                "
+                                                    className="truncate font-mono text-[8px] text-zinc-500"
                                                 >
                                                     {color.imageUrl}
                                                 </span>
@@ -1218,24 +823,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <div className="mt-6 flex gap-3">
                         <button
                             type="submit"
-                            className="
-                                flex
-                                h-12
-                                flex-1
-                                items-center
-                                justify-center
-                                gap-2
-                                bg-second
-                                font-mono
-                                text-[11px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-black
-                                transition-opacity
-                                hover:opacity-90
-                                cursor-pointer
-                            "
+                            className="flex h-12 flex-1 items-center justify-center gap-2 bg-second font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90 cursor-pointer"
                         >
                             <Check className="size-4" />
 
@@ -1247,24 +835,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         <button
                             type="button"
                             onClick={onCloseAction}
-                            className="
-                                h-12
-                                border
-                                border-zinc-800
-                                px-7
-                                font-mono
-                                text-[11px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-white
-                                transition-colors
-                                hover:bg-zinc-900
-                                light:border-zinc-300
-                                light:text-zinc-900
-                                light:hover:bg-zinc-100
-                                cursor-pointer
-                            "
+                            className="h-12 border border-zinc-800 px-7 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-white transition-colors hover:bg-zinc-900 light:border-zinc-300 light:text-zinc-900 light:hover:bg-zinc-100 cursor-pointer"
                         >
                             CANCEL
                         </button>

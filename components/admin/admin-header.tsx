@@ -90,18 +90,7 @@ export function AdminHeader() {
         <button
           type="button"
           aria-label="Notifications"
-          className="
-            relative
-            flex
-            size-9
-            items-center
-            justify-center
-            light:text-zinc-600
-            text-white
-            transition-colors
-            light:hover:text-zinc-800
-            cursor-pointer
-          "
+          className="relative flex size-9 items-center justify-center light:text-zinc-600 text-white transition-colors light:hover:text-zinc-800 cursor-pointer"
         >
           <Bell className="size-4" />
 
@@ -116,14 +105,7 @@ export function AdminHeader() {
             render={
               <button
                 type="button"
-                className="
-                  mr-4
-                  flex
-                  h-full
-                  items-center
-                  gap-2
-                  outline-none
-                "
+                className="mr-4 flex h-full items-center gap-2 outline-none"
               />
             }
           >

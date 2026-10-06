@@ -125,13 +125,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                     </div>
 
                     {state.message && (
-                        <div className={`
-                            border-l-4 p-3 rounded-r font-mono text-xs
-                            ${state.success
-                                ? 'bg-green-950/50 border-green-400 text-green-700'
-                                : 'bg-red-950/50 border-red-500 text-red-700'}
-                            animate-pulse
-                        `}>
+                        <div className={` border-l-4 p-3 rounded-r font-mono text-xs ${state.success ? 'bg-green-950/50 border-green-400 text-green-700' : 'bg-red-950/50 border-red-500 text-red-700'} animate-pulse `}>
                             <div className="flex items-start gap-2">
                                 <span className="text-lg">
                                     {state.success ? <UserRoundCheck /> : <TriangleAlert />}
@@ -158,10 +152,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your identity"
-                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-zinc-700 '
-                                    } text-gray-400 placeholder:text-zinc-700`}
+                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 ' } text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
                             {state.errors?.email && (
@@ -187,10 +178,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                     type={ShowPassword ? "text" : "password"}
                                     name="password"
                                     placeholder="Enter passcode"
-                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password
-                                        ? 'border-red-500 focus:border-red-500'
-                                        : 'border-zinc-700 '
-                                        } text-gray-400 placeholder:text-zinc-700`}
+                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 ' } text-gray-400 placeholder:text-zinc-700`}
                                     disabled={isPending}
                                 />
                                 {
@@ -209,10 +197,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                         <button
                             type="submit"
                             disabled={isPending}
-                            className={`btn w-full tracking-widest font-semibold transition-all ${isPending
-                                ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed'
-                                : 'bg-second text-black hover:bg-second'
-                                }`}
+                            className={`btn w-full tracking-widest font-semibold transition-all ${isPending ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-second text-black hover:bg-second' }`}
                         >
                             {isPending ? (
                                 <span className="flex items-center gap-2">
@@ -266,10 +251,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                         <ul className="space-y-2 text-xs">
                             <li className="opacity-80">&gt; SECURE_CONNECTION_ESTABLISHED</li>
                             <li className="opacity-80">&gt; ENCRYPTION_LEVEL_MAX</li>
-                            <li className={`transition-all duration-500 ${state.success
-                                ? 'text-green-400 animate-pulse'
-                                : 'opacity-80'
-                                }`}>
+                            <li className={`transition-all duration-500 ${state.success ? 'text-green-400 animate-pulse' : 'opacity-80' }`}>
                                 &gt; {state.success ? 'ACCESS_GRANTED' : 'AWAITING_CREDENTIALS'}
                             </li>
                         </ul>

@@ -34,14 +34,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
     return (
         <>
             <tr
-                className="
-                border-t
-                border-zinc-800
-                transition-colors
-                hover:bg-white/2.5
-                light:border-zinc-200
-                light:hover:bg-black/2
-            "
+                className="border-t border-zinc-800 transition-colors hover:bg-white/2.5 light:border-zinc-200 light:hover:bg-black/2"
             >
                 {/* PRODUCT */}
                 <td className="px-3 py-3">

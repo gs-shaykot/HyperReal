@@ -26,22 +26,7 @@ export const ProductsPagination = ({
                     onClick={() =>
                         onPageChangeAction(page - 1)
                     }
-                    className="
-                        cursor-pointer
-                        border
-                        border-zinc-800
-                        px-3
-                        py-2
-                        text-[9px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-zinc-500
-                        disabled:cursor-not-allowed
-                        disabled:opacity-30
-                        hover:border-zinc-600
-                        light:border-zinc-300
-                    "
+                    className="cursor-pointer border border-zinc-800 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-zinc-500 disabled:cursor-not-allowed disabled:opacity-30 hover:border-zinc-600 light:border-zinc-300"
                 >
                     Prev
                 </button>
@@ -54,23 +39,7 @@ export const ProductsPagination = ({
                     onClick={() =>
                         onPageChangeAction(page + 1)
                     }
-                    className="
-                        cursor-pointer
-                        border
-                        border-zinc-800
-                        px-3
-                        py-2
-                        text-[9px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-white
-                        disabled:cursor-not-allowed
-                        disabled:opacity-30
-                        hover:border-second
-                        light:border-zinc-300
-                        light:text-zinc-900
-                    "
+                    className="cursor-pointer border border-zinc-800 px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-white disabled:cursor-not-allowed disabled:opacity-30 hover:border-second light:border-zinc-300 light:text-zinc-900"
                 >
                     Next
                 </button>

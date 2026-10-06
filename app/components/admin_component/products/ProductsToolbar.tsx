@@ -26,14 +26,7 @@ export const ProductsToolbar = ({
         <div className="my-6 flex gap-3">
             <div className="relative min-w-0 flex-1">
                 <Search
-                    className="
-                        absolute
-                        left-3
-                        top-1/2
-                        size-3.5
-                        -translate-y-1/2
-                        text-zinc-500
-                    "
+                    className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-500"
                 />
 
                 <input
@@ -44,38 +37,13 @@ export const ProductsToolbar = ({
                         )
                     }
                     placeholder="Search products..."
-                    className="
-                        h-10
-                        w-full
-                        border
-                        border-zinc-800
-                        bg-dark
-                        pl-9
-                        pr-3
-                        font-mono
-                        text-xs
-                        text-white
-                        outline-none
-                        placeholder:text-zinc-500
-                        focus:border-zinc-600
-                        light:border-zinc-300
-                        light:bg-white
-                        light:text-zinc-900
-                    "
+                    className="h-10 w-full border border-zinc-800 bg-dark pl-9 pr-3 font-mono text-xs text-white outline-none placeholder:text-zinc-500 focus:border-zinc-600 light:border-zinc-300 light:bg-white light:text-zinc-900"
                 />
             </div>
 
             <div className="relative w-34 shrink-0">
                 <Funnel
-                    className="
-                        absolute
-                        left-3
-                        top-1/2
-                        z-10
-                        size-3.5
-                        -translate-y-1/2
-                        text-zinc-500
-                    "
+                    className="absolute left-3 top-1/2 z-10 size-3.5 -translate-y-1/2 text-zinc-500"
                 />
                 <select
                     value={category}
@@ -84,24 +52,7 @@ export const ProductsToolbar = ({
                             event.target.value
                         )
                     }
-                    className="
-                        h-10
-                        w-full
-                        cursor-pointer
-                        appearance-none
-                        border
-                        border-zinc-800
-                        bg-dark
-                        pl-9
-                        pr-8
-                        font-mono
-                        text-xs
-                        text-white
-                        outline-none
-                        light:border-zinc-300
-                        light:bg-white
-                        light:text-zinc-900
-                    "
+                    className="h-10 w-full cursor-pointer appearance-none border border-zinc-800 bg-dark pl-9 pr-8 font-mono text-xs text-white outline-none light:border-zinc-300 light:bg-white light:text-zinc-900"
                 >
                     <option value="">
                         All
