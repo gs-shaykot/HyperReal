@@ -145,9 +145,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                                 (variant) => variant.size
                             )
                         )
-                    ),
-                    imageUrl:
-                        product.productImages[0]?.imageUrl,
+                    ), 
                 }}
                 categories={categories}
             />
