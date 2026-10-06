@@ -1,11 +1,22 @@
 "use client";
-import { X, Check } from "lucide-react";
+import { X, Check, Plus, Trash2, Upload } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { uploadImage } from "@/utils/uploadImage";
+import toast from "react-hot-toast";
 
 type Category = {
     id: string;
     name: string;
+};
+
+type ProductColor = {
+    id: string;
+    name: string;
+    hex: string;
+    imageUrl: string;
+    uploading?: boolean;
+    progress?: number;
 };
 
 export type ProductModalData = {
@@ -17,7 +28,7 @@ export type ProductModalData = {
     sizes?: string[];
     stock?: number;
     stockBySize?: Record<string, number>;
-    imageUrl?: string;
+    colors?: ProductColor[];
 };
 
 type ProductModalProps = {
@@ -77,7 +88,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
     const [stockBySize, setStockBySize] = useState<Record<string, string>>({});
 
-    const [imageUrl, setImageUrl] = useState("");
+    const [colors, setColors] = useState<ProductColor[]>([]);
 
     useEffect(() => {
         if (product) {
@@ -131,8 +142,12 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     )
             );
 
-            setImageUrl(
-                product.imageUrl ?? ""
+            setColors(
+                product.colors?.map((color) => ({
+                    ...color,
+                    uploading: false,
+                    progress: 0,
+                })) ?? []
             );
 
             return;
@@ -147,7 +162,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         setSameStockForEverySize(true);
         setSameStock("");
         setStockBySize({});
-        setImageUrl("");
+        setColors([]);
     }, [product, open]);
 
     if (!open) {
@@ -199,8 +214,160 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         }
     };
 
+    const handleAddColor = () => {
+        setColors((current) => [
+            ...current,
+            {
+                id: crypto.randomUUID(),
+                name: "",
+                hex: "#CCFF00",
+                imageUrl: "",
+                uploading: false,
+                progress: 0,
+            },
+        ]);
+    };
+
+    const handleRemoveColor = (id: string) => {
+        setColors((current) =>
+            current.filter((color) => color.id !== id)
+        );
+    };
+
+    const handleColorNameChange = (
+        id: string,
+        name: string
+    ) => {
+        setColors((current) =>
+            current.map((color) =>
+                color.id === id
+                    ? {
+                        ...color,
+                        name,
+                    }
+                    : color
+            )
+        );
+    };
+
+    const handleColorHexChange = (
+        id: string,
+        hex: string
+    ) => {
+        setColors((current) =>
+            current.map((color) =>
+                color.id === id
+                    ? {
+                        ...color,
+                        hex,
+                    }
+                    : color
+            )
+        );
+    };
+
+    const handleColorImageUpload = async (
+        id: string,
+        file: File | undefined
+    ) => {
+        if (!file) return;
+
+        const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+        const ALLOWED_TYPES = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+        ];
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            toast.error(
+                "Only JPG, PNG, and WebP images are allowed."
+            );
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            toast.error(
+                "Image size must not exceed 2 MB."
+            );
+            return;
+        }
+
+        setColors((current) =>
+            current.map((color) =>
+                color.id === id
+                    ? {
+                        ...color,
+                        uploading: true,
+                        progress: 0,
+                    }
+                    : color
+            )
+        );
+
+        try {
+            const imageUrl = await uploadImage(
+                file,
+                (progress) => {
+                    setColors((current) =>
+                        current.map((color) =>
+                            color.id === id
+                                ? {
+                                    ...color,
+                                    progress,
+                                }
+                                : color
+                        )
+                    );
+                },
+                "products"
+            );
+
+            setColors((current) =>
+                current.map((color) =>
+                    color.id === id
+                        ? {
+                            ...color,
+                            imageUrl,
+                            uploading: false,
+                            progress: 100,
+                        }
+                        : color
+                )
+            );
+
+            toast.success("Color image uploaded");
+        } catch {
+            setColors((current) =>
+                current.map((color) =>
+                    color.id === id
+                        ? {
+                            ...color,
+                            uploading: false,
+                            progress: 0,
+                        }
+                        : color
+                )
+            );
+
+            toast.error("Image upload failed");
+        }
+    };
+
+    const hasUploadingColor = colors.some(
+        (color) => color.uploading
+    );
+
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (hasUploadingColor) {
+            toast.error(
+                "Please wait for all images to finish uploading."
+            );
+            return;
+        }
 
         const data = {
             name,
@@ -223,7 +390,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         Number(stockBySize[size] ?? 0),
                     ])
                 ),
-            imageUrl,
+            colors
         };
 
         console.log(
@@ -773,41 +940,128 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         )}
                     </div>
 
-                    {/* Image URL */}
+                    {/* Colors */}
                     <div className="mt-6">
-                        <label
-                            className="
-                                mb-2
-                                block
-                                font-mono
-                                text-[10px]
-                                font-bold
-                                uppercase
-                                tracking-[0.12em]
-                                text-zinc-400
-                                light:text-zinc-700
-                            "
-                        >
-                            Image URL
-                        </label>
+                        <div className="mb-2 flex items-center justify-between">
+                            <label
+                                className="
+                block
+                font-mono
+                text-[10px]
+                font-bold
+                uppercase
+                tracking-[0.12em]
+                text-zinc-400
+                light:text-zinc-700
+            "
+                            >
+                                Colors
+                            </label>
 
-                        <input
-                            value={imageUrl}
-                            onChange={(event) =>
-                                setImageUrl(
-                                    event.target.value
-                                )
-                            }
-                            className="
-                                h-12
-                                w-full
+                            <button
+                                type="button"
+                                onClick={handleAddColor}
+                                className="
+                flex
+                cursor-pointer
+                items-center
+                gap-1
+                font-mono
+                text-[9px]
+                font-bold
+                uppercase
+                tracking-[0.08em]
+                text-second
+                transition-opacity
+                hover:opacity-80
+            "
+                            >
+                                <Plus className="size-3" />
+                                Add Color
+                            </button>
+                        </div>
+
+                        {colors.length === 0 ? (
+                            <div
+                                className="
+                flex
+                min-h-11
+                items-center
+                border
+                border-dashed
+                border-zinc-800
+                px-4
+                font-mono
+                text-[10px]
+                text-zinc-500
+                light:border-zinc-300
+            "
+                            >
+            // No colors — product will use default palette
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {colors.map((color) => (
+                                    <div
+                                        key={color.id}
+                                        className="
+                        border
+                        border-zinc-800
+                        p-2
+                        light:border-zinc-300
+                    "
+                                    >
+                                        <div
+                                            className="
+                            flex
+                            items-center
+                            gap-2
+                        "
+                                        >
+                                            {/* Color Picker */}
+                                            <input
+                                                type="color"
+                                                value={color.hex}
+                                                onChange={(event) =>
+                                                    handleColorHexChange(
+                                                        color.id,
+                                                        event.target.value
+                                                    )
+                                                }
+                                                className="
+                                size-9
+                                shrink-0
+                                cursor-pointer
+                                border
+                                border-zinc-700
+                                bg-transparent
+                                p-0
+                            "
+                                            />
+
+                                            {/* Color Name */}
+                                            <input
+                                                type="text"
+                                                value={color.name}
+                                                onChange={(event) =>
+                                                    handleColorNameChange(
+                                                        color.id,
+                                                        event.target.value
+                                                    )
+                                                }
+                                                placeholder="Color name"
+                                                required
+                                                className="
+                                h-9
+                                min-w-0
+                                flex-1
                                 rounded-none
                                 border
                                 border-zinc-800
                                 bg-dark
-                                px-4
+                                px-3
                                 font-mono
-                                text-sm
+                                text-[10px]
                                 text-white
                                 outline-none
                                 focus:border-zinc-500
@@ -815,7 +1069,149 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 light:bg-white
                                 light:text-zinc-900
                             "
-                        />
+                                            />
+
+                                            {/* Image Upload */}
+                                            <label
+                                                className="
+                                flex
+                                h-9
+                                min-w-0
+                                flex-1
+                                cursor-pointer
+                                items-center
+                                gap-2
+                                border
+                                border-zinc-800
+                                px-3
+                                font-mono
+                                text-[10px]
+                                text-zinc-400
+                                hover:border-zinc-500
+                                light:border-zinc-300
+                                light:text-zinc-700
+                            "
+                                            >
+                                                <Upload className="size-3 shrink-0" />
+
+                                                <span className="truncate">
+                                                    {color.imageUrl
+                                                        ? "Image uploaded"
+                                                        : "Upload color image"}
+                                                </span>
+
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp"
+                                                    className="hidden"
+                                                    disabled={color.uploading}
+                                                    onChange={(event) =>
+                                                        handleColorImageUpload(
+                                                            color.id,
+                                                            event.target.files?.[0]
+                                                        )
+                                                    }
+                                                />
+                                            </label>
+
+                                            {/* Delete */}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleRemoveColor(
+                                                        color.id
+                                                    )
+                                                }
+                                                className="
+                                shrink-0
+                                cursor-pointer
+                                text-zinc-500
+                                transition-colors
+                                hover:text-red-500
+                            "
+                                            >
+                                                <Trash2 className="size-3.5" />
+                                            </button>
+                                        </div>
+
+                                        {/* Upload Progress */}
+                                        {color.uploading && (
+                                            <div className="mt-2">
+                                                <div
+                                                    className="
+                                    h-1
+                                    w-full
+                                    overflow-hidden
+                                    bg-zinc-800
+                                "
+                                                >
+                                                    <div
+                                                        className="
+                                        h-full
+                                        bg-second
+                                        transition-all
+                                        duration-200
+                                    "
+                                                        style={{
+                                                            width: `${color.progress ?? 0}%`,
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                <p
+                                                    className="
+                                    mt-1
+                                    font-mono
+                                    text-[9px]
+                                    text-second
+                                "
+                                                >
+                                                    Uploading...{" "}
+                                                    {color.progress ?? 0}%
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Uploaded Image Preview */}
+                                        {color.imageUrl && !color.uploading && (
+                                            <div
+                                                className="
+                                mt-2
+                                flex
+                                items-center
+                                gap-2
+                            "
+                                            >
+                                                <img
+                                                    src={color.imageUrl}
+                                                    alt={
+                                                        color.name ||
+                                                        "Color preview"
+                                                    }
+                                                    className="
+                                    size-10
+                                    border
+                                    border-zinc-800
+                                    object-cover
+                                "
+                                                />
+
+                                                <span
+                                                    className="
+                                    truncate
+                                    font-mono
+                                    text-[8px]
+                                    text-zinc-500
+                                "
+                                                >
+                                                    {color.imageUrl}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Buttons */}

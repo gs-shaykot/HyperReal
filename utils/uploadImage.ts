@@ -1,12 +1,18 @@
 import axios from 'axios';
 
-export const uploadImage = async (file: File | null, onProgress?: (percent: number) => void) => {
+export const uploadImage = async (file: File | null, onProgress?: (percent: number) => void, folder?: "users" | "products") => {
 
     const defaultUrl = "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png";
 
     if (!file) return defaultUrl;
+
     const formData = new FormData();
+
     formData.append("file", file);
+
+    if (folder) {
+        formData.append("folder", folder);
+    }
 
     try {
         const res = await axios.post("/api/uploadImage", formData, {
@@ -16,7 +22,7 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
                 onProgress?.(percent);
             },
         });
- 
+
         const uploadResult = res.data.data ?? res.data;
         const imageUrl = uploadResult.secure_url || uploadResult.url;
 

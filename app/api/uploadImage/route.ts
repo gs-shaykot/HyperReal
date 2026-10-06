@@ -12,7 +12,12 @@ const ALLOWED_TYPES = [
 export async function POST(req: Request) {
     try {
         const formData = await req.formData();
+
         const file = formData.get("file");
+
+        const requestedFolder = formData.get("folder");
+
+        const folder = requestedFolder === "products" ? "products" : "users";
 
         if (!(file instanceof File)) {
             return NextResponse.json(
@@ -52,7 +57,7 @@ export async function POST(req: Request) {
         const uploadResult = await new Promise((resolve, reject) => {
             cloudinary.uploader.upload_stream(
                 {
-                    folder: "users",
+                    folder,
                     resource_type: "image",
                 },
                 (error, result) => {
