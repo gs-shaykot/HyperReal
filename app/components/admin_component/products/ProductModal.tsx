@@ -220,7 +220,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             {
                 id: crypto.randomUUID(),
                 name: "",
-                hex: "#CCFF00",
+                hex: "#ccff00",
                 imageUrl: "",
                 uploading: false,
                 progress: 0,
@@ -312,12 +312,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                 (progress) => {
                     setColors((current) =>
                         current.map((color) =>
-                            color.id === id
-                                ? {
-                                    ...color,
-                                    progress,
-                                }
-                                : color
+                            color.id === id ? { ...color, progress, } : color
                         )
                     );
                 },
@@ -548,7 +543,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         key={item}
                                         type="button"
                                         onClick={() => setBadge(badge === item ? "" : item)}
-                                        className={` h-8 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${badge === item ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500" } `}
+                                        className={` h-8 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${badge === item ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
                                     >
                                         {item}
                                     </button>
@@ -578,7 +573,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 size
                                             )
                                         }
-                                        className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500" } `}
+                                        className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
                                     >
                                         {size}
                                     </button>
@@ -686,21 +681,17 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         </div>
 
                         {colors.length === 0 ? (
-                            <div
-                                className="flex min-h-11 items-center border border-dashed border-zinc-800 px-4 font-mono text-[10px] text-zinc-500 light:border-zinc-300"
-                            >
-            // No colors — product will use default palette
+                            <div className="flex min-h-11 items-center border border-dashed border-zinc-800 px-4 font-mono text-[10px] text-zinc-500 light:border-zinc-300" >
+                            // No colors — product will use default palette
                             </div>
                         ) : (
                             <div className="space-y-2">
                                 {colors.map((color) => (
                                     <div
                                         key={color.id}
-                                        className="border border-zinc-800 p-2 light:border-zinc-300"
-                                    >
+                                        className="border border-zinc-800 p-2 light:border-zinc-300" >
                                         <div
-                                            className="flex items-center gap-2"
-                                        >
+                                            className="flex items-center gap-2" >
                                             {/* Color Picker */}
                                             <input
                                                 type="color"
@@ -772,15 +763,8 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         {/* Upload Progress */}
                                         {color.uploading && (
                                             <div className="mt-2">
-                                                <div
-                                                    className="h-1 w-full overflow-hidden bg-zinc-800"
-                                                >
-                                                    <div
-                                                        className="h-full bg-second transition-all duration-200"
-                                                        style={{
-                                                            width: `${color.progress ?? 0}%`,
-                                                        }}
-                                                    />
+                                                <div className="h-1 w-full overflow-hidden bg-zinc-800" >
+                                                    <div className="h-full bg-second transition-all duration-200" style={{ width: `${color.progress ?? 0}%`, }} />
                                                 </div>
 
                                                 <p
@@ -800,8 +784,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 <img
                                                     src={color.imageUrl}
                                                     alt={
-                                                        color.name ||
-                                                        "Color preview"
+                                                        color.name || "Color preview"
                                                     }
                                                     className="size-10 border border-zinc-800 object-cover"
                                                 />
