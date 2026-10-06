@@ -26,9 +26,35 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
     );
 
     const visibleSizes = sizes.slice(0, 4);
-    const remainingSizes = Math.max(
-        sizes.length - visibleSizes.length,
-        0
+    const remainingSizes = Math.max(sizes.length - visibleSizes.length, 0);
+
+    const colors = Array.from(
+        new Map(
+            product.productVariants.map((variant) => [
+                variant.color,
+                {
+                    id: variant.color,
+                    name: variant.color,
+                    hex: variant.hex ?? "#000000",
+                    imageUrl:
+                        product.productImages.find(
+                            (image) =>
+                                image.color === variant.color
+                        )?.imageUrl ?? "",
+                },
+            ])
+        ).values()
+    );
+
+    const stockBySize = Object.fromEntries(
+        Array.from(
+            new Map(
+                product.productVariants.map((variant) => [
+                    variant.size,
+                    variant.stock,
+                ])
+            )
+        )
     );
 
     return (
@@ -135,17 +161,14 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                 open={open}
                 onCloseAction={() => setOpen(false)}
                 product={{
+                    id: product.id,
                     name: product.name,
                     category: product.category,
                     price: product.price,
                     description: product.description,
-                    sizes: Array.from(
-                        new Set(
-                            product.productVariants.map(
-                                (variant) => variant.size
-                            )
-                        )
-                    ),
+                    sizes,
+                    stockBySize,
+                    colors,
                 }}
                 categories={categories}
             />
