@@ -34,5 +34,5 @@ export const updateAdminProduct = async (product: AdminProductInput) => {
         throw new Error("Failed to update product");
     }
     // returns object like: {success: true}, {status:200}}
-    return res.data;
+    return res.data.data;
 }

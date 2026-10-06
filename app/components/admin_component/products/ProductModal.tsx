@@ -71,16 +71,14 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
     const [sizes, setSizes] = useState<string[]>([]);
 
-    const [sameStockForEverySize, setSameStockForEverySize] =
-        useState(true);
+    const [sameStockForEverySize, setSameStockForEverySize] = useState(true);
 
     const [sameStock, setSameStock] = useState("");
 
-    const [stockBySize, setStockBySize] =
-        useState<Record<string, string>>({});
+    const [stockBySize, setStockBySize] = useState<Record<string, string>>({});
 
     const [imageUrl, setImageUrl] = useState("");
- 
+
     useEffect(() => {
         if (product) {
             setName(product.name ?? "");
@@ -183,9 +181,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         });
     };
 
-    const handleSameStockChange = (
-        checked: boolean
-    ) => {
+    const handleSameStockChange = (checked: boolean) => {
         setSameStockForEverySize(checked);
 
         if (!checked) {
@@ -213,9 +209,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             description,
             badge,
             sizes,
-            stock: sameStockForEverySize
-                ? Number(sameStock)
-                : undefined,
+            stock: sameStockForEverySize ? Number(sameStock) : undefined,
             stockBySize: sameStockForEverySize
                 ? Object.fromEntries(
                     sizes.map((size) => [
@@ -525,8 +519,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 tracking-[0.12em]
                                 text-zinc-400
                                 light:text-zinc-700
-                            "
-                        >
+                            ">
                             Badge
                         </label>
 
@@ -536,14 +529,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                     <button
                                         key={item}
                                         type="button"
-                                        onClick={() =>
-                                            setBadge(
-                                                badge ===
-                                                    item
-                                                    ? ""
-                                                    : item
-                                            )
-                                        }
+                                        onClick={() => setBadge(badge === item ? "" : item)}
                                         className={`
                                             h-8
                                             border
@@ -588,23 +574,19 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         </label>
 
                         <div className="flex flex-wrap gap-2">
-                            {SIZES.map(
-                                (size) => {
-                                    const selected =
-                                        sizes.includes(
-                                            size
-                                        );
+                            {SIZES.map((size) => {
+                                const selected = sizes.includes(size);
 
-                                    return (
-                                        <button
-                                            key={size}
-                                            type="button"
-                                            onClick={() =>
-                                                toggleSize(
-                                                    size
-                                                )
-                                            }
-                                            className={`
+                                return (
+                                    <button
+                                        key={size}
+                                        type="button"
+                                        onClick={() =>
+                                            toggleSize(
+                                                size
+                                            )
+                                        }
+                                        className={`
                                                 min-w-11
                                                 h-8
                                                 border
@@ -615,15 +597,15 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                                 transition-colors
                                                 cursor-pointer
                                                 ${selected
-                                                    ? "border-second bg-second text-black"
-                                                    : "border-zinc-800 text-zinc-400 hover:border-zinc-500"
-                                                }
+                                                ? "border-second bg-second text-black"
+                                                : "border-zinc-800 text-zinc-400 hover:border-zinc-500"
+                                            }
                                             `}
-                                        >
-                                            {size}
-                                        </button>
-                                    );
-                                }
+                                    >
+                                        {size}
+                                    </button>
+                                );
+                            }
                             )}
                         </div>
                     </div>
@@ -664,11 +646,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                 <input
                                     type="checkbox"
                                     checked={sameStockForEverySize}
-                                    onChange={(event) =>
-                                        handleSameStockChange(
-                                            event.target.checked
-                                        )
-                                    }
+                                    onChange={(event) => handleSameStockChange(event.target.checked)}
                                     className="
                                         size-3.5
                                         cursor-pointer
@@ -766,15 +744,14 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                             min="0"
                                             value={
                                                 stockBySize[
-                                                    size
+                                                size
                                                 ] ?? "0"
                                             }
                                             onChange={(event) =>
                                                 setStockBySize(
                                                     (current) => ({
                                                         ...current,
-                                                        [size]:
-                                                            event.target.value,
+                                                        [size]: event.target.value,
                                                     })
                                                 )
                                             }
