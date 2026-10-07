@@ -872,6 +872,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                         <button
                             type="submit"
                             disabled={isSaving}
+                            className="flex h-12 flex-1 items-center justify-center gap-2 bg-second font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90 cursor-pointer"
                         >
                             {isSaving
                                 ? "Saving..."

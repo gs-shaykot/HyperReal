@@ -150,6 +150,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                             type="button"
                             aria-label={`Delete ${product.name}`}
                             disabled={deleteProduct.isPending}
+                            className="text-zinc-500 transition-colors hover:text-red-400 cursor-pointer"
                             onClick={() => {
                                 const confirmed = window.confirm(
                                     `Delete "${product.name}"?`
