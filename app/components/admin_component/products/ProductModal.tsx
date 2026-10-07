@@ -4,6 +4,10 @@ import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { uploadImage } from "@/utils/uploadImage";
 import toast from "react-hot-toast";
+import {
+    useCreateProduct,
+    useUpdateProduct,
+} from "@/app/Hooks/useAdminProducts";
 
 type Category = {
     id: string;
@@ -95,13 +99,16 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
     const [colors, setColors] = useState<ProductColor[]>([]);
 
+    const createProduct = useCreateProduct();
+    const updateProduct = useUpdateProduct();
+
+    const isSaving = createProduct.isPending || updateProduct.isPending;
+
     useEffect(() => {
         if (product) {
             setName(product.name ?? "");
 
-            setCategory(
-                product.category?.id ?? ""
-            );
+            setCategory(product.category?.id ?? "");
 
             setPrice(
                 product.price !== undefined
@@ -125,8 +132,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
 
             const stockValues = Object.values(existingStockBySize);
 
-            const allStocksAreSame =
-                stockValues.length > 0 &&
+            const allStocksAreSame = stockValues.length > 0 &&
                 stockValues.every(
                     (stock) => stock === stockValues[0]
                 );
@@ -142,11 +148,10 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             setStockBySize(
                 product.stockBySize
                     ? Object.fromEntries(
-                        Object.entries(product.stockBySize).map(
-                            ([size, stock]) => [
-                                size,
-                                String(stock),
-                            ]
+                        Object.entries(product.stockBySize).map(([size, stock]) => [
+                            size,
+                            String(stock),
+                        ]
                         )
                     )
                     : Object.fromEntries(
@@ -369,27 +374,45 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         (color) => color.uploading
     );
 
-    const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+
+        e.preventDefault();
+
+        if (isSaving) return;
 
         if (hasUploadingColor) {
             toast.error(
-                "Please wait for all images to finish uploading."
+                "Please wait for image uploads to finish"
             );
             return;
         }
 
-        const data = {
-            name,
-            category,
-            price: Number(price),
-            description,
-            badge,
-            sizes,
+        if (sizes.length === 0) {
+            toast.error(
+                "At least one size is required"
+            );
+            return;
+        }
 
-            stock: sameStockForEverySize ? Number(sameStock) : undefined,
+        if (colors.length === 0) {
+            toast.error(
+                "At least one color is required"
+            );
+            return;
+        }
 
-            stockBySize: sameStockForEverySize
+        const selectedCategory =
+            categories.find(
+                (item) => item.id === category
+            );
+
+        if (!selectedCategory) {
+            toast.error("Please select a category");
+            return;
+        }
+
+        const finalStockBySize =
+            sameStockForEverySize
                 ? Object.fromEntries(
                     sizes.map((size) => [
                         size,
@@ -399,23 +422,50 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                 : Object.fromEntries(
                     sizes.map((size) => [
                         size,
-                        Number(stockBySize[size] ?? 0),
+                        Number(
+                            stockBySize[size] ?? 0
+                        ),
                     ])
-                ),
-            colors,
+                );
+
+        const data = {
+            name: name.trim(),
+            category,
+            categoryName: selectedCategory.name,
+            price: Number(price),
+            description: description.trim(),
+            sizes,
+            stockBySize: finalStockBySize,
+
+            colors: colors.map((color) => ({
+                name: color.name,
+                hex: color.hex,
+                imageUrl: color.imageUrl,
+            })),
         };
 
-        console.log(
-            isEdit
-                ? "Edit product:"
-                : "Add product:",
-            data
-        );
-
-        /*
-         * Actual API/database operation will be
-         * connected when we build product CRUD.
-         */
+        if (isEdit && product?.id) {
+            updateProduct.mutate(
+                {
+                    id: product.id,
+                    data,
+                },
+                {
+                    onSuccess: () => {
+                        onCloseAction();
+                    },
+                }
+            );
+        } else {
+            createProduct.mutate(
+                data,
+                {
+                    onSuccess: () => {
+                        onCloseAction();
+                    },
+                }
+            );
+        }
     };
 
     return createPortal(
@@ -586,9 +636,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         key={size}
                                         type="button"
                                         onClick={() =>
-                                            toggleSize(
-                                                size
-                                            )
+                                            toggleSize(size)
                                         }
                                         className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
                                     >
@@ -823,13 +871,13 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                     <div className="mt-6 flex gap-3">
                         <button
                             type="submit"
-                            className="flex h-12 flex-1 items-center justify-center gap-2 bg-second font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90 cursor-pointer"
+                            disabled={isSaving}
                         >
-                            <Check className="size-4" />
-
-                            {isEdit
-                                ? "SAVE CHANGES"
-                                : "ADD PRODUCT"}
+                            {isSaving
+                                ? "Saving..."
+                                : isEdit
+                                    ? "Update Product"
+                                    : "Add Product"}
                         </button>
 
                         <button

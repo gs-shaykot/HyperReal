@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Pencil, Trash2 } from "lucide-react";
-
+import { useDeleteProduct } from "@/app/Hooks/useAdminProducts";
 import { AdminProduct } from "@/app/types/AdminProduct";
 import { ProductBadge } from "./product-badge";
 import { useState } from "react";
@@ -16,7 +16,7 @@ type ProductRowProps = {
 
 export const ProductRow = ({ product, categories }: ProductRowProps) => {
     const [open, setOpen] = useState(false);
-
+    const deleteProduct = useDeleteProduct();
     const sizes = Array.from(
         new Set(
             product.productVariants
@@ -129,7 +129,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                         ))}
 
                         {remainingSizes > 0 && (
-                            <span>,...</span>
+                            <span>,...{remainingSizes} more</span>
                         )}
                     </div>
                 </td>
@@ -149,7 +149,16 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                         <button
                             type="button"
                             aria-label={`Delete ${product.name}`}
-                            className="text-zinc-500 transition-colors hover:text-red-400 cursor-pointer"
+                            disabled={deleteProduct.isPending}
+                            onClick={() => {
+                                const confirmed = window.confirm(
+                                    `Delete "${product.name}"?`
+                                );
+
+                                if (!confirmed) return;
+
+                                deleteProduct.mutate(product.id);
+                            }}
                         >
                             <Trash2 className="size-3.5" />
                         </button>
