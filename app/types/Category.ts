@@ -27,6 +27,7 @@ export interface ProductType {
     size: string | null;
     color: string;
     stock: number;
+    hex?: string | null;
   }[];
 }
 

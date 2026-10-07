@@ -9,7 +9,7 @@ const page = async ({ params }: any) => {
         include: {
             category: { select: { name: true, slug: true } },
             productImages: {
-                select: { imageUrl: true, color: true    },
+                select: { imageUrl: true, color: true },
                 orderBy: {id: 'desc'}
             },
             productVariants: {
@@ -17,6 +17,7 @@ const page = async ({ params }: any) => {
                     id: true,
                     size: true,
                     color: true,
+                    hex: true,
                     stock: true,
                 },
                 orderBy: [

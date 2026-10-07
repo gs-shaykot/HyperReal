@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Getwishlist } from '@/lib/account_helpers/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
+
     const { data: session } = useSession();
     const [isSizeSelected, setIsSizeSelected] = useState(false);
 
@@ -27,14 +28,25 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
     }, [wishlistItems, product.id]);
 
 
-    //EXTRACTED UNIQUE COLRS
-    let Extractedcolor = useMemo(
-        () => [...new Set(product.productVariants?.map(variant => variant.color))],
+    const productVariants = useMemo(
+        () => product.productVariants ?? [],
         [product.productVariants]
     );
 
+    
+    const Extractedcolor = useMemo(() => {
+        const colors = new Map<string, string | null | undefined>();
+
+        for (const variant of productVariants) {
+            if (!colors.has(variant.color) || !colors.get(variant.color)) {
+                colors.set(variant.color, variant.hex);
+            }
+        }
+
+        return [...colors].map(([name, hex]) => ({ name, hex }));
+    }, [productVariants]);
     const [selectedColor, setSelectedColor] = useState(
-        Extractedcolor.find((color) => color.toLowerCase() === 'neon breach') ?? Extractedcolor[0]
+        Extractedcolor.find((color) => color.name.toLowerCase() === 'neon breach')?.name ?? Extractedcolor[0]?.name
     );
 
     const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -43,13 +55,13 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     //EXTRACTED SIZES BASED ON SELECTED COLOR
     let ExtractedSize = useMemo(
-        () => [...new Set(product.productVariants?.filter(variant => variant.color === selectedColor))],
-        [product.productVariants, selectedColor]
+        () => [...new Set(productVariants.filter(variant => variant.color === selectedColor))],
+        [productVariants, selectedColor]
     );
 
     let ExtractedVariant = useMemo(
-        () => product.productVariants?.find(variant => variant.color === selectedColor && variant.size === selectedSize),
-        [product.productVariants, selectedColor, selectedSize]
+        () => productVariants.find(variant => variant.color === selectedColor && variant.size === selectedSize),
+        [productVariants, selectedColor, selectedSize]
     );
     const extractedStock = ExtractedVariant?.stock ?? 0;
     const isOutOfStock = selectedSize !== null && extractedStock <= 0;
@@ -86,7 +98,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
             return;
         }
 
-        const selectedVariant = product.productVariants?.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
+        const selectedVariant = productVariants.find((variant) => variant.color === selectedColor && variant.size === selectedSize);
         if (!selectedVariant) {
             toast.error("Selected variant not available");
             return;
@@ -158,20 +170,20 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                             <h1 className='font-bold text-sm light:text-zinc-900 text-white mt-6 mb-2'>Colors: <span className='text-second'>{selectedColor}</span></h1>
                             <div className="flex gap-3">
                                 {Extractedcolor.map(color => (
-                                    <div className='flex justify-center items-center relative' key={color}>
+                                    <div className='flex justify-center items-center relative' key={color.name}>
                                         <button
-                                            key={color}
                                             onClick={() => {
-                                                setSelectedColor(color);
+                                                setSelectedColor(color.name);
                                                 setSelectedSize(null);
                                             }}
                                             className={`w-8 h-8 rounded-full border
-                                                ${selectedColor === color ? "border-second" : "border-gray-600"} ${color.toLowerCase() === 'neon breach' ? 'bg-second' : 'bg-[#1d2122]'}`}
-                                            title={color}
+                                                ${selectedColor === color.name ? "border-second" : "border-gray-600"} ${!color.hex && color.name.toLowerCase() === 'neon breach' ? 'bg-second' : !color.hex ? 'bg-[#1d2122]' : ''}`}
+                                            style={color.hex ? { backgroundColor: color.hex } : undefined}
+                                            title={color.name}
                                         />
                                         {
-                                            selectedColor === color && (
-                                                <Check className={`${color.toLowerCase() === 'neon breach' ? 'text-black' : 'text-white'} absolute font-bold`} size={18} strokeWidth={3} />
+                                            selectedColor === color.name && (
+                                                <Check className={`${!color.hex && color.name.toLowerCase() === 'neon breach' ? 'text-black' : 'text-white'} absolute font-bold`} size={18} strokeWidth={3} />
                                             )
                                         }
                                     </div>
