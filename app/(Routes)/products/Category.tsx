@@ -119,7 +119,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
         router
     ]);
 
-    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent text-zinc-900 p-1 hover:text-zinc-900' : ''}`;
+    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent text-white p-1 hover:text-second' : ''}`;
 
     return (
         <div className="space-y-3">
@@ -136,6 +136,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     <Trash size={18}/>  
                 </button>
             </div>
+
             {/* Search Box */}
             <div className="border-b border-zinc-800 pb-3">
                 <h2 className="cursor-pointer text-[11px] font-bold uppercase text-second">
@@ -160,9 +161,10 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     Category
                     <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
                 </summary>
-                <ul className="mt-3 space-y-2">
+
+                <ul className="mt-3 space-y-2 text-zinc-300">
                     <li>
-                        <button onClick={() => updateFilter('category', null)} className={`${activeCategoryClass(categoryId === null)} text-xs text-zinc-300 hover:text-second`}>
+                        <button onClick={() => updateFilter('category', null)} className={`${activeCategoryClass(categoryId === null)} text-sm hover:text-second `}>
                             All
                         </button>
                     </li>
@@ -172,7 +174,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                             <li key={category.id}>
                                 <button
                                     onClick={() => updateFilter('category', category.id)}
-                                    className={`${activeCategoryClass(isActive)} text-xs text-zinc-300 hover:text-second`}>
+                                    className={`${activeCategoryClass(isActive)} text-sm hover:text-second`}>
                                     {category.name}
                                 </button>
                             </li>

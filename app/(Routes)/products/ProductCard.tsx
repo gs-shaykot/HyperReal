@@ -43,7 +43,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                                     }
                                     alt={product.name}
                                     fill
-                                    className="object-contain"
+                                    className="object-cover"
                                     sizes="(max-width: 768px) 100vw, 33vw"
                                 />
                             </motion.div>

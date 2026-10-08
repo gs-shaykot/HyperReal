@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, View } from "lucide-react";
 import { useDeleteProduct } from "@/app/Hooks/useAdminProducts";
 import { AdminProduct } from "@/app/types/AdminProduct";
 import { ProductBadge } from "./product-badge";
 import { useState } from "react";
 import { ProductModal } from "@/app/components/admin_component/products/ProductModal";
 import { Category } from "@/app/components/admin_component/products/ProductsToolbar";
+import Link from "next/link";
 
 type ProductRowProps = {
     product: AdminProduct;
@@ -136,7 +137,14 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
 
                 {/* ACTIONS */}
                 <td className="px-3 py-3">
+
                     <div className="flex items-center justify-end gap-3">
+                        <Link href={`/products/${product.id}`} target="_blank" rel="noopener noreferrer"
+                            className="text-zinc-500 transition-colors hover:text-white light:hover:text-zinc-900 cursor-pointer"
+                        >
+                            <View className="size-3.5" />
+                        </Link>
+
                         <button
                             type="button"
                             aria-label={`Edit ${product.name}`}
