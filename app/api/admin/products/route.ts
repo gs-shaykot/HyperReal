@@ -7,6 +7,8 @@ import {
     ProductValidationError,
     validateProductInput,
 } from "@/utils/AdminUtils/productValidation";
+import { deleteCloudinaryImages } from "@/lib/cloudinary";
+
 
 const productSelect = {
     id: true,
@@ -289,6 +291,13 @@ export async function PATCH(req: Request) {
                         color: true,
                     },
                 },
+                productImages: {
+                    select: {
+                        id: true,
+                        imageUrl: true,
+                        color: true,
+                    }
+                }
             },
         });
 
@@ -298,6 +307,11 @@ export async function PATCH(req: Request) {
                 { status: 404 }
             );
         }
+
+        const oldImageUrls = existingProduct.productImages.map(
+            (image) => image.imageUrl
+        );
+
 
         // --------------------------------------------------
         // 6. Check category exists
@@ -522,6 +536,12 @@ export async function PATCH(req: Request) {
             }
         );
 
+        const newImageUrls = updatedProduct.productImages.map((image) => image.imageUrl);
+
+        const removedImageUrls = oldImageUrls.filter((oldUrl) => !newImageUrls.includes(oldUrl));
+
+        await deleteCloudinaryImages(removedImageUrls);
+
         // --------------------------------------------------
         // 9. Success
         // --------------------------------------------------
@@ -598,18 +618,24 @@ export async function DELETE(req: Request) {
             );
         }
 
-        const product =
-            await prisma.product.findUnique({
-                where: { id },
-                select: {
-                    id: true,
-                    productVariants: {
-                        select: {
-                            id: true,
-                        },
+        const product = await prisma.product.findUnique({
+            where: { id },
+            select: {
+                id: true,
+
+                productImages: {
+                    select: {
+                        imageUrl: true,
                     },
                 },
-            });
+
+                productVariants: {
+                    select: {
+                        id: true,
+                    },
+                },
+            },
+        });
 
         if (!product) {
             return NextResponse.json(
@@ -620,6 +646,8 @@ export async function DELETE(req: Request) {
                 { status: 404 }
             );
         }
+
+        const imageUrls = product.productImages.map((image) => image.imageUrl);
 
         for (const variant of product.productVariants) {
             const orderItemCount =
@@ -674,6 +702,8 @@ export async function DELETE(req: Request) {
                 },
             });
         });
+
+        await deleteCloudinaryImages(imageUrls);
 
         return NextResponse.json(
             {
