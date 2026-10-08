@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Getwishlist } from '@/lib/account_helpers/wishlistAPI';
 
 export const ProductDetails = ({ product }: ProductDetailsProps) => {
-
+    console.log(product)
     const { data: session } = useSession();
     const [isSizeSelected, setIsSizeSelected] = useState(false);
 
@@ -45,6 +45,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
         return [...colors].map(([name, hex]) => ({ name, hex }));
     }, [productVariants]);
+    
     const [selectedColor, setSelectedColor] = useState(
         Extractedcolor.find((color) => color.name.toLowerCase() === 'neon breach')?.name ?? Extractedcolor[0]?.name
     );
