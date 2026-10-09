@@ -5,8 +5,7 @@ import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
-import { countCartItems } from "@/lib/order_helpers/cartAPIs"
-import { getProfile } from "@/lib/account_helpers/profileApi"
+import { countCartItems } from "@/lib/order_helpers/cartAPIs" 
 
 export const Navbar = () => {
     const { data: session } = useSession();

@@ -22,9 +22,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/app/components/ui/sidebar"
 
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { SidebarTrigger } from "@/app/components/ui/sidebar"
 
 const navigationItems = [
     {

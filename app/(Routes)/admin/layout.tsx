@@ -1,11 +1,11 @@
 import type { CSSProperties, ReactNode } from "react"
 
-import { AppSidebar } from "@/components/admin/app-sidebar"
-import { AdminHeader } from "@/components/admin/admin-header"
+import { AppSidebar } from "@/app/components/admin/app-sidebar"
+import { AdminHeader } from "@/app/components/admin/admin-header"
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar"
+} from "@/app/components/ui/sidebar"
 
 export default function AdminLayout({
   children,

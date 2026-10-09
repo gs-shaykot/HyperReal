@@ -2,7 +2,7 @@
 import { usePathname } from "next/navigation"
 import { Bell, ChevronDown, Moon, Sun } from "lucide-react"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@/app/components/ui/dropdown-menu"
+import { SidebarTrigger } from "@/app/components/ui/sidebar"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
@@ -110,16 +110,16 @@ export function AdminHeader() {
             }
           >
 
-<Avatar className="size-7 shrink-0 rounded-none overflow-hidden after:content-none">
-  <AvatarImage
-    src={session?.user?.image ?? undefined}
-    alt={session?.user?.name ?? "User profile"}
-    className="size-full rounded-none object-cover"
-  />
-  <AvatarFallback className="size-full rounded-none bg-lime-100 text-[9px] font-bold text-lime-700">
-    {session?.user?.name?.charAt(0).toUpperCase()}
-  </AvatarFallback>
-</Avatar>
+            <Avatar className="size-7 shrink-0 rounded-none overflow-hidden after:content-none">
+              <AvatarImage
+                src={session?.user?.image ?? undefined}
+                alt={session?.user?.name ?? "User profile"}
+                className="size-full rounded-none object-cover"
+              />
+              <AvatarFallback className="size-full rounded-none bg-lime-100 text-[9px] font-bold text-lime-700">
+                {session?.user?.name?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
 
 
             <div className="hidden text-left sm:block">

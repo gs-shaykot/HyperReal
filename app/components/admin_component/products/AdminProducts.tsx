@@ -72,14 +72,12 @@ export const AdminProducts = ({
             if (res.status !== 200) {
                 throw new Error("Failed to fetch products");
             }
-  
+
             return res.data.data;
         },
 
         initialData:
-            page === 1 &&
-                !debouncedSearch &&
-                !category
+            page === 1 && !debouncedSearch && !category
                 ? {
                     products: initialProducts,
                     total: initialTotal,

@@ -1,11 +1,29 @@
+import { AdminOrders } from '@/app/components/admin_component/orders/AdminOrders';
+import { getAdminOrders } from '@/utils/AdminUtils/getAdminOrders';
 import React from 'react'
 
-const OrderPage = () => {
+const OrderPage = async () => {
+    const [ordersData] = await Promise.all([
+        getAdminOrders({ page: 1, }),
+    ]);
+    console.log("ordersData", ordersData)
     return (
-        <div className="bg-main light:bg-white min-h-screen flex items-center justify-center">
-            <h1 className="text-xl font-bold">
-                Orders Page
-            </h1>
+        <div className="bg-main light:bg-white min-h-screen p-4">
+            <div>
+                <h1 className="text-lg font-bold tracking-[0.08em] text-white light:text-zinc-900">
+                    ORDERS
+                </h1>
+
+                <p className="mt-1 font-mono text-xs text-zinc-500">
+                    {ordersData.total} orders
+                </p>
+            </div>
+
+            {/* <AdminOrders
+                initialOrders={ordersData.orders}
+                initialTotal={ordersData.total}
+                initialTotalPages={ordersData.totalPages}
+            /> */}
         </div>
     )
 }

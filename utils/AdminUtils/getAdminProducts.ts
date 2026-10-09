@@ -47,7 +47,7 @@ export async function getAdminProducts({
             : {}),
     };
 
-    const safePage = Math.max(1, page);
+    const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
     const skip = (safePage - 1) * PRODUCTS_PER_PAGE;
 
     const [products, total] = await Promise.all([
