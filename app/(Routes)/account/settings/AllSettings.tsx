@@ -194,14 +194,23 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
                                                     <div className="flex items-center gap-3">
                                                         <input
                                                             type="checkbox"
-                                                            className="toggle toggle-success h-6 w-11 border-none bg-[#2a2d30] light:bg-zinc-200 checked:bg-second"
-                                                            checked={toggleKey ? notifications[toggleKey] : false}
+                                                            className="toggle toggle-success h-6 w-11 rounded-full! border-none bg-[#2a2d30] light:bg-zinc-200 checked:bg-second"
+                                                            checked={
+                                                                toggleKey
+                                                                    ? notifications[toggleKey]
+                                                                    : false
+                                                            }
                                                             onChange={() => {
-                                                                if (toggleKey) handleToggle(toggleKey);
+                                                                if (toggleKey) {
+                                                                    handleToggle(toggleKey);
+                                                                }
                                                             }}
                                                         />
+
                                                         <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#cbd5e1] light:text-zinc-700">
-                                                            {toggleKey && notifications[toggleKey] ? 'ON' : 'OFF'}
+                                                            {toggleKey && notifications[toggleKey]
+                                                                ? "ON"
+                                                                : "OFF"}
                                                         </span>
                                                     </div>
                                                 ) : (

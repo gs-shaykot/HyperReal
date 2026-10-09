@@ -839,7 +839,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="btn mt-4 w-full rounded-none bg-second text-zinc-900 font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
+                            className="btn mt-4 w-full rounded-none bg-second text-zinc-900 light:text-white font-bold uppercase tracking-wider disabled:opacity-50 cursor-pointer"
                         >
                             {isSubmitting
                                 ? "PROCESSING PAYMENT..."

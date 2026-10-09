@@ -110,7 +110,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                                     setSelectedOrder(order);
                                                     setOpen(true);
                                                 }}
-                                                 className="btn btn-xs md:btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
+                                                 className="btn btn-xs md:btn-sm btn-outline rounded-none border border-zinc-700 hover:bg-white hover:text-zinc-900 light:text-zinc-900 light:hover:bg-main light:hover:text-white transition-all duration-300">
                                                 <Eye className='w-4 h-4 md:w-auto md:h-auto'/>
                                                 VIEW
                                             </button>

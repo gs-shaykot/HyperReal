@@ -119,7 +119,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
         router
     ]);
 
-    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent text-white p-1 hover:text-second' : ''}`;
+    const activeCategoryClass = (isActive: boolean) => `cursor-pointer transition-all duration-300 ease-out ${isActive ? 'lg:before:w-2 lg:before:h-2 lg:before:bg-second lg:before:rounded-full lg:before:inline-block lg:before:mr-2 lg:translate-x-2 bg-second lg:bg-transparent text-white light:text-zinc-900 font-extrabold p-1 hover:text-second' : ''}`;
 
     return (
         <div className="space-y-3">
@@ -151,7 +151,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                             setInputState((prev) => ({ ...prev, searchInput: e.target.value }));
                         }}
                         placeholder="SEARCH GEAR..." aria-label="Search products"
-                        className="min-w-0 w-full bg-transparent text-[10px] uppercase outline-none placeholder:text-zinc-600" />
+                        className="min-w-0 w-full bg-transparent text-[10px] text-white light:text-zinc-900 uppercase outline-none placeholder:text-zinc-600 light:placeholder:text-zinc-500" />
                 </label>
             </div>
 
@@ -162,7 +162,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
                 </summary>
 
-                <ul className="mt-3 space-y-2 text-zinc-300">
+                <ul className="mt-3 space-y-2 text-zinc-300 light:text-zinc-700">
                     <li>
                         <button onClick={() => updateFilter('category', null)} className={`${activeCategoryClass(categoryId === null)} text-sm hover:text-second `}>
                             All
@@ -190,7 +190,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
                 </summary>
                 <div className="mt-3 flex items-center gap-2">
-                    <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500">
+                    <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500 light:text-zinc-700">
                         $<input
                             value={inputState.minPriceInput}
                             onChange={(e) => {
@@ -198,10 +198,10 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                                 setInputState((prev) => ({ ...prev, minPriceInput: e.target.value }));
                             }}
                             placeholder="25" aria-label="Minimum price" inputMode="decimal"
-                            className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
+                            className="min-w-0 w-full bg-transparent text-white light:text-zinc-900 outline-none" />
                     </label>
-                    <span className="text-zinc-600">-</span>
-                    <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500">
+                    <span className="text-zinc-600 light:text-zinc-700">-</span>
+                    <label className="flex flex-1 items-center gap-1 border border-zinc-800 px-2 py-2 text-[10px] text-zinc-500 light:text-zinc-700">
                         $<input
                             value={inputState.maxPriceInput}
                             onChange={(e) => {
@@ -209,7 +209,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                                 setInputState((prev) => ({ ...prev, maxPriceInput: e.target.value }));
                             }}
                             placeholder="285" aria-label="Maximum price" inputMode="decimal"
-                            className="min-w-0 w-full bg-transparent text-zinc-300 outline-none" />
+                            className="min-w-0 w-full bg-transparent text-white light:text-zinc-900 outline-none" />
                     </label>
                 </div>
             </details>
@@ -220,7 +220,7 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
                     Availability
                     <ChevronDown size={14} className="transition-transform group-open:rotate-180" />
                 </summary>
-                <label className="mt-3 flex cursor-pointer items-center gap-2 border border-zinc-800 px-2 py-2 text-[10px] uppercase text-zinc-400">
+                <label className="mt-3 flex cursor-pointer items-center gap-2 border border-zinc-800 px-2 py-2 text-[10px] uppercase text-zinc-200 light:text-zinc-700">
                     <input type="checkbox" checked={inStock} onChange={(e) => updateFilter('inStock', e.target.checked ? 'true' : null)} className="accent-second" />
                     In stock only
                 </label>

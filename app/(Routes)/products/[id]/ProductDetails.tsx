@@ -135,7 +135,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                         <h2 className='light:text-zinc-900 font-bold text-white text-2xl'>&#x24;{product.price}</h2>
                         {
                             selectedSize === null ? (
-                                <div className='flex items-center text-zinc-400 mt-2 py-1.5'>
+                                <div className='flex items-center text-zinc-400 light:text-zinc-700 mt-2 py-1.5'>
                                     <span className='w-2 h-2 rounded-full bg-second mr-2' /> <p>Select a size to see availability</p>
                                 </div>
                             ) : (

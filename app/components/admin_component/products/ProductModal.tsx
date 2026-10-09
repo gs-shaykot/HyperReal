@@ -610,7 +610,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         key={item}
                                         type="button"
                                         onClick={() => setBadge(badge === item ? "" : item)}
-                                        className={` h-8 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${badge === item ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
+                                        className={` h-8 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${badge === item ? "border-second bg-second text-black light:text-white" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
                                     >
                                         {item}
                                     </button>
@@ -638,7 +638,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                                         onClick={() =>
                                             toggleSize(size)
                                         }
-                                        className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
+                                        className={` min-w-11 h-8 border px-3 font-mono text-[9px] font-bold transition-colors cursor-pointer ${selected ? "border-second bg-second text-black light:text-white" : "border-zinc-800 text-zinc-400 hover:border-zinc-500"} `}
                                     >
                                         {size}
                                     </button>

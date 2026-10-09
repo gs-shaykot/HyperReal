@@ -440,7 +440,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     <p className='text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
-                  <button className='btn border-second bg-transparent hover:bg-second hover:text-black text-second' onClick={handleLoadBestCoupon}>
+                  <button className='btn border-second bg-transparent hover:bg-second hover:text-white text-second' onClick={handleLoadBestCoupon}>
                     Apply <ChevronRight className=' ' />
                   </button>
 
@@ -474,7 +474,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
                 <button
                   onClick={handleApplyCoupon}
-                  className={`${appliedCoupon ? 'bg-second/50' : 'bg-second'} text-black px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition`}
+                  className={`${appliedCoupon ? 'bg-second/50' : 'bg-second'} text-zinc-900 light:text-white px-4 text-sm font-semibold rounded h-10 cursor-pointer hover:opacity-90 transition`}
                 >
                   {applyingCoupon ? 'Applying...' : 'Apply'}
                 </button>
@@ -511,7 +511,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             {/* BUTTON */}
 
-            <button onClick={() => router.push(`/checkout?${appliedCoupon?.code ? `coupon=${appliedCoupon?.code}` : ''}`)} className="w-full mt-6 bg-second text-black py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
+            <button onClick={() => router.push(`/checkout?${appliedCoupon?.code ? `coupon=${appliedCoupon?.code}` : ''}`)} className="w-full mt-6 bg-second text-zinc-900 light:text-white py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
               Initiate Transfer
             </button>
           </div>

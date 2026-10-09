@@ -207,7 +207,7 @@ export const Identity = () => {
                                         phone: profile.phone ?? "",
                                     });
                                 }
-                            }} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white light:hover:bg-main text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white">
+                            }} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white light:hover:bg-[#0a0a0a]">
                                 <SquarePen size={16} />
                                 Edit
                             </button>

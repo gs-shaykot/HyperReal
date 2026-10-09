@@ -109,7 +109,7 @@ export function AdminHeader() {
               />
             }
           >
-            <Avatar className="size-5.5 rounded-none">
+            <Avatar className="size-5.5 rounded-none overflow-hidden">
               <AvatarImage
                 src={session?.user?.image ?? undefined}
                 alt={session?.user?.name ?? "User profile"}

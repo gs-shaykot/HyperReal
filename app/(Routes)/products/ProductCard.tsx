@@ -27,7 +27,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                             boxShadow: "0px 12px 24px rgba(0,0,0,0.15)",
                             borderColor: "#8fb300",
                         }}
-                        className="overflow-hidden border border-zinc-800 bg-zinc-950 cursor-pointer group"
+                        className="overflow-hidden border border-zinc-800 bg-zinc-950 light:bg-white cursor-pointer group"
                     >
                         {/* IMAGE */}
                         <div className="relative z-10 aspect-square w-full overflow-hidden bg-black">
@@ -53,10 +53,10 @@ export const ProductCard = ({ products }: ProductProps) => {
                         </div>
 
                         {/* CONTENT */}
-                        <div className="bg-zinc-900 px-3 py-2 text-sm light:bg-white">
+                        <div className="bg-zinc-900 px-3 py-2 text-sm light:bg-white light:text-zinc-900">
                             <div className="flex justify-between items-center">
                                 <h3
-                                    className="truncate text-xs font-bold uppercase"
+                                    className="truncate text-xs font-bold uppercase light:text-zinc-900"
                                 >
                                     {product.name}
                                 </h3>
@@ -72,7 +72,7 @@ export const ProductCard = ({ products }: ProductProps) => {
                                 </div>
                             </div>
 
-                            <p className="mt-1 text-[10px] uppercase text-gray-500">
+                            <p className="mt-1 text-[10px] uppercase text-gray-500 light:text-zinc-600">
                                 {product.category.name}
                             </p>
                         </div>
