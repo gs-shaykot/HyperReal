@@ -109,17 +109,18 @@ export function AdminHeader() {
               />
             }
           >
-            <Avatar className="size-5.5 rounded-none overflow-hidden">
-              <AvatarImage
-                src={session?.user?.image ?? undefined}
-                alt={session?.user?.name ?? "User profile"}
-                className="rounded-none"
-              />
-              <AvatarFallback
-                className="rounded-none bg-lime-100 text-[9px] font-bold text-lime-700 w-5 h-5">
-                {session?.user?.name?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+
+<Avatar className="size-7 shrink-0 rounded-none overflow-hidden after:content-none">
+  <AvatarImage
+    src={session?.user?.image ?? undefined}
+    alt={session?.user?.name ?? "User profile"}
+    className="size-full rounded-none object-cover"
+  />
+  <AvatarFallback className="size-full rounded-none bg-lime-100 text-[9px] font-bold text-lime-700">
+    {session?.user?.name?.charAt(0).toUpperCase()}
+  </AvatarFallback>
+</Avatar>
+
 
             <div className="hidden text-left sm:block">
               <p className="text-xs font-bold leading-none light:text-gray-900 text-white">
@@ -151,7 +152,7 @@ export function AdminHeader() {
                   }
                 </p>
 
-                <p className="mt-1 text-xs font-normal text-zinc-300">
+                <p className="mt-1 text-xs font-normal text-zinc-400 light:text-zinc-700">
                   {
                     session?.user?.email
                   }
