@@ -1,3 +1,5 @@
+'use client'
+import { OrdersToolbar } from '@/app/components/admin_component/orders/OrdersToolbar';
 import { OrderProduct } from '@/app/types/OrderProduct';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import axios from 'axios';
@@ -75,7 +77,11 @@ export const AdminOrders = ({ initialOrders, initialTotal, initialTotalPages }: 
 
     return (
         <div className="min-h-screen bg-main light:bg-white">
-            
+            <OrdersToolbar 
+                searchOrder={search}
+                onSearchChangeAction={setSearch}
+                onStatusChangeAction={handleStatusChange}
+            />
         </div>
     )
 }

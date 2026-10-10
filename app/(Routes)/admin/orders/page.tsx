@@ -19,11 +19,11 @@ const OrderPage = async () => {
                 </p>
             </div>
 
-            {/* <AdminOrders
+            <AdminOrders
                 initialOrders={ordersData.orders}
                 initialTotal={ordersData.total}
                 initialTotalPages={ordersData.totalPages}
-            /> */}
+            />
         </div>
     )
 }

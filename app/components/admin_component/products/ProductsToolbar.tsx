@@ -37,7 +37,7 @@ export const ProductsToolbar = ({
                         )
                     }
                     placeholder="Search products..."
-                    className="h-10 w-full border border-zinc-800 bg-dark pl-9 pr-3 font-mono text-xs text-white outline-none placeholder:text-zinc-500 focus:border-zinc-600 light:border-zinc-300 light:bg-white light:text-zinc-900"
+                    className="h-10 w-full border border-zinc-800 bg-dark pl-9 pr-3 font-mono text-xs text-white outline-none placeholder:text-zinc-500 focus:border-second light:border-zinc-300 light:bg-white light:text-zinc-900"
                 />
             </div>
 

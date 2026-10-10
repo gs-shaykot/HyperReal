@@ -34,7 +34,7 @@ export type OrderProduct = {
         shippingCost: number;
         method: string;
         country: string;
-    }
+    }[]
 
     orderHistory: {
         fullName: string;
@@ -44,5 +44,5 @@ export type OrderProduct = {
         house: string;
         zipCode: string;
         country: string;
-    }
+    } | null;
 }
