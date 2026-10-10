@@ -2,6 +2,7 @@ export type OrderProduct = {
     id: string;
     orderCode: string;
     status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+    createdAt: string | Date;
 
     user: {
         id: string;

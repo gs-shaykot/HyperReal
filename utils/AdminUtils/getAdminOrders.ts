@@ -1,10 +1,12 @@
-import prisma from "@/lib/prisma";
 
-const Orders_PER_PAGE = 10;
+import prisma from "@/lib/prisma";
+import { OrderStatus } from "@prisma/client";
+
+const ORDERS_PER_PAGE = 10;
 
 type GetAdminOrdersParams = {
     search?: string;
-    status?: string;
+    status?: OrderStatus;
     page?: number;
 };
 
@@ -14,50 +16,60 @@ export async function getAdminOrders({
     page = 1,
 }: GetAdminOrdersParams = {}) {
     const normalizedSearch = search.trim();
+
     const where = {
-        ...(normalizedSearch ? {
-            OR: [
-                {
-                    orderCode: {
-                        contains: normalizedSearch,
-                        mode: "insensitive" as const,
-                    }
-                },
-                {
-                    user: {
-                        name: {
+        ...(normalizedSearch
+            ? {
+                OR: [
+                    {
+                        orderCode: {
                             contains: normalizedSearch,
                             mode: "insensitive" as const,
                         },
                     },
-                },
-                {
-                    user: {
-                        email: {
-                            contains: normalizedSearch,
-                            mode: "insensitive" as const,
+                    {
+                        user: {
+                            name: {
+                                contains: normalizedSearch,
+                                mode: "insensitive" as const,
+                            },
                         },
                     },
-                },
-            ]
-        } : {})
+                    {
+                        user: {
+                            email: {
+                                contains: normalizedSearch,
+                                mode: "insensitive" as const,
+                            },
+                        },
+                    },
+                ],
+            }
+            : {}),
+        ...(status ? { status } : {}),
     };
 
-    const safePage = Number.isFinite(page) ? Math.max(1, Math.floor(page)) : 1;
-    const skip = (safePage - 1) * Orders_PER_PAGE;
+    const safePage =
+        Number.isFinite(page) && page > 0
+            ? Math.floor(page)
+            : 1;
+
+    const skip = (safePage - 1) * ORDERS_PER_PAGE;
 
     const [orders, total] = await Promise.all([
         prisma.order.findMany({
             where,
             orderBy: {
-                id: "asc",
+                createdAt: "desc",
             },
             skip,
-            take: Orders_PER_PAGE,
+            take: ORDERS_PER_PAGE,
+
             select: {
                 id: true,
                 orderCode: true,
                 status: true,
+                createdAt: true,
 
                 user: {
                     select: {
@@ -72,12 +84,10 @@ export async function getAdminOrders({
                         id: true,
                         quantity: true,
                         priceAtPurchase: true,
-
                         variant: {
                             select: {
                                 size: true,
                                 color: true,
-
                                 product: {
                                     select: {
                                         id: true,
@@ -116,24 +126,20 @@ export async function getAdminOrders({
                         country: true,
                     },
                 },
-
-            }
+            },
         }),
 
-        prisma.order.count({
-            where,
-        }),
+        prisma.order.count({ where }),
     ]);
-
-
-    const totalPages = Math.max(1, Math.ceil(total / Orders_PER_PAGE));
-
 
     return {
         orders,
         total,
         page: safePage,
-        totalPages,
-        pageSize: Orders_PER_PAGE,
+        totalPages: Math.max(
+            1,
+            Math.ceil(total / ORDERS_PER_PAGE)
+        ),
+        pageSize: ORDERS_PER_PAGE,
     };
 }

@@ -12,11 +12,7 @@ const OrderPage = async () => {
             <div>
                 <h1 className="text-lg font-bold tracking-[0.08em] text-white light:text-zinc-900">
                     ORDERS
-                </h1>
-
-                <p className="mt-1 font-mono text-xs text-zinc-500">
-                    {ordersData.total} orders
-                </p>
+                </h1> 
             </div>
 
             <AdminOrders
