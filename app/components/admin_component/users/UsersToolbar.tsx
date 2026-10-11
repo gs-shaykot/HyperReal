@@ -39,11 +39,10 @@ export const UsersToolbar = ({
                         key={item}
                         type="button"
                         onClick={() => onRoleChangeAction(item)}
-                        className={`h-10 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors ${
-                            role === item
+                        className={`h-10 border px-3 font-mono text-[9px] font-bold uppercase tracking-wider transition-colors cursor-pointer ${role === item
                                 ? "border-second bg-second text-black"
                                 : "border-zinc-800 text-zinc-400 hover:border-zinc-600 light:border-zinc-300"
-                        }`}
+                            }`}
                     >
                         {item}
                     </button>

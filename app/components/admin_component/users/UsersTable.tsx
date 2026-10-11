@@ -48,9 +48,8 @@ export const UsersTable = ({
                         ].map((heading) => (
                             <th
                                 key={heading}
-                                className={`px-3 py-4 text-left font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500 ${
-                                    heading === "Actions" ? "text-right" : ""
-                                }`}
+                                className={`px-3 py-4 text-left font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500 ${heading === "Actions" ? "text-right" : ""
+                                    }`}
                             >
                                 {heading}
                             </th>
@@ -67,7 +66,7 @@ export const UsersTable = ({
                             >
                                 <td className="px-3 py-3.5">
                                     <div className="flex items-center gap-3">
-                                        {user.PhotoUrl ? ( 
+                                        {user.PhotoUrl ? (
                                             <img
                                                 referrerPolicy="no-referrer"
                                                 src={user.PhotoUrl}
@@ -121,11 +120,10 @@ export const UsersTable = ({
 
                                 <td className="px-3 py-3.5">
                                     <span
-                                        className={`inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${
-                                            user.isBlocked
-                                                ? "border-red-700/60 bg-red-500/10 text-red-400"
-                                                : "border-lime-700/60 bg-lime-500/10 text-lime-400"
-                                        }`}
+                                        className={`inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${user.isBlocked
+                                            ? "border-red-700/60 bg-red-500/10 text-red-400"
+                                            : "border-lime-700/60 bg-lime-500/10 text-lime-400"
+                                            }`}
                                     >
                                         {user.isBlocked ? "BLOCKED" : "ACTIVE"}
                                     </span>
@@ -142,7 +140,7 @@ export const UsersTable = ({
                                             }
                                             className="text-zinc-500 transition-colors hover:text-white light:hover:text-zinc-900"
                                         >
-                                            <Eye className="size-3.5" />
+                                            <Eye className="size-4  cursor-pointer" />
                                         </button>
 
                                         <button
@@ -164,16 +162,15 @@ export const UsersTable = ({
                                                     isBlocked: !user.isBlocked,
                                                 })
                                             }
-                                            className={`transition-colors disabled:opacity-40 ${
-                                                user.isBlocked
-                                                    ? "text-second"
-                                                    : "text-zinc-500 hover:text-second"
-                                            }`}
+                                            className={`transition-colors disabled:opacity-40 ${user.isBlocked
+                                                ? "text-second"
+                                                : "text-zinc-500 hover:text-second"
+                                                }`}
                                         >
                                             {user.isBlocked ? (
-                                                <ShieldCheck className="size-3.5" />
+                                                <ShieldCheck className="size-4 text-red-500 cursor-pointer" />
                                             ) : (
-                                                <Shield className="size-3.5" />
+                                                <Shield className="size-4  cursor-pointer" />
                                             )}
                                         </button>
                                     </div>
