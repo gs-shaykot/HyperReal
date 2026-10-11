@@ -8,8 +8,12 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { AdminUser } from "@/app/types/AdminUser";
+import type {
+    AdminUserSort,
+    AdminUserStatus,
+} from "@/utils/AdminUtils/getAdminUsers";
 import { UsersToolbar } from "./UsersToolbar";
-import { UsersTable } from "./UsersTable"; 
+import { UsersTable } from "./UsersTable";
 import { UserDetailsSidebar } from "./UserDetailsSidebar";
 import { UsersPagination } from "@/app/components/admin_component/users/UsersPagination";
 
@@ -27,8 +31,11 @@ export const AdminUsers = ({
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [role, setRole] = useState("ALL");
+    const [status, setStatus] = useState<AdminUserStatus>("ALL");
+    const [sort, setSort] = useState<AdminUserSort>("NEWEST");
     const [page, setPage] = useState(1);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedUserId, setSelectedUserId] =
+        useState<string | null>(null);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -44,11 +51,23 @@ export const AdminUsers = ({
         setPage(1);
     };
 
+    const handleStatusChange = (value: AdminUserStatus) => {
+        setStatus(value);
+        setPage(1);
+    };
+
+    const handleSortChange = (value: AdminUserSort) => {
+        setSort(value);
+        setPage(1);
+    };
+
     const { data, isFetching } = useQuery({
         queryKey: [
             "admin-users",
             debouncedSearch,
             role,
+            status,
+            sort,
             page,
         ],
 
@@ -63,6 +82,8 @@ export const AdminUsers = ({
                 params.set("role", role);
             }
 
+            params.set("status", status);
+            params.set("sort", sort);
             params.set("page", String(page));
 
             const res = await axios.get(
@@ -75,13 +96,15 @@ export const AdminUsers = ({
         initialData:
             page === 1 &&
             !debouncedSearch &&
-            role === "ALL"
+            role === "ALL" &&
+            status === "ALL" &&
+            sort === "NEWEST"
                 ? {
-                    users: initialUsers,
-                    total: initialTotal,
-                    page: 1,
-                    totalPages: initialTotalPages,
-                }
+                      users: initialUsers,
+                      total: initialTotal,
+                      page: 1,
+                      totalPages: initialTotalPages,
+                  }
                 : undefined,
 
         placeholderData: keepPreviousData,
@@ -91,8 +114,6 @@ export const AdminUsers = ({
     const total = data?.total ?? initialTotal;
     const totalPages = data?.totalPages ?? initialTotalPages;
 
-    // Resolve the selected user from the query cache so the
-    // sidebar reflects optimistic role/status changes immediately.
     const selectedUser =
         users.find((user) => user.id === selectedUserId) ?? null;
 
@@ -115,8 +136,12 @@ export const AdminUsers = ({
             <UsersToolbar
                 search={search}
                 role={role}
+                status={status}
+                sort={sort}
                 onSearchChangeAction={setSearch}
                 onRoleChangeAction={handleRoleChange}
+                onStatusChangeAction={handleStatusChange}
+                onSortChangeAction={handleSortChange}
             />
 
             <div className="relative">

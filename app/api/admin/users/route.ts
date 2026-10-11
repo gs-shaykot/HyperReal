@@ -1,7 +1,7 @@
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getAdminUsers } from "@/utils/AdminUtils/getAdminUsers";
+import { AdminUserSort, AdminUserStatus, getAdminUsers } from "@/utils/AdminUtils/getAdminUsers";
 import { Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -33,7 +33,7 @@ async function getAdmin() {
 
     return user;
 }
- 
+
 export async function GET(req: Request) {
     try {
         const admin = await getAdmin();
@@ -47,8 +47,11 @@ export async function GET(req: Request) {
 
         const { searchParams } = new URL(req.url);
 
+
         const search = searchParams.get("search") ?? "";
         const rawRole = searchParams.get("role") ?? "";
+        const rawStatus = searchParams.get("status") ?? "ALL";
+        const rawSort = searchParams.get("sort") ?? "NEWEST";
         const rawPage = Number(searchParams.get("page") ?? "1");
 
         let role: Role | undefined;
@@ -56,17 +59,12 @@ export async function GET(req: Request) {
         if (rawRole && rawRole.toUpperCase() !== "ALL") {
             const normalizedRole = rawRole.toUpperCase();
 
-            // UI CUSTOMER maps to the existing USER enum.
             const mappedRole =
                 normalizedRole === "CUSTOMER"
                     ? "USER"
                     : normalizedRole;
 
-            if (
-                !Object.values(Role).includes(
-                    mappedRole as Role
-                )
-            ) {
+            if (!Object.values(Role).includes(mappedRole as Role)) {
                 return NextResponse.json(
                     {
                         success: false,
@@ -79,9 +77,44 @@ export async function GET(req: Request) {
             role = mappedRole as Role;
         }
 
+        const status = rawStatus.toUpperCase();
+        const allowedStatuses = ["ALL", "ACTIVE", "BLOCKED"] as const;
+
+        if (!(allowedStatuses as readonly string[]).includes(status)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid user status",
+                },
+                { status: 400 }
+            );
+        }
+
+
+        const sort = rawSort.toUpperCase();
+        const allowedSorts = [
+            "NEWEST",
+            "OLDEST",
+            "TOP_SPENDERS",
+            "MOST_ORDERS",
+            "NAME_A_Z",
+        ] as const;
+
+        if (!(allowedSorts as readonly string[]).includes(sort)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid user sort option",
+                },
+                { status: 400 }
+            );
+        }
+
         const data = await getAdminUsers({
             search,
             role,
+            status: status as AdminUserStatus,
+            sort: sort as AdminUserSort,
             page: Number.isFinite(rawPage)
                 ? Math.max(1, Math.floor(rawPage))
                 : 1,
@@ -103,7 +136,7 @@ export async function GET(req: Request) {
         );
     }
 }
- 
+
 export async function PATCH(req: Request) {
     try {
         const admin = await getAdmin();
