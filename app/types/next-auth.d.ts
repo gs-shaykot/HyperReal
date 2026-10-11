@@ -1,35 +1,39 @@
+
 import { DefaultSession } from "next-auth";
-// okay or not ?
+import { Role, AuthProvider } from "@prisma/client";
+
 declare module "next-auth" {
+    interface User {
+        id: string;
+        role: Role;
+        createdAt: Date;
+        picture?: string | null;
+        isNewUser: boolean;
+        authProvider: AuthProvider;
+    }
+
     interface Session {
         user: {
             id: string;
-            role: "USER" | "ADMIN";
-            image: string;
+            role: Role;
+            createdAt: Date;
             isNewUser: boolean;
-            createdAt: string;
-            authProvider: "GOOGLE" | "EMAIL";
+            authProvider: AuthProvider;
         } & DefaultSession["user"];
-        sessionId: string;
-        sessionRevoked?: boolean;
-    }
 
-    interface User {
-        role: "USER" | "ADMIN";
-        picture: string;
-        isNewUser: boolean;
+        sessionId: string;
+        sessionRevoked: boolean;
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
         id: string;
-        role: "USER" | "ADMIN";
-        picture: string;
-        isNewUser: boolean;
+        role: Role;
         createdAt: Date;
-        authProvider: "GOOGLE" | "EMAIL";
+        isNewUser: boolean;
+        authProvider: AuthProvider;
         sessionId: string;
-        sessionRevoked?: boolean;
+        sessionRevoked: boolean;
     }
 }

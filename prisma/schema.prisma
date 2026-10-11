@@ -13,6 +13,7 @@ model User {
   password               String?
   PhotoUrl               String?
   role                   Role         @default(USER)
+  isBlocked              Boolean      @default(false)
   createdAt              DateTime     @default(now())
   isVerified             Boolean      @default(false)
   otp                    String?
@@ -187,28 +188,28 @@ model OrderHistory {
 }
 
 model Payment {
-  id                     String        @id @default(uuid())
-  orderId                String
-  method                 PaymentMethod
-  country                String        @default("Bangladesh")
-  status                 PaymentStatus @default(PENDING)
-  transactionId          String?       @unique
+  id            String        @id @default(uuid())
+  orderId       String
+  method        PaymentMethod
+  country       String        @default("Bangladesh")
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
 
-  paidAmountInUSD        Float         @default(0)
-  paidAmountInBDT        Float         @default(0)
-  
-  totalProductPriceInUSD Float         @default(0)
-  discount               Float         @default(0)
-  shippingCost           Float         @default(0)
-  createdAt              DateTime      @default(now())
-  shippingMethod         String?       @default("Standard Drop")
+  paidAmountInUSD Float @default(0)
+  paidAmountInBDT Float @default(0)
+
+  totalProductPriceInUSD Float    @default(0)
+  discount               Float    @default(0)
+  shippingCost           Float    @default(0)
+  createdAt              DateTime @default(now())
+  shippingMethod         String?  @default("Standard Drop")
   couponCode             String?
   cardBrand              String?
   last4                  String?
-  paymentIntentId        String?       @unique
+  paymentIntentId        String?  @unique
   receiptUrl             String?
-  stripeChargeId         String?       @unique
-  order                  Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  stripeChargeId         String?  @unique
+  order                  Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model Wishlist {
@@ -227,6 +228,7 @@ model Wishlist {
 enum Role {
   USER
   ADMIN
+  MANAGER
 }
 
 enum OrderStatus {

@@ -8,8 +8,9 @@ import {
     createSessionRecord,
 } from "@/lib/auth/session";
 import { hashSessionId } from "@/lib/auth/hashSessionId";
+import type { Role } from "@prisma/client";
 
-type UserRole = "USER" | "ADMIN";
+type UserRole = "USER" | "ADMIN" | "MANAGER";
 
 export const authOptions: AuthOptions = {
     secret: process.env.AUTH_SECRET,
@@ -175,7 +176,7 @@ export const authOptions: AuthOptions = {
             if (session.user) {
                 session.user.id = token.id as string;
                 session.user.image = token.picture as string;
-                session.user.role = token.role as UserRole;
+                session.user.role = token.role as Role;;
                 session.user.isNewUser = token.isNewUser as boolean;
                 session.user.createdAt = token.createdAt as Date;
                 session.user.authProvider = token.authProvider as string;
