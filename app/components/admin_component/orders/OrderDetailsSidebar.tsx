@@ -35,13 +35,17 @@ function formatDate(date: string | Date) {
 function statusClass(status: OrderStatus) {
     switch (status) {
         case "PENDING":
-            return "border-zinc-600 bg-zinc-800/40 text-zinc-300";
+            return "border-orange-500/50 bg-orange-400/30 text-[#fb923c]";
+
         case "PROCESSING":
             return "border-yellow-700/60 bg-yellow-500/10 text-yellow-400";
+
         case "SHIPPED":
             return "border-blue-700/60 bg-blue-500/10 text-blue-400";
+
         case "DELIVERED":
             return "border-lime-700/60 bg-lime-500/10 text-lime-400";
+
         case "CANCELLED":
             return "border-red-700/60 bg-red-500/10 text-red-400";
     }
@@ -108,7 +112,7 @@ export const OrderDetailsSidebar = ({
                             Order Details
                         </h2>
 
-                        <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                        <p className="mt-1 font-mono text-[10px] text-zinc-300">
                             {order.orderCode}
                         </p>
                     </div>
@@ -128,7 +132,7 @@ export const OrderDetailsSidebar = ({
                     {/* Receipt heading */}
                     <section className="flex items-start justify-between gap-4 border-b border-dashed border-zinc-800 pb-5 light:border-zinc-200">
                         <div>
-                            <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+                            <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-300">
                                 Cargo Receipt
                             </p>
 
@@ -136,7 +140,7 @@ export const OrderDetailsSidebar = ({
                                 HYPER<span className="text-second">REAL</span>
                             </h3>
 
-                            <p className="mt-1 font-mono text-[9px] uppercase text-zinc-500">
+                            <p className="mt-1 font-mono text-[9px] uppercase text-zinc-300">
                                 // Techwear Division
                             </p>
                         </div>
@@ -148,7 +152,7 @@ export const OrderDetailsSidebar = ({
                                 {order.status}
                             </span>
 
-                            <p className="mt-3 flex items-center justify-end gap-1 font-mono text-[10px] text-zinc-400">
+                            <p className="mt-3 flex items-center justify-end gap-1 font-mono text-[10px] text-zinc-300">
                                 <CalendarDays className="size-3" />
                                 {formatDate(order.createdAt)}
                             </p>
@@ -158,7 +162,7 @@ export const OrderDetailsSidebar = ({
                     {/* Payment / shipping metadata */}
                     <section className="grid grid-cols-3 gap-3 border-b border-dashed border-zinc-800 py-5 light:border-zinc-200">
                         <div className="min-w-0">
-                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-500">
+                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-400">
                                 <CreditCard className="size-3" />
                                 Gateway
                             </p>
@@ -169,7 +173,7 @@ export const OrderDetailsSidebar = ({
                         </div>
 
                         <div className="min-w-0">
-                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-500">
+                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-400">
                                 <Truck className="size-3" />
                                 Method
                             </p>
@@ -180,7 +184,7 @@ export const OrderDetailsSidebar = ({
                         </div>
 
                         <div className="min-w-0">
-                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-500">
+                            <p className="flex items-center gap-1 text-[9px] uppercase tracking-wider text-zinc-400">
                                 <Globe className="size-3" />
                                 Region
                             </p>
@@ -202,12 +206,12 @@ export const OrderDetailsSidebar = ({
                                 {order.orderHistory?.fullName || order.user.name}
                             </p>
 
-                            <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                            <p className="mt-1 font-mono text-[10px] text-zinc-100">
                                 {order.user.email}
                             </p>
 
                             {order.orderHistory ? (
-                                <div className="mt-3 space-y-1 font-mono text-[10px] leading-relaxed text-zinc-400">
+                                <div className="mt-2 font-mono text-[10px] leading-relaxed text-zinc-300">
                                     <p>
                                         {order.orderHistory.house},{" "}
                                         {order.orderHistory.street}
@@ -219,11 +223,12 @@ export const OrderDetailsSidebar = ({
                                     <p>{order.orderHistory.country}</p>
                                     <p>{order.orderHistory.phone}</p>
                                 </div>
-                            ) : (
-                                <p className="mt-3 font-mono text-[10px] text-zinc-500">
-                                    No shipping address available.
-                                </p>
-                            )}
+                            ) :
+                                (
+                                    <p className="mt-3 font-mono text-[10px] text-zinc-300">
+                                        No shipping address available.
+                                    </p>
+                                )}
                         </div>
                     </section>
 
@@ -238,18 +243,18 @@ export const OrderDetailsSidebar = ({
                             {order.orderItems.map((item) => (
                                 <div
                                     key={item.id}
-                                    className="flex items-start justify-between gap-4 border-b border-dashed border-zinc-800 py-4 first:pt-0 last:border-b-0 light:border-zinc-200"
+                                    className="flex items-start justify-between gap-4 border-b border-dashed border-zinc-800 py-3 first:pt-0 last:border-b-0 light:border-zinc-200"
                                 >
                                     <div className="min-w-0">
                                         <p className="text-[10px] font-bold uppercase">
                                             {item.variant.product.name}
                                         </p>
 
-                                        <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                                        <p className="mt-1 font-mono text-[10px] text-zinc-200">
                                             [{item.variant.size}] × {item.quantity}
                                         </p>
 
-                                        <p className="mt-1 font-mono text-[9px] uppercase text-zinc-500">
+                                        <p className="mt-1 font-mono text-[9px] uppercase text-zinc-200">
                                             {item.variant.color}
                                         </p>
                                     </div>
@@ -265,20 +270,20 @@ export const OrderDetailsSidebar = ({
                     </section>
 
                     {/* Financial summary */}
-                    <section className="mt-2 space-y-3 border-t border-dashed border-zinc-800 pt-5 font-mono text-[10px] light:border-zinc-200">
+                    <section className="mt-2 space-y-3 border-t border-dashed border-zinc-800 pt-2 font-mono text-[10px] light:border-zinc-200">
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Subtotal</span>
-                            <span>{formatUSD(subtotal)}</span>
+                            <span className="text-zinc-200">{formatUSD(subtotal)}</span>
                         </div>
 
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Shipping</span>
-                            <span>{formatUSD(shipping)}</span>
+                            <span className="text-zinc-200">{formatUSD(shipping)}</span>
                         </div>
 
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Discount</span>
-                            <span>-{formatUSD(discount)}</span>
+                            <span className="text-zinc-200">-{formatUSD(discount)}</span>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between gap-3 border-b border-dashed border-zinc-800 pb-5 pt-2 light:border-zinc-200">
@@ -292,7 +297,7 @@ export const OrderDetailsSidebar = ({
                         </div>
 
                         {payment && (
-                            <div className="flex justify-between gap-3 pt-1 text-zinc-500">
+                            <div className="flex justify-between gap-3 pt-1 text-zinc-300">
                                 <span>Payment status</span>
                                 <span className="font-bold uppercase">
                                     {payment.status}

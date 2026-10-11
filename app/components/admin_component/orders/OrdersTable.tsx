@@ -41,7 +41,7 @@ function getOrderTotal(order: OrderProduct) {
 function statusClass(status: OrderStatus) {
     switch (status) {
         case "PENDING":
-            return "border-orange bg-orange-400/30 text-orange-400";
+            return "border-orange-500/50 bg-orange-400/30 text-[#fb923c]";
 
         case "PROCESSING":
             return "border-yellow-700/60 bg-yellow-500/10 text-yellow-400";
