@@ -87,7 +87,6 @@ export const AdminOrders = ({
     const total = data?.total ?? initialTotal;
     const totalPages = data?.totalPages ?? initialTotalPages;
 
-    // Keep the displayed page valid if a filter reduces the page count.
     useEffect(() => {
         if (data && page > data.totalPages) {
             setPage(data.totalPages);

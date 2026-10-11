@@ -35,6 +35,7 @@ export type OrderProduct = {
         shippingCost: number;
         method: string;
         country: string;
+        shippingMethod: string | null;
     }[]
 
     orderHistory: {

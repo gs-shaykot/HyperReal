@@ -109,6 +109,7 @@ export async function getAdminOrders({
                         shippingCost: true,
                         method: true,
                         country: true,
+                        shippingMethod: true,
                     },
                     orderBy: {
                         createdAt: "desc",
