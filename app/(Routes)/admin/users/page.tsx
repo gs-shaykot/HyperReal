@@ -1,13 +1,21 @@
-import React from 'react'
 
-const UserPage = () => {
+import { AdminUsers } from "@/app/components/admin_component/users/AdminUsers";
+import { getAdminUsers } from "@/utils/AdminUtils/getAdminUsers";
+
+const UserPage = async () => {
+    const usersData = await getAdminUsers({
+        page: 1,
+    });
+
     return (
-        <div className="bg-main light:bg-white min-h-screen flex items-center justify-center">
-            <h1 className="text-xl font-bold">
-                Users Page
-            </h1>
+        <div className="min-h-screen bg-main p-4 light:bg-white">
+            <AdminUsers
+                initialUsers={usersData.users}
+                initialTotal={usersData.total}
+                initialTotalPages={usersData.totalPages}
+            />
         </div>
-    )
-}
+    );
+};
 
-export default UserPage
+export default UserPage;

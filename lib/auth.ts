@@ -31,6 +31,13 @@ export const authOptions: AuthOptions = {
                     where: { email },
                 });
 
+                if (
+                    !Fetchuser ||
+                    !Fetchuser.password ||
+                    Fetchuser.isBlocked
+                ) {
+                    return null;
+                }
                 if (!Fetchuser || !Fetchuser.password) return null;
 
                 const isValid = await argon2.verify(Fetchuser.password, password);
@@ -68,6 +75,9 @@ export const authOptions: AuthOptions = {
                 const isUserExis = await prisma.user.findUnique({
                     where: { email: user.email?.toLowerCase() },
                 });
+                if (isUserExis?.isBlocked) {
+                    return false;
+                }
                 if (!isUserExis) {
                     await prisma.user.create({
                         data: {
@@ -88,6 +98,22 @@ export const authOptions: AuthOptions = {
             return true;
         },
         async jwt({ token, user, trigger }) {
+            if (token.id) {
+                const dbUser = await prisma.user.findUnique({
+                    where: {
+                        id: token.id as string,
+                    },
+                    select: {
+                        isBlocked: true,
+                    },
+                });
+
+                if (!dbUser || dbUser.isBlocked) {
+                    token.sessionRevoked = true;
+                    return token;
+                }
+            }
+            
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {
