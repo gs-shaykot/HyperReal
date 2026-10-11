@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import LogoutButton from '@/app/components/LogoutButton'
 import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
-import { countCartItems } from "@/lib/order_helpers/cartAPIs" 
+import { countCartItems } from "@/lib/order_helpers/cartAPIs"
 
 export const Navbar = () => {
     const { data: session } = useSession();
@@ -99,7 +99,11 @@ export const Navbar = () => {
                                                 <div className="w-7 h-7 rounded-full">
                                                     <img
                                                         alt="User avatar"
-                                                        src={session?.user?.image} referrerPolicy="no-referrer" />
+                                                        src={
+                                                            session?.user?.image ??
+                                                            "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png"
+                                                        }
+                                                        referrerPolicy="no-referrer" />
                                                 </div>
                                             </div>
                                             <ul
