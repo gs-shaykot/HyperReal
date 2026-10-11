@@ -9,8 +9,7 @@ import {
 } from "@/lib/auth/session";
 import { hashSessionId } from "@/lib/auth/hashSessionId";
 import type { Role } from "@prisma/client";
-
-type UserRole = "USER" | "ADMIN" | "MANAGER";
+ 
 
 export const authOptions: AuthOptions = {
     secret: process.env.AUTH_SECRET,
@@ -113,7 +112,7 @@ export const authOptions: AuthOptions = {
                     return token;
                 }
             }
-            
+
             if (user?.email) {
                 const dbUser = await prisma.user.findUnique({
                     where: {

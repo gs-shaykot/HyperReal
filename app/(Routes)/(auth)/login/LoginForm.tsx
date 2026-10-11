@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import { Eye, EyeOff, TriangleAlert, UserRoundCheck } from 'lucide-react';
+import axios from 'axios';
 
 type LoginState = {
     success: boolean;
@@ -42,14 +43,23 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
         };
     }
 
+
     try {
-        const res = await signIn('credentials', {
-            email: email.toLowerCase(),
+        const { data: check } = await axios.post(
+            "/api/auth/check-login",
+            {
+                email: email.trim().toLowerCase(),
+                password,
+            }
+        );
+ 
+        const res = await signIn("credentials", {
+            email: email.trim().toLowerCase(),
             password,
             redirect: false,
         });
 
-        if (res?.error) {
+        if (res?.error || !res?.ok) {
             return {
                 success: false,
                 message: "ACCESS_DENIED: Invalid credentials",
@@ -57,23 +67,46 @@ const LoginAction = async (prevState: LoginState, formData: FormData): Promise<L
             };
         }
 
-        if (res?.ok) {
-            return {
-                success: true,
-                message: "ACCESS_GRANTED: Initializing session...",
-                errors: {},
-            };
+        return {
+            success: true,
+            message: "ACCESS_GRANTED: Initializing session...",
+            errors: {},
+        };
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            const code = error.response?.data?.code;
+
+            if (code === "ACCOUNT_BLOCKED") {
+                return {
+                    success: false,
+                    message:
+                        "ACCOUNT_BLOCKED: Your account has been blocked by an administrator. Please contact support.",
+                    errors: {},
+                };
+            }
+
+            if (code === "INVALID_CREDENTIALS") {
+                return {
+                    success: false,
+                    message: "ACCESS_DENIED: Invalid credentials",
+                    errors: {},
+                };
+            }
+
+            if (!error.response) {
+                return {
+                    success: false,
+                    message:
+                        "CRITICAL_ERROR: Connection to authentication service lost",
+                    errors: {},
+                };
+            }
         }
 
         return {
             success: false,
-            message: "SYSTEM_ERROR: Authentication service unavailable",
-            errors: {},
-        };
-    } catch (error) {
-        return {
-            success: false,
-            message: "CRITICAL_ERROR: Connection to mainframe lost",
+            message:
+                "SYSTEM_ERROR: Authentication service unavailable",
             errors: {},
         };
     }
@@ -152,7 +185,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your identity"
-                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 ' } text-gray-400 placeholder:text-zinc-700`}
+                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
                             {state.errors?.email && (
@@ -178,7 +211,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                     type={ShowPassword ? "text" : "password"}
                                     name="password"
                                     placeholder="Enter passcode"
-                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 ' } text-gray-400 placeholder:text-zinc-700`}
+                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 placeholder:text-zinc-700`}
                                     disabled={isPending}
                                 />
                                 {
@@ -197,7 +230,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                         <button
                             type="submit"
                             disabled={isPending}
-                            className={`btn w-full tracking-widest font-semibold transition-all ${isPending ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-second text-black hover:bg-second' }`}
+                            className={`btn w-full tracking-widest font-semibold transition-all ${isPending ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-second text-black hover:bg-second'}`}
                         >
                             {isPending ? (
                                 <span className="flex items-center gap-2">
@@ -251,7 +284,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                         <ul className="space-y-2 text-xs">
                             <li className="opacity-80">&gt; SECURE_CONNECTION_ESTABLISHED</li>
                             <li className="opacity-80">&gt; ENCRYPTION_LEVEL_MAX</li>
-                            <li className={`transition-all duration-500 ${state.success ? 'text-green-400 animate-pulse' : 'opacity-80' }`}>
+                            <li className={`transition-all duration-500 ${state.success ? 'text-green-400 animate-pulse' : 'opacity-80'}`}>
                                 &gt; {state.success ? 'ACCESS_GRANTED' : 'AWAITING_CREDENTIALS'}
                             </li>
                         </ul>
