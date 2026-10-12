@@ -31,6 +31,39 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, message: "Invalid payment method" }, { status: 400 });
         }
 
+        if (paymentMethod === "COD") {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: session.user.id,
+                },
+                select: {
+                    isBlocked: true,
+                    isCODDisabled: true,
+                },
+            });
+
+            if (!user || user.isBlocked) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Your account is not authorized to place this order.",
+                    },
+                    { status: 403 }
+                );
+            }
+
+            if (user.isCODDisabled) {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message:
+                            "Cash on Delivery is not available for your account. Please choose another payment method.",
+                    },
+                    { status: 403 }
+                );
+            }
+        }
+
         const allowedDeliveryOptions = [
             "Standard Drop",
             "Express Drop",

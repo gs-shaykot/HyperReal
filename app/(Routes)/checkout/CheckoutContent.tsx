@@ -23,6 +23,27 @@ const hudson = localFont({
 
 export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: string | null; addressesCount: number }) => {
     const { data: session, status, update } = useSession();
+    const {
+        data: codAvailability,
+    } = useQuery({
+        queryKey: ["codAvailability", session?.user?.id],
+
+        queryFn: async () => {
+            const res = await axios.get<{
+                isCODDisabled: boolean;
+            }>("/api/order/cod-availability");
+
+            return res.data;
+        },
+
+        enabled: status === "authenticated",
+
+        // Do not show COD until the server confirms it is allowed.
+        retry: 1,
+    });
+
+    const isCODDisabled = codAvailability?.isCODDisabled !== false;
+
     const stripe = useStripe();
     const elements = useElements();
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -146,6 +167,15 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             }
         }
     }, [selectedCountry.value])
+
+    useEffect(() => {
+        if (
+            isCODDisabled &&
+            selectedPaymentMethod === "COD"
+        ) {
+            setSelectedPaymentMethod("SSLC");
+        }
+    }, [isCODDisabled, selectedPaymentMethod]);
 
     const convertPrice = (usdAmount: number) => {
         if (!rates || selectedCountry.value === 'usd') return null;
@@ -742,12 +772,16 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             desc: "International Cards, Apple Pay, Google Pay",
                                             icon: <DollarSign className="text-second" />,
                                         },
-                                        {
-                                            label: "CASH ON DELIVERY",
-                                            value: "COD",
-                                            desc: "Pay with cash upon delivery",
-                                            icon: <HandCoins className="text-second" />,
-                                        },
+                                        ...(!isCODDisabled
+                                            ? [
+                                                {
+                                                    label: "CASH ON DELIVERY",
+                                                    value: "COD",
+                                                    desc: "Pay with cash upon delivery",
+                                                    icon: <HandCoins className="text-second" />,
+                                                },
+                                            ]
+                                            : []),
                                     ].map((method) => (
                                         <button
                                             type="button"
