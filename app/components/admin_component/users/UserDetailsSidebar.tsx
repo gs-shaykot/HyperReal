@@ -1,7 +1,7 @@
 
 "use client";
 
-import { CalendarDays, Shield, UserRound, X } from "lucide-react";
+import { CalendarDays, HandCoins, Shield, UserRound, X } from "lucide-react";
 import type { Role } from "@prisma/client";
 import type { AdminUser } from "@/app/types/AdminUser";
 import { useUpdateAdminUser } from "@/app/Hooks/useAdminUsers";
@@ -92,11 +92,10 @@ export const UserDetailsSidebar = ({
                                 {user.email}
                             </p>
                             <span
-                                className={`mt-3 inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${
-                                    user.isBlocked
+                                className={`mt-3 inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${user.isBlocked
                                         ? "border-red-700/60 bg-red-500/10 text-red-400"
                                         : "border-lime-700/60 bg-lime-500/10 text-lime-400"
-                                }`}
+                                    }`}
                             >
                                 {user.isBlocked ? "Blocked" : "Active"}
                             </span>
@@ -185,14 +184,33 @@ export const UserDetailsSidebar = ({
                                     isBlocked: !user.isBlocked,
                                 })
                             }
-                            className={`mt-4 flex h-10 w-full items-center justify-center gap-2 border font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 ${
-                                user.isBlocked
+                            className={`mt-4 flex h-10 w-full items-center justify-center gap-2 border font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer ${user.isBlocked
                                     ? "border-lime-700/60 text-lime-400 hover:bg-lime-500/10"
                                     : "border-red-700/60 text-red-400 hover:bg-red-500/10"
-                            }`}
+                                }`}
                         >
                             <Shield className="size-3.5" />
                             {user.isBlocked ? "Unblock Account" : "Block Account"}
+                        </button>
+
+                        <button
+                            type="button"
+                            disabled={updateUser.isPending}
+                            onClick={() =>
+                                updateUser.mutate({
+                                    id: user.id,
+                                    isCODDisabled: !user.isCODDisabled,
+                                })
+                            }
+                            className={`mt-3 flex h-10 w-full items-center justify-center gap-2 border font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer ${user.isCODDisabled
+                                    ? "border-lime-700/60 text-lime-400 hover:bg-lime-500/10"
+                                    : "border-amber-700/60 text-amber-400 hover:bg-amber-500/10"
+                                }`}
+                        >
+                            <HandCoins className="size-3.5" />
+                            {user.isCODDisabled
+                                ? "Enable Cash on Delivery"
+                                : "Disable Cash on Delivery"}
                         </button>
 
                         <p className="mt-3 font-mono text-[9px] leading-relaxed text-zinc-500">

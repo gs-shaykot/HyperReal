@@ -150,7 +150,7 @@ export async function PATCH(req: Request) {
 
         const body = await req.json();
 
-        const { id, role, isBlocked } = body;
+        const { id, role, isBlocked, isCODDisabled } = body;
 
         if (
             typeof id !== "string" ||
@@ -168,6 +168,29 @@ export async function PATCH(req: Request) {
         // Require exactly one supported update.
         const updatesRole = role !== undefined;
         const updatesBlocked = isBlocked !== undefined;
+        const updatesCOD = isCODDisabled !== undefined;
+
+        const updateCount = [
+            updatesRole,
+            updatesBlocked,
+            updatesCOD,
+        ].filter(Boolean).length;
+
+        if (
+            updateCount !== 1 ||
+            (updatesRole && typeof role !== "string") ||
+            (updatesBlocked && typeof isBlocked !== "boolean") ||
+            (updatesCOD && typeof isCODDisabled !== "boolean")
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Provide exactly one valid update: role, isBlocked, or isCODDisabled",
+                },
+                { status: 400 }
+            );
+        }
 
         if (
             updatesRole === updatesBlocked ||
@@ -212,6 +235,7 @@ export async function PATCH(req: Request) {
         const data: {
             role?: Role;
             isBlocked?: boolean;
+            isCODDisabled?: boolean;
         } = {};
 
         if (updatesRole) {
@@ -241,6 +265,10 @@ export async function PATCH(req: Request) {
 
         if (updatesBlocked) {
             data.isBlocked = isBlocked;
+        }
+
+        if (updatesCOD) {
+            data.isCODDisabled = isCODDisabled;
         }
 
         // Avoid removing the final administrator.
@@ -274,6 +302,7 @@ export async function PATCH(req: Request) {
                 PhotoUrl: true,
                 role: true,
                 isBlocked: true,
+                isCODDisabled: true,
                 createdAt: true,
             },
         });

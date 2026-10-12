@@ -88,6 +88,7 @@ export async function getAdminUsers({
                 PhotoUrl: true,
                 role: true,
                 isBlocked: true,
+                isCODDisabled: true,
                 createdAt: true,
 
                 _count: {

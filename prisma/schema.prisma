@@ -16,6 +16,7 @@ model User {
   isBlocked              Boolean      @default(false)
   createdAt              DateTime     @default(now())
   isVerified             Boolean      @default(false)
+  isCODDisabled          Boolean      @default(false)
   otp                    String?
   otpExpiry              DateTime?
   isNewUser              Boolean      @default(true)

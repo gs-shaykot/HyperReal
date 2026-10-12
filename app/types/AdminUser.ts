@@ -7,6 +7,7 @@ export type AdminUser = {
     PhotoUrl: string | null;
     role: Role;
     isBlocked: boolean;
+    isCODDisabled: boolean;
     createdAt: Date | string;
     ordersCount: number;
     totalSpent: number;

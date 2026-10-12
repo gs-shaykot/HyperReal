@@ -13,9 +13,10 @@ import toast from "react-hot-toast";
 type UpdateAdminUserInput = {
     id: string;
 } & (
-    | { role: Role | "CUSTOMER"; isBlocked?: never }
-    | { isBlocked: boolean; role?: never }
-);
+        | { role: Role | "CUSTOMER"; isBlocked?: never; isCODDisabled?: never }
+        | { isBlocked: boolean; role?: never; isCODDisabled?: never }
+        | { isCODDisabled: boolean; role?: never; isBlocked?: never }
+    );
 
 async function updateAdminUser(input: UpdateAdminUserInput) {
     try {
@@ -29,7 +30,7 @@ async function updateAdminUser(input: UpdateAdminUserInput) {
         if (axios.isAxiosError(error)) {
             throw new Error(
                 error.response?.data?.message ??
-                    "Failed to update user"
+                "Failed to update user"
             );
         }
 
@@ -79,6 +80,13 @@ export function useUpdateAdminUser() {
                                     return {
                                         ...user,
                                         isBlocked: input.isBlocked,
+                                    };
+                                }
+                                
+                                if ("isCODDisabled" in input) {
+                                    return {
+                                        ...user,
+                                        isCODDisabled: input.isCODDisabled,
                                     };
                                 }
 
