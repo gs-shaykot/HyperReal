@@ -387,10 +387,12 @@ export async function POST(req: Request) {
         });
     }
     catch (error) {
-
         if (
             error instanceof Error &&
-            error.message === "OUT_OF_STOCK"
+            (
+                error.message === "OUT_OF_STOCK" ||
+                error.message === "Insufficient stock"
+            )
         ) {
             return NextResponse.json(
                 {
@@ -401,8 +403,6 @@ export async function POST(req: Request) {
                 { status: 409 }
             );
         }
-
-
 
         if (error instanceof CouponError) {
             return NextResponse.json(
