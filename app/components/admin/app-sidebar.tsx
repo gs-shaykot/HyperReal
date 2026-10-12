@@ -11,6 +11,8 @@ import {
     ShoppingCart,
     Tag,
     Users,
+    Eye,
+    LogOut
 } from "lucide-react"
 
 import {
@@ -23,6 +25,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/app/components/ui/sidebar"
+import { signOut } from "next-auth/react";
 
 import { SidebarTrigger } from "@/app/components/ui/sidebar"
 
@@ -131,7 +134,31 @@ export function AppSidebar() {
             </SidebarContent>
 
             {/* Footer */}
-            <SidebarFooter />
+            <SidebarFooter className="mt-auto border-t border-zinc-800 px-2 py-3 light:border-zinc-300">
+                <SidebarMenu className="gap-1">
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            render={<Link href="/" />}
+                            tooltip="View Store"
+                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-400 transition-colors hover:bg-second hover:text-zinc-900"
+                        >
+                            <Eye className="size-3.75" />
+                            <span>VIEW STORE</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                        <SidebarMenuButton
+                            tooltip="Logout"
+                            onClick={() => signOut({ callbackUrl: "/login" })}
+                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-400 transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                        >
+                            <LogOut className="size-3.75" />
+                            <span>LOGOUT</span>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
     )
 }
