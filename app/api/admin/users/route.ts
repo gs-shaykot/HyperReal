@@ -192,19 +192,6 @@ export async function PATCH(req: Request) {
             );
         }
 
-        if (
-            updatesRole === updatesBlocked ||
-            (updatesRole && typeof role !== "string") ||
-            (updatesBlocked && typeof isBlocked !== "boolean")
-        ) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Provide either a valid role or isBlocked",
-                },
-                { status: 400 }
-            );
-        }
 
         // Prevent admins from changing their own role or status.
         if (id === admin.id) {
