@@ -186,6 +186,27 @@ export async function POST(req: Request) {
         }
 
         const order = await prisma.$transaction(async (tx) => {
+
+            for (const item of cartItems) {
+                const reserved = await tx.productVariant.updateMany({
+                    where: {
+                        id: item.variantId,
+                        stock: {
+                            gte: item.quantity,
+                        },
+                    },
+                    data: {
+                        stock: {
+                            decrement: item.quantity,
+                        },
+                    },
+                });
+
+                if (reserved.count !== 1) {
+                    throw new Error("OUT_OF_STOCK");
+                }
+            }
+
             const createdOrder = await tx.order.create({
                 data: {
                     userId: session.user.id,
@@ -364,7 +385,25 @@ export async function POST(req: Request) {
             message: "Order created successfully",
             orderId: order.id,
         });
-    } catch (error) {
+    }
+    catch (error) {
+
+        if (
+            error instanceof Error &&
+            error.message === "OUT_OF_STOCK"
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message:
+                        "Sorry, this product just went out of stock. Please update your cart and try again.",
+                },
+                { status: 409 }
+            );
+        }
+
+
+
         if (error instanceof CouponError) {
             return NextResponse.json(
                 {

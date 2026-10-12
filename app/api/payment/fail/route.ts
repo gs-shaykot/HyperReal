@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server"; 
+import { NextResponse } from "next/server";
+import { releaseOrderStock } from "@/lib/service/paymentService";
 
 export async function POST(req: Request) {
     try {
@@ -36,16 +37,7 @@ export async function POST(req: Request) {
             );
         }
 
-        await prisma.payment.updateMany({
-            where: {
-                orderId: order.id,
-                status: "PENDING",
-            },
-            data: {
-                status: "FAILED",
-                transactionId: tran_id,
-            },
-        });
+        await releaseOrderStock(order.id);
 
         return NextResponse.redirect(
             `${process.env.BASE_URL}/failed?orderId=${order.id}`

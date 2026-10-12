@@ -126,29 +126,6 @@ export async function completePayment(
             );
         }
 
-        for (const item of order.orderItems) {
-            const updatedStock = await tx.productVariant.updateMany({
-                where: {
-                    id: item.variantId,
-                    stock: {
-                        gte: item.quantity,
-                    }
-                },
-                data: {
-                    stock: {
-                        decrement: item.quantity,
-                    },
-                },
-            });
-
-            if (updatedStock.count !== 1) {
-                throw new Error(
-                    `Insufficient stock or variant not found: ${item.variantId}`
-                );
-            }
-        }
-
-
 
         if (cart) {
             await tx.cartItem.deleteMany({
@@ -192,5 +169,48 @@ export async function markPaymentFailed(orderId: string) {
         data: {
             status: PaymentStatus.FAILED,
         },
+    });
+}
+
+
+export async function releaseOrderStock(orderId: string) {
+    await prisma.$transaction(async (tx) => {
+        const failedPayment = await tx.payment.updateMany({
+            where: {
+                orderId,
+                status: PaymentStatus.PENDING,
+            },
+            data: {
+                status: PaymentStatus.FAILED,
+            },
+        });
+
+        // Release stock only once for a pending payment.
+        if (failedPayment.count !== 1) {
+            return;
+        }
+
+        const orderItems = await tx.orderItem.findMany({
+            where: {
+                orderId,
+            },
+            select: {
+                variantId: true,
+                quantity: true,
+            },
+        });
+
+        for (const item of orderItems) {
+            await tx.productVariant.update({
+                where: {
+                    id: item.variantId,
+                },
+                data: {
+                    stock: {
+                        increment: item.quantity,
+                    },
+                },
+            });
+        }
     });
 }
