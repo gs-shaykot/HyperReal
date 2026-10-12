@@ -194,7 +194,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
     };
 
     const convertedTotal = convertPrice(total);
-
     const handlePayment: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -231,9 +230,21 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 saveAddress: addNewAddress.isChecked,
                 deliveryOption: selectedDeliveryOption.label,
             };
+            
+            let data;
 
-            const res = await axios.post("/api/order", paymentData);
-            const data = res.data;
+            try {
+                const res = await axios.post("/api/order", paymentData);
+                data = res.data;
+            } catch (error: any) {
+                const message =
+                    error.response?.data?.message ||
+                    "Failed to create order";
+
+                toast.error(message);
+                setIsSubmitting(false);
+                return;
+            }
 
             if (!data.success) {
                 toast.error(data.message || "Failed to create order");
@@ -799,10 +810,10 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                     setSelectedPaymentMethod(method.value);
                                                 }}
                                                 className={`btn h-20 w-full rounded-none p-3 shadow-none transition-all flex items-center justify-between gap-6 border ${method.value === "COD" && isCODDisabled
-                                                        ? "cursor-not-allowed border-zinc-700 bg-zinc-800/40 text-zinc-500 opacity-60"
-                                                        : selectedPaymentMethod === method.value
-                                                            ? "cursor-pointer bg-second/15 light:bg-second/25 border-second"
-                                                            : "cursor-pointer bg-second/5 light:bg-white border-second/50 hover:bg-second/10 hover:border-second"
+                                                    ? "cursor-not-allowed border-zinc-700 bg-zinc-800/40 text-zinc-500 opacity-60"
+                                                    : selectedPaymentMethod === method.value
+                                                        ? "cursor-pointer bg-second/15 light:bg-second/25 border-second"
+                                                        : "cursor-pointer bg-second/5 light:bg-white border-second/50 hover:bg-second/10 hover:border-second"
                                                     }`}
                                             >
                                                 <div className="flex h-14 w-14 items-center justify-center border border-second">
@@ -858,8 +869,8 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                 setSelectedPaymentMethod(method.value)
                                             }
                                             className={`btn h-20 rounded-none border p-3 shadow-none transition-all flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                    ? "bg-second/15 border-second"
-                                                    : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
+                                                ? "bg-second/15 border-second"
+                                                : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
                                                 }`}
                                         >
                                             <div className="flex h-14 w-14 items-center justify-center border border-second">
