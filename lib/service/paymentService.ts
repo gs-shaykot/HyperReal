@@ -42,6 +42,7 @@ type CompletePaymentType = Prisma.OrderGetPayload<{
     };
 }>;
 
+
 export async function completePayment(
     order: CompletePaymentType,
     stripeDetails?: {
@@ -55,9 +56,8 @@ export async function completePayment(
 ) {
     const payment = order.payments[0];
 
-    // Avoid processing a payment already marked successful.
-    if (payment?.status === PaymentStatus.SUCCESS) {
-        return;
+    if (!payment) {
+        throw new Error(`No payment found for order ${order.id}`);
     }
 
     const cart = await prisma.cart.findFirst({
@@ -69,9 +69,26 @@ export async function completePayment(
     const transactionId = await generatePaymentTrxId();
 
     await prisma.$transaction(async (tx) => {
-        await tx.payment.updateMany({
+        const claimedOrder = await tx.order.updateMany({
+            where: {
+                id: order.id,
+                status: OrderStatus.PENDING,
+            },
+            data: {
+                status: OrderStatus.PROCESSING,
+            },
+        });
+
+        if (claimedOrder.count === 0) {
+            return;
+        }
+
+        const updatedPayment = await tx.payment.updateMany({
             where: {
                 orderId: order.id,
+                status: {
+                    not: PaymentStatus.SUCCESS,
+                },
             },
             data: {
                 status:
@@ -82,13 +99,11 @@ export async function completePayment(
                 transactionId,
 
                 ...(stripeDetails?.paymentIntentId && {
-                    paymentIntentId:
-                        stripeDetails.paymentIntentId,
+                    paymentIntentId: stripeDetails.paymentIntentId,
                 }),
 
                 ...(stripeDetails?.stripeChargeId && {
-                    stripeChargeId:
-                        stripeDetails.stripeChargeId,
+                    stripeChargeId: stripeDetails.stripeChargeId,
                 }),
 
                 ...(stripeDetails?.cardBrand && {
@@ -105,34 +120,35 @@ export async function completePayment(
             },
         });
 
-        await tx.order.update({
-            where: {
-                id: order.id,
-            },
-            data: {
-                status: OrderStatus.PROCESSING,
-            },
-        });
+        if (updatedPayment.count === 0) {
+            throw new Error(
+                `Could not update payment for order ${order.id}`
+            );
+        }
 
         for (const item of order.orderItems) {
-            const updated =
-                await tx.productVariant.updateMany({
-                    where: {
-                        id: item.variantId,
+            const updatedStock = await tx.productVariant.updateMany({
+                where: {
+                    id: item.variantId,
+                    stock: {
+                        gte: item.quantity,
+                    }
+                },
+                data: {
+                    stock: {
+                        decrement: item.quantity,
                     },
-                    data: {
-                        stock: {
-                            decrement: item.quantity,
-                        },
-                    },
-                });
+                },
+            });
 
-            if (updated.count === 0) {
+            if (updatedStock.count !== 1) {
                 throw new Error(
-                    `Failed to update stock for variant ${item.variantId}`
+                    `Insufficient stock or variant not found: ${item.variantId}`
                 );
             }
         }
+
+
 
         if (cart) {
             await tx.cartItem.deleteMany({
@@ -142,7 +158,7 @@ export async function completePayment(
             });
         }
 
-        if (payment?.couponCode) {
+        if (payment.couponCode) {
             await tx.coupon.update({
                 where: {
                     code: payment.couponCode,
@@ -155,8 +171,6 @@ export async function completePayment(
             });
         }
 
-        // Mark the user as no longer new only after this order
-        // reaches the payment-completion / COD-acceptance flow.
         await tx.user.updateMany({
             where: {
                 id: order.userId,
@@ -168,6 +182,7 @@ export async function completePayment(
         });
     });
 }
+
 
 export async function markPaymentFailed(orderId: string) {
     await prisma.payment.updateMany({
