@@ -1,19 +1,22 @@
-import { generateCustomId } from '@/lib/order_helpers/generateCustomId';
-import prisma from '@/lib/prisma';
-import { OrderStatus, PaymentStatus, Prisma } from '@prisma/client';
 
+import { generateCustomId } from "@/lib/order_helpers/generateCustomId";
+import prisma from "@/lib/prisma";
+import {
+    OrderStatus,
+    PaymentStatus,
+    Prisma,
+} from "@prisma/client";
 
 export async function generatePaymentTrxId() {
     let transactionId = generateCustomId("HYP-PAY");
 
     while (
-        await prisma.payment.findUnique(
-            {
-                where: {
-                    transactionId
-                }
-            }
-        )) {
+        await prisma.payment.findUnique({
+            where: {
+                transactionId,
+            },
+        })
+    ) {
         transactionId = generateCustomId("HYP-PAY");
     }
 
@@ -24,14 +27,12 @@ type CompletePaymentType = Prisma.OrderGetPayload<{
     select: {
         id: true;
         userId: true;
-
         orderItems: {
             select: {
                 quantity: true;
                 variantId: true;
             };
         };
-
         payments: {
             select: {
                 status: true;
@@ -40,7 +41,6 @@ type CompletePaymentType = Prisma.OrderGetPayload<{
         };
     };
 }>;
-
 
 export async function completePayment(
     order: CompletePaymentType,
@@ -55,67 +55,89 @@ export async function completePayment(
 ) {
     const payment = order.payments[0];
 
-    if (payment && payment.status === PaymentStatus.SUCCESS) {
+    // Avoid processing a payment already marked successful.
+    if (payment?.status === PaymentStatus.SUCCESS) {
         return;
     }
 
     const cart = await prisma.cart.findFirst({
-        where: { userId: order.userId },
+        where: {
+            userId: order.userId,
+        },
     });
 
     const transactionId = await generatePaymentTrxId();
 
     await prisma.$transaction(async (tx) => {
         await tx.payment.updateMany({
-            where: { orderId: order.id },
+            where: {
+                orderId: order.id,
+            },
             data: {
-                status: paymentMethod === "COD" ? PaymentStatus.PENDING : PaymentStatus.SUCCESS,
+                status:
+                    paymentMethod === "COD"
+                        ? PaymentStatus.PENDING
+                        : PaymentStatus.SUCCESS,
+
                 transactionId,
-                ...(
-                    stripeDetails?.paymentIntentId && { paymentIntentId: stripeDetails.paymentIntentId }
-                ),
-                ...(
-                    stripeDetails?.stripeChargeId && { stripeChargeId: stripeDetails.stripeChargeId }
-                ),
-                ...(
-                    stripeDetails?.cardBrand && { cardBrand: stripeDetails.cardBrand }),
-                ...(
-                    stripeDetails?.last4 && { last4: stripeDetails.last4 }
-                ),
-                ...(
-                    stripeDetails?.receiptUrl && { receiptUrl: stripeDetails.receiptUrl }
-                ),
+
+                ...(stripeDetails?.paymentIntentId && {
+                    paymentIntentId:
+                        stripeDetails.paymentIntentId,
+                }),
+
+                ...(stripeDetails?.stripeChargeId && {
+                    stripeChargeId:
+                        stripeDetails.stripeChargeId,
+                }),
+
+                ...(stripeDetails?.cardBrand && {
+                    cardBrand: stripeDetails.cardBrand,
+                }),
+
+                ...(stripeDetails?.last4 && {
+                    last4: stripeDetails.last4,
+                }),
+
+                ...(stripeDetails?.receiptUrl && {
+                    receiptUrl: stripeDetails.receiptUrl,
+                }),
             },
         });
 
         await tx.order.update({
-            where: { id: order.id },
+            where: {
+                id: order.id,
+            },
             data: {
                 status: OrderStatus.PROCESSING,
             },
         });
 
         for (const item of order.orderItems) {
-
-            const updated = await tx.productVariant.updateMany({
-                where: {
-                    id: item.variantId,
-                },
-                data: {
-                    stock: {
-                        decrement: item.quantity,
+            const updated =
+                await tx.productVariant.updateMany({
+                    where: {
+                        id: item.variantId,
                     },
-                },
-            });
+                    data: {
+                        stock: {
+                            decrement: item.quantity,
+                        },
+                    },
+                });
+
             if (updated.count === 0) {
-                throw new Error(`Failed to update stock for variant ${item.variantId}`);
+                throw new Error(
+                    `Failed to update stock for variant ${item.variantId}`
+                );
             }
         }
 
         if (cart) {
             await tx.cartItem.deleteMany({
                 where: {
-                    cartId: cart?.id,
+                    cartId: cart.id,
                 },
             });
         }
@@ -132,7 +154,19 @@ export async function completePayment(
                 },
             });
         }
-    })
+
+        // Mark the user as no longer new only after this order
+        // reaches the payment-completion / COD-acceptance flow.
+        await tx.user.updateMany({
+            where: {
+                id: order.userId,
+                isNewUser: true,
+            },
+            data: {
+                isNewUser: false,
+            },
+        });
+    });
 }
 
 export async function markPaymentFailed(orderId: string) {
@@ -144,5 +178,4 @@ export async function markPaymentFailed(orderId: string) {
             status: PaymentStatus.FAILED,
         },
     });
-
 }

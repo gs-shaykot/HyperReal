@@ -1,3 +1,4 @@
+
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -34,9 +35,11 @@ export async function POST(req: Request) {
             );
         }
 
+        const normalizedCode = code.trim().toUpperCase();
+
         const coupon = await prisma.coupon.findUnique({
             where: {
-                code: code.trim().toUpperCase(),
+                code: normalizedCode,
             },
         });
 
@@ -50,41 +53,26 @@ export async function POST(req: Request) {
             );
         }
 
-        if (
-            coupon.expiryDate &&
-            coupon.expiryDate < new Date()
-        ) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "This coupon has expired",
-                },
-                { status: 400 }
-            );
-        }
+        // Always use the database record rather than relying on
+        // potentially stale session data.
+        const user = await prisma.user.findUnique({
+            where: {
+                id: session.user.id,
+            },
+            select: {
+                isNewUser: true,
+                isBlocked: true,
+            },
+        });
 
-        if (
-            coupon.newUserOnly &&
-            session.user.isNewUser !== true
-        ) {
+        if (!user || user.isBlocked) {
             return NextResponse.json(
                 {
                     success: false,
-                    message: "This coupon is for new users only",
+                    message:
+                        "Your account is not authorized to use coupons.",
                 },
-                { status: 400 }
-            );
-        }
-
-        if (
-            coupon.limit !== null && coupon.usedCount >= coupon.limit
-        ) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "This coupon has reached its usage limit",
-                },
-                { status: 400 }
+                { status: 403 }
             );
         }
 
@@ -105,46 +93,16 @@ export async function POST(req: Request) {
             },
         });
 
-        const subtotal = cart?.cartItems.reduce(
-            (total, item) =>
-                total +
-                item.quantity *
-                item.variant.product.price,
-            0
-        ) ?? 0;
+        const subtotal =
+            cart?.cartItems.reduce(
+                (total, item) =>
+                    total +
+                    item.quantity * item.variant.product.price,
+                0
+            ) ?? 0;
 
-        if (
-            coupon.minSpend !== null &&
-            subtotal < coupon.minSpend
-        ) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: `Minimum purchase of $${coupon.minSpend} is required for this coupon`,
-                },
-                { status: 400 }
-            );
-        }
-
-
-        const user = await prisma.user.findUnique({
-            where: { id: session.user.id },
-            select: {
-                isNewUser: true,
-                isBlocked: true,
-            },
-        });
-
-        if (!user || user.isBlocked) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: "Your account is not authorized to use coupons.",
-                },
-                { status: 403 }
-            );
-        }
-
+        // Shared validation handles expiry, usage limit, new-user
+        // eligibility, minimum spend, and discount configuration.
         const validationError = getCouponValidationError(
             coupon,
             subtotal,
@@ -176,9 +134,6 @@ export async function POST(req: Request) {
                 subtotal,
             },
         });
-
-
-
     } catch (error) {
         console.error("Coupon validation error:", error);
 

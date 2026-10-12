@@ -1,3 +1,4 @@
+
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { CouponError } from "@/lib/errors/CouponError";
@@ -14,13 +15,28 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
-        if (!session?.user) {
-            return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+
+        if (!session?.user?.id) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 401 }
+            );
         }
 
-        // Parsing requested body: 
         const body = await req.json();
-        const { country, coupon, paymentMethod, address, saveAddress, deliveryOption } = body;
+
+        const {
+            country,
+            coupon,
+            paymentMethod,
+            address,
+            saveAddress,
+            deliveryOption,
+        } = body;
+
         const allowedPaymentMethods = [
             "SSLC",
             "STRIPE",
@@ -28,7 +44,13 @@ export async function POST(req: Request) {
         ] as const;
 
         if (!allowedPaymentMethods.includes(paymentMethod)) {
-            return NextResponse.json({ success: false, message: "Invalid payment method" }, { status: 400 });
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid payment method",
+                },
+                { status: 400 }
+            );
         }
 
         if (paymentMethod === "COD") {
@@ -46,7 +68,8 @@ export async function POST(req: Request) {
                 return NextResponse.json(
                     {
                         success: false,
-                        message: "Your account is not authorized to place this order.",
+                        message:
+                            "Your account is not authorized to place this order.",
                     },
                     { status: 403 }
                 );
@@ -88,46 +111,87 @@ export async function POST(req: Request) {
 
         if (!cart || cart.cartItems.length === 0) {
             return NextResponse.json(
-                { success: false, message: "Cart is empty" },
+                {
+                    success: false,
+                    message: "Cart is empty",
+                },
                 { status: 400 }
             );
         }
 
         const cartItems = cart.cartItems;
 
-        // Calculating Order total & others: 
-        const { label, fullName, street, city, house, zipCode, phone } = address;
-        const { USD_finalTotal, subTotal, discount, shippingCost } = await calculateOrder(cartItems, country.value, coupon, deliveryOption);
+        const {
+            label,
+            fullName,
+            street,
+            city,
+            house,
+            zipCode,
+            phone,
+        } = address;
 
-        // Generating unique order code: 
+        const {
+            USD_finalTotal,
+            subTotal,
+            discount,
+            shippingCost,
+        } = await calculateOrder(
+            cartItems,
+            country.value,
+            coupon,
+            deliveryOption
+        );
+
+        // Generate a unique order code.
         let orderCode = generateCustomId("HYP-ORD");
-        while (await prisma.order.findUnique({ where: { orderCode } })) {
+
+        while (
+            await prisma.order.findUnique({
+                where: { orderCode },
+            })
+        ) {
             orderCode = generateCustomId("HYP-ORD");
         }
 
-        // Converting currency:
-        const res = await axios.get('https://open.er-api.com/v6/latest/USD');
+        // Convert USD to BDT for SSLCOMMERZ.
+        const res = await axios.get(
+            "https://open.er-api.com/v6/latest/USD"
+        );
+
         const rates = res.data.rates;
-        // const finalTotal = USD_finalTotal * rates.BDT;
-        const finalTotal = paymentMethod === "SSLC" ? USD_finalTotal * rates.BDT : 0;
+
+        const finalTotal =
+            paymentMethod === "SSLC"
+                ? USD_finalTotal * rates.BDT
+                : 0;
 
         if (saveAddress) {
             const addressCount = await prisma.address.count({
                 where: {
-                    userId: session.user.id
-                }
+                    userId: session.user.id,
+                },
             });
+
             if (addressCount >= 10) {
-                return NextResponse.json({ success: false, message: "Address limit reached. You can save up to 10 addresses." }, { status: 400 });
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message:
+                            "Address limit reached. You can save up to 10 addresses.",
+                    },
+                    { status: 400 }
+                );
             }
         }
 
         const order = await prisma.$transaction(async (tx) => {
-            const order = await tx.order.create({
+            const createdOrder = await tx.order.create({
                 data: {
                     userId: session.user.id,
                     status: "PENDING",
                     orderCode,
+
                     orderHistory: {
                         create: {
                             fullName,
@@ -137,15 +201,18 @@ export async function POST(req: Request) {
                             zipCode,
                             country: country.name,
                             phone,
-                        }
+                        },
                     },
 
                     orderItems: {
-                        create: cartItems.map((item: CartItemWithProductType) => ({
-                            variantId: item.variantId,
-                            quantity: item.quantity,
-                            priceAtPurchase: item.variant.product.price,
-                        }))
+                        create: cartItems.map(
+                            (item: CartItemWithProductType) => ({
+                                variantId: item.variantId,
+                                quantity: item.quantity,
+                                priceAtPurchase:
+                                    item.variant.product.price,
+                            })
+                        ),
                     },
 
                     payments: {
@@ -155,57 +222,54 @@ export async function POST(req: Request) {
                             paidAmountInBDT: finalTotal,
                             paidAmountInUSD: USD_finalTotal,
                             totalProductPriceInUSD: subTotal,
-                            discount: discount,
-                            shippingCost: shippingCost,
+                            discount,
+                            shippingCost,
                             country: country.name,
                             shippingMethod: deliveryOption,
-                            couponCode: coupon || null
-                        }
-                    }
+                            couponCode: coupon || null,
+                        },
+                    },
                 },
+
                 include: {
                     orderItems: {
                         select: {
                             variantId: true,
                             quantity: true,
-                        }
+                        },
                     },
                     payments: {
                         select: {
                             status: true,
                             couponCode: true,
-                        }
-                    }
-                }
-            });
-
-            saveAddress && await tx.address.create({
-                data: {
-                    userId: session.user.id,
-                    label,
-                    fullName,
-                    street,
-                    city,
-                    house,
-                    zipCode,
-                    country: country.name,
-                    phone
-                }
-            });
-
-            await tx.user.updateMany({
-                where: {
-                    id: session.user.id,
-                    isNewUser: true
+                        },
+                    },
                 },
-                data: {
-                    isNewUser: false
-                }
             });
 
-            return order;
-        });
+            if (saveAddress) {
+                await tx.address.create({
+                    data: {
+                        userId: session.user.id,
+                        label,
+                        fullName,
+                        street,
+                        city,
+                        house,
+                        zipCode,
+                        country: country.name,
+                        phone,
+                    },
+                });
+            }
 
+            // IMPORTANT:
+            // Do not change user.isNewUser here.
+            // Online payment may still fail or be cancelled.
+            // The update is handled by completePayment() instead.
+
+            return createdOrder;
+        });
 
         switch (paymentMethod) {
             case "SSLC": {
@@ -214,14 +278,18 @@ export async function POST(req: Request) {
 
                 const sslData = {
                     store_id: process.env.SSLC_STORE_ID,
-                    store_passwd: process.env.SSLC_STORE_PASSWORD,
+                    store_passwd:
+                        process.env.SSLC_STORE_PASSWORD,
                     total_amount: finalTotal,
                     currency: "BDT",
                     tran_id,
                     orderId,
-                    success_url: `${process.env.BASE_URL}/api/payment/success`,
-                    fail_url: `${process.env.BASE_URL}/api/payment/fail`,
-                    cancel_url: `${process.env.BASE_URL}/api/payment/cancel`,
+                    success_url:
+                        `${process.env.BASE_URL}/api/payment/success`,
+                    fail_url:
+                        `${process.env.BASE_URL}/api/payment/fail`,
+                    cancel_url:
+                        `${process.env.BASE_URL}/api/payment/cancel`,
                     product_name: "Order Payment",
                     product_category: "Ecommerce",
                     product_profile: "general",
@@ -232,28 +300,35 @@ export async function POST(req: Request) {
                     new URLSearchParams(sslData as any),
                     {
                         headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
+                            "Content-Type":
+                                "application/x-www-form-urlencoded",
                         },
                     }
                 );
 
                 const data = response.data;
 
-                return NextResponse.json({ success: true, paymentUrl: data.GatewayPageURL });
+                return NextResponse.json({
+                    success: true,
+                    paymentUrl: data.GatewayPageURL,
+                });
             }
 
             case "STRIPE": {
-                const paymentIntent = await stripe.paymentIntents.create({
-                    amount: Math.round(USD_finalTotal * 100),
-                    currency: "usd",
-                    payment_method_types: ["card"],
+                const paymentIntent =
+                    await stripe.paymentIntents.create({
+                        amount: Math.round(
+                            USD_finalTotal * 100
+                        ),
+                        currency: "usd",
+                        payment_method_types: ["card"],
 
-                    metadata: {
-                        orderId: order.id,
-                        orderCode: order.orderCode,
-                        userId: session.user.id,
-                    },
-                });
+                        metadata: {
+                            orderId: order.id,
+                            orderCode: order.orderCode,
+                            userId: session.user.id,
+                        },
+                    });
 
                 await prisma.payment.updateMany({
                     where: {
@@ -271,21 +346,43 @@ export async function POST(req: Request) {
                         paymentIntent.client_secret,
                 });
             }
+
             case "COD": {
-                await completePayment(order, undefined, "COD");
+                // COD order is accepted, although payment remains pending.
+                await completePayment(
+                    order,
+                    undefined,
+                    "COD"
+                );
+
                 break;
             }
-
         }
 
-        return NextResponse.json({ success: true, message: "Order created successfully", orderId: order.id });
-    }
-    catch (error) {
+        return NextResponse.json({
+            success: true,
+            message: "Order created successfully",
+            orderId: order.id,
+        });
+    } catch (error) {
         if (error instanceof CouponError) {
-            return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: error.message,
+                },
+                { status: 400 }
+            );
         }
 
-        console.error('Error creating order:', error);
-        return NextResponse.json({ success: false, message: "Failed to create order" }, { status: 500 });
+        console.error("Error creating order:", error);
+
+        return NextResponse.json(
+            {
+                success: false,
+                message: "Failed to create order",
+            },
+            { status: 500 }
+        );
     }
 }
