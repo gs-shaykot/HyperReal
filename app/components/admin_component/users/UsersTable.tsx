@@ -1,7 +1,5 @@
-
-"use client";
-
-import { Eye, Shield, ShieldCheck } from "lucide-react";
+"use client"; 
+import { Eye, HandCoins, Shield, ShieldCheck } from "lucide-react";
 import type { Role } from "@prisma/client";
 import type { AdminUser } from "@/app/types/AdminUser";
 import { useUpdateAdminUser } from "@/app/Hooks/useAdminUsers";
@@ -138,7 +136,7 @@ export const UsersTable = ({
                                             onClick={() =>
                                                 onSelectUserAction(user)
                                             }
-                                            className="text-zinc-500 transition-colors hover:text-white light:hover:text-zinc-900"
+                                            className="text-zinc-500 transition-colors hover:text-white light:hover:text-zinc-900 cursor-pointer"
                                         >
                                             <Eye className="size-4  cursor-pointer" />
                                         </button>
@@ -162,9 +160,9 @@ export const UsersTable = ({
                                                     isBlocked: !user.isBlocked,
                                                 })
                                             }
-                                            className={`transition-colors disabled:opacity-40 ${user.isBlocked
+                                            className={`transition-colors disabled:opacity-40 text-zinc-500 hover:text-red-500 cursor-pointer${user.isBlocked
                                                 ? "text-second"
-                                                : "text-zinc-500 hover:text-second"
+                                                : ""
                                                 }`}
                                         >
                                             {user.isBlocked ? (
@@ -172,6 +170,20 @@ export const UsersTable = ({
                                             ) : (
                                                 <Shield className="size-4  cursor-pointer" />
                                             )}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            disabled={updateUser.isPending}
+                                            onClick={() =>
+                                                updateUser.mutate({
+                                                    id: user.id,
+                                                    isCODDisabled: !user.isCODDisabled,
+                                                })
+                                            }
+                                            className={`transition-colors light:hover:text-zinc-900  cursor-pointer hover:text-orange-400 ${user.isCODDisabled ? "text-orange-400" : "text-zinc-500"}`}
+                                        >
+                                            <HandCoins className="size-3.5" />
                                         </button>
                                     </div>
                                 </td>
