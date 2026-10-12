@@ -758,6 +758,8 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                             </h2>
 
                             <div className="flex flex-col gap-3 pb-6">
+                                {/* aah, there is two modification i want. 1: the title of the COD is not showing, means when i'm hovering the disabled cod, the title is not showing. 2: instead of showing the disabled state, i want to show a message below the COD button that explains why it's disabled. */}
+
                                 {selectedCountry.value === "bdt" ? (
                                     [
                                         {
@@ -772,44 +774,73 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             desc: "International Cards, Apple Pay, Google Pay",
                                             icon: <DollarSign className="text-second" />,
                                         },
-                                        ...(!isCODDisabled
-                                            ? [
-                                                {
-                                                    label: "CASH ON DELIVERY",
-                                                    value: "COD",
-                                                    desc: "Pay with cash upon delivery",
-                                                    icon: <HandCoins className="text-second" />,
-                                                },
-                                            ]
-                                            : []),
+                                        {
+                                            label: "CASH ON DELIVERY",
+                                            value: "COD",
+                                            desc: "Pay with cash upon delivery",
+                                            icon: <HandCoins className="text-second" />,
+                                        },
                                     ].map((method) => (
-                                        <button
-                                            type="button"
-                                            key={method.value}
-                                            onClick={() =>
-                                                setSelectedPaymentMethod(method.value)
-                                            }
-                                            className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                ? "bg-second/15 light:bg-second/25 border-second"
-                                                : "bg-second/5 light:bg-white border-second/50 hover:bg-second/10 hover:border-second"
-                                                } border`}
-                                        >
-                                            <div className="w-14 h-14 flex justify-center items-center border border-second">
-                                                {method.icon}
-                                            </div>
+                                        <div key={method.value} className="w-full">
+                                            <button
+                                                type="button"
+                                                disabled={
+                                                    method.value === "COD" && isCODDisabled
+                                                }
+                                                title={`Pay with ${method.label}`}
+                                                onClick={() => {
+                                                    if (
+                                                        method.value === "COD" &&
+                                                        isCODDisabled
+                                                    ) {
+                                                        return;
+                                                    }
 
-                                            <div className="flex-1 text-white light:text-zinc-700 text-start">
-                                                <h3>{method.label}</h3>
-                                                <p className="text-xs ">
-                                                    {method.desc}
-                                                </p>
-                                            </div>
+                                                    setSelectedPaymentMethod(method.value);
+                                                }}
+                                                className={`btn h-20 w-full rounded-none p-3 shadow-none transition-all flex items-center justify-between gap-6 border ${method.value === "COD" && isCODDisabled
+                                                        ? "cursor-not-allowed border-zinc-700 bg-zinc-800/40 text-zinc-500 opacity-60"
+                                                        : selectedPaymentMethod === method.value
+                                                            ? "cursor-pointer bg-second/15 light:bg-second/25 border-second"
+                                                            : "cursor-pointer bg-second/5 light:bg-white border-second/50 hover:bg-second/10 hover:border-second"
+                                                    }`}
+                                            >
+                                                <div className="flex h-14 w-14 items-center justify-center border border-second">
+                                                    {method.icon}
+                                                </div>
 
-                                            <ShieldCheck
-                                                size={18}
-                                                className="text-second"
-                                            />
-                                        </button>
+                                                <div className="flex-1 text-start text-white light:text-zinc-700">
+                                                    <h3>{method.label}</h3>
+                                                    <p className="text-xs">{method.desc}</p>
+                                                </div>
+
+                                                <ShieldCheck
+                                                    size={18}
+                                                    className={
+                                                        method.value === "COD" && isCODDisabled
+                                                            ? "text-zinc-500"
+                                                            : "text-second"
+                                                    }
+                                                />
+                                            </button>
+
+                                            {method.value === "COD" && isCODDisabled && (
+                                                <div
+                                                    role="status"
+                                                    className="mt-2 flex items-start gap-2 border-l-2 border-amber-500/70 bg-amber-500/5 px-3 py-2"
+                                                >
+                                                    <HandCoins
+                                                        size={14}
+                                                        className="mt-0.5 shrink-0 text-amber-500"
+                                                    />
+
+                                                    <p className="font-mono text-[10px] leading-relaxed text-amber-400">
+                                                        COD unavailable: few previous cash-on-delivery order
+                                                        remains unfulfilled. Please use another payment method.
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
                                     ))
                                 ) : (
                                     [
@@ -826,12 +857,12 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                             onClick={() =>
                                                 setSelectedPaymentMethod(method.value)
                                             }
-                                            className={`btn rounded-none h-20 p-3 shadow-none transition-all cursor-pointer flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
-                                                ? "bg-second/15 border-second"
-                                                : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
-                                                } border`}
+                                            className={`btn h-20 rounded-none border p-3 shadow-none transition-all flex items-center justify-between gap-6 ${selectedPaymentMethod === method.value
+                                                    ? "bg-second/15 border-second"
+                                                    : "bg-second/5 border-second/5 hover:bg-second/10 hover:border-second"
+                                                }`}
                                         >
-                                            <div className="w-14 h-14 flex justify-center items-center border border-second">
+                                            <div className="flex h-14 w-14 items-center justify-center border border-second">
                                                 {method.icon}
                                             </div>
 
@@ -849,6 +880,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                         </button>
                                     ))
                                 )}
+
                             </div>
 
                             {
