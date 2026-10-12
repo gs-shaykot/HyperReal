@@ -440,7 +440,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     <p className='text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
-                  <button className='btn border-second bg-transparent hover:bg-second hover:text-white text-second' onClick={handleLoadBestCoupon}>
+                  <button className='btn border-second bg-transparent hover:bg-second hover:text-zinc-900 light:hover:text-white text-second' onClick={handleLoadBestCoupon}>
                     Apply <ChevronRight className=' ' />
                   </button>
 

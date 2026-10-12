@@ -1,9 +1,9 @@
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
-import { getDiscount } from "@/lib/order_helpers/Discount_Calculation_funcs";
 import { CouponError } from "@/lib/errors/CouponError";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
+import { getCouponValidationError, getDiscount } from "@/lib/order_helpers/Discount_Calculation_funcs";
 
 export async function calculateOrder(cartItems: CartItemWithProductType[], country: string, coupon?: string, deliveryOption?: string) {
 
@@ -56,34 +56,55 @@ export async function calculateOrder(cartItems: CartItemWithProductType[], count
     const shippingCost = deliveryOption ? DeliveryOptions.find(option => option.label === deliveryOption)?.cost || 0 : 0;
     let discount = 0;
 
+
     if (coupon) {
-        const Appliedcoupon = await prisma.coupon.findUnique({
-            where: { code: coupon }
-        });
+        const normalizedCode = coupon.trim().toUpperCase();
 
-        if (!Appliedcoupon) {
-            throw new CouponError("Invalid coupon code");
+        if (!normalizedCode) {
+            throw new CouponError("Invalid coupon code.");
         }
 
-        if (Appliedcoupon.expiryDate && Appliedcoupon.expiryDate < new Date()) {
-            throw new CouponError('This coupon has expired');
+        const [appliedCoupon, user] = await Promise.all([
+            prisma.coupon.findUnique({
+                where: { code: normalizedCode },
+            }),
+            session?.user?.id
+                ? prisma.user.findUnique({
+                    where: { id: session.user.id },
+                    select: {
+                        isNewUser: true,
+                        isBlocked: true,
+                    },
+                })
+                : Promise.resolve(null),
+        ]);
+
+        if (!appliedCoupon) {
+            throw new CouponError("Invalid coupon code.");
         }
 
-        if (Appliedcoupon.newUserOnly && session?.user?.isNewUser !== true) {
-            throw new CouponError('This coupon is only available for new users');
+        if (!user || user.isBlocked) {
+            throw new CouponError(
+                "Your account is not authorized to use this coupon."
+            );
         }
 
-        if (Appliedcoupon.limit !== null && Appliedcoupon.usedCount >= Appliedcoupon.limit) {
-            throw new CouponError('This coupon has reached its usage limit');
+        const validationError = getCouponValidationError(
+            appliedCoupon,
+            subTotal,
+            user.isNewUser
+        );
+
+        if (validationError) {
+            throw new CouponError(validationError);
         }
 
-        if (Appliedcoupon.minSpend !== null && subTotal < Appliedcoupon.minSpend) {
-            throw new CouponError(`Minimum purchase of $${Appliedcoupon.minSpend} is required for this coupon`);
-        }
-
-        discount = getDiscount(Appliedcoupon, subTotal, session?.user?.isNewUser === true);
-
-    }
+        discount = getDiscount(
+            appliedCoupon,
+            subTotal,
+            user.isNewUser
+        );
+    };
 
     const USD_finalTotal = subTotal + shippingCost - discount;
 

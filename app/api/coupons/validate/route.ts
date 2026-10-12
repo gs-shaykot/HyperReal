@@ -3,7 +3,10 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getDiscount } from "@/lib/order_helpers/Discount_Calculation_funcs";
+import {
+    getCouponValidationError,
+    getDiscount,
+} from "@/lib/order_helpers/Discount_Calculation_funcs";
 
 export async function POST(req: Request) {
     try {
@@ -102,14 +105,13 @@ export async function POST(req: Request) {
             },
         });
 
-        const subtotal =
-            cart?.cartItems.reduce(
-                (total, item) =>
-                    total +
-                    item.quantity *
-                    item.variant.product.price,
-                0
-            ) ?? 0;
+        const subtotal = cart?.cartItems.reduce(
+            (total, item) =>
+                total +
+                item.quantity *
+                item.variant.product.price,
+            0
+        ) ?? 0;
 
         if (
             coupon.minSpend !== null &&
@@ -124,10 +126,45 @@ export async function POST(req: Request) {
             );
         }
 
+
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: {
+                isNewUser: true,
+                isBlocked: true,
+            },
+        });
+
+        if (!user || user.isBlocked) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Your account is not authorized to use coupons.",
+                },
+                { status: 403 }
+            );
+        }
+
+        const validationError = getCouponValidationError(
+            coupon,
+            subtotal,
+            user.isNewUser
+        );
+
+        if (validationError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: validationError,
+                },
+                { status: 400 }
+            );
+        }
+
         const discount = getDiscount(
             coupon,
             subtotal,
-            session.user.isNewUser === true
+            user.isNewUser
         );
 
         return NextResponse.json({
@@ -139,6 +176,8 @@ export async function POST(req: Request) {
                 subtotal,
             },
         });
+
+
 
     } catch (error) {
         console.error("Coupon validation error:", error);
