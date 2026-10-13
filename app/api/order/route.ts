@@ -12,8 +12,7 @@ import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-    let createdOrderId: string | null = null;
+export async function POST(req: Request) { 
     try {
         const session = await getServerSession(authOptions);
 
@@ -337,8 +336,7 @@ export async function POST(req: Request) {
 
             return createdOrder;
         });
-
-        createdOrderId = order.id;
+ 
 
         switch (paymentMethod) {
             case "SSLC": {
@@ -391,6 +389,7 @@ export async function POST(req: Request) {
                         success: true,
                         paymentUrl: data.GatewayPageURL,
                     });
+
                 } catch (error) {
                     console.error(
                         "[Order API] SSLCOMMERZ initialization failed:",
@@ -408,6 +407,7 @@ export async function POST(req: Request) {
                         { status: 502 }
                     );
                 }
+
             }
 
             case "STRIPE": {
@@ -444,6 +444,7 @@ export async function POST(req: Request) {
                         orderId: order.id,
                         clientSecret: paymentIntent.client_secret,
                     });
+
                 } catch (error) {
                     console.error(
                         "[Order API] Stripe initialization failed:",
@@ -461,6 +462,7 @@ export async function POST(req: Request) {
                         { status: 502 }
                     );
                 }
+
             }
 
             case "COD": {

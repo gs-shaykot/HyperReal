@@ -160,8 +160,11 @@ export async function markPaymentFailed(orderId: string) {
 }
 
 
+
 export async function releaseOrderStock(orderId: string) {
     await prisma.$transaction(async (tx) => {
+        // Claim the cleanup operation so stock and coupon reservations
+        // can only be released once.
         const failedPayment = await tx.payment.updateMany({
             where: {
                 orderId,
@@ -172,37 +175,42 @@ export async function releaseOrderStock(orderId: string) {
             },
         });
 
-        // Release reservations only once.
         if (failedPayment.count !== 1) {
             return;
         }
 
+        // Mark the order cancelled only if it is still pending.
+        // Do not overwrite an order that has already advanced.
+        await tx.order.updateMany({
+            where: {
+                id: orderId,
+                status: OrderStatus.PENDING,
+            },
+            data: {
+                status: OrderStatus.CANCELLED,
+            },
+        });
+
         const [orderItems, payment] = await Promise.all([
             tx.orderItem.findMany({
-                where: {
-                    orderId,
-                },
+                where: { orderId },
                 select: {
                     variantId: true,
                     quantity: true,
                 },
             }),
             tx.payment.findFirst({
-                where: {
-                    orderId,
-                },
+                where: { orderId },
                 select: {
                     couponCode: true,
                 },
             }),
         ]);
 
-        // Release reserved stock.
+        // Restore the stock reserved when the order was created.
         for (const item of orderItems) {
             await tx.productVariant.update({
-                where: {
-                    id: item.variantId,
-                },
+                where: { id: item.variantId },
                 data: {
                     stock: {
                         increment: item.quantity,
@@ -211,19 +219,15 @@ export async function releaseOrderStock(orderId: string) {
             });
         }
 
-        // Release the coupon reservation.
+        // Release the coupon use reserved at order creation.
         if (payment?.couponCode) {
             await tx.coupon.updateMany({
                 where: {
                     code: payment.couponCode,
-                    usedCount: {
-                        gt: 0,
-                    },
+                    usedCount: { gt: 0 },
                 },
                 data: {
-                    usedCount: {
-                        decrement: 1,
-                    },
+                    usedCount: { decrement: 1 },
                 },
             });
         }
