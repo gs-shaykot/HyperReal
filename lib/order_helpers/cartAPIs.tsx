@@ -2,17 +2,27 @@ import { CartItemType } from "@/app/types/cartType";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-export const addToCartApi = async (data: CartItemType) => {
 
+export const addToCartApi = async (data: CartItemType) => {
     try {
         const res = await axios.post("/api/cart/cartItem", data);
 
         if (!res.data.success) {
-            throw new Error(res.data.message);
+            throw new Error(
+                res.data.message || "Failed to add item to cart."
+            );
         }
+
         return res.data.data?.cartItems ?? [];
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
+        if (axios.isAxiosError(error)) {
+            throw new Error(
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to add item to cart."
+            );
+        }
+
         throw error;
     }
 };
@@ -29,9 +39,9 @@ export const fetchCartApi = async () => {
 }
 
 export const countCartItems = async () => {
-    try { 
+    try {
         const res = await axios.get("/api/cart/cartCount");
- 
+
 
         if (!res.data.success) {
             throw new Error(res.data.message);

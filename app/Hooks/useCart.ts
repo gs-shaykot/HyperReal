@@ -28,11 +28,23 @@ export const useCart = () => {
             return { previousCartItem };
         },
 
+
         onError: (err, newItem, context) => {
             if (context?.previousCartItem) {
-                queryClient.setQueryData(["cartItems"], context.previousCartItem);
+                queryClient.setQueryData(
+                    ["cartItems"],
+                    context.previousCartItem
+                );
             }
+
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "Failed to add item to cart.";
+
+            toast.error(message);
         },
+
 
         onSuccess: () => {
             toast.success("Item added to cart successfully.");
