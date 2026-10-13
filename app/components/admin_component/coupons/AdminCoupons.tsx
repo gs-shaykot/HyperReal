@@ -12,7 +12,7 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, SubmitEvent, useState } from "react";
 
 type Coupon = {
     id: string;
@@ -37,6 +37,16 @@ type CouponForm = {
     maxDiscount: string;
     newUserOnly: boolean;
 };
+
+type CouponStatus = "all" | "active" | "expired";
+type CouponTypeFilter = "all" | "percent" | "flat";
+
+type CouponSort =
+    | "expiringSoon"
+    | "mostUsed"
+    | "biggestDiscount"
+    | "codeAZ";
+
 
 const initialForm: CouponForm = {
     code: "",
@@ -74,6 +84,13 @@ export function AdminCoupons() {
     const [form, setForm] = useState<CouponForm>(initialForm);
     const [error, setError] = useState("");
 
+    const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState<CouponStatus>("all");
+    const [typeFilter, setTypeFilter] = useState<CouponTypeFilter>("all");
+    const [sortBy, setSortBy] = useState<CouponSort>("expiringSoon");
+
+
+
     const {
         data: coupons = [],
         isLoading,
@@ -86,10 +103,12 @@ export function AdminCoupons() {
         },
     });
 
+
     const createMutation = useMutation({
         mutationFn: async (payload: CouponForm) => {
             const response = await axios.post("/api/admin/coupons", {
                 ...payload,
+                code: payload.code.trim().toUpperCase(),
                 value: Number(payload.value),
                 minSpend: Number(payload.minSpend),
                 limit: payload.limit === "" ? null : Number(payload.limit),
@@ -102,42 +121,157 @@ export function AdminCoupons() {
 
             return response.data.data as Coupon;
         },
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({
+
+        onMutate: async (payload) => {
+            await queryClient.cancelQueries({
                 queryKey: ["admin-coupons"],
             });
-            await queryClient.invalidateQueries({
-                queryKey: ["coupons"],
-            });
+
+            const previousCoupons =
+                queryClient.getQueryData<Coupon[]>(["admin-coupons"]);
+
+            const optimisticCoupon: Coupon = {
+                id: `temp-${Date.now()}`,
+                code: payload.code.trim().toUpperCase(),
+                type: payload.type,
+                value: Number(payload.value),
+                minSpend: Number(payload.minSpend),
+                maxDiscount:
+                    payload.type === "percent" && payload.maxDiscount !== ""
+                        ? Number(payload.maxDiscount)
+                        : null,
+                newUserOnly: payload.newUserOnly,
+                limit: payload.limit === "" ? null : Number(payload.limit),
+                usedCount: 0,
+                expiryDate: payload.expiryDate || null,
+            };
+
+            queryClient.setQueryData<Coupon[]>(
+                ["admin-coupons"],
+                (old = []) => [optimisticCoupon, ...old]
+            );
 
             setModalOpen(false);
             setForm(initialForm);
             setError("");
-        },
-        onError: (err) => {
-            if (axios.isAxiosError(err)) {
-                setError(
-                    err.response?.data?.message ?? "Could not create coupon."
-                );
-            } else {
-                setError("Could not create coupon.");
-            }
-        },
-    });
 
-    const deleteMutation = useMutation({
-        mutationFn: async (id: string) => {
-            await axios.delete(`/api/admin/coupons?id=${encodeURIComponent(id)}`);
+            return { previousCoupons };
         },
-        onSuccess: async () => {
+
+        onError: (err, _payload, context) => {
+            if (context?.previousCoupons) {
+                queryClient.setQueryData(
+                    ["admin-coupons"],
+                    context.previousCoupons
+                );
+            }
+
+            setError(
+                axios.isAxiosError(err)
+                    ? err.response?.data?.message ?? "Could not create coupon."
+                    : "Could not create coupon."
+            );
+
+            setModalOpen(true);
+        },
+
+        onSettled: async () => {
             await queryClient.invalidateQueries({
                 queryKey: ["admin-coupons"],
             });
+
             await queryClient.invalidateQueries({
                 queryKey: ["coupons"],
             });
         },
     });
+
+
+
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await axios.delete(
+                `/api/admin/coupons?id=${encodeURIComponent(id)}`
+            );
+        },
+
+        onMutate: async (id: string) => {
+            await queryClient.cancelQueries({
+                queryKey: ["admin-coupons"],
+            });
+
+            const previousCoupons =
+                queryClient.getQueryData<Coupon[]>(["admin-coupons"]);
+
+            queryClient.setQueryData<Coupon[]>(
+                ["admin-coupons"],
+                (old = []) => old.filter((coupon) => coupon.id !== id)
+            );
+
+            return { previousCoupons };
+        },
+
+        onError: (_error, _id, context) => {
+            if (context?.previousCoupons) {
+                queryClient.setQueryData(
+                    ["admin-coupons"],
+                    context.previousCoupons
+                );
+            }
+        },
+
+        onSettled: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ["admin-coupons"],
+            });
+
+            await queryClient.invalidateQueries({
+                queryKey: ["coupons"],
+            });
+        },
+    });
+
+
+
+    const filteredCoupons = coupons
+        .filter((coupon) =>
+            coupon.code.toLowerCase().includes(search.toLowerCase().trim())
+        )
+        .filter((coupon) => {
+            if (statusFilter === "active") return isActive(coupon);
+            if (statusFilter === "expired") return isExpired(coupon);
+            return true;
+        })
+        .filter((coupon) => {
+            if (typeFilter === "all") return true;
+            return coupon.type.toLowerCase() === typeFilter;
+        })
+        .sort((a, b) => {
+            switch (sortBy) {
+                case "mostUsed":
+                    return b.usedCount - a.usedCount;
+
+                case "biggestDiscount":
+                    return b.value - a.value;
+
+                case "codeAZ":
+                    return a.code.localeCompare(b.code);
+
+                case "expiringSoon": {
+                    if (!a.expiryDate) return 1;
+                    if (!b.expiryDate) return -1;
+
+                    return (
+                        new Date(a.expiryDate).getTime() -
+                        new Date(b.expiryDate).getTime()
+                    );
+                }
+
+                default:
+                    return 0;
+            }
+        });
+
 
     const activeCoupons = coupons.filter(isActive).length;
     const expiredCoupons = coupons.filter(isExpired).length;
@@ -152,11 +286,11 @@ export function AdminCoupons() {
 
     const averageDiscount = percentageCoupons.length
         ? Math.round(
-              percentageCoupons.reduce(
-                  (total, coupon) => total + coupon.value,
-                  0
-              ) / percentageCoupons.length
-          )
+            percentageCoupons.reduce(
+                (total, coupon) => total + coupon.value,
+                0
+            ) / percentageCoupons.length
+        )
         : 0;
 
     const updateForm = <K extends keyof CouponForm>(
@@ -166,7 +300,7 @@ export function AdminCoupons() {
         setForm((current) => ({ ...current, [key]: value }));
     };
 
-    const handleCreate = (event: FormEvent<HTMLFormElement>) => {
+    const handleCreate = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         setError("");
         createMutation.mutate(form);
@@ -212,16 +346,104 @@ export function AdminCoupons() {
                             {stat.label}
                         </p>
                         <p
-                            className={`mt-2 text-xl font-bold ${
-                                stat.accent
-                                    ? "text-second"
-                                    : "text-white light:text-zinc-900"
-                            }`}
+                            className={`mt-2 text-xl font-bold ${stat.accent
+                                ? "text-second"
+                                : "text-white light:text-zinc-900"
+                                }`}
                         >
                             {stat.value}
                         </p>
                     </div>
                 ))}
+            </div>
+
+            {/* SEARCH AND FILTERS */}
+            <div className="mt-6 space-y-4 border border-zinc-800 p-3 light:border-zinc-200">
+                <div className="flex flex-col gap-3 lg:flex-row">
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        placeholder="Search by coupon code..."
+                        className="h-10 min-w-0 flex-1 border border-zinc-800 bg-[#101010] px-3 font-mono text-xs text-white outline-none focus:border-second light:border-zinc-300 light:bg-white light:text-zinc-900"
+                    />
+
+                    <select
+                        value={sortBy}
+                        onChange={(event) =>
+                            setSortBy(event.target.value as CouponSort)
+                        }
+                        className="h-10 border border-zinc-800 bg-[#101010] px-3 font-mono text-xs text-white outline-none light:border-zinc-300 light:bg-white light:text-zinc-900"
+                    >
+                        <option value="expiringSoon">SORT: EXPIRING SOON</option>
+                        <option value="mostUsed">SORT: MOST USED</option>
+                        <option value="biggestDiscount">SORT: BIGGEST DISCOUNT</option>
+                        <option value="codeAZ">SORT: CODE A–Z</option>
+                    </select>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="mr-1 font-mono text-[10px] tracking-widest text-zinc-400">
+                        STATUS
+                    </span>
+
+                    {([
+                        ["all", "ALL"],
+                        ["active", "ACTIVE"],
+                        ["expired", "EXPIRED"],
+                    ] as const).map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => setStatusFilter(value)}
+                            className={`h-8 border px-3 font-mono text-[10px] ${statusFilter === value
+                                ? "border-second bg-second text-black"
+                                : "border-zinc-800 text-zinc-400"
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+
+                    <span className="ml-3 mr-1 font-mono text-[10px] tracking-widest text-zinc-400">
+                        TYPE
+                    </span>
+
+                    {([
+                        ["all", "ALL"],
+                        ["percent", "% PERCENT"],
+                        ["flat", "$ FIXED"],
+                    ] as const).map(([value, label]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            onClick={() => setTypeFilter(value)}
+                            className={`h-8 border px-3 font-mono text-[10px] ${typeFilter === value
+                                ? "border-second bg-second text-black"
+                                : "border-zinc-800 text-zinc-400"
+                                }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearch("");
+                            setStatusFilter("all");
+                            setTypeFilter("all");
+                            setSortBy("expiringSoon");
+                        }}
+                        className="ml-auto font-mono text-[10px] text-zinc-400 underline hover:text-second cursor-pointer"
+                    >
+                        RESET FILTERS
+                    </button>
+                </div>
+
+                <p className="font-mono text-[10px] text-zinc-500">
+                    {filteredCoupons.length} shown · {activeCoupons} active coupons
+                </p>
             </div>
 
             <div className="mt-5 space-y-3">
@@ -238,27 +460,30 @@ export function AdminCoupons() {
                     </div>
                 )}
 
-                {!isLoading && !isError && coupons.length === 0 && (
+                {!isLoading && !isError && filteredCoupons.length === 0 && (
                     <div className="border border-zinc-800 p-10 text-center light:border-zinc-200">
-                        <Tag className="mx-auto size-6 text-zinc-500" />
                         <p className="mt-3 font-mono text-xs text-zinc-400">
-                            NO COUPONS YET
+                            {coupons.length === 0
+                                ? "NO COUPONS YET"
+                                : "NO MATCHING COUPONS"}
                         </p>
                         <p className="mt-1 text-xs text-zinc-500">
-                            Create your first coupon to get started.
+                            {coupons.length === 0
+                                ? "Create your first coupon to get started."
+                                : "Try changing your search or filters."}
                         </p>
                     </div>
                 )}
 
-                {coupons.map((coupon) => {
+                {filteredCoupons.map((coupon) => {
                     const active = isActive(coupon);
                     const exhausted = isExhausted(coupon);
                     const usagePercent =
                         coupon.limit && coupon.limit > 0
                             ? Math.min(
-                                  100,
-                                  (coupon.usedCount / coupon.limit) * 100
-                              )
+                                100,
+                                (coupon.usedCount / coupon.limit) * 100
+                            )
                             : 0;
 
                     return (
@@ -278,11 +503,10 @@ export function AdminCoupons() {
                                         </h2>
 
                                         <span
-                                            className={`border px-2 py-0.5 font-mono text-[9px] font-bold ${
-                                                active
-                                                    ? "border-second/40 bg-second/10 text-second"
-                                                    : "border-zinc-700 text-zinc-500"
-                                            }`}
+                                            className={`border px-2 py-0.5 font-mono text-[9px] font-bold ${active
+                                                ? "border-second/40 bg-second/10 text-second"
+                                                : "border-zinc-700 text-zinc-500"
+                                                }`}
                                         >
                                             {active ? "ACTIVE" : exhausted ? "USED UP" : "EXPIRED"}
                                         </span>
@@ -512,11 +736,10 @@ export function AdminCoupons() {
                                             onClick={() =>
                                                 updateForm("type", type)
                                             }
-                                            className={`h-9 cursor-pointer border font-mono text-[10px] font-bold tracking-widest ${
-                                                form.type === type
-                                                    ? "border-second bg-second text-black"
-                                                    : "border-zinc-800 text-zinc-400 hover:border-zinc-600"
-                                            }`}
+                                            className={`h-9 cursor-pointer border font-mono text-[10px] font-bold tracking-widest ${form.type === type
+                                                ? "border-second bg-second text-black"
+                                                : "border-zinc-800 text-zinc-400 hover:border-zinc-600"
+                                                }`}
                                         >
                                             {label}
                                         </button>
@@ -549,7 +772,7 @@ export function AdminCoupons() {
                                 <button
                                     type="submit"
                                     disabled={createMutation.isPending}
-                                    className="inline-flex h-9 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold tracking-widest text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="inline-flex h-9 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold tracking-widest text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
                                 >
                                     {createMutation.isPending ? (
                                         <LoaderCircle className="size-4 animate-spin" />
