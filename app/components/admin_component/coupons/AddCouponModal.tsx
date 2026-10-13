@@ -156,7 +156,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                                 onClick={() =>
                                     setForm((prev) => ({ ...prev, type: "percent" }))
                                 }
-                                className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all ${form.type === "percent"
+                                className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all cursor-pointer ${form.type === "percent"
                                         ? "border-second bg-second text-black"
                                         : "border-zinc-800 text-zinc-400"
                                     }`}
@@ -169,7 +169,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                                 onClick={() =>
                                     setForm((prev) => ({ ...prev, type: "flat" }))
                                 }
-                                className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all ${form.type === "flat"
+                                className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all cursor-pointer ${form.type === "flat"
                                         ? "border-second bg-second text-black"
                                         : "border-zinc-800 text-zinc-400"
                                     }`}
@@ -193,7 +193,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="inline-flex h-9 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold tracking-widest text-black disabled:opacity-50"
+                            className="inline-flex h-9 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold tracking-widest text-black disabled:opacity-50 cursor-pointer"
                         >
                             <Check className="size-4" />
                             {isPending ? "CREATING..." : "CREATE COUPON"}
@@ -203,7 +203,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                             type="button"
                             onClick={onCloseAction}
                             disabled={isPending}
-                            className="h-9 border border-zinc-800 px-5 font-mono text-[10px] font-bold tracking-widest text-white light:text-zinc-900"
+                            className="h-9 border border-zinc-800 px-5 font-mono text-[10px] font-bold tracking-widest text-white light:text-zinc-900 cursor-pointer"
                         >
                             CANCEL
                         </button>

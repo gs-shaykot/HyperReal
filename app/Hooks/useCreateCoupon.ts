@@ -1,7 +1,7 @@
 import { Coupon } from "@/app/components/admin_component/coupons/AdminCoupons";
 import { createCoupon, deleteCoupon } from "@/lib/admin_helpers/adminCouponAPI";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
+import toast from "react-hot-toast";
 
 const couponQueryKey = ["admin-coupons"];
 const publicCouponQueryKey = ["coupons"];
@@ -35,17 +35,25 @@ export const useCreateCoupon = (options: {
 
             queryClient.setQueryData<Coupon[]>(couponQueryKey, (oldCoupons = []) => [optimisticCoupon, ...oldCoupons]);
 
-            options.onCreated();
-
             return { previousCoupons };
+        },
+
+        onSuccess: () => {
+            toast.success("Coupon created successfully!");
+            options.onCreated();
         },
 
         onError: (error, _payload, context) => {
             if (context?.previousCoupons !== undefined) {
-                queryClient.setQueryData<Coupon[]>(couponQueryKey, context.previousCoupons);
-
-                options.onErrorMessage(error instanceof Error ? error.message : "An error occurred while creating the coupon.");
+                queryClient.setQueryData<Coupon[]>(couponQueryKey, context.previousCoupons
+                );
             }
+
+            const message =
+                error instanceof Error ? error.message : "Failed to create coupon.";
+
+            toast.error(message);
+            options.onErrorMessage(message);
         },
 
         onSettled: async () => {
@@ -83,13 +91,19 @@ export function useDeleteCoupon() {
             return { previousCoupons };
         },
 
+        onSuccess: () => {
+            toast.success("Coupon deleted successfully!");
+        },
+
         onError: (error, _id, context) => {
             if (context?.previousCoupons !== undefined) {
-                queryClient.setQueryData(
-                    couponQueryKey,
-                    context.previousCoupons
-                );
+                queryClient.setQueryData<Coupon[]>(couponQueryKey, context.previousCoupons);
             }
+
+            const message =
+                error instanceof Error ? error.message : "Failed to delete coupon.";
+
+            toast.error(message);
         },
 
         onSettled: async () => {

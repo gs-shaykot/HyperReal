@@ -374,7 +374,7 @@ export function AdminCoupons() {
                                     title="Delete coupon"
                                     onClick={() => deleteMutation.mutate(coupon.id)}
                                     disabled={deleteMutation.isPending}
-                                    className="p-2 text-zinc-500 hover:text-red-400"
+                                    className="p-2 text-zinc-500 hover:text-red-400 cursor-pointer"
                                 >
                                     <Trash2 className="size-4" />
                                 </button>
