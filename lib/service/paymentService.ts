@@ -135,19 +135,6 @@ export async function completePayment(
             });
         }
 
-        if (payment.couponCode) {
-            await tx.coupon.update({
-                where: {
-                    code: payment.couponCode,
-                },
-                data: {
-                    usedCount: {
-                        increment: 1,
-                    },
-                },
-            });
-        }
-
         await tx.user.updateMany({
             where: {
                 id: order.userId,
@@ -185,21 +172,32 @@ export async function releaseOrderStock(orderId: string) {
             },
         });
 
-        // Release stock only once for a pending payment.
+        // Release reservations only once.
         if (failedPayment.count !== 1) {
             return;
         }
 
-        const orderItems = await tx.orderItem.findMany({
-            where: {
-                orderId,
-            },
-            select: {
-                variantId: true,
-                quantity: true,
-            },
-        });
+        const [orderItems, payment] = await Promise.all([
+            tx.orderItem.findMany({
+                where: {
+                    orderId,
+                },
+                select: {
+                    variantId: true,
+                    quantity: true,
+                },
+            }),
+            tx.payment.findFirst({
+                where: {
+                    orderId,
+                },
+                select: {
+                    couponCode: true,
+                },
+            }),
+        ]);
 
+        // Release reserved stock.
         for (const item of orderItems) {
             await tx.productVariant.update({
                 where: {
@@ -208,6 +206,23 @@ export async function releaseOrderStock(orderId: string) {
                 data: {
                     stock: {
                         increment: item.quantity,
+                    },
+                },
+            });
+        }
+
+        // Release the coupon reservation.
+        if (payment?.couponCode) {
+            await tx.coupon.updateMany({
+                where: {
+                    code: payment.couponCode,
+                    usedCount: {
+                        gt: 0,
+                    },
+                },
+                data: {
+                    usedCount: {
+                        decrement: 1,
                     },
                 },
             });

@@ -37,6 +37,11 @@ export async function POST(req: Request) {
             deliveryOption,
         } = body;
 
+        const normalizedCouponCode =
+            typeof coupon === "string" && coupon.trim()
+                ? coupon.trim().toUpperCase()
+                : null;
+
         const allowedPaymentMethods = [
             "SSLC",
             "STRIPE",
@@ -207,6 +212,46 @@ export async function POST(req: Request) {
                 }
             }
 
+            // Reserve one coupon use atomically.
+            // If the limit has been reached, throw so the entire transaction
+            // rolls back, including the stock reservation.
+            if (normalizedCouponCode) {
+                const appliedCoupon = await tx.coupon.findUnique({
+                    where: {
+                        code: normalizedCouponCode,
+                    },
+                    select: {
+                        limit: true,
+                    },
+                });
+
+                if (!appliedCoupon) {
+                    throw new CouponError("Invalid coupon code.");
+                }
+
+                const couponReservation = await tx.coupon.updateMany({
+                    where: {
+                        code: normalizedCouponCode,
+                        ...(appliedCoupon.limit !== null && {
+                            usedCount: {
+                                lt: appliedCoupon.limit,
+                            },
+                        }),
+                    },
+                    data: {
+                        usedCount: {
+                            increment: 1,
+                        },
+                    },
+                });
+
+                if (couponReservation.count !== 1) {
+                    throw new CouponError(
+                        "This coupon has reached its usage limit."
+                    );
+                }
+            }
+
             const createdOrder = await tx.order.create({
                 data: {
                     userId: session.user.id,
@@ -247,7 +292,7 @@ export async function POST(req: Request) {
                             shippingCost,
                             country: country.name,
                             shippingMethod: deliveryOption,
-                            couponCode: coupon || null,
+                            couponCode: normalizedCouponCode,
                         },
                     },
                 },
