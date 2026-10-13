@@ -1,6 +1,7 @@
 
 "use client";
 import { AddCouponModal } from "@/app/components/admin_component/coupons/AddCouponModal";
+import { useCreateCoupon, useDeleteCoupon } from "@/app/Hooks/useCreateCoupon";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -31,7 +32,7 @@ export type Coupon = {
     usedCount: number;
     expiryDate: string | null;
 };
- 
+
 function isExepired(coupon: Coupon) {
     return Boolean(
         coupon.expiryDate && new Date(coupon.expiryDate) < new Date()
@@ -57,7 +58,7 @@ export function AdminCoupons() {
     const [open, setOpen] = useState(false);
 
     const { data: AllCoupons, isLoading, isError } = useQuery<Coupon[]>({
-        queryKey: ["adminCoupons"],
+        queryKey: ["admin-coupons"],
         queryFn: async () => {
             const res = await axios.get("/api/admin/coupons");
             return res.data.data;
@@ -65,7 +66,17 @@ export function AdminCoupons() {
     })
 
     const coupons = AllCoupons ?? [];
- 
+
+    const createMutation = useCreateCoupon({
+        onCreated: () => {
+            setOpen(false);
+        },
+        onErrorMessage: (message) => {
+            console.error(message);
+        },
+    });
+
+    const deleteMutation = useDeleteCoupon();
 
     const filteredCoupons = coupons
         .filter((coupon) =>
@@ -288,7 +299,7 @@ export function AdminCoupons() {
                 {filteredCoupons.map((coupon, index) => {
                     const expired = isExepired(coupon);
                     const exhausted = HaveLimit(coupon)
-                    console.log('Coupon: ', coupon, 'Expired: ', expired, 'Exhausted: ', exhausted);
+                    
                     return (
                         <div
                             key={coupon.id}
@@ -361,6 +372,8 @@ export function AdminCoupons() {
                                 <button
                                     type="button"
                                     title="Delete coupon"
+                                    onClick={() => deleteMutation.mutate(coupon.id)}
+                                    disabled={deleteMutation.isPending}
                                     className="p-2 text-zinc-500 hover:text-red-400"
                                 >
                                     <Trash2 className="size-4" />
@@ -372,7 +385,11 @@ export function AdminCoupons() {
             </div>
 
             {/* CREATE COUPON MODAL UI — STATIC */}
-            <AddCouponModal open={open} onCloseAction={() => setOpen(false)} />
+            <AddCouponModal
+                open={open}
+                onCloseAction={() => setOpen(false)}
+                onCreate={(form) => createMutation.mutate(form)}
+                isPending={createMutation.isPending} />
         </div>
     );
 }
