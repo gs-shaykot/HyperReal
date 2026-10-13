@@ -12,7 +12,7 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { FormEvent, SubmitEvent, useState } from "react";
+import { SubmitEvent, useState } from "react";
 
 type Coupon = {
     id: string;
@@ -46,7 +46,6 @@ type CouponSort =
     | "mostUsed"
     | "biggestDiscount"
     | "codeAZ";
-
 
 const initialForm: CouponForm = {
     code: "",
@@ -186,8 +185,6 @@ export function AdminCoupons() {
         },
     });
 
-
-
     const deleteMutation = useMutation({
         mutationFn: async (id: string) => {
             await axios.delete(
@@ -231,8 +228,6 @@ export function AdminCoupons() {
         },
     });
 
-
-
     const filteredCoupons = coupons
         .filter((coupon) =>
             coupon.code.toLowerCase().includes(search.toLowerCase().trim())
@@ -272,13 +267,9 @@ export function AdminCoupons() {
             }
         });
 
-
     const activeCoupons = coupons.filter(isActive).length;
     const expiredCoupons = coupons.filter(isExpired).length;
-    const totalUsed = coupons.reduce(
-        (total, coupon) => total + coupon.usedCount,
-        0
-    );
+    const totalUsed = coupons.reduce((total, coupon) => total + coupon.usedCount, 0);
 
     const percentageCoupons = coupons.filter(
         (coupon) => coupon.type.toLowerCase() === "percent"
@@ -581,6 +572,8 @@ export function AdminCoupons() {
                     Failed to delete coupon. Please try again.
                 </p>
             )}
+
+            {/* MODAL */}
 
             {modalOpen && (
                 <div
