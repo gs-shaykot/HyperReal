@@ -8,10 +8,8 @@ export async function getAdminCoupons() {
 
     const now = new Date();
 
-    const active = coupons.filter((coupon) => //Save1000(NA)
-        //                T || T = T &&
+    const active = coupons.filter((coupon) =>
         (!coupon.expiryDate || coupon.expiryDate >= now) &&
-        //                F || F = F &&
         (coupon.limit == null || coupon.usedCount < coupon.limit)
     );
 
