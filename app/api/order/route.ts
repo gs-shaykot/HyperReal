@@ -6,13 +6,14 @@ import { generateCustomId } from "@/lib/order_helpers/generateCustomId";
 import prisma from "@/lib/prisma";
 import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
 import { calculateOrder } from "@/lib/service/orderService";
-import { completePayment } from "@/lib/service/paymentService";
+import { completePayment, releaseOrderStock } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+    let createdOrderId: string | null = null;
     try {
         const session = await getServerSession(authOptions);
 
@@ -337,6 +338,8 @@ export async function POST(req: Request) {
             return createdOrder;
         });
 
+        createdOrderId = order.id;
+
         switch (paymentMethod) {
             case "SSLC": {
                 const tran_id = order.orderCode;
@@ -361,56 +364,103 @@ export async function POST(req: Request) {
                     product_profile: "general",
                 };
 
-                const response = await axios.post(
-                    "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
-                    new URLSearchParams(sslData as any),
-                    {
-                        headers: {
-                            "Content-Type":
-                                "application/x-www-form-urlencoded",
-                        },
+                try {
+                    const response = await axios.post(
+                        "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                        new URLSearchParams(sslData as any),
+                        {
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                            },
+                        }
+                    );
+
+                    const data = response.data;
+
+                    if (
+                        typeof data.GatewayPageURL !== "string" ||
+                        !data.GatewayPageURL
+                    ) {
+                        throw new Error(
+                            "SSLCOMMERZ did not return a gateway URL."
+                        );
                     }
-                );
 
-                const data = response.data;
+                    return NextResponse.json({
+                        success: true,
+                        paymentUrl: data.GatewayPageURL,
+                    });
+                } catch (error) {
+                    console.error(
+                        "[Order API] SSLCOMMERZ initialization failed:",
+                        error
+                    );
 
-                return NextResponse.json({
-                    success: true,
-                    paymentUrl: data.GatewayPageURL,
-                });
+                    await releaseOrderStock(order.id);
+
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            message:
+                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                        },
+                        { status: 502 }
+                    );
+                }
             }
 
             case "STRIPE": {
-                const paymentIntent =
-                    await stripe.paymentIntents.create({
-                        amount: Math.round(
-                            USD_finalTotal * 100
-                        ),
-                        currency: "usd",
-                        payment_method_types: ["card"],
+                try {
+                    const paymentIntent =
+                        await stripe.paymentIntents.create({
+                            amount: Math.round(USD_finalTotal * 100),
+                            currency: "usd",
+                            payment_method_types: ["card"],
+                            metadata: {
+                                orderId: order.id,
+                                orderCode: order.orderCode,
+                                userId: session.user.id,
+                            },
+                        });
 
-                        metadata: {
+                    if (!paymentIntent.client_secret) {
+                        throw new Error(
+                            "Stripe did not return a client secret."
+                        );
+                    }
+
+                    await prisma.payment.updateMany({
+                        where: {
                             orderId: order.id,
-                            orderCode: order.orderCode,
-                            userId: session.user.id,
+                        },
+                        data: {
+                            paymentIntentId: paymentIntent.id,
                         },
                     });
 
-                await prisma.payment.updateMany({
-                    where: {
+                    return NextResponse.json({
+                        success: true,
                         orderId: order.id,
-                    },
-                    data: {
-                        paymentIntentId: paymentIntent.id,
-                    },
-                });
+                        clientSecret: paymentIntent.client_secret,
+                    });
+                } catch (error) {
+                    console.error(
+                        "[Order API] Stripe initialization failed:",
+                        error
+                    );
 
-                return NextResponse.json({
-                    success: true,
-                    orderId: order.id,
-                    clientSecret:
-                        paymentIntent.client_secret,
-                });
+                    await releaseOrderStock(order.id);
+
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            message:
+                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                        },
+                        { status: 502 }
+                    );
+                }
             }
 
             case "COD": {
