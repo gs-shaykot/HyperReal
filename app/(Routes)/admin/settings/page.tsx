@@ -152,7 +152,7 @@ export default function AdminSettingsPage() {
                     <label className={`${labelClass} mt-4`}>MESSAGES</label>
                     <div className="space-y-2">
                         {settings.marqueeMessages.map((message, index) => (
-                            <div key={`${index}-${message}`} className="flex gap-2">
+                            <div key={index} className="flex gap-2">
                                 <input
                                     className={inputClass}
                                     value={message}
