@@ -3,12 +3,19 @@ import Image from 'next/image'
 export const ComboPack = () => {
     return (
         <section className='py-10'>
-            <div className='max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center'>
-                <div className='p-2 relative'>
-                    <Image src='https://res.cloudinary.com/dloasaxt1/image/upload/v1774972677/Gemini_Generated_Image_27smmz27smmz27sm_i8wim3.png' alt='ComboPack'
-                        className='border light:border-zinc-400 border-zinc-700 p-2 box-border'
-                        width={500} height={500} />
+            <div className='max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center'>{/* Image container: 600px height, 9/12 width */}
+                <div className="relative h-150 w-9/12 border border-zinc-700 light:border-zinc-400">
+
+                    <Image
+                        src="https://res.cloudinary.com/dloasaxt1/image/upload/v1764174010/Gemini_Generated_Image_7vnlsy7vnlsy7vnl_lsfuni.png"
+                        alt="ComboPack"
+                        fill
+                        sizes="75vw"
+                        className="border border-zinc-700 p-2 object-cover light:border-zinc-400"
+                    />
+
                     <span className='absolute top-0 left-8 light:bg-white bg-main light:border-zinc-500 border light:text-zinc-900 text-white text-xs font-bold px-2 py-1'>UNFILTERED</span>
+
                 </div>
                 <div className='space-y-7'>
                     <h1 className='text-6xl font-bold light:text-zinc-900 text-white '>
