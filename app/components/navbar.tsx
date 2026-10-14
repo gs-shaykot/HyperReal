@@ -17,6 +17,19 @@ export const Navbar = () => {
         enabled: !!session?.user?.id,
     });
 
+    const { data: storeSettings } = useQuery({
+        queryKey: ["storeSettings"],
+        queryFn: async () => {
+            const response = await fetch("/api/store-settings");
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch store settings");
+            }
+
+            return response.json() as Promise<{ storeName: string }>;
+        },
+        staleTime: 5 * 60 * 1000,
+    });
 
     const navLinks =
         <>
@@ -26,10 +39,7 @@ export const Navbar = () => {
         </>
 
     return (
-        <>
-            {/* <div>
-                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
-                </div> */}
+        <> 
             <div className={`bg-main/80 border-zinc-800 light:bg-white/70 light:border-gray-300/85 border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
                 <div className={`text-white light:text-zinc-900 max-w-7xl mx-auto navbar `}>
                     <div className="navbar-start w-[30%] md:w-[50%]">

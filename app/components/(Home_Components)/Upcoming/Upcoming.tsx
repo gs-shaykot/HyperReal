@@ -1,4 +1,4 @@
-
+export const dynamic = "force-dynamic";
 import LaunchCountdown from "@/app/components/(Home_Components)/Upcoming/CustomCountdown";
 import { getStoreSettings } from "@/lib/storeSettings";
 

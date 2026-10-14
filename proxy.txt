@@ -1,65 +1,8 @@
-import { hashSessionId } from "@/lib/auth/session";
-import prisma from "@/lib/prisma";
-import { getToken } from "next-auth/jwt";
-import { NextRequest, NextResponse } from "next/server";
-
-export async function proxy(request: NextRequest) {
-    const token = await getToken({
-        req: request,
-        secret: process.env.AUTH_SECRET,
-    });
-
-    if (token?.sessionId) {
-        const currentSessionHash = hashSessionId(
-            token.sessionId
-        );
-
-        const sessionRecord = await prisma.session.findFirst({
-            where: {
-                tokenHash: currentSessionHash,
-                expiresAt: {
-                    gt: new Date(),
-                },
-                sessionRevoked: false,
-            },
-        });
-
-        if (!sessionRecord) {
-            const response = NextResponse.redirect(
-                new URL("/login", request.url)
-            );
-
-            response.cookies.delete(
-                "next-auth.session-token"
-            );
-
-            response.cookies.delete(
-                "__Secure-next-auth.session-token"
-            );
-
-            return response;
-        }
-
-        return NextResponse.next();
-    }
-
-    const loginUrl = new URL("/login", request.url);
-
-    loginUrl.searchParams.set(
-        "callbackUrl",
-        `${request.nextUrl.pathname}${request.nextUrl.search}`
-    );
-
-    return NextResponse.redirect(loginUrl);
-}
-
-export const config = {
-    matcher: [
-        "/account/:path*",
-        "/cart/:path*",
-        "/checkout/:path*",
-        "/success/:path*",
-        "/failed/:path*",
-        "/cancel/:path*",
-    ],
-};
+I have some suggestions & some question:
+suggestions:
+1: In the Model add some top operational countries as select & Option.
+2: Selecting a country should automatically fill his short name, currency code & currency symbol.
+3: move the modal & others components like my others model and others components in a dedicate .tsx page then connect together.
+Questions:
+1: As we are adding different countries, do we need to add different payment methods ?
+2: Suppose someone is ordering from europe what should the payment process ? will we accept euro or will convert the currency ? 

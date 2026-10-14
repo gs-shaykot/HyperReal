@@ -7,14 +7,18 @@ import ThemeConnector from "@/app/components/ThemeConnector";
 import SiteChrome from "@/app/components/SiteChrome";
 import { Toaster } from 'react-hot-toast';
 import { cn } from "@/lib/utils";
+import { getStoreSettings } from "@/lib/storeSettings";
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+ 
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getStoreSettings();
 
-export const metadata: Metadata = {
-  title: "HYPERREAL",
-  description:
-    "HYPERREAL — Technical apparel and experimental urban style.",
-};
+  return {
+    title: settings.storeName || "HYPERREAL",
+    description: `${settings.storeName || "HYPERREAL"} — Technical apparel and experimental urban style.`,
+  };
+}
 
 const spaceMono = Space_Mono({
   weight: ['400', '700'],

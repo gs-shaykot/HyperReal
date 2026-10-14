@@ -1,29 +1,52 @@
 
-import { getStoreSettings } from "@/lib/storeSettings";
+"use client";
+
 import { Megaphone } from "lucide-react";
+import { useEffect, useState } from "react";
 
-export async function Marquee() {
-    const settings = await getStoreSettings();
+type MarqueeSettings = {
+    showMarquee: boolean;
+    marqueeMessages: string[];
+    marqueeScrollSpeed: number;
+};
 
-    if (!settings.showMarquee || settings.marqueeMessages.length === 0) {
-        return null;
-    }
+export function Marquee() {
+    const [settings, setSettings] = useState<MarqueeSettings | null>(null);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        fetch("/api/store-settings", {
+            signal: controller.signal,
+            cache: "no-store",
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error("Settings unavailable");
+                return response.json();
+            })
+            .then((data) => setSettings(data))
+            .catch((error: unknown) => {
+                if (error instanceof Error && error.name === "AbortError") return;
+                console.error("Unable to load marquee settings:", error);
+            });
+
+        return () => controller.abort();
+    }, []);
+
+    if (!settings?.showMarquee) return null;
 
     const messages = settings.marqueeMessages.filter(
         (message) => message.trim().length > 0
     );
 
-    if (messages.length === 0) return null;
+    if (!messages.length) return null;
 
-    const duration = Math.min(
-        120,
-        Math.max(10, settings.marqueeScrollSpeed)
-    );
+    const duration = Math.min(120, Math.max(10, settings.marqueeScrollSpeed));
 
     return (
         <div className="overflow-hidden border-b border-zinc-800 bg-second text-black light:border-zinc-300">
             <div
-                className="flex w-max items-center py-2 font-mono text-xs font-bold"
+                className="flex w-max items-center py-2 font-mono text-xs font-bold motion-safe:animate-none"
                 style={{
                     animation: `hyperreal-marquee ${duration}s linear infinite`,
                 }}
@@ -48,13 +71,14 @@ export async function Marquee() {
                 ))}
             </div>
 
-            <style>{`
+            <style jsx>{`
                 @keyframes hyperreal-marquee {
                     from { transform: translateX(0); }
                     to { transform: translateX(-50%); }
                 }
+
                 @media (prefers-reduced-motion: reduce) {
-                    .marquee-motion { animation: none; }
+                    div[style] { animation: none !important; }
                 }
             `}</style>
         </div>

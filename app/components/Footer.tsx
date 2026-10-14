@@ -1,3 +1,4 @@
+import StoreSupportEmail from '@/app/components/(Home_Components)/StoreSupportEmail';
 import { Globe, ArrowRight, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
@@ -61,6 +62,9 @@ const Footer = () => {
                                     <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                         Contact Us
                                     </Link>
+                                </li>
+                                <li>
+                                    <StoreSupportEmail />
                                 </li>
                             </ul>
                         </div>
