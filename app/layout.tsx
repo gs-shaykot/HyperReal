@@ -8,18 +8,13 @@ import SiteChrome from "@/app/components/SiteChrome";
 import { Toaster } from 'react-hot-toast';
 import { cn } from "@/lib/utils";
 
-import { getStoreSettings } from "@/lib/storeSettings";
-
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
- 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getStoreSettings();
 
-  return {
-    title: settings.storeName,
-    description: `${settings.storeName} — Technical apparel and experimental urban style.`,
-  };
-}
+export const metadata: Metadata = {
+  title: "HYPERREAL",
+  description:
+    "HYPERREAL — Technical apparel and experimental urban style.",
+};
 
 const spaceMono = Space_Mono({
   weight: ['400', '700'],
