@@ -1,7 +1,9 @@
-import { Instagram, Globe, ArrowRight } from 'lucide-react';
+import { Globe, ArrowRight, Instagram } from 'lucide-react';
 import Link from 'next/link';
+import { getStoreSettings } from "@/lib/storeSettings";
 
-const Footer = () => {
+const Footer = async () => {
+    const settings = await getStoreSettings();
 
     return (
         <footer className="border-t border-border bg-main/80 light:bg-background">
@@ -57,10 +59,14 @@ const Footer = () => {
                                         Size Guide
                                     </Link>
                                 </li>
+
                                 <li>
-                                    <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                        Contact Us
-                                    </Link>
+                                    <a
+                                        href={`mailto:${settings.supportEmail}`}
+                                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                                    >
+                                        {settings.supportEmail}
+                                    </a>
                                 </li>
                             </ul>
                         </div>

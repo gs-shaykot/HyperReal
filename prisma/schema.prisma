@@ -226,6 +226,39 @@ model Wishlist {
   @@unique([userId, productId])
 }
 
+model StoreSettings {
+  id           String @id @default("default")
+  storeName    String @default("HYPERREAL")
+  supportEmail String @default("support@hyperreal.store")
+
+  showMarquee        Boolean  @default(true)
+  marqueeMessages    String[] @default(["FREE SHIPPING WORLDWIDE", "DROP 004 AVAILABLE NOW", "LIMITED STOCK"])
+  marqueeScrollSpeed Int      @default(45)
+
+  showUpcomingRelease  Boolean   @default(true)
+  releaseNameLine1     String    @default("Void")
+  releaseNameLine2     String    @default("Runner")
+  releaseVersion       String    @default("V3")
+  releaseDescription   String    @default("The next iteration of urban mobility.")
+  releaseCountdownEnds DateTime?
+  releaseButtonLabel   String    @default("Set Reminder")
+
+  updatedAt DateTime @updatedAt
+}
+
+model OperationalCountry {
+  id                       String   @id @default(uuid())
+  name                     String
+  code                     String   @unique
+  currencyCode             String
+  currencySymbol           String
+  shippingFeeUSD           Float
+  freeShippingThresholdUSD Float
+  isActive                 Boolean  @default(true)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
 enum Role {
   USER
   ADMIN

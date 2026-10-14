@@ -4,17 +4,22 @@ import "./globals.css";
 import Providers from "@/app/providers/Providers";
 import ThemeBackground from "@/app/components/ThemeBackground";
 import ThemeConnector from "@/app/components/ThemeConnector";
-import CyberpunkLoader from "@/app/components/CyberpunkLoader";
 import SiteChrome from "@/app/components/SiteChrome";
 import { Toaster } from 'react-hot-toast';
 import { cn } from "@/lib/utils";
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+import { getStoreSettings } from "@/lib/storeSettings";
 
-export const metadata: Metadata = {
-  title: "HYPERREAL",
-  description: "Your Trusted platform for hyperrealistic products",
-};
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+ 
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getStoreSettings();
+
+  return {
+    title: settings.storeName,
+    description: `${settings.storeName} — Technical apparel and experimental urban style.`,
+  };
+}
 
 const spaceMono = Space_Mono({
   weight: ['400', '700'],
