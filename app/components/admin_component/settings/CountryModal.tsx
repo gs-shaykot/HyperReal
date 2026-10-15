@@ -57,7 +57,7 @@ type Props = {
     existingCountries: OperationalCountry[];
     isPending: boolean;
     onCloseAction: () => void;
-    onCreate: (form: CountryForm & { id?: string }) => void;
+    onCreateAction: (form: CountryForm & { id?: string }) => void;
 };
 
 export function CountryModal({
@@ -66,7 +66,7 @@ export function CountryModal({
     existingCountries,
     isPending,
     onCloseAction,
-    onCreate,
+    onCreateAction,
 }: Props) {
     const [form, setForm] = useState<CountryForm>(emptyForm);
     const [search, setSearch] = useState("");
@@ -133,7 +133,7 @@ export function CountryModal({
             return;
         }
 
-        onCreate({
+        onCreateAction({
             ...form,
             ...(country ? { id: country.id } : {}),
         });

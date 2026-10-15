@@ -25,11 +25,11 @@ type Props = {
     isLoading?: boolean;
     isRefreshingRates?: boolean;
     deletingCountryId?: string | null;
-    onAdd: () => void;
-    onEdit: (country: CountryWithRates) => void;
-    onDelete: (id: string) => void;
-    onToggleStatus: (country: CountryWithRates) => void;
-    onRefreshRates?: () => void;
+    onAddAction: () => void;
+    onEditAction: (country: CountryWithRates) => void;
+    onDeleteAction: (id: string) => void;
+    onToggleStatusAction: (country: CountryWithRates) => void;
+    onRefreshRatesAction?: () => void;
 };
 
 const panelClass = "border border-white/10 bg-[#0d0f10]";
@@ -120,11 +120,11 @@ export function CountrySettings({
     isLoading = false,
     isRefreshingRates = false,
     deletingCountryId = null,
-    onAdd,
-    onEdit,
-    onDelete,
-    onToggleStatus,
-    onRefreshRates,
+    onAddAction,
+    onEditAction,
+    onDeleteAction,
+    onToggleStatusAction,
+    onRefreshRatesAction,
 }: Props) {
     const handleDelete = (country: CountryWithRates) => {
         const confirmed = window.confirm(
@@ -132,7 +132,7 @@ export function CountrySettings({
         );
 
         if (confirmed) {
-            onDelete(country.id);
+            onDeleteAction(country.id);
         }
     };
 
@@ -158,10 +158,10 @@ export function CountrySettings({
                 </div>
 
                 <div className="flex shrink-0 gap-2">
-                    {onRefreshRates && (
+                    {onRefreshRatesAction && (
                         <button
                             type="button"
-                            onClick={onRefreshRates}
+                            onClick={onRefreshRatesAction}
                             disabled={isRefreshingRates}
                             title="Refresh exchange rates"
                             className="flex items-center justify-center border border-white/15 px-3 py-2 text-white transition hover:border-lime-400 hover:text-lime-400 disabled:cursor-not-allowed disabled:opacity-50"
@@ -176,7 +176,7 @@ export function CountrySettings({
 
                     <button
                         type="button"
-                        onClick={onAdd}
+                        onClick={onAddAction}
                         className="flex items-center justify-center gap-2 bg-lime-400 px-4 py-2 font-mono text-xs font-bold text-black transition hover:bg-lime-300"
                     >
                         <Plus className="size-4" />
@@ -294,7 +294,7 @@ export function CountrySettings({
                                             type="button"
                                             role="switch"
                                             aria-checked={country.isActive}
-                                            onClick={() => onToggleStatus(country)}
+                                            onClick={() => onToggleStatusAction(country)}
                                             title={
                                                 country.isActive
                                                     ? "Deactivate country"
@@ -324,7 +324,7 @@ export function CountrySettings({
                                         <div className="flex items-center gap-2">
                                             <button
                                                 type="button"
-                                                onClick={() => onEdit(country)}
+                                                onClick={() => onEditAction(country)}
                                                 title={`Edit ${country.name}`}
                                                 className="border border-white/15 p-2 text-white/70 transition hover:border-lime-400 hover:text-lime-400"
                                             >
