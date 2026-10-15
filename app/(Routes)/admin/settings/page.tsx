@@ -214,7 +214,7 @@ export default function AdminSettingsPage() {
                                 marqueeScrollSpeed: Number(event.target.value),
                             })
                         }
-                        className="range range-success range-xs w-full"
+                        className="range range-success range-xs w-full h-2.5"
                     />
 
                     <div className="mt-4 bg-second p-3 font-mono text-xs font-bold text-black">

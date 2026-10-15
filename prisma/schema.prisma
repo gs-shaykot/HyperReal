@@ -250,10 +250,14 @@ model OperationalCountry {
   id                       String   @id @default(uuid())
   name                     String
   code                     String   @unique
+  phoneCode                String
   currencyCode             String
   currencySymbol           String
   shippingFeeUSD           Float
   freeShippingThresholdUSD Float
+  currentExchangeRate      Float?
+  previousExchangeRate     Float?
+  exchangeRateDate         DateTime?
   isActive                 Boolean  @default(true)
   createdAt                DateTime @default(now())
   updatedAt                DateTime @updatedAt

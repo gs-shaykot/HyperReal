@@ -354,6 +354,6 @@ body {
     --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* .range-success{
+.range-success{
   color: var(--color-second) !important;
-} */
+}

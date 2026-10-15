@@ -30,6 +30,10 @@ export type OperationalCountry = {
     shippingFeeUSD: number;
     freeShippingThresholdUSD: number;
     isActive: boolean;
+    phoneCode: string;
+    currentExchangeRate: number | null;
+    previousExchangeRate: number | null;
+    exchangeRateDate: string | null;
 };
 
 const settingsKey = ["adminSettings"];
@@ -107,7 +111,17 @@ export function useSaveCountry() {
 
     return useMutation({
         mutationFn: async (
-            payload: Partial<OperationalCountry> & { id?: string }
+            payload: Partial<OperationalCountry> & {
+                id?: string;
+                name: string;
+                code: string;
+                phoneCode: string;
+                currencyCode: string;
+                currencySymbol: string;
+                shippingFeeUSD: number;
+                freeShippingThresholdUSD: number;
+                isActive: boolean;
+            }
         ) => {
             const { data } = payload.id
                 ? await axios.put("/api/admin/settings/countries", payload)
@@ -115,12 +129,68 @@ export function useSaveCountry() {
 
             return data.data as OperationalCountry;
         },
-        onSuccess: (_country, variables) => {
+
+        onMutate: async (payload) => {
+            await client.cancelQueries({ queryKey: countriesKey });
+
+            const previous =
+                client.getQueryData<OperationalCountry[]>(countriesKey) ?? [];
+
+            const optimisticCountry: OperationalCountry = {
+                id: payload.id ?? `temp-${Date.now()}`,
+                name: payload.name,
+                code: payload.code,
+                phoneCode: payload.phoneCode,
+                currencyCode: payload.currencyCode,
+                currencySymbol: payload.currencySymbol,
+                shippingFeeUSD: payload.shippingFeeUSD,
+                freeShippingThresholdUSD: payload.freeShippingThresholdUSD,
+                isActive: payload.isActive,
+                currentExchangeRate: null,
+                previousExchangeRate: null,
+                exchangeRateDate: null,
+            };
+
+            client.setQueryData<OperationalCountry[]>(
+                countriesKey,
+                payload.id
+                    ? previous.map((country) =>
+                        country.id === payload.id
+                            ? { ...country, ...payload }
+                            : country
+                    )
+                    : [...previous, optimisticCountry]
+            );
+
+            return { previous };
+        },
+
+        onSuccess: (country, variables) => {
+            client.setQueryData<OperationalCountry[]>(
+                countriesKey,
+                (current = []) =>
+                    variables.id
+                        ? current.map((item) =>
+                            item.id === country.id ? country : item
+                        )
+                        : [
+                            ...current.filter(
+                                (item) => !item.id.startsWith("temp-")
+                            ),
+                            country,
+                        ]
+            );
+
             toast.success(variables.id ? "Country updated." : "Country added.");
         },
-        onError: async (error) => {
+
+        onError: async (error, _variables, context) => {
+            if (context) {
+                client.setQueryData(countriesKey, context.previous);
+            }
             toast.error(await readError(error));
         },
+
         onSettled: () => {
             client.invalidateQueries({ queryKey: countriesKey });
         },
@@ -136,8 +206,30 @@ export function useDeleteCountry() {
                 data: { id },
             });
         },
+
+        onMutate: async (id) => {
+            await client.cancelQueries({ queryKey: countriesKey });
+
+            const previous =
+                client.getQueryData<OperationalCountry[]>(countriesKey) ?? [];
+
+            client.setQueryData(
+                countriesKey,
+                previous.filter((country) => country.id !== id)
+            );
+
+            return { previous };
+        },
+
+        onError: async (error, _id, context) => {
+            if (context) {
+                client.setQueryData(countriesKey, context.previous);
+            }
+            toast.error(await readError(error));
+        },
+
         onSuccess: () => toast.success("Country deleted."),
-        onError: async (error) => toast.error(await readError(error)),
+
         onSettled: () => {
             client.invalidateQueries({ queryKey: countriesKey });
         },
