@@ -58,7 +58,7 @@ const AnalyticsPage = async () => {
     ];
 
     return (
-        <main className="min-h-screen bg-main p-4 light:bg-white sm:p-5">
+        <main className="min-h-screen bg-main p-4 light:bg-white ">
             <header className="mb-5">
                 <div className="flex items-center gap-2">
                     <Activity className="size-4 text-second" />

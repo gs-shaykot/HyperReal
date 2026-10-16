@@ -30,31 +30,31 @@ async function getOrCreateMarquee() {
     });
 }
 
+// Public: the storefront needs to read the announcement settings.
 export async function GET() {
     try {
-        if (!(await isAdmin())) {
-            return NextResponse.json(
-                { message: "Unauthorized" },
-                { status: 401 }
-            );
-        }
-
         const settings = await getOrCreateMarquee();
 
         return NextResponse.json(
             { success: true, data: settings },
-            { status: 200 }
+            {
+                status: 200,
+                headers: {
+                    "Cache-Control": "no-store",
+                },
+            }
         );
     } catch (error) {
         console.error("Get homepage marquee error:", error);
 
         return NextResponse.json(
-            { message: "Failed to fetch marquee settings" },
+            { message: "Failed to fetch marquee settings." },
             { status: 500 }
         );
     }
 }
 
+// Admin-only: only administrators can modify the settings.
 export async function PUT(req: Request) {
     try {
         if (!(await isAdmin())) {
@@ -78,7 +78,10 @@ export async function PUT(req: Request) {
             )
         ) {
             return NextResponse.json(
-                { message: "Enter between 0 and 10 valid messages, each up to 200 characters." },
+                {
+                    message:
+                        "Messages must contain up to 10 non-empty entries, each no longer than 200 characters.",
+                },
                 { status: 400 }
             );
         }

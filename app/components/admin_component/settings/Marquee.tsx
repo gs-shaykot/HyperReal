@@ -2,29 +2,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, RotateCcw, Save, X } from "lucide-react";
+import toast from "react-hot-toast";
 import {
-    Plus,
-    RotateCcw,
-    Save,
-    Trash2,
-    Megaphone,
-    Eye,
-} from "lucide-react";
-import {
-    MarqueeSettings,
+    type MarqueeSettings,
     useAdminMarquee,
     useSaveAdminMarquee,
 } from "@/app/Hooks/useAdminMarquee";
 
-const initialMessages = [
+const DEFAULT_MESSAGES = [
     "FREE SHIPPING WORLDWIDE",
     "DROP 004 AVAILABLE NOW",
     "LIMITED STOCK",
 ];
 
-const defaultSettings: MarqueeSettings = {
+const DEFAULT_SETTINGS: MarqueeSettings = {
     id: "homepage",
-    messages: initialMessages,
+    messages: DEFAULT_MESSAGES,
     isEnabled: true,
     scrollSpeed: 45,
 };
@@ -34,21 +28,14 @@ export default function Marquee() {
     const saveMutation = useSaveAdminMarquee();
 
     const [settings, setSettings] =
-        useState<MarqueeSettings>(defaultSettings);
+        useState<MarqueeSettings>(DEFAULT_SETTINGS);
 
     useEffect(() => {
-        if (data) {
-            setSettings(data);
-        }
+        if (data) setSettings(data);
     }, [data]);
 
-    const updateSettings = (
-        changes: Partial<MarqueeSettings>
-    ) => {
-        setSettings((current) => ({
-            ...current,
-            ...changes,
-        }));
+    const updateSettings = (changes: Partial<MarqueeSettings>) => {
+        setSettings((current) => ({ ...current, ...changes }));
     };
 
     const updateMessage = (index: number, value: string) => {
@@ -61,7 +48,10 @@ export default function Marquee() {
     };
 
     const addMessage = () => {
-        if (settings.messages.length >= 10) return;
+        if (settings.messages.length >= 10) {
+            toast.error("You can add up to 10 messages.");
+            return;
+        }
 
         updateSettings({
             messages: [...settings.messages, ""],
@@ -70,39 +60,29 @@ export default function Marquee() {
 
     const removeMessage = (index: number) => {
         updateSettings({
-            messages: settings.messages.filter(
-                (_, i) => i !== index
-            ),
+            messages: settings.messages.filter((_, i) => i !== index),
         });
     };
 
-    const handleReset = () => {
-        if (data) {
-            setSettings(data);
-        } else {
-            setSettings(defaultSettings);
-        }
+    const resetChanges = () => {
+        setSettings(data ?? DEFAULT_SETTINGS);
     };
 
-    const handleSave = () => {
+    const saveChanges = () => {
         if (settings.messages.some((message) => !message.trim())) {
-            import("react-hot-toast").then(({ default: toast }) => {
-                toast.error("Please fill in or remove empty messages.");
-            });
+            toast.error("Fill in or remove empty messages.");
             return;
         }
 
         saveMutation.mutate({
             ...settings,
-            messages: settings.messages.map((message) =>
-                message.trim()
-            ),
+            messages: settings.messages.map((message) => message.trim()),
         });
     };
 
     if (isLoading) {
         return (
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-400">
+            <section className="border border-zinc-800 bg-[#0b0b0b] p-5 text-sm text-zinc-400">
                 Loading marquee settings...
             </section>
         );
@@ -110,238 +90,178 @@ export default function Marquee() {
 
     if (isError && !data) {
         return (
-            <section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-6">
+            <section className="border border-zinc-800 bg-[#0b0b0b] p-5">
                 <p className="text-sm text-red-400">
                     Could not load marquee settings.
                 </p>
                 <button
+                    type="button"
                     onClick={() => refetch()}
-                    className="mt-4 rounded-lg bg-lime-300 px-4 py-2 text-sm font-semibold text-black"
+                    className="mt-3 border border-zinc-700 px-4 py-2 text-xs text-white hover:border-[#c8ff00]"
                 >
-                    Try Again
+                    Retry
                 </button>
             </section>
         );
     }
 
     return (
-        <section className="space-y-6 border border-zinc-800 bg-zinc-950 text-white sm:p-7">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                    <div className="rounded-xl bg-lime-300/10 p-3 text-lime-300">
-                        <Megaphone size={22} />
-                    </div>
-
-                    <div>
-                        <h2 className="text-lg font-semibold">
-                            Homepage Marquee
-                        </h2>
-                        <p className="mt-1 text-sm text-zinc-400">
-                            Manage the announcement bar displayed across your store.
-                        </p>
-                    </div>
-                </div>
+        <section className="min-w-0 border border-[#292929] bg-[#0b0b0b] p-4 text-white sm:p-4.25">
+            <div className="mb-4 flex items-center justify-between gap-3">
+                <h2 className="font-mono text-xs font-bold uppercase tracking-wider">
+                    Homepage Marquee
+                </h2>
 
                 <button
                     type="button"
+                    onClick={resetChanges}
+                    disabled={saveMutation.isPending}
+                    title="Reset changes"
+                    aria-label="Reset marquee changes"
+                    className="text-zinc-500 transition hover:text-[#c8ff00] disabled:opacity-50"
+                >
+                    <RotateCcw size={14} />
+                </button>
+            </div>
+
+            <div className="mb-4 flex items-center justify-between">
+                <label
+                    htmlFor="marquee-enabled"
+                    className="font-mono text-[11px] uppercase tracking-wider text-zinc-300"
+                >
+                    Show marquee
+                </label>
+
+                <button
+                    id="marquee-enabled"
+                    type="button"
+                    role="switch"
+                    aria-checked={settings.isEnabled}
                     onClick={() =>
-                        updateSettings({
-                            isEnabled: !settings.isEnabled,
-                        })
+                        updateSettings({ isEnabled: !settings.isEnabled })
                     }
-                    aria-pressed={settings.isEnabled}
-                    className={`flex items-center gap-3 rounded-full border px-3 py-2 text-sm ${settings.isEnabled
-                            ? "border-lime-300/30 text-lime-300"
-                            : "border-zinc-700 text-zinc-400"
-                        }`}
+                    className={`relative h-4.5 w-8 border border-[#c8ff00] transition ${
+                        settings.isEnabled ? "bg-[#c8ff00]" : "bg-transparent"
+                    }`}
                 >
-                    <span>
-                        {settings.isEnabled ? "Enabled" : "Disabled"}
-                    </span>
-
                     <span
-                        className={`relative h-5 w-9 rounded-full transition ${settings.isEnabled
-                                ? "bg-lime-300"
-                                : "bg-zinc-700"
-                            }`}
-                    >
-                        <span
-                            className={`absolute top-0.5 h-4 w-4 rounded-full bg-black transition ${settings.isEnabled
-                                    ? "left-4.5"
-                                    : "left-0.5"
-                                }`}
+                        className={`absolute top-0.5 h-3 w-3 bg-black transition-all ${
+                            settings.isEnabled ? "left-3.75" : "left-0.5"
+                        }`}
+                    />
+                </button>
+            </div>
+
+            <div className="mb-2 font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                Messages
+            </div>
+
+            <div className="space-y-1.5">
+                {settings.messages.map((message, index) => (
+                    <div key={index} className="flex min-w-0 gap-1.5">
+                        <input
+                            value={message}
+                            maxLength={200}
+                            onChange={(event) =>
+                                updateMessage(index, event.target.value)
+                            }
+                            aria-label={`Marquee message ${index + 1}`}
+                            placeholder="Enter announcement"
+                            className="h-9.5 min-w-0 flex-1 border border-[#292929] bg-transparent px-3 font-mono text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
                         />
-                    </span>
-                </button>
-            </div>
 
-            <div className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4 sm:p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h3 className="font-medium">Announcement messages</h3>
-                        <p className="mt-1 text-xs text-zinc-500">
-                            Up to 10 messages, maximum 200 characters each.
-                        </p>
-                    </div>
-
-                    <span className="text-xs text-zinc-500">
-                        {settings.messages.length}/10
-                    </span>
-                </div>
-
-                <div className="space-y-3">
-                    {settings.messages.map((message, index) => (
-                        <div
-                            key={index}
-                            className="flex items-center gap-2"
+                        <button
+                            type="button"
+                            onClick={() => removeMessage(index)}
+                            aria-label={`Remove message ${index + 1}`}
+                            className="flex h-9.5 w-9.5 shrink-0 items-center justify-center border border-[#292929] text-zinc-300 hover:border-red-500 hover:text-red-400"
                         >
-                            <span className="w-6 shrink-0 text-xs text-zinc-500">
-                                {String(index + 1).padStart(2, "0")}
-                            </span>
-
-                            <input
-                                value={message}
-                                maxLength={200}
-                                onChange={(event) =>
-                                    updateMessage(index, event.target.value)
-                                }
-                                aria-label={`Announcement message ${index + 1}`}
-                                placeholder="Enter announcement text"
-                                className="min-w-0 flex-1 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-3 text-sm outline-none transition focus:border-lime-300"
-                            />
-
-                            <button
-                                type="button"
-                                onClick={() => removeMessage(index)}
-                                aria-label={`Remove message ${index + 1}`}
-                                className="rounded-lg p-2 text-zinc-500 transition hover:bg-red-400/10 hover:text-red-400"
-                            >
-                                <Trash2 size={17} />
-                            </button>
-                        </div>
-                    ))}
-                </div>
-
-                <button
-                    type="button"
-                    onClick={addMessage}
-                    disabled={settings.messages.length >= 10}
-                    className="flex items-center gap-2 rounded-lg border border-dashed border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:border-lime-300 hover:text-lime-300 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                    <Plus size={16} />
-                    Add Message
-                </button>
-            </div>
-
-            <div className="rounded-xl border border-zinc-800 p-4 sm:p-5">
-                <div className="flex items-center justify-between gap-3">
-                    <div>
-                        <h3 className="font-medium">Scroll speed</h3>
-                        <p className="mt-1 text-xs text-zinc-500">
-                            Lower values scroll slower.
-                        </p>
+                            <X size={14} />
+                        </button>
                     </div>
-
-                    <span className="rounded-lg bg-zinc-800 px-3 py-1.5 text-sm font-medium text-lime-300">
-                        {settings.scrollSpeed}
-                    </span>
-                </div>
-
-                <input
-                    type="range"
-                    min={15}
-                    max={120}
-                    step={5}
-                    value={settings.scrollSpeed}
-                    onChange={(event) =>
-                        updateSettings({
-                            scrollSpeed: Number(event.target.value),
-                        })
-                    }
-                    aria-label="Marquee scroll speed"
-                    className="mt-5 w-full accent-lime-300"
-                />
-
-                <div className="mt-2 flex justify-between text-xs text-zinc-500">
-                    <span>Slow</span>
-                    <span>Fast</span>
-                </div>
+                ))}
             </div>
 
-            <div className="overflow-hidden border border-zinc-800">
-                <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900 px-4 py-3">
-                    <Eye size={16} className="text-lime-300" />
-                    <span className="text-sm font-medium">Preview</span>
-                    <span className="ml-auto text-xs text-zinc-500">
-                        {settings.isEnabled ? "Visible on store" : "Disabled"}
-                    </span>
-                </div>
+            <button
+                type="button"
+                onClick={addMessage}
+                disabled={settings.messages.length >= 10}
+                className="mt-2 flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00] hover:text-white disabled:opacity-40"
+            >
+                <Plus size={13} />
+                Add Message
+            </button>
 
-                <div className="overflow-hidden bg-lime-300 py-3 text-black">
+            <div className="mb-2 mt-5 font-mono text-[10px] uppercase tracking-wider text-zinc-400">
+                Scroll speed — {settings.scrollSpeed}s per loop
+            </div>
+
+            <input
+                type="range"
+                min={15}
+                max={120}
+                step={5}
+                value={settings.scrollSpeed}
+                onChange={(event) =>
+                    updateSettings({
+                        scrollSpeed: Number(event.target.value),
+                    })
+                }
+                aria-label="Marquee scroll speed"
+                className="mb-5 h-1 w-full cursor-pointer accent-[#c8ff00]"
+            />
+
+            <div className="mb-4 overflow-hidden border border-[#292929]">
+                <div className="overflow-hidden bg-[#c8ff00] py-2.25 text-black">
                     {settings.isEnabled && settings.messages.length > 0 ? (
                         <div
-                            className="flex w-max items-center whitespace-nowrap"
+                            className="flex w-max whitespace-nowrap"
                             style={{
-                                animation: `homepage-marquee ${Math.max(
-                                    8,
-                                    settings.scrollSpeed
-                                )}s linear infinite`,
+                                animation: `admin-marquee-preview ${settings.scrollSpeed}s linear infinite`,
                             }}
                         >
                             {[...settings.messages, ...settings.messages].map(
                                 (message, index) => (
                                     <span
                                         key={`${index}-${message}`}
-                                        className="px-5 text-xs font-bold tracking-widest sm:text-sm"
+                                        className="px-3 font-mono text-[9px] font-bold uppercase tracking-wider"
                                     >
-                                        {message || "YOUR ANNOUNCEMENT"}
-                                        <span className="ml-10">✳</span>
+                                        {message || "ANNOUNCEMENT"}
+                                        <span className="ml-4">◆</span>
                                     </span>
                                 )
                             )}
                         </div>
                     ) : (
-                        <p className="px-4 text-center text-sm font-medium">
+                        <p className="px-3 text-center font-mono text-[9px] font-bold uppercase">
                             {settings.isEnabled
-                                ? "Add a message to preview the marquee."
-                                : "Marquee is disabled."}
+                                ? "Add a message to preview"
+                                : "Marquee is disabled"}
                         </p>
                     )}
                 </div>
+            </div>
 
-                <style jsx>{`
-                    @keyframes homepage-marquee {
-                        from {
-                            transform: translateX(0);
-                        }
-                        to {
-                            transform: translateX(-50%);
-                        }
+            <style jsx>{`
+                @keyframes admin-marquee-preview {
+                    from {
+                        transform: translateX(0);
                     }
-                `}</style>
-            </div>
+                    to {
+                        transform: translateX(-50%);
+                    }
+                }
+            `}</style>
 
-            <div className="flex flex-wrap justify-end gap-3 border-t border-zinc-800 pt-5">
-                <button
-                    type="button"
-                    onClick={handleReset}
-                    disabled={saveMutation.isPending}
-                    className="flex items-center gap-2 rounded-lg border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition hover:bg-zinc-800 disabled:opacity-50"
-                >
-                    <RotateCcw size={16} />
-                    Reset Changes
-                </button>
-
-                <button
-                    type="button"
-                    onClick={handleSave}
-                    disabled={saveMutation.isPending}
-                    className="flex items-center gap-2 rounded-lg bg-lime-300 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <Save size={16} />
-                    {saveMutation.isPending ? "Saving..." : "Save Changes"}
-                </button>
-            </div>
+            <button
+                type="button"
+                onClick={saveChanges}
+                disabled={saveMutation.isPending}
+                className="flex h-10 w-full items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+                <Save size={13} />
+                {saveMutation.isPending ? "Saving..." : "Save Marquee"}
+            </button>
         </section>
     );
 }
