@@ -1,13 +1,9 @@
-import React from 'react'
+import AdminSettings from "@/app/components/admin_component/settings/AdminSettings"; 
 
-const SettingPage = () => {
+export default function SettingPage() {
     return (
-        <div className="bg-main light:bg-white min-h-screen flex items-center justify-center">
-            <h1 className="text-xl font-bold">
-                Settings Page
-            </h1>
-        </div>
-    )
+        <main className="min-h-screen bg-main p-4 sm:p-6">
+            <AdminSettings />
+        </main>
+    );
 }
-
-export default SettingPage

@@ -226,6 +226,16 @@ model Wishlist {
   @@unique([userId, productId])
 }
 
+model HomepageMarquee {
+  id          String   @id @default("homepage")
+  messages    String[] @default([])
+  isEnabled   Boolean  @default(true)
+  scrollSpeed Int      @default(45)
+  updatedAt   DateTime @updatedAt
+
+  @@map("homepage_marquee")
+}
+
 enum Role {
   USER
   ADMIN
