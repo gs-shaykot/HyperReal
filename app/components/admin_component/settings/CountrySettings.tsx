@@ -187,9 +187,9 @@ export function CountrySettings({
 
             {/* Country table */}
             <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] border-collapse text-left font-mono text-xs">
+                <table className="w-full min-w-262.5 border-collapse text-left font-mono text-xs">
                     <thead>
-                        <tr className="bg-white/[0.04] text-[10px] tracking-wider text-white/60">
+                        <tr className="bg-white/4 text-[10px] tracking-wider text-white/60">
                             <th className="border border-white/10 px-3 py-3">#</th>
                             <th className="border border-white/10 px-3 py-3">COUNTRY</th>
                             <th className="border border-white/10 px-3 py-3">CODE</th>
@@ -238,7 +238,7 @@ export function CountrySettings({
                             countries.map((country, index) => (
                                 <tr
                                     key={country.id}
-                                    className="transition hover:bg-white/[0.025]"
+                                    className="transition hover:bg-white/2.5"
                                 >
                                     <td className="border border-white/10 px-3 py-3 text-white/50">
                                         {index + 1}
@@ -309,7 +309,7 @@ export function CountrySettings({
                                             <span
                                                 className={`absolute top-0.5 size-4 rounded-full bg-black transition-all ${
                                                     country.isActive
-                                                        ? "left-[22px]"
+                                                        ? "left-5.5"
                                                         : "left-0.5"
                                                 }`}
                                             />
@@ -354,7 +354,7 @@ export function CountrySettings({
             </div>
 
             {/* Footer note */}
-            <div className="mt-4 flex items-start gap-2 border border-white/10 bg-white/[0.02] p-3">
+            <div className="mt-4 flex items-start gap-2 border border-white/10 bg-white/2 p-3">
                 <Info className="mt-0.5 size-4 shrink-0 text-white/50" />
 
                 <p className={mutedText}>

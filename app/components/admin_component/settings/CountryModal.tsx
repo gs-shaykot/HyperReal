@@ -1,7 +1,8 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Globe, RefreshCw } from "lucide-react";
+import { Globe, RefreshCw, X } from "lucide-react";
 import type { OperationalCountry } from "@/app/Hooks/useAdminSettings";
 
 export type CountryForm = {
@@ -15,15 +16,24 @@ export type CountryForm = {
     isActive: boolean;
 };
 
-type CountryOption = {
-    name: string;
-    code: string;
-    phoneCode: string;
-    currencyCode: string;
-    currencySymbol: string;
+type CountryOption = Omit<
+    CountryForm,
+    "shippingFeeUSD" | "freeShippingThresholdUSD" | "isActive"
+>;
+
+type Props = {
+    open: boolean;
+    country: OperationalCountry | null;
+    existingCountries: OperationalCountry[];
+    exchangeRates: Record<string, number>;
+    isPending: boolean;
+    onCloseAction: () => void;
+    onSubmitAction: (form: CountryForm) => void;
+    onRefreshRatesAction: () => void;
+    isRefreshingRates: boolean;
 };
 
-const supportedCountries: CountryOption[] = [
+const countryOptions: CountryOption[] = [
     { name: "Bangladesh", code: "BD", phoneCode: "+880", currencyCode: "BDT", currencySymbol: "৳" },
     { name: "United States", code: "US", phoneCode: "+1", currencyCode: "USD", currencySymbol: "$" },
     { name: "United Kingdom", code: "GB", phoneCode: "+44", currencyCode: "GBP", currencySymbol: "£" },
@@ -46,27 +56,21 @@ const emptyForm: CountryForm = {
 };
 
 const inputClass =
-    "w-full border border-white/15 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none focus:border-second";
+    "w-full border border-white/20 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none focus:border-second";
 
 const labelClass =
-    "mb-1.5 block font-mono text-[10px] tracking-wider text-white/60";
+    "mb-1.5 block font-mono text-[10px] font-bold tracking-wider text-white/60";
 
-type Props = {
-    open: boolean;
-    country?: OperationalCountry | null;
-    existingCountries: OperationalCountry[];
-    isPending: boolean;
-    onCloseAction: () => void;
-    onCreateAction: (form: CountryForm & { id?: string }) => void;
-};
-
-export function CountryModal({
+export default function CountryModal({
     open,
     country,
     existingCountries,
+    exchangeRates,
     isPending,
     onCloseAction,
-    onCreateAction,
+    onSubmitAction,
+    onRefreshRatesAction,
+    isRefreshingRates,
 }: Props) {
     const [form, setForm] = useState<CountryForm>(emptyForm);
     const [search, setSearch] = useState("");
@@ -78,7 +82,7 @@ export function CountryModal({
             setForm({
                 name: country.name,
                 code: country.code,
-                phoneCode: country.phoneCode,
+                phoneCode: country.phoneCode ?? "",
                 currencyCode: country.currencyCode,
                 currencySymbol: country.currencySymbol,
                 shippingFeeUSD: country.shippingFeeUSD,
@@ -94,37 +98,45 @@ export function CountryModal({
 
     if (!open) return null;
 
-    const availableCountries = supportedCountries.filter(
-        (option) =>
-            !existingCountries.some(
-                (existing) =>
-                    existing.code === option.code &&
-                    existing.id !== country?.id
-            ) &&
+    const availableCountries = countryOptions.filter((option) => {
+        const alreadyExists = existingCountries.some(
+            (item) => item.code === option.code && item.id !== country?.id
+        );
+
+        return (
+            !alreadyExists &&
             option.name.toLowerCase().includes(search.toLowerCase())
-    );
+        );
+    });
 
-    const update = (values: Partial<CountryForm>) =>
+    const rate = exchangeRates[form.currencyCode];
+
+    const updateForm = (values: Partial<CountryForm>) => {
         setForm((current) => ({ ...current, ...values }));
+    };
 
-    const chooseCountry = (code: string) => {
-        const option = supportedCountries.find((item) => item.code === code);
-        if (!option) return;
+    const selectCountry = (code: string) => {
+        const selected = countryOptions.find((item) => item.code === code);
+        if (!selected) return;
 
-        update({
-            name: option.name,
-            code: option.code,
-            phoneCode: option.phoneCode,
-            currencyCode: option.currencyCode,
-            currencySymbol: option.currencySymbol,
+        updateForm({
+            name: selected.name,
+            code: selected.code,
+            phoneCode: selected.phoneCode,
+            currencyCode: selected.currencyCode,
+            currencySymbol: selected.currencySymbol,
         });
     };
 
-    const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (
+            !form.name ||
             !form.code ||
+            !form.phoneCode ||
+            !form.currencyCode ||
+            !form.currencySymbol ||
             !Number.isFinite(form.shippingFeeUSD) ||
             !Number.isFinite(form.freeShippingThresholdUSD) ||
             form.shippingFeeUSD < 0 ||
@@ -133,32 +145,42 @@ export function CountryModal({
             return;
         }
 
-        onCreateAction({
-            ...form,
-            ...(country ? { id: country.id } : {}),
-        });
+        onSubmitAction(form);
     };
 
     return (
-        <dialog className="modal modal-open z-50">
-            <div className="modal-box max-h-[90vh] overflow-y-auto rounded-none border border-white/15 bg-[#0b0f12] p-5 text-white">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) onCloseAction();
+            }}
+        >
+            <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="country-modal-title"
+                className="my-auto max-h-[95vh] w-full max-w-lg overflow-y-auto border border-white/20 bg-[#0b0f12] p-5 text-white shadow-2xl"
+            >
                 <header className="mb-5 flex items-start justify-between border-b border-white/10 pb-4">
                     <div>
-                        <h2 className="flex items-center gap-2 font-mono text-sm font-bold">
+                        <h2
+                            id="country-modal-title"
+                            className="flex items-center gap-2 font-mono text-sm font-bold"
+                        >
                             <Globe className="size-4" />
                             {country ? "EDIT COUNTRY" : "ADD COUNTRY"}
                         </h2>
                         <p className="mt-1 text-xs text-white/50">
-                            Configure shipping destination settings.
+                            Configure a shipping destination.
                         </p>
                     </div>
 
-                    <button type="button" onClick={onCloseAction}>
+                    <button type="button" onClick={onCloseAction} aria-label="Close">
                         <X className="size-4" />
                     </button>
                 </header>
 
-                <form onSubmit={submit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className={labelClass}>COUNTRY *</label>
 
@@ -180,7 +202,7 @@ export function CountryModal({
                                 <select
                                     className={inputClass}
                                     value={form.code}
-                                    onChange={(event) => chooseCountry(event.target.value)}
+                                    onChange={(event) => selectCountry(event.target.value)}
                                     required
                                 >
                                     <option value="">Select a country...</option>
@@ -194,7 +216,7 @@ export function CountryModal({
                         )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-2">
                         <label>
                             <span className={labelClass}>COUNTRY CODE</span>
                             <input className={inputClass} value={form.code} readOnly />
@@ -220,24 +242,39 @@ export function CountryModal({
                     </div>
 
                     <label className="block">
-                        <span className={labelClass}>EXCHANGE RATE (1 USD = ?)</span>
+                        <span className={labelClass}>
+                            EXCHANGE RATE (1 USD = ?)
+                        </span>
+
                         <div className="flex gap-2">
                             <input
                                 className={inputClass}
-                                value="Fetched from exchange-rate service"
+                                value={
+                                    rate == null
+                                        ? form.code
+                                            ? "Rate unavailable"
+                                            : "Select a country first"
+                                        : `1 USD = ${rate} ${form.currencyCode}`
+                                }
                                 readOnly
                             />
+
                             <button
                                 type="button"
-                                title="Refresh exchange rate"
-                                className="border border-white/15 px-3"
-                                onClick={() => window.dispatchEvent(
-                                    new Event("hyperreal-refresh-exchange-rates")
-                                )}
+                                onClick={onRefreshRatesAction}
+                                disabled={isRefreshingRates}
+                                title="Refresh exchange rates"
+                                className="border border-white/20 px-3 disabled:opacity-50"
                             >
-                                <RefreshCw className="size-4" />
+                                <RefreshCw
+                                    className={`size-4 ${isRefreshingRates ? "animate-spin" : ""}`}
+                                />
                             </button>
                         </div>
+
+                        <span className="mt-1 block text-[10px] text-white/40">
+                            Estimate for display only. Checkout remains in USD.
+                        </span>
                     </label>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -245,29 +282,35 @@ export function CountryModal({
                             <span className={labelClass}>SHIPPING FEE (USD) *</span>
                             <input
                                 type="number"
-                                min={0}
+                                min="0"
                                 step="0.01"
                                 required
                                 className={inputClass}
                                 value={form.shippingFeeUSD}
                                 onChange={(event) =>
-                                    update({ shippingFeeUSD: Number(event.target.value) })
+                                    updateForm({
+                                        shippingFeeUSD: Number(event.target.value),
+                                    })
                                 }
                             />
                         </label>
 
                         <label>
-                            <span className={labelClass}>FREE SHIPPING (USD) *</span>
+                            <span className={labelClass}>
+                                FREE SHIPPING (USD) *
+                            </span>
                             <input
                                 type="number"
-                                min={0}
+                                min="0"
                                 step="0.01"
                                 required
                                 className={inputClass}
                                 value={form.freeShippingThresholdUSD}
                                 onChange={(event) =>
-                                    update({
-                                        freeShippingThresholdUSD: Number(event.target.value),
+                                    updateForm({
+                                        freeShippingThresholdUSD: Number(
+                                            event.target.value
+                                        ),
                                     })
                                 }
                             />
@@ -280,7 +323,7 @@ export function CountryModal({
                             className="toggle toggle-success"
                             checked={form.isActive}
                             onChange={(event) =>
-                                update({ isActive: event.target.checked })
+                                updateForm({ isActive: event.target.checked })
                             }
                         />
                         ACTIVE — AVAILABLE AT CHECKOUT
@@ -290,25 +333,25 @@ export function CountryModal({
                         <button
                             type="button"
                             onClick={onCloseAction}
-                            className="flex-1 border border-white/20 py-3 font-mono text-xs"
+                            className="flex-1 border border-white/20 py-3 font-mono text-xs font-bold"
                         >
                             CANCEL
                         </button>
 
                         <button
                             type="submit"
-                            disabled={isPending || (!country && !form.code)}
+                            disabled={isPending || !form.code}
                             className="flex-1 bg-second py-3 font-mono text-xs font-bold text-black disabled:opacity-50"
                         >
-                            {isPending ? "SAVING..." : country ? "SAVE COUNTRY" : "ADD COUNTRY"}
+                            {isPending
+                                ? "SAVING..."
+                                : country
+                                    ? "SAVE COUNTRY"
+                                    : "ADD COUNTRY"}
                         </button>
                     </footer>
                 </form>
-            </div>
-
-            <form method="dialog" className="modal-backdrop">
-                <button type="button" onClick={onCloseAction}>close</button>
-            </form>
-        </dialog>
+            </section>
+        </div>
     );
 }
