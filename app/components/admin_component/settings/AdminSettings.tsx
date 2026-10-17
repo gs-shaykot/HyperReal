@@ -2,6 +2,7 @@
 "use client";
 
 import Marquee from "@/app/components/admin_component/settings/Marquee";
+import UpcomingRelease from "@/app/components/admin_component/settings/UpcomingRelease";
 
 export default function AdminSettings() {
     return (
@@ -10,6 +11,7 @@ export default function AdminSettings() {
                 <h1 className="font-mono text-xl font-bold uppercase tracking-widest text-white">
                     Settings
                 </h1>
+
                 <p className="mt-1 font-mono text-xs text-zinc-400">
                     Store configuration &amp; preferences
                 </p>
@@ -17,12 +19,10 @@ export default function AdminSettings() {
 
             <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-2">
                 <Marquee />
-
-                {/* UpcomingRelease will occupy this column. */}
-                <div className="hidden xl:block" aria-hidden="true" />
+                <UpcomingRelease />
             </div>
 
-            {/* CountrySettings will span both columns when added. */}
+            {/* CountrySettings will be added as a full-width section here. */}
         </div>
     );
 }
