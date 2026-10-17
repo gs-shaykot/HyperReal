@@ -140,12 +140,12 @@ export default function Marquee() {
                     onClick={() =>
                         updateSettings({ isEnabled: !settings.isEnabled })
                     }
-                    className={`relative h-4.5 w-8 border border-[#c8ff00] transition ${
+                    className={`relative h-4.5 w-8 border border-[#c8ff00] rounded-full cursor-pointer transition ${
                         settings.isEnabled ? "bg-[#c8ff00]" : "bg-transparent"
                     }`}
                 >
                     <span
-                        className={`absolute top-0.5 h-3 w-3 bg-black transition-all ${
+                        className={`absolute top-0.5 h-3 w-3 bg-black transition-all rounded-full! {
                             settings.isEnabled ? "left-3.75" : "left-0.5"
                         }`}
                     />
@@ -186,7 +186,7 @@ export default function Marquee() {
                 type="button"
                 onClick={addMessage}
                 disabled={settings.messages.length >= 10}
-                className="mt-2 flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00] hover:text-white disabled:opacity-40"
+                className="mt-2 cursor-pointer flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00] hover:text-white disabled:opacity-40"
             >
                 <Plus size={13} />
                 Add Message
@@ -257,7 +257,7 @@ export default function Marquee() {
                 type="button"
                 onClick={saveChanges}
                 disabled={saveMutation.isPending}
-                className="flex h-10 w-full items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <Save size={13} />
                 {saveMutation.isPending ? "Saving..." : "Save Marquee"}

@@ -235,6 +235,21 @@ model HomepageMarquee {
 
   @@map("homepage_marquee")
 }
+ 
+model UpcomingRelease {
+  id                  String    @id @default("homepage")
+  isEnabled           Boolean   @default(true)
+  nameLine1           String    @default("Void")
+  nameLine2           String    @default("Runner")
+  version             String    @default("V3")
+  description         String    @default("The next iteration of urban mobility.")
+  countdownEnds       DateTime?
+  buttonLabel         String    @default("Set Reminder")
+  updatedAt           DateTime  @updatedAt
+
+  @@map("upcoming_release")
+}
+
 
 enum Role {
   USER
