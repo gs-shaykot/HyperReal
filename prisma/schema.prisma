@@ -250,6 +250,24 @@ model UpcomingRelease {
   @@map("upcoming_release")
 }
 
+model OperationalCountry {
+  id                      String    @id @default(uuid())
+  name                    String
+  code                    String    @unique
+  phoneCode               String
+  currencyCode            String
+  currencySymbol          String
+  shippingFeeUSD          Float     @default(10)
+  freeShippingThresholdUSD Float    @default(150)
+  currentExchangeRate     Float?
+  previousExchangeRate    Float?
+  exchangeRateDate        DateTime?
+  isActive                Boolean   @default(true)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+
+  @@map("operational_country")
+}
 
 enum Role {
   USER

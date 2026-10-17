@@ -1,8 +1,8 @@
-
 "use client";
 
 import Marquee from "@/app/components/admin_component/settings/Marquee";
 import UpcomingRelease from "@/app/components/admin_component/settings/UpcomingRelease";
+import CountrySettings from "@/app/components/admin_component/settings/CountrySettings";
 
 export default function AdminSettings() {
     return (
@@ -22,7 +22,7 @@ export default function AdminSettings() {
                 <UpcomingRelease />
             </div>
 
-            {/* CountrySettings will be added as a full-width section here. */}
+            <CountrySettings />
         </div>
     );
 }
