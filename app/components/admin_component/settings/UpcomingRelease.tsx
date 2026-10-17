@@ -100,7 +100,7 @@ export default function UpcomingRelease() {
 
     if (isLoading) {
         return (
-            <section className="border border-[#292929] bg-[#0b0b0b] p-4 text-sm text-zinc-400">
+            <section className="border border-[#292929] bg-[#0b0b0b] p-5 text-sm text-zinc-400">
                 Loading upcoming release settings...
             </section>
         );
@@ -233,7 +233,7 @@ export default function UpcomingRelease() {
                     onChange={(event) =>
                         updateSettings({ description: event.target.value })
                     }
-                    className="w-full min-h-16.5 resize-y border border-[#292929] bg-transparent px-3 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-[#c8ff00]"
+                    className="h-16.5 w-full min-h-16.5 resize-y border border-[#292929] bg-transparent px-3 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-[#c8ff00]"
                 />
             </div>
 
