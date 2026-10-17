@@ -112,7 +112,7 @@ export default function CountrySettings() {
                 <button
                     type="button"
                     onClick={() => refetch()}
-                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-xs text-white hover:border-[#c8ff00]"
+                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-sm text-white hover:border-[#c8ff00]"
                 >
                     Retry
                 </button>
@@ -129,10 +129,10 @@ export default function CountrySettings() {
                             <Globe2 size={17} />
                         </div>
                         <div>
-                            <h2 className="font-mono text-xs font-bold uppercase tracking-wider">
+                            <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
                                 Country &amp; Shipping Settings
                             </h2>
-                            <p className="mt-1 text-xs text-zinc-500">
+                            <p className="mt-1 text-sm text-zinc-500">
                                 Manage shipping destinations and local currency information
                             </p>
                         </div>
@@ -141,7 +141,7 @@ export default function CountrySettings() {
                     <button
                         type="button"
                         onClick={openAddModal}
-                        className="flex h-10 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
+                        className="flex h-10 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[12px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
                     >
                         <Plus size={14} />
                         Add Country
@@ -159,7 +159,7 @@ export default function CountrySettings() {
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Search country or currency..."
                             aria-label="Search countries"
-                            className="h-10 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                            className="h-10 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
                         />
                     </div>
 
@@ -169,11 +169,10 @@ export default function CountrySettings() {
                                 type="button"
                                 key={item}
                                 onClick={() => setFilter(item)}
-                                className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${
-                                    filter === item
-                                        ? "bg-[#c8ff00] text-black"
-                                        : "text-zinc-400 hover:text-white"
-                                }`}
+                                className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${filter === item
+                                    ? "bg-[#c8ff00] text-black"
+                                    : "text-zinc-400 hover:text-white"
+                                    }`}
                             >
                                 {item}
                             </button>
@@ -214,36 +213,32 @@ export default function CountrySettings() {
                                         className="border-b border-[#222] last:border-b-0 hover:bg-white/2"
                                     >
                                         <td className="px-3 py-3">
-                                            <div className="text-xs font-semibold">
+                                            <div className="text-sm font-semibold">
                                                 {country.name}
                                             </div>
-                                            <div className="mt-1 font-mono text-[10px] text-zinc-500">
+                                            <div className="mt-1 font-mono text-[12px] text-zinc-500">
                                                 {country.code} · {country.phoneCode}
                                             </div>
                                         </td>
 
-                                        <td className="px-3 py-3">
-                                            <div className="text-xs">
-                                                {country.currencyCode}
-                                            </div>
-                                            <div className="mt-1 text-[10px] text-zinc-500">
-                                                {country.currencySymbol}
+                                        <td className="px-3 py-3 font-mono">
+                                            <div className="text-sm">
+                                                {country.currencyCode} {country.currencySymbol}
                                             </div>
                                         </td>
 
                                         <td className="px-3 py-3">
-                                            <div className="font-mono text-xs">
+                                            <div className="font-mono text-sm">
                                                 {formatRate(country)}
                                             </div>
                                             {change !== null && (
                                                 <div
-                                                    className={`mt-1 text-[10px] ${
-                                                        change > 0
-                                                            ? "text-emerald-400"
-                                                            : change < 0
-                                                              ? "text-red-400"
-                                                              : "text-zinc-500"
-                                                    }`}
+                                                    className={`mt-1 text-[12px] ${change > 0
+                                                        ? "text-emerald-400"
+                                                        : change < 0
+                                                            ? "text-red-400"
+                                                            : "text-zinc-500"
+                                                        }`}
                                                 >
                                                     {change > 0 ? "+" : ""}
                                                     {change.toFixed(2)}%
@@ -251,11 +246,11 @@ export default function CountrySettings() {
                                             )}
                                         </td>
 
-                                        <td className="px-3 py-3 font-mono text-xs">
+                                        <td className="px-3 py-3 font-mono text-sm">
                                             ${country.shippingFeeUSD.toFixed(2)}
                                         </td>
 
-                                        <td className="px-3 py-3 font-mono text-xs">
+                                        <td className="px-3 py-3 font-mono text-sm">
                                             ${country.freeShippingThresholdUSD.toFixed(2)}
                                         </td>
 
@@ -264,31 +259,27 @@ export default function CountrySettings() {
                                                 type="button"
                                                 role="switch"
                                                 aria-checked={country.isActive}
-                                                aria-label={`Set ${country.name} ${
-                                                    country.isActive ? "inactive" : "active"
-                                                }`}
+                                                aria-label={`Set ${country.name} ${country.isActive ? "inactive" : "active"
+                                                    }`}
                                                 onClick={() => toggleCountry(country)}
                                                 disabled={toggleMutation.isPending}
-                                                className={`relative h-4.5 w-8 border border-[#c8ff00] transition ${
-                                                    country.isActive
-                                                        ? "bg-[#c8ff00]"
-                                                        : "bg-transparent"
-                                                }`}
+                                                className={`relative h-4.5 w-8 border border-[#c8ff00] transition rounded-full ${country.isActive
+                                                    ? "bg-[#c8ff00]"
+                                                    : "bg-[#2a2d30]"
+                                                    }`}
                                             >
                                                 <span
-                                                    className={`absolute top-0.5 h-3 w-3 bg-black transition-all ${
-                                                        country.isActive
-                                                            ? "left-3.75"
-                                                            : "left-0.5"
-                                                    }`}
+                                                    className={`absolute top-0.5 h-3 w-3 transition-all rounded-full ${country.isActive
+                                                        ? "left-3.75 bg-black"
+                                                        : "left-0.5 bg-[#8b939e]"
+                                                        }`}
                                                 />
                                             </button>
                                             <div
-                                                className={`mt-1 text-[9px] uppercase ${
-                                                    country.isActive
-                                                        ? "text-[#c8ff00]"
-                                                        : "text-zinc-500"
-                                                }`}
+                                                className={`mt-1 text-[9px] uppercase ${country.isActive
+                                                    ? "text-[#c8ff00]"
+                                                    : "text-zinc-500"
+                                                    }`}
                                             >
                                                 {country.isActive ? "Active" : "Inactive"}
                                             </div>
@@ -312,7 +303,7 @@ export default function CountrySettings() {
                                 <tr>
                                     <td
                                         colSpan={7}
-                                        className="px-4 py-10 text-center text-xs text-zinc-500"
+                                        className="px-4 py-10 text-center text-sm text-zinc-500"
                                     >
                                         No countries match your search.
                                     </td>
@@ -322,7 +313,7 @@ export default function CountrySettings() {
                     </table>
                 </div>
 
-                <p className="mt-3 text-[10px] leading-relaxed text-zinc-500">
+                <p className="mt-3 text-[12px] leading-relaxed text-zinc-500">
                     Shipping fees and free-shipping thresholds are stored in USD.
                     Exchange rates appear only after rate data has been populated.
                 </p>
