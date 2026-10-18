@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronDown, Globe2, Search, X } from "lucide-react";
 import type {
     CountryInput,
     OperationalCountry,
@@ -65,6 +65,12 @@ const inputClass =
 const labelClass =
     "mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-zinc-400";
 
+function countryFlag(code: string) {
+    return code.toUpperCase().replace(/[A-Z]/g, (letter) =>
+        String.fromCodePoint(letter.charCodeAt(0) + 127397)
+    );
+}
+
 export default function CountryModal({
     open,
     country,
@@ -90,11 +96,13 @@ export default function CountryModal({
                       currencyCode: country.currencyCode,
                       currencySymbol: country.currencySymbol,
                       shippingFeeUSD: country.shippingFeeUSD,
-                      freeShippingThresholdUSD: country.freeShippingThresholdUSD,
+                      freeShippingThresholdUSD:
+                          country.freeShippingThresholdUSD,
                       isActive: country.isActive,
                   }
-                : emptyForm
+                : { ...emptyForm }
         );
+
         setSearch(country?.name ?? "");
         setShowOptions(false);
     }, [open, country]);
@@ -107,7 +115,8 @@ export default function CountryModal({
             .includes(search.toLowerCase());
 
         const alreadyExists =
-            existingCodes.includes(option.code) && option.code !== country?.code;
+            existingCodes.includes(option.code) &&
+            option.code !== country?.code;
 
         return matchesSearch && !alreadyExists;
     });
@@ -144,23 +153,30 @@ export default function CountryModal({
 
     return (
         <div
-            className="fixed inset-0 z-100 flex items-center justify-center bg-black/75 p-4"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget) onCloseAction();
+                if (event.target === event.currentTarget) {
+                    onCloseAction();
+                }
             }}
         >
             <form
                 onSubmit={submit}
-                className="w-full max-w-lg border border-[#303030] bg-[#0b0b0b] p-5 text-white shadow-2xl"
+                className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#303030] bg-[#0b0b0b] text-white shadow-2xl"
             >
-                <div className="mb-5 flex items-center justify-between">
-                    <div>
-                        <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
-                            {country ? "Edit Country" : "Add Country"}
-                        </h2>
-                        <p className="mt-1 text-xs text-zinc-500">
-                            Shipping and currency configuration
-                        </p>
+                <div className="flex items-start justify-between border-b border-[#292929] p-5">
+                    <div className="flex items-start gap-3">
+                        <Globe2 size={17} className="mt-0.5 text-zinc-200" />
+                        <div>
+                            <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
+                                {country ? "Edit Country" : "Add Country"}
+                            </h2>
+                            <p className="mt-1 text-xs text-zinc-500">
+                                {country
+                                    ? "Update this shipping destination"
+                                    : "Add a new country to your shipping destinations"}
+                            </p>
+                        </div>
                     </div>
 
                     <button
@@ -173,132 +189,228 @@ export default function CountryModal({
                     </button>
                 </div>
 
-                <div className="relative mb-4">
-                    <label htmlFor="country-search" className={labelClass}>
-                        Country
-                    </label>
+                <div className="space-y-5 p-5">
+                    <div className="relative">
+                        <label htmlFor="country-search" className={labelClass}>
+                            Select country
+                        </label>
 
-                    <input
-                        id="country-search"
-                        value={search}
-                        onFocus={() => !country && setShowOptions(true)}
-                        onChange={(event) => {
-                            setSearch(event.target.value);
-                            setShowOptions(true);
-                            update({
-                                name: event.target.value,
-                                code: "",
-                                phoneCode: "",
-                                currencyCode: "",
-                                currencySymbol: "",
-                            });
-                        }}
-                        placeholder="Search a country..."
-                        autoComplete="off"
-                        required
-                        readOnly={Boolean(country)}
-                        className={inputClass}
-                    />
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!country) {
+                                    setShowOptions((value) => !value);
+                                }
+                            }}
+                            disabled={Boolean(country)}
+                            className={`${inputClass} flex items-center justify-between text-left ${
+                                showOptions ? "border-[#c8ff00]" : ""
+                            }`}
+                        >
+                            <span className="flex min-w-0 items-center gap-2">
+                                {form.code ? (
+                                    <span aria-hidden="true">
+                                        {countryFlag(form.code)}
+                                    </span>
+                                ) : null}
+                                <span className="truncate">
+                                    {form.name || "Select a country..."}
+                                </span>
+                            </span>
+                            <ChevronDown
+                                size={15}
+                                className={`shrink-0 transition-transform ${
+                                    showOptions ? "rotate-180" : ""
+                                }`}
+                            />
+                        </button>
 
-                    {showOptions && !country && (
-                        <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto border border-[#303030] bg-[#101010]">
-                            {availableOptions.length ? (
-                                availableOptions.map((option) => (
-                                    <button
-                                        type="button"
-                                        key={option.code}
-                                        onClick={() => chooseCountry(option)}
-                                        className="block w-full px-3 py-2.5 text-left text-sm hover:bg-[#c8ff00] hover:text-black"
-                                    >
-                                        {option.name}
-                                        <span className="float-right text-xs opacity-60">
-                                            {option.code} · {option.currencyCode}
-                                        </span>
-                                    </button>
-                                ))
-                            ) : (
-                                <p className="px-3 py-3 text-xs text-zinc-500">
-                                    No available countries found.
-                                </p>
-                            )}
+                        {showOptions && !country && (
+                            <div className="absolute z-20 mt-1 w-full border border-[#303030] bg-[#090909] shadow-xl">
+                                <div className="border-b border-[#292929] p-2">
+                                    <div className="relative">
+                                        <Search
+                                            size={14}
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                                        />
+                                        <input
+                                            id="country-search"
+                                            value={search}
+                                            onChange={(event) =>
+                                                setSearch(event.target.value)
+                                            }
+                                            placeholder="Search country..."
+                                            autoComplete="off"
+                                            className="h-9 w-full border border-[#303030] bg-[#101010] pl-9 pr-3 text-sm outline-none focus:border-[#c8ff00]"
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="max-h-56 overflow-y-auto p-1">
+                                    {availableOptions.length ? (
+                                        availableOptions.map((option) => (
+                                            <button
+                                                type="button"
+                                                key={option.code}
+                                                onClick={() =>
+                                                    chooseCountry(option)
+                                                }
+                                                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-[#c8ff00] hover:text-black"
+                                            >
+                                                <span
+                                                    className="text-base"
+                                                    aria-hidden="true"
+                                                >
+                                                    {countryFlag(option.code)}
+                                                </span>
+                                                <span className="min-w-0 flex-1 truncate">
+                                                    {option.name}
+                                                </span>
+                                                <span className="font-mono text-xs opacity-70">
+                                                    {option.code}
+                                                </span>
+                                                <span className="font-mono text-xs opacity-70">
+                                                    {option.currencyCode} (
+                                                    {option.currencySymbol})
+                                                </span>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <p className="px-3 py-4 text-xs text-zinc-500">
+                                            No available countries found.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                        <div>
+                            <label className={labelClass}>Country code</label>
+                            <input
+                                value={form.code}
+                                readOnly
+                                placeholder="—"
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                                · Auto-filled
+                            </p>
                         </div>
-                    )}
-                </div>
+                        <div>
+                            <label className={labelClass}>Currency code</label>
+                            <input
+                                value={form.currencyCode}
+                                readOnly
+                                placeholder="—"
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                                · Auto-filled
+                            </p>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Currency symbol</label>
+                            <input
+                                value={form.currencySymbol}
+                                readOnly
+                                placeholder="—"
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                                · Auto-filled
+                            </p>
+                        </div>
+                    </div>
 
-                <div className="mb-4 grid grid-cols-2 gap-3">
-                    <div>
-                        <label className={labelClass}>Country code</label>
-                        <input value={form.code} readOnly className={inputClass} />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Phone prefix</label>
-                        <input value={form.phoneCode} readOnly className={inputClass} />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Currency code</label>
-                        <input value={form.currencyCode} readOnly className={inputClass} />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Currency symbol</label>
-                        <input value={form.currencySymbol} readOnly className={inputClass} />
-                    </div>
-                </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label
+                                htmlFor="country-shipping-fee"
+                                className={labelClass}
+                            >
+                                Shipping fee (USD)
+                            </label>
+                            <input
+                                id="country-shipping-fee"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                value={form.shippingFeeUSD}
+                                onChange={(event) =>
+                                    update({
+                                        shippingFeeUSD: Number(
+                                            event.target.value
+                                        ),
+                                    })
+                                }
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                                Shipping charge for this country
+                            </p>
+                        </div>
 
-                <div className="mb-4 grid grid-cols-2 gap-3">
+                        <div>
+                            <label
+                                htmlFor="country-free-threshold"
+                                className={labelClass}
+                            >
+                                Free shipping threshold (USD)
+                            </label>
+                            <input
+                                id="country-free-threshold"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                value={form.freeShippingThresholdUSD}
+                                onChange={(event) =>
+                                    update({
+                                        freeShippingThresholdUSD: Number(
+                                            event.target.value
+                                        ),
+                                    })
+                                }
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-[10px] text-zinc-500">
+                                Minimum order value for free shipping
+                            </p>
+                        </div>
+                    </div>
+
                     <div>
-                        <label htmlFor="country-shipping-fee" className={labelClass}>
-                            Shipping fee (USD)
-                        </label>
-                        <input
-                            id="country-shipping-fee"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            required
-                            value={form.shippingFeeUSD}
-                            onChange={(event) =>
-                                update({ shippingFeeUSD: Number(event.target.value) })
+                        <label className={labelClass}>Status</label>
+                        <button
+                            type="button"
+                            onClick={() =>
+                                update({ isActive: !form.isActive })
                             }
-                            className={inputClass}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="country-free-threshold" className={labelClass}>
-                            Free shipping (USD)
-                        </label>
-                        <input
-                            id="country-free-threshold"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            required
-                            value={form.freeShippingThresholdUSD}
-                            onChange={(event) =>
-                                update({
-                                    freeShippingThresholdUSD: Number(event.target.value),
-                                })
-                            }
-                            className={inputClass}
-                        />
+                            aria-pressed={Boolean(form.isActive)}
+                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                                form.isActive
+                                    ? "border-[#c8ff00] bg-[#c8ff00]/10 text-[#c8ff00]"
+                                    : "border-[#303030] text-zinc-500"
+                            }`}
+                        >
+                            {form.isActive ? "Active" : "Inactive"}
+                        </button>
+                        <p className="mt-1 text-[10px] text-zinc-500">
+                            Active countries will be available for shipping at
+                            checkout.
+                        </p>
                     </div>
                 </div>
 
-                <label className="mb-5 flex cursor-pointer items-center gap-2 text-xs text-zinc-300">
-                    <input
-                        type="checkbox"
-                        checked={Boolean(form.isActive)}
-                        onChange={(event) => update({ isActive: event.target.checked })}
-                        className="accent-[#c8ff00]"
-                    />
-                    Available for shipping
-                </label>
-
-                <div className="flex gap-2">
+                <div className="flex gap-3 border-t border-[#292929] p-5">
                     <button
                         type="button"
                         onClick={onCloseAction}
-                        className="h-10 flex-1 border border-[#303030] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-white"
+                        className="h-11 flex-1 border border-[#303030] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-white"
                     >
                         Cancel
                     </button>
@@ -308,11 +420,16 @@ export default function CountryModal({
                         disabled={
                             isSaving ||
                             !form.code ||
-                            (existingCodes.includes(form.code) && form.code !== country?.code)
+                            (existingCodes.includes(form.code) &&
+                                form.code !== country?.code)
                         }
-                        className="h-10 flex-1 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900] disabled:opacity-50"
+                        className="flex h-11 flex-1 items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {isSaving ? "Saving..." : country ? "Save Changes" : "Add Country"}
+                        {isSaving
+                            ? "Saving..."
+                            : country
+                              ? "Save Changes"
+                              : "+ Add Country"}
                     </button>
                 </div>
             </form>

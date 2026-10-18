@@ -65,10 +65,14 @@ export function useSaveCountry() {
         },
 
         onMutate: async (country) => {
-            await queryClient.cancelQueries({ queryKey: countriesQueryKey });
+            await queryClient.cancelQueries({
+                queryKey: countriesQueryKey,
+            });
 
             const previousCountries =
-                queryClient.getQueryData<OperationalCountry[]>(countriesQueryKey) ?? [];
+                queryClient.getQueryData<OperationalCountry[]>(
+                    countriesQueryKey
+                ) ?? [];
 
             if (country.id) {
                 queryClient.setQueryData<OperationalCountry[]>(
@@ -102,7 +106,9 @@ export function useSaveCountry() {
         },
 
         onSuccess: (_country, variables) => {
-            toast.success(variables.id ? "Country updated." : "Country added.");
+            toast.success(
+                variables.id ? "Country updated." : "Country added."
+            );
         },
 
         onError: (error, _variables, context) => {
@@ -137,14 +143,19 @@ export function useToggleCountry() {
                 "/api/admin/settings/countries",
                 country
             );
+
             return response.data.data as OperationalCountry;
         },
 
         onMutate: async (country) => {
-            await queryClient.cancelQueries({ queryKey: countriesQueryKey });
+            await queryClient.cancelQueries({
+                queryKey: countriesQueryKey,
+            });
 
             const previousCountries =
-                queryClient.getQueryData<OperationalCountry[]>(countriesQueryKey);
+                queryClient.getQueryData<OperationalCountry[]>(
+                    countriesQueryKey
+                );
 
             queryClient.setQueryData<OperationalCountry[]>(
                 countriesQueryKey,
@@ -159,7 +170,9 @@ export function useToggleCountry() {
             return { previousCountries };
         },
 
-        onSuccess: () => toast.success("Country status updated."),
+        onSuccess: () => {
+            toast.success("Country status updated.");
+        },
 
         onError: (error, _country, context) => {
             if (context?.previousCountries) {
@@ -174,6 +187,64 @@ export function useToggleCountry() {
                 : undefined;
 
             toast.error(message || "Could not update country status.");
+        },
+
+        onSettled: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: countriesQueryKey,
+            });
+        },
+    });
+}
+
+export function useDeleteCountry() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await axios.delete(
+                "/api/admin/settings/countries",
+                { data: { id } }
+            );
+
+            return response.data;
+        },
+
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({
+                queryKey: countriesQueryKey,
+            });
+
+            const previousCountries =
+                queryClient.getQueryData<OperationalCountry[]>(
+                    countriesQueryKey
+                ) ?? [];
+
+            queryClient.setQueryData<OperationalCountry[]>(
+                countriesQueryKey,
+                previousCountries.filter((country) => country.id !== id)
+            );
+
+            return { previousCountries };
+        },
+
+        onSuccess: () => {
+            toast.success("Country deleted.");
+        },
+
+        onError: (error, _id, context) => {
+            if (context) {
+                queryClient.setQueryData(
+                    countriesQueryKey,
+                    context.previousCountries
+                );
+            }
+
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+
+            toast.error(message || "Could not delete country.");
         },
 
         onSettled: async () => {

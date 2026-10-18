@@ -2,18 +2,30 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Globe2, Pencil, Plus, Search } from "lucide-react";
-import toast from "react-hot-toast";
+import {
+    Globe2,
+    Pencil,
+    Plus,
+    Search,
+    Trash2,
+} from "lucide-react";
 import CountryModal from "@/app/components/admin_component/settings/CountryModal";
 import {
     type CountryInput,
     type OperationalCountry,
     useAdminCountries,
+    useDeleteCountry,
     useSaveCountry,
     useToggleCountry,
 } from "@/app/Hooks/useAdminCountries";
 
 type Filter = "ALL" | "ACTIVE" | "INACTIVE";
+
+function countryFlag(code: string) {
+    return code.toUpperCase().replace(/[A-Z]/g, (letter) =>
+        String.fromCodePoint(letter.charCodeAt(0) + 127397)
+    );
+}
 
 function formatRate(country: OperationalCountry) {
     if (country.currentExchangeRate === null) return "—";
@@ -39,11 +51,16 @@ function rateChange(country: OperationalCountry) {
 }
 
 export default function CountrySettings() {
-    const { data: countries = [], isLoading, isError, refetch } =
-        useAdminCountries();
+    const {
+        data: countries = [],
+        isLoading,
+        isError,
+        refetch,
+    } = useAdminCountries();
 
     const saveMutation = useSaveCountry();
     const toggleMutation = useToggleCountry();
+    const deleteMutation = useDeleteCountry();
 
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Filter>("ALL");
@@ -52,11 +69,13 @@ export default function CountrySettings() {
         useState<OperationalCountry | null>(null);
 
     const filteredCountries = useMemo(() => {
+        const normalizedSearch = search.toLowerCase().trim();
+
         return countries.filter((country) => {
             const matchesSearch =
-                country.name.toLowerCase().includes(search.toLowerCase()) ||
-                country.code.toLowerCase().includes(search.toLowerCase()) ||
-                country.currencyCode.toLowerCase().includes(search.toLowerCase());
+                country.name.toLowerCase().includes(normalizedSearch) ||
+                country.code.toLowerCase().includes(normalizedSearch) ||
+                country.currencyCode.toLowerCase().includes(normalizedSearch);
 
             const matchesFilter =
                 filter === "ALL" ||
@@ -84,7 +103,7 @@ export default function CountrySettings() {
 
     const saveCountry = (data: CountryInput) => {
         saveMutation.mutate(data, {
-            onSuccess: () => closeModal(),
+            onSuccess: closeModal,
         });
     };
 
@@ -93,6 +112,16 @@ export default function CountrySettings() {
             ...country,
             isActive: !country.isActive,
         });
+    };
+
+    const deleteCountry = (country: OperationalCountry) => {
+        const confirmed = window.confirm(
+            `Delete ${country.name} (${country.code})? This action cannot be undone.`
+        );
+
+        if (confirmed) {
+            deleteMutation.mutate(country.id);
+        }
     };
 
     if (isLoading) {
@@ -123,17 +152,18 @@ export default function CountrySettings() {
     return (
         <>
             <section className="min-w-0 border border-[#292929] bg-[#0b0b0b] p-4 text-white sm:p-5">
-                <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-[#292929] text-[#c8ff00]">
-                            <Globe2 size={17} />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-[#292929] text-zinc-200">
+                            <Globe2 size={16} />
                         </div>
                         <div>
-                            <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
+                            <h2 className="font-mono text-xs font-bold uppercase tracking-wider">
                                 Country &amp; Shipping Settings
                             </h2>
-                            <p className="mt-1 text-sm text-zinc-500">
-                                Manage shipping destinations and local currency information
+                            <p className="mt-1 text-xs text-zinc-500">
+                                Manage available countries, currency and
+                                shipping settings
                             </p>
                         </div>
                     </div>
@@ -141,61 +171,68 @@ export default function CountrySettings() {
                     <button
                         type="button"
                         onClick={openAddModal}
-                        className="flex h-10 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[12px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
+                        className="flex h-9 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
                     >
                         <Plus size={14} />
                         Add Country
                     </button>
                 </div>
 
-                <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                    <div className="relative w-full md:max-w-xs">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="relative w-full sm:max-w-xs">
                         <Search
                             size={14}
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
                         />
                         <input
                             value={search}
-                            onChange={(event) => setSearch(event.target.value)}
+                            onChange={(event) =>
+                                setSearch(event.target.value)
+                            }
                             placeholder="Search country or currency..."
                             aria-label="Search countries"
-                            className="h-10 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                            className="h-9 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
                         />
                     </div>
 
-                    <div className="flex border border-[#292929]">
-                        {(["ALL", "ACTIVE", "INACTIVE"] as Filter[]).map((item) => (
-                            <button
-                                type="button"
-                                key={item}
-                                onClick={() => setFilter(item)}
-                                className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${filter === item
-                                    ? "bg-[#c8ff00] text-black"
-                                    : "text-zinc-400 hover:text-white"
+                    <div className="flex self-start border border-[#292929]">
+                        {(["ALL", "ACTIVE", "INACTIVE"] as Filter[]).map(
+                            (item) => (
+                                <button
+                                    type="button"
+                                    key={item}
+                                    onClick={() => setFilter(item)}
+                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${
+                                        filter === item
+                                            ? "bg-[#c8ff00] text-black"
+                                            : "text-zinc-400 hover:text-white"
                                     }`}
-                            >
-                                {item}
-                            </button>
-                        ))}
+                                >
+                                    {item}
+                                </button>
+                            )
+                        )}
                     </div>
                 </div>
 
                 <div className="overflow-x-auto border border-[#292929]">
-                    <table className="w-full min-w-237.5 border-collapse text-left">
+                    <table className="w-full min-w-262.5 border-collapse text-left">
                         <thead>
-                            <tr className="border-b border-[#292929] bg-[#101010]">
+                            <tr className="border-b border-[#292929] bg-[#151515]">
                                 {[
+                                    "#",
                                     "Country",
+                                    "Code",
                                     "Currency",
-                                    "Exchange Rate / USD",
-                                    "Shipping (USD)",
-                                    "Free Shipping (USD)",
+                                    "Exchange Rate (1 USD = ?)",
+                                    "Shipping Fee",
+                                    "Free Shipping Threshold",
                                     "Status",
-                                    "Action",
+                                    "Actions",
                                 ].map((heading) => (
                                     <th
                                         key={heading}
-                                        className="px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500"
+                                        className="whitespace-nowrap px-3 py-3 font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-500"
                                     >
                                         {heading}
                                     </th>
@@ -204,96 +241,131 @@ export default function CountrySettings() {
                         </thead>
 
                         <tbody>
-                            {filteredCountries.map((country) => {
+                            {filteredCountries.map((country, index) => {
                                 const change = rateChange(country);
 
                                 return (
                                     <tr
                                         key={country.id}
-                                        className="border-b border-[#222] last:border-b-0 hover:bg-white/2"
+                                        className="border-b border-[#292929] last:border-b-0 hover:bg-white/2"
                                     >
-                                        <td className="px-3 py-3">
-                                            <div className="text-sm font-semibold">
-                                                {country.name}
-                                            </div>
-                                            <div className="mt-1 font-mono text-[12px] text-zinc-500">
-                                                {country.code} · {country.phoneCode}
+                                        <td className="w-10 px-3 py-3 font-mono text-[10px] text-zinc-500">
+                                            {index + 1}
+                                        </td>
+
+                                        <td className="min-w-45 whitespace-nowrap px-3 py-3">
+                                            <div className="flex items-center gap-2 font-mono text-xs font-semibold text-white">
+                                                <span
+                                                    className="text-base leading-none"
+                                                    aria-hidden="true"
+                                                >
+                                                    {countryFlag(country.code)}
+                                                </span>
+                                                <span>{country.name}</span>
                                             </div>
                                         </td>
 
-                                        <td className="px-3 py-3 font-mono">
-                                            <div className="text-sm">
-                                                {country.currencyCode} {country.currencySymbol}
-                                            </div>
+                                        <td className="px-3 py-3 font-mono text-[11px] text-white">
+                                            {country.code}
                                         </td>
 
-                                        <td className="px-3 py-3">
-                                            <div className="font-mono text-sm">
+                                        <td className="whitespace-nowrap px-3 py-3 font-mono text-[11px] text-white">
+                                            {country.currencyCode} (
+                                            {country.currencySymbol})
+                                        </td>
+
+                                        <td className="whitespace-nowrap px-3 py-3">
+                                            <div className="font-mono text-[11px] text-white">
                                                 {formatRate(country)}
                                             </div>
+
                                             {change !== null && (
                                                 <div
-                                                    className={`mt-1 text-[12px] ${change > 0
-                                                        ? "text-emerald-400"
-                                                        : change < 0
-                                                            ? "text-red-400"
-                                                            : "text-zinc-500"
-                                                        }`}
+                                                    className={`mt-1 font-mono text-[10px] ${
+                                                        change > 0
+                                                            ? "text-emerald-400"
+                                                            : change < 0
+                                                              ? "text-red-400"
+                                                              : "text-zinc-500"
+                                                    }`}
                                                 >
-                                                    {change > 0 ? "+" : ""}
+                                                    {change > 0 ? "↑ +" : change < 0 ? "↓ " : ""}
                                                     {change.toFixed(2)}%
                                                 </div>
                                             )}
                                         </td>
 
-                                        <td className="px-3 py-3 font-mono text-sm">
-                                            ${country.shippingFeeUSD.toFixed(2)}
+                                        <td className="whitespace-nowrap px-3 py-3 font-mono text-[11px] text-white">
+                                            $ {country.shippingFeeUSD.toFixed(2)}
                                         </td>
 
-                                        <td className="px-3 py-3 font-mono text-sm">
-                                            ${country.freeShippingThresholdUSD.toFixed(2)}
+                                        <td className="whitespace-nowrap px-3 py-3 font-mono text-[11px] text-white">
+                                            $ {country.freeShippingThresholdUSD.toFixed(2)}
                                         </td>
 
-                                        <td className="px-3 py-3">
-                                            <button
-                                                type="button"
-                                                role="switch"
-                                                aria-checked={country.isActive}
-                                                aria-label={`Set ${country.name} ${country.isActive ? "inactive" : "active"
+                                        <td className="w-26.25 px-3 py-3">
+                                            <div className="flex min-h-8 flex-col items-start justify-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    role="switch"
+                                                    aria-checked={country.isActive}
+                                                    aria-label={`Set ${country.name} ${
+                                                        country.isActive
+                                                            ? "inactive"
+                                                            : "active"
                                                     }`}
-                                                onClick={() => toggleCountry(country)}
-                                                disabled={toggleMutation.isPending}
-                                                className={`relative h-4.5 w-8 border border-[#c8ff00] transition rounded-full ${country.isActive
-                                                    ? "bg-[#c8ff00]"
-                                                    : "bg-[#2a2d30]"
+                                                    onClick={() =>
+                                                        toggleCountry(country)
+                                                    }
+                                                    disabled={
+                                                        toggleMutation.isPending
+                                                    }
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${
+                                                        country.isActive
+                                                            ? "bg-[#c8ff00]"
+                                                            : "bg-[#2a2d30]"
                                                     }`}
-                                            >
-                                                <span
-                                                    className={`absolute top-0.5 h-3 w-3 transition-all rounded-full ${country.isActive
-                                                        ? "left-3.75 bg-black"
-                                                        : "left-0.5 bg-[#8b939e]"
+                                                >
+                                                    <span
+                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${
+                                                            country.isActive
+                                                                ? "translate-x-4 bg-black"
+                                                                : "translate-x-0 bg-[#8b939e]"
                                                         }`}
-                                                />
-                                            </button>
-                                            <div
-                                                className={`mt-1 text-[9px] uppercase ${country.isActive
-                                                    ? "text-[#c8ff00]"
-                                                    : "text-zinc-500"
-                                                    }`}
-                                            >
-                                                {country.isActive ? "Active" : "Inactive"}
+                                                    />
+                                                </button> 
                                             </div>
                                         </td>
 
-                                        <td className="px-3 py-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => openEditModal(country)}
-                                                aria-label={`Edit ${country.name}`}
-                                                className="flex h-8 w-8 items-center justify-center border border-[#292929] text-zinc-400 hover:border-[#c8ff00] hover:text-[#c8ff00]"
-                                            >
-                                                <Pencil size={13} />
-                                            </button>
+                                        <td className="w-22 whitespace-nowrap px-3 py-3">
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openEditModal(country)
+                                                    }
+                                                    aria-label={`Edit ${country.name}`}
+                                                    title="Edit country"
+                                                    className="flex h-7 w-7 items-center justify-center border border-[#292929] text-zinc-400 hover:border-[#c8ff00] hover:text-[#c8ff00]"
+                                                >
+                                                    <Pencil size={13} />
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        deleteCountry(country)
+                                                    }
+                                                    disabled={
+                                                        deleteMutation.isPending
+                                                    }
+                                                    aria-label={`Delete ${country.name}`}
+                                                    title="Delete country"
+                                                    className="flex h-7 w-7 items-center justify-center border border-[#292929] text-red-400 hover:border-red-500 hover:bg-red-500/10 disabled:cursor-wait disabled:opacity-50"
+                                                >
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 );
@@ -302,8 +374,8 @@ export default function CountrySettings() {
                             {filteredCountries.length === 0 && (
                                 <tr>
                                     <td
-                                        colSpan={7}
-                                        className="px-4 py-10 text-center text-sm text-zinc-500"
+                                        colSpan={9}
+                                        className="px-4 py-10 text-center font-mono text-xs text-zinc-500"
                                     >
                                         No countries match your search.
                                     </td>
@@ -313,10 +385,14 @@ export default function CountrySettings() {
                     </table>
                 </div>
 
-                <p className="mt-3 text-[12px] leading-relaxed text-zinc-500">
-                    Shipping fees and free-shipping thresholds are stored in USD.
-                    Exchange rates appear only after rate data has been populated.
-                </p>
+                <div className="mt-3 flex items-start gap-2 border border-[#292929] bg-[#111111] p-3">
+                    <span className="text-zinc-400">ⓘ</span>
+                    <p className="text-[11px] leading-relaxed text-zinc-500">
+                        Shipping fees and free-shipping thresholds are stored
+                        in USD. Exchange rates will appear here after rate data
+                        is populated. Checkout integration is a separate step.
+                    </p>
+                </div>
             </section>
 
             <CountryModal
