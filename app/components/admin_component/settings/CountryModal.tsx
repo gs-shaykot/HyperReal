@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,6 +6,7 @@ import type {
     CountryInput,
     OperationalCountry,
 } from "@/app/Hooks/useAdminCountries";
+import CountryFlag from "@/app/components/admin_component/settings/CountryFlag";
 
 type CountryOption = {
     name: string;
@@ -89,17 +89,17 @@ export default function CountryModal({
         setForm(
             country
                 ? {
-                      id: country.id,
-                      name: country.name,
-                      code: country.code,
-                      phoneCode: country.phoneCode,
-                      currencyCode: country.currencyCode,
-                      currencySymbol: country.currencySymbol,
-                      shippingFeeUSD: country.shippingFeeUSD,
-                      freeShippingThresholdUSD:
-                          country.freeShippingThresholdUSD,
-                      isActive: country.isActive,
-                  }
+                    id: country.id,
+                    name: country.name,
+                    code: country.code,
+                    phoneCode: country.phoneCode,
+                    currencyCode: country.currencyCode,
+                    currencySymbol: country.currencySymbol,
+                    shippingFeeUSD: country.shippingFeeUSD,
+                    freeShippingThresholdUSD:
+                        country.freeShippingThresholdUSD,
+                    isActive: country.isActive,
+                }
                 : { ...emptyForm }
         );
 
@@ -203,9 +203,8 @@ export default function CountryModal({
                                 }
                             }}
                             disabled={Boolean(country)}
-                            className={`${inputClass} flex items-center justify-between text-left ${
-                                showOptions ? "border-[#c8ff00]" : ""
-                            }`}
+                            className={`${inputClass} flex items-center justify-between text-left ${showOptions ? "border-[#c8ff00]" : ""
+                                }`}
                         >
                             <span className="flex min-w-0 items-center gap-2">
                                 {form.code ? (
@@ -219,9 +218,8 @@ export default function CountryModal({
                             </span>
                             <ChevronDown
                                 size={15}
-                                className={`shrink-0 transition-transform ${
-                                    showOptions ? "rotate-180" : ""
-                                }`}
+                                className={`shrink-0 transition-transform ${showOptions ? "rotate-180" : ""
+                                    }`}
                             />
                         </button>
 
@@ -258,12 +256,7 @@ export default function CountryModal({
                                                 }
                                                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-[#c8ff00] hover:text-black"
                                             >
-                                                <span
-                                                    className="text-base"
-                                                    aria-hidden="true"
-                                                >
-                                                    {countryFlag(option.code)}
-                                                </span>
+                                                <CountryFlag code={option.code} size={24} />
                                                 <span className="min-w-0 flex-1 truncate">
                                                     {option.name}
                                                 </span>
@@ -391,11 +384,10 @@ export default function CountryModal({
                                 update({ isActive: !form.isActive })
                             }
                             aria-pressed={Boolean(form.isActive)}
-                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                                form.isActive
+                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${form.isActive
                                     ? "border-[#c8ff00] bg-[#c8ff00]/10 text-[#c8ff00]"
                                     : "border-[#303030] text-zinc-500"
-                            }`}
+                                }`}
                         >
                             {form.isActive ? "Active" : "Inactive"}
                         </button>
@@ -428,8 +420,8 @@ export default function CountryModal({
                         {isSaving
                             ? "Saving..."
                             : country
-                              ? "Save Changes"
-                              : "+ Add Country"}
+                                ? "Save Changes"
+                                : "+ Add Country"}
                     </button>
                 </div>
             </form>

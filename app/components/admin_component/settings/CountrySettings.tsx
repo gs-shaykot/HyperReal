@@ -18,14 +18,9 @@ import {
     useSaveCountry,
     useToggleCountry,
 } from "@/app/Hooks/useAdminCountries";
+import CountryFlag from "@/app/components/admin_component/settings/CountryFlag";
 
 type Filter = "ALL" | "ACTIVE" | "INACTIVE";
-
-function countryFlag(code: string) {
-    return code.toUpperCase().replace(/[A-Z]/g, (letter) =>
-        String.fromCodePoint(letter.charCodeAt(0) + 127397)
-    );
-}
 
 function formatRate(country: OperationalCountry) {
     if (country.currentExchangeRate === null) return "—";
@@ -202,11 +197,10 @@ export default function CountrySettings() {
                                     type="button"
                                     key={item}
                                     onClick={() => setFilter(item)}
-                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${
-                                        filter === item
+                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${filter === item
                                             ? "bg-[#c8ff00] text-black"
                                             : "text-zinc-400 hover:text-white"
-                                    }`}
+                                        }`}
                                 >
                                     {item}
                                 </button>
@@ -255,12 +249,7 @@ export default function CountrySettings() {
 
                                         <td className="min-w-45 whitespace-nowrap px-3 py-3">
                                             <div className="flex items-center gap-2 font-mono text-xs font-semibold text-white">
-                                                <span
-                                                    className="text-base leading-none"
-                                                    aria-hidden="true"
-                                                >
-                                                    {countryFlag(country.code)}
-                                                </span>
+                                                <CountryFlag code={country.code} size={24} />
                                                 <span>{country.name}</span>
                                             </div>
                                         </td>
@@ -281,13 +270,12 @@ export default function CountrySettings() {
 
                                             {change !== null && (
                                                 <div
-                                                    className={`mt-1 font-mono text-[10px] ${
-                                                        change > 0
+                                                    className={`mt-1 font-mono text-[10px] ${change > 0
                                                             ? "text-emerald-400"
                                                             : change < 0
-                                                              ? "text-red-400"
-                                                              : "text-zinc-500"
-                                                    }`}
+                                                                ? "text-red-400"
+                                                                : "text-zinc-500"
+                                                        }`}
                                                 >
                                                     {change > 0 ? "↑ +" : change < 0 ? "↓ " : ""}
                                                     {change.toFixed(2)}%
@@ -309,31 +297,28 @@ export default function CountrySettings() {
                                                     type="button"
                                                     role="switch"
                                                     aria-checked={country.isActive}
-                                                    aria-label={`Set ${country.name} ${
-                                                        country.isActive
+                                                    aria-label={`Set ${country.name} ${country.isActive
                                                             ? "inactive"
                                                             : "active"
-                                                    }`}
+                                                        }`}
                                                     onClick={() =>
                                                         toggleCountry(country)
                                                     }
                                                     disabled={
                                                         toggleMutation.isPending
                                                     }
-                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${
-                                                        country.isActive
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${country.isActive
                                                             ? "bg-[#c8ff00]"
                                                             : "bg-[#2a2d30]"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span
-                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${
-                                                            country.isActive
+                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${country.isActive
                                                                 ? "translate-x-4 bg-black"
                                                                 : "translate-x-0 bg-[#8b939e]"
-                                                        }`}
+                                                            }`}
                                                     />
-                                                </button> 
+                                                </button>
                                             </div>
                                         </td>
 
