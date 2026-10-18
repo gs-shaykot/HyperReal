@@ -107,17 +107,36 @@ export default function CountryModal({
 
     if (!open) return null;
 
-    const availableOptions = countryOptions.filter((option) => {
-        const matchesSearch = option.name
-            .toLowerCase()
-            .includes(search.toLowerCase().trim());
+    const normalizedSearch = search.trim().toLowerCase();
 
-        const alreadyExists =
-            existingCodes.includes(option.code) &&
-            option.code !== country?.code;
+    const matchingCountries = countryOptions.filter((option) =>
+        option.name.toLowerCase().includes(normalizedSearch)
+    );
 
-        return matchesSearch && !alreadyExists;
-    });
+    // Prefer an exact name match over similarly named countries or territories.
+    const exactCountryMatch = normalizedSearch
+        ? countryOptions.find(
+              (option) =>
+                  option.name.trim().toLowerCase() === normalizedSearch
+          )
+        : undefined;
+
+    const isAlreadyConfigured = (option: CountryOption) =>
+        existingCodes.some(
+            (code) => code.toUpperCase() === option.code.toUpperCase()
+        ) && option.code.toUpperCase() !== country?.code.toUpperCase();
+
+    const exactMatchAlreadyConfigured = exactCountryMatch
+        ? isAlreadyConfigured(exactCountryMatch)
+        : false;
+
+    const availableOptions = matchingCountries.filter(
+        (option) => !isAlreadyConfigured(option)
+    );
+
+    const alreadyConfiguredCountries = matchingCountries.filter(
+        isAlreadyConfigured
+    );
 
     const update = (changes: Partial<CountryInput>) => {
         setForm((current) => ({
@@ -295,6 +314,21 @@ export default function CountryModal({
                                                 Try again
                                             </button>
                                         </div>
+                                    ) : exactMatchAlreadyConfigured &&
+                                      exactCountryMatch ? (
+                                        <p className="flex items-center gap-2 px-3 py-4 text-xs text-zinc-400">
+                                            <CountryFlag
+                                                code={exactCountryMatch.code}
+                                                size={24}
+                                            />
+
+                                            <span>
+                                                <span className="text-white">
+                                                    {exactCountryMatch.name}
+                                                </span>{" "}
+                                                is already configured.
+                                            </span>
+                                        </p>
                                     ) : availableOptions.length > 0 ? (
                                         availableOptions.map((option) => (
                                             <button
@@ -324,6 +358,31 @@ export default function CountryModal({
                                                 </span>
                                             </button>
                                         ))
+                                    ) : alreadyConfiguredCountries.length >
+                                      0 ? (
+                                        <div className="space-y-1 px-3 py-4">
+                                            {alreadyConfiguredCountries.map(
+                                                (option) => (
+                                                    <p
+                                                        key={option.code}
+                                                        className="flex items-center gap-2 text-xs text-zinc-400"
+                                                    >
+                                                        <CountryFlag
+                                                            code={option.code}
+                                                            size={24}
+                                                        />
+
+                                                        <span>
+                                                            <span className="text-white">
+                                                                {option.name}
+                                                            </span>{" "}
+                                                            is already
+                                                            configured.
+                                                        </span>
+                                                    </p>
+                                                )
+                                            )}
+                                        </div>
                                     ) : (
                                         <p className="px-3 py-4 text-xs text-zinc-500">
                                             No available countries found.
@@ -498,8 +557,13 @@ export default function CountryModal({
                             !form.phoneCode.trim() ||
                             !form.currencyCode.trim() ||
                             !form.currencySymbol.trim() ||
-                            (existingCodes.includes(form.code) &&
-                                form.code !== country?.code)
+                            (existingCodes.some(
+                                (code) =>
+                                    code.toUpperCase() ===
+                                    form.code.toUpperCase()
+                            ) &&
+                                form.code.toUpperCase() !==
+                                    country?.code.toUpperCase())
                         }
                         className="flex h-11 flex-1 items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
                     >
