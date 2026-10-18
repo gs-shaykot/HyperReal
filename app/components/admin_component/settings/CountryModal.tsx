@@ -1,43 +1,26 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Globe2, Search, X } from "lucide-react";
+
 import type {
     CountryInput,
     OperationalCountry,
 } from "@/app/Hooks/useAdminCountries";
+
 import CountryFlag from "@/app/components/admin_component/settings/CountryFlag";
 
 type CountryOption = {
     name: string;
     code: string;
+    flag: string;
     phoneCode: string;
     currencyCode: string;
     currencySymbol: string;
 };
-
-const COUNTRY_OPTIONS: CountryOption[] = [
-    { name: "Australia", code: "AU", phoneCode: "+61", currencyCode: "AUD", currencySymbol: "A$" },
-    { name: "Bangladesh", code: "BD", phoneCode: "+880", currencyCode: "BDT", currencySymbol: "৳" },
-    { name: "Brazil", code: "BR", phoneCode: "+55", currencyCode: "BRL", currencySymbol: "R$" },
-    { name: "Canada", code: "CA", phoneCode: "+1", currencyCode: "CAD", currencySymbol: "C$" },
-    { name: "China", code: "CN", phoneCode: "+86", currencyCode: "CNY", currencySymbol: "¥" },
-    { name: "Denmark", code: "DK", phoneCode: "+45", currencyCode: "DKK", currencySymbol: "kr" },
-    { name: "France", code: "FR", phoneCode: "+33", currencyCode: "EUR", currencySymbol: "€" },
-    { name: "Germany", code: "DE", phoneCode: "+49", currencyCode: "EUR", currencySymbol: "€" },
-    { name: "India", code: "IN", phoneCode: "+91", currencyCode: "INR", currencySymbol: "₹" },
-    { name: "Indonesia", code: "ID", phoneCode: "+62", currencyCode: "IDR", currencySymbol: "Rp" },
-    { name: "Italy", code: "IT", phoneCode: "+39", currencyCode: "EUR", currencySymbol: "€" },
-    { name: "Japan", code: "JP", phoneCode: "+81", currencyCode: "JPY", currencySymbol: "¥" },
-    { name: "Malaysia", code: "MY", phoneCode: "+60", currencyCode: "MYR", currencySymbol: "RM" },
-    { name: "Netherlands", code: "NL", phoneCode: "+31", currencyCode: "EUR", currencySymbol: "€" },
-    { name: "New Zealand", code: "NZ", phoneCode: "+64", currencyCode: "NZD", currencySymbol: "NZ$" },
-    { name: "Pakistan", code: "PK", phoneCode: "+92", currencyCode: "PKR", currencySymbol: "₨" },
-    { name: "Saudi Arabia", code: "SA", phoneCode: "+966", currencyCode: "SAR", currencySymbol: "﷼" },
-    { name: "Singapore", code: "SG", phoneCode: "+65", currencyCode: "SGD", currencySymbol: "S$" },
-    { name: "United Kingdom", code: "GB", phoneCode: "+44", currencyCode: "GBP", currencySymbol: "£" },
-    { name: "United States", code: "US", phoneCode: "+1", currencyCode: "USD", currencySymbol: "$" },
-];
 
 type Props = {
     open: boolean;
@@ -65,10 +48,12 @@ const inputClass =
 const labelClass =
     "mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-zinc-400";
 
-function countryFlag(code: string) {
-    return code.toUpperCase().replace(/[A-Z]/g, (letter) =>
-        String.fromCodePoint(letter.charCodeAt(0) + 127397)
+async function fetchCountryOptions(): Promise<CountryOption[]> {
+    const response = await axios.get<CountryOption[]>(
+        "/api/admin/settings/country-options"
     );
+
+    return response.data;
 }
 
 export default function CountryModal({
@@ -83,23 +68,36 @@ export default function CountryModal({
     const [search, setSearch] = useState("");
     const [showOptions, setShowOptions] = useState(false);
 
+    const {
+        data: countryOptions = [],
+        isLoading: isLoadingCountries,
+        isError: hasCountryLoadError,
+        refetch: refetchCountries,
+    } = useQuery({
+        queryKey: ["country-options"],
+        queryFn: fetchCountryOptions,
+        staleTime: 3 * 24 * 60 * 60 * 1000,
+        enabled: open && !country,
+        retry: 1,
+    });
+
     useEffect(() => {
         if (!open) return;
 
         setForm(
             country
                 ? {
-                    id: country.id,
-                    name: country.name,
-                    code: country.code,
-                    phoneCode: country.phoneCode,
-                    currencyCode: country.currencyCode,
-                    currencySymbol: country.currencySymbol,
-                    shippingFeeUSD: country.shippingFeeUSD,
-                    freeShippingThresholdUSD:
-                        country.freeShippingThresholdUSD,
-                    isActive: country.isActive,
-                }
+                      id: country.id,
+                      name: country.name,
+                      code: country.code,
+                      phoneCode: country.phoneCode,
+                      currencyCode: country.currencyCode,
+                      currencySymbol: country.currencySymbol,
+                      shippingFeeUSD: country.shippingFeeUSD,
+                      freeShippingThresholdUSD:
+                          country.freeShippingThresholdUSD,
+                      isActive: country.isActive,
+                  }
                 : { ...emptyForm }
         );
 
@@ -109,10 +107,10 @@ export default function CountryModal({
 
     if (!open) return null;
 
-    const availableOptions = COUNTRY_OPTIONS.filter((option) => {
+    const availableOptions = countryOptions.filter((option) => {
         const matchesSearch = option.name
             .toLowerCase()
-            .includes(search.toLowerCase());
+            .includes(search.toLowerCase().trim());
 
         const alreadyExists =
             existingCodes.includes(option.code) &&
@@ -122,7 +120,10 @@ export default function CountryModal({
     });
 
     const update = (changes: Partial<CountryInput>) => {
-        setForm((current) => ({ ...current, ...changes }));
+        setForm((current) => ({
+            ...current,
+            ...changes,
+        }));
     };
 
     const chooseCountry = (option: CountryOption) => {
@@ -140,6 +141,16 @@ export default function CountryModal({
 
     const submit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        if (
+            !form.name.trim() ||
+            !form.code.trim() ||
+            !form.phoneCode.trim() ||
+            !form.currencyCode.trim() ||
+            !form.currencySymbol.trim()
+        ) {
+            return;
+        }
 
         onSaveAction({
             ...form,
@@ -164,13 +175,19 @@ export default function CountryModal({
                 onSubmit={submit}
                 className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#303030] bg-[#0b0b0b] text-white shadow-2xl"
             >
+                {/* Header */}
                 <div className="flex items-start justify-between border-b border-[#292929] p-5">
                     <div className="flex items-start gap-3">
-                        <Globe2 size={17} className="mt-0.5 text-zinc-200" />
+                        <Globe2
+                            size={17}
+                            className="mt-0.5 text-zinc-200"
+                        />
+
                         <div>
                             <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
                                 {country ? "Edit Country" : "Add Country"}
                             </h2>
+
                             <p className="mt-1 text-xs text-zinc-500">
                                 {country
                                     ? "Update this shipping destination"
@@ -189,9 +206,14 @@ export default function CountryModal({
                     </button>
                 </div>
 
+                {/* Form */}
                 <div className="space-y-5 p-5">
+                    {/* Country selector */}
                     <div className="relative">
-                        <label htmlFor="country-search" className={labelClass}>
+                        <label
+                            htmlFor="country-search"
+                            className={labelClass}
+                        >
                             Select country
                         </label>
 
@@ -203,23 +225,29 @@ export default function CountryModal({
                                 }
                             }}
                             disabled={Boolean(country)}
-                            className={`${inputClass} flex items-center justify-between text-left ${showOptions ? "border-[#c8ff00]" : ""
-                                }`}
+                            aria-expanded={showOptions}
+                            className={`${inputClass} flex items-center justify-between text-left ${
+                                showOptions ? "border-[#c8ff00]" : ""
+                            }`}
                         >
                             <span className="flex min-w-0 items-center gap-2">
-                                {form.code ? (
-                                    <span aria-hidden="true">
-                                        {countryFlag(form.code)}
-                                    </span>
-                                ) : null}
+                                {form.code && (
+                                    <CountryFlag
+                                        code={form.code}
+                                        size={24}
+                                    />
+                                )}
+
                                 <span className="truncate">
                                     {form.name || "Select a country..."}
                                 </span>
                             </span>
+
                             <ChevronDown
                                 size={15}
-                                className={`shrink-0 transition-transform ${showOptions ? "rotate-180" : ""
-                                    }`}
+                                className={`shrink-0 transition-transform ${
+                                    showOptions ? "rotate-180" : ""
+                                }`}
                             />
                         </button>
 
@@ -231,6 +259,7 @@ export default function CountryModal({
                                             size={14}
                                             className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
                                         />
+
                                         <input
                                             id="country-search"
                                             value={search}
@@ -246,7 +275,27 @@ export default function CountryModal({
                                 </div>
 
                                 <div className="max-h-56 overflow-y-auto p-1">
-                                    {availableOptions.length ? (
+                                    {isLoadingCountries ? (
+                                        <p className="px-3 py-4 text-xs text-zinc-500">
+                                            Loading countries...
+                                        </p>
+                                    ) : hasCountryLoadError ? (
+                                        <div className="space-y-2 px-3 py-4">
+                                            <p className="text-xs text-red-400">
+                                                Failed to load countries.
+                                            </p>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    void refetchCountries()
+                                                }
+                                                className="text-xs font-bold text-[#c8ff00] hover:underline"
+                                            >
+                                                Try again
+                                            </button>
+                                        </div>
+                                    ) : availableOptions.length > 0 ? (
                                         availableOptions.map((option) => (
                                             <button
                                                 type="button"
@@ -256,16 +305,22 @@ export default function CountryModal({
                                                 }
                                                 className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-[#c8ff00] hover:text-black"
                                             >
-                                                <CountryFlag code={option.code} size={24} />
+                                                <CountryFlag
+                                                    code={option.code}
+                                                    size={24}
+                                                />
+
                                                 <span className="min-w-0 flex-1 truncate">
                                                     {option.name}
                                                 </span>
+
                                                 <span className="font-mono text-xs opacity-70">
                                                     {option.code}
                                                 </span>
+
                                                 <span className="font-mono text-xs opacity-70">
-                                                    {option.currencyCode} (
-                                                    {option.currencySymbol})
+                                                    {option.currencyCode ||
+                                                        "No currency"}
                                                 </span>
                                             </button>
                                         ))
@@ -279,45 +334,61 @@ export default function CountryModal({
                         )}
                     </div>
 
+                    {/* Country metadata */}
                     <div className="grid grid-cols-3 gap-3">
                         <div>
-                            <label className={labelClass}>Country code</label>
+                            <label className={labelClass}>
+                                Country code
+                            </label>
+
                             <input
                                 value={form.code}
                                 readOnly
                                 placeholder="—"
                                 className={inputClass}
                             />
+
                             <p className="mt-1 text-[10px] text-zinc-500">
                                 · Auto-filled
                             </p>
                         </div>
+
                         <div>
-                            <label className={labelClass}>Currency code</label>
+                            <label className={labelClass}>
+                                Currency code
+                            </label>
+
                             <input
                                 value={form.currencyCode}
                                 readOnly
                                 placeholder="—"
                                 className={inputClass}
                             />
+
                             <p className="mt-1 text-[10px] text-zinc-500">
                                 · Auto-filled
                             </p>
                         </div>
+
                         <div>
-                            <label className={labelClass}>Currency symbol</label>
+                            <label className={labelClass}>
+                                Currency symbol
+                            </label>
+
                             <input
                                 value={form.currencySymbol}
                                 readOnly
                                 placeholder="—"
                                 className={inputClass}
                             />
+
                             <p className="mt-1 text-[10px] text-zinc-500">
                                 · Auto-filled
                             </p>
                         </div>
                     </div>
 
+                    {/* Shipping settings */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label
@@ -326,6 +397,7 @@ export default function CountryModal({
                             >
                                 Shipping fee (USD)
                             </label>
+
                             <input
                                 id="country-shipping-fee"
                                 type="number"
@@ -342,6 +414,7 @@ export default function CountryModal({
                                 }
                                 className={inputClass}
                             />
+
                             <p className="mt-1 text-[10px] text-zinc-500">
                                 Shipping charge for this country
                             </p>
@@ -354,6 +427,7 @@ export default function CountryModal({
                             >
                                 Free shipping threshold (USD)
                             </label>
+
                             <input
                                 id="country-free-threshold"
                                 type="number"
@@ -370,34 +444,42 @@ export default function CountryModal({
                                 }
                                 className={inputClass}
                             />
+
                             <p className="mt-1 text-[10px] text-zinc-500">
                                 Minimum order value for free shipping
                             </p>
                         </div>
                     </div>
 
+                    {/* Status */}
                     <div>
                         <label className={labelClass}>Status</label>
+
                         <button
                             type="button"
                             onClick={() =>
-                                update({ isActive: !form.isActive })
+                                update({
+                                    isActive: !form.isActive,
+                                })
                             }
                             aria-pressed={Boolean(form.isActive)}
-                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${form.isActive
+                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${
+                                form.isActive
                                     ? "border-[#c8ff00] bg-[#c8ff00]/10 text-[#c8ff00]"
                                     : "border-[#303030] text-zinc-500"
-                                }`}
+                            }`}
                         >
                             {form.isActive ? "Active" : "Inactive"}
                         </button>
+
                         <p className="mt-1 text-[10px] text-zinc-500">
-                            Active countries will be available for shipping at
-                            checkout.
+                            Active countries will be available for shipping
+                            at checkout.
                         </p>
                     </div>
                 </div>
 
+                {/* Footer */}
                 <div className="flex gap-3 border-t border-[#292929] p-5">
                     <button
                         type="button"
@@ -411,7 +493,11 @@ export default function CountryModal({
                         type="submit"
                         disabled={
                             isSaving ||
-                            !form.code ||
+                            !form.name.trim() ||
+                            !form.code.trim() ||
+                            !form.phoneCode.trim() ||
+                            !form.currencyCode.trim() ||
+                            !form.currencySymbol.trim() ||
                             (existingCodes.includes(form.code) &&
                                 form.code !== country?.code)
                         }
@@ -420,8 +506,8 @@ export default function CountryModal({
                         {isSaving
                             ? "Saving..."
                             : country
-                                ? "Save Changes"
-                                : "+ Add Country"}
+                              ? "Save Changes"
+                              : "Add Country"}
                     </button>
                 </div>
             </form>
