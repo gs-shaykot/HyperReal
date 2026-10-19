@@ -7,28 +7,30 @@ datasource db {
 }
 
 model User {
-  id                     String       @id @default(uuid())
+  id                     String              @id @default(uuid())
   name                   String
-  email                  String       @unique
+  email                  String              @unique
   password               String?
   PhotoUrl               String?
-  role                   Role         @default(USER)
-  isBlocked              Boolean      @default(false)
-  createdAt              DateTime     @default(now())
-  isVerified             Boolean      @default(false)
-  isCODDisabled          Boolean      @default(false)
+  role                   Role                @default(USER)
+  isBlocked              Boolean             @default(false)
+  createdAt              DateTime            @default(now())
+  isVerified             Boolean             @default(false)
+  isCODDisabled          Boolean             @default(false)
   otp                    String?
   otpExpiry              DateTime?
-  isNewUser              Boolean      @default(true)
+  isNewUser              Boolean             @default(true)
   phone                  String?
-  orderNotifications     Boolean      @default(true)
-  marketingNotifications Boolean      @default(true)
-  authProvider           AuthProvider @default(EMAIL)
+  orderNotifications     Boolean             @default(true)
+  marketingNotifications Boolean             @default(true)
+  authProvider           AuthProvider        @default(EMAIL)
   cart                   Cart?
   orders                 Order[]
   wishlist               Wishlist[]
   addresses              Address[]
   sessions               Session[]
+  reviews                Review[]
+  reviewVotes            ReviewHelpfulVote[]
 
   @@map("user")
 }
@@ -97,6 +99,7 @@ model Product {
   productImages   ProductImage[]
   productVariants ProductVariant[]
   wishlists       Wishlist[]
+  reviews         Review[]
 }
 
 model ProductVariant {
@@ -235,38 +238,73 @@ model HomepageMarquee {
 
   @@map("homepage_marquee")
 }
- 
+
 model UpcomingRelease {
-  id                  String    @id @default("homepage")
-  isEnabled           Boolean   @default(true)
-  nameLine1           String    @default("Void")
-  nameLine2           String    @default("Runner")
-  version             String    @default("V3")
-  description         String    @default("The next iteration of urban mobility.")
-  countdownEnds       DateTime?
-  buttonLabel         String    @default("Set Reminder")
-  updatedAt           DateTime  @updatedAt
+  id            String    @id @default("homepage")
+  isEnabled     Boolean   @default(true)
+  nameLine1     String    @default("Void")
+  nameLine2     String    @default("Runner")
+  version       String    @default("V3")
+  description   String    @default("The next iteration of urban mobility.")
+  countdownEnds DateTime?
+  buttonLabel   String    @default("Set Reminder")
+  updatedAt     DateTime  @updatedAt
 
   @@map("upcoming_release")
 }
 
 model OperationalCountry {
-  id                      String    @id @default(uuid())
-  name                    String
-  code                    String    @unique
-  phoneCode               String
-  currencyCode            String
-  currencySymbol          String
-  shippingFeeUSD          Float     @default(10)
-  freeShippingThresholdUSD Float    @default(150)
-  currentExchangeRate     Float?
-  previousExchangeRate    Float?
-  exchangeRateDate        DateTime?
-  isActive                Boolean   @default(true)
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
+  id                       String    @id @default(uuid())
+  name                     String
+  code                     String    @unique
+  phoneCode                String
+  currencyCode             String
+  currencySymbol           String
+  shippingFeeUSD           Float     @default(10)
+  freeShippingThresholdUSD Float     @default(150)
+  currentExchangeRate      Float?
+  previousExchangeRate     Float?
+  exchangeRateDate         DateTime?
+  isActive                 Boolean   @default(true)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
 
   @@map("operational_country")
+}
+
+model Review {
+  id               String   @id @default(uuid())
+  productId        String
+  userId           String
+  rating           Int
+  headline         String
+  body             String
+  displayName      String
+  verifiedPurchase Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  helpfulVotes ReviewHelpfulVote[]
+
+  @@unique([userId, productId])
+  @@index([productId, createdAt])
+  @@index([productId, rating])
+}
+
+model ReviewHelpfulVote {
+  id        String   @id @default(uuid())
+  reviewId  String
+  userId    String
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([reviewId])
 }
 
 enum Role {
