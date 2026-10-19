@@ -63,11 +63,8 @@ export function useSaveCountry() {
 
             return response.data.data as OperationalCountry;
         },
-
         onMutate: async (country) => {
-            await queryClient.cancelQueries({
-                queryKey: countriesQueryKey,
-            });
+            await queryClient.cancelQueries({ queryKey: countriesQueryKey });
 
             const previousCountries =
                 queryClient.getQueryData<OperationalCountry[]>(
@@ -78,9 +75,7 @@ export function useSaveCountry() {
                 queryClient.setQueryData<OperationalCountry[]>(
                     countriesQueryKey,
                     previousCountries.map((item) =>
-                        item.id === country.id
-                            ? { ...item, ...country }
-                            : item
+                        item.id === country.id ? { ...item, ...country } : item
                     )
                 );
             } else {
@@ -104,13 +99,9 @@ export function useSaveCountry() {
 
             return { previousCountries };
         },
-
         onSuccess: (_country, variables) => {
-            toast.success(
-                variables.id ? "Country updated." : "Country added."
-            );
+            toast.success(variables.id ? "Country updated." : "Country added.");
         },
-
         onError: (error, _variables, context) => {
             if (context) {
                 queryClient.setQueryData(
@@ -125,7 +116,6 @@ export function useSaveCountry() {
 
             toast.error(message || "Could not save country.");
         },
-
         onSettled: async () => {
             await queryClient.invalidateQueries({
                 queryKey: countriesQueryKey,
@@ -146,11 +136,8 @@ export function useToggleCountry() {
 
             return response.data.data as OperationalCountry;
         },
-
         onMutate: async (country) => {
-            await queryClient.cancelQueries({
-                queryKey: countriesQueryKey,
-            });
+            await queryClient.cancelQueries({ queryKey: countriesQueryKey });
 
             const previousCountries =
                 queryClient.getQueryData<OperationalCountry[]>(
@@ -169,11 +156,7 @@ export function useToggleCountry() {
 
             return { previousCountries };
         },
-
-        onSuccess: () => {
-            toast.success("Country status updated.");
-        },
-
+        onSuccess: () => toast.success("Country status updated."),
         onError: (error, _country, context) => {
             if (context?.previousCountries) {
                 queryClient.setQueryData(
@@ -188,7 +171,6 @@ export function useToggleCountry() {
 
             toast.error(message || "Could not update country status.");
         },
-
         onSettled: async () => {
             await queryClient.invalidateQueries({
                 queryKey: countriesQueryKey,
@@ -209,11 +191,8 @@ export function useDeleteCountry() {
 
             return response.data;
         },
-
         onMutate: async (id) => {
-            await queryClient.cancelQueries({
-                queryKey: countriesQueryKey,
-            });
+            await queryClient.cancelQueries({ queryKey: countriesQueryKey });
 
             const previousCountries =
                 queryClient.getQueryData<OperationalCountry[]>(
@@ -227,11 +206,7 @@ export function useDeleteCountry() {
 
             return { previousCountries };
         },
-
-        onSuccess: () => {
-            toast.success("Country deleted.");
-        },
-
+        onSuccess: () => toast.success("Country deleted."),
         onError: (error, _id, context) => {
             if (context) {
                 queryClient.setQueryData(
@@ -246,11 +221,64 @@ export function useDeleteCountry() {
 
             toast.error(message || "Could not delete country.");
         },
-
         onSettled: async () => {
             await queryClient.invalidateQueries({
                 queryKey: countriesQueryKey,
             });
+        },
+    });
+}
+
+/**
+ * Refreshes exchange-rate snapshots through the admin-only API route.
+ * Invalidates country data so the table displays the updated rates.
+ */
+export function useRefreshExchangeRates() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async () => {
+            const response = await axios.post(
+                "/api/admin/settings/exchange-rates"
+            );
+
+            return response.data as {
+                success: boolean;
+                message: string;
+                updated: number;
+                updatedCountries?: string[];
+                skipped?: Array<{
+                    country: string;
+                    currencyCode: string;
+                    reason: string;
+                }>;
+                rateDateRange?: {
+                    from: string;
+                    to: string;
+                };
+            };
+        },
+        onSuccess: async (result) => {
+            await queryClient.invalidateQueries({
+                queryKey: countriesQueryKey,
+            });
+
+            if (result.skipped?.length) {
+                toast.success(
+                    `Updated ${result.updated} country record(s); ${result.skipped.length} skipped.`
+                );
+            } else {
+                toast.success(
+                    result.message || "Exchange rates updated."
+                );
+            }
+        },
+        onError: (error) => {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+
+            toast.error(message || "Could not refresh exchange rates.");
         },
     });
 }

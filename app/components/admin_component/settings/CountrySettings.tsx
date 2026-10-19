@@ -8,6 +8,7 @@ import {
     Plus,
     Search,
     Trash2,
+    RefreshCw,
 } from "lucide-react";
 import CountryModal from "@/app/components/admin_component/settings/CountryModal";
 import {
@@ -15,6 +16,7 @@ import {
     type OperationalCountry,
     useAdminCountries,
     useDeleteCountry,
+    useRefreshExchangeRates,
     useSaveCountry,
     useToggleCountry,
 } from "@/app/Hooks/useAdminCountries";
@@ -34,15 +36,25 @@ function rateChange(country: OperationalCountry) {
     const current = country.currentExchangeRate;
     const previous = country.previousExchangeRate;
 
-    if (
-        current === null ||
-        previous === null ||
-        previous === 0
-    ) {
+    if (current === null || previous === null || previous === 0) {
         return null;
     }
 
     return ((current - previous) / previous) * 100;
+}
+
+function formatRateDate(date: string | null) {
+    if (!date) return "Not updated";
+
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "Date unavailable";
+
+    return new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+    }).format(parsed);
 }
 
 export default function CountrySettings() {
@@ -56,6 +68,7 @@ export default function CountrySettings() {
     const saveMutation = useSaveCountry();
     const toggleMutation = useToggleCountry();
     const deleteMutation = useDeleteCountry();
+    const refreshRatesMutation = useRefreshExchangeRates();
 
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Filter>("ALL");
@@ -163,14 +176,36 @@ export default function CountrySettings() {
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={openAddModal}
-                        className="flex h-9 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
-                    >
-                        <Plus size={14} />
-                        Add Country
-                    </button>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <button
+                            type="button"
+                            onClick={() => refreshRatesMutation.mutate()}
+                            disabled={refreshRatesMutation.isPending}
+                            title="Fetch the latest available reference rates"
+                            className="flex h-9 items-center justify-center gap-2 border border-[#383838] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-200 hover:border-[#c8ff00] hover:text-[#c8ff00] disabled:cursor-wait disabled:opacity-60"
+                        >
+                            <RefreshCw
+                                size={13}
+                                className={
+                                    refreshRatesMutation.isPending
+                                        ? "animate-spin"
+                                        : ""
+                                }
+                            />
+                            {refreshRatesMutation.isPending
+                                ? "Updating..."
+                                : "Refresh Rates"}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={openAddModal}
+                            className="flex h-9 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
+                        >
+                            <Plus size={14} />
+                            Add Country
+                        </button>
+                    </div>
                 </div>
 
                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -181,9 +216,7 @@ export default function CountrySettings() {
                         />
                         <input
                             value={search}
-                            onChange={(event) =>
-                                setSearch(event.target.value)
-                            }
+                            onChange={(event) => setSearch(event.target.value)}
                             placeholder="Search country or currency..."
                             aria-label="Search countries"
                             className="h-9 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
@@ -197,10 +230,11 @@ export default function CountrySettings() {
                                     type="button"
                                     key={item}
                                     onClick={() => setFilter(item)}
-                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${filter === item
+                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${
+                                        filter === item
                                             ? "bg-[#c8ff00] text-black"
                                             : "text-zinc-400 hover:text-white"
-                                        }`}
+                                    }`}
                                 >
                                     {item}
                                 </button>
@@ -249,7 +283,10 @@ export default function CountrySettings() {
 
                                         <td className="min-w-45 whitespace-nowrap px-3 py-3">
                                             <div className="flex items-center gap-2 font-mono text-xs font-semibold text-white">
-                                                <CountryFlag code={country.code} size={24} />
+                                                <CountryFlag
+                                                    code={country.code}
+                                                    size={24}
+                                                />
                                                 <span>{country.name}</span>
                                             </div>
                                         </td>
@@ -270,17 +307,28 @@ export default function CountrySettings() {
 
                                             {change !== null && (
                                                 <div
-                                                    className={`mt-1 font-mono text-[10px] ${change > 0
+                                                    className={`mt-1 font-mono text-[10px] ${
+                                                        change > 0
                                                             ? "text-emerald-400"
                                                             : change < 0
-                                                                ? "text-red-400"
-                                                                : "text-zinc-500"
-                                                        }`}
+                                                              ? "text-red-400"
+                                                              : "text-zinc-500"
+                                                    }`}
                                                 >
-                                                    {change > 0 ? "↑ +" : change < 0 ? "↓ " : ""}
+                                                    {change > 0
+                                                        ? "↑ +"
+                                                        : change < 0
+                                                          ? "↓ "
+                                                          : ""}
                                                     {change.toFixed(2)}%
                                                 </div>
                                             )}
+
+                                            <div className="mt-1 text-[9px] text-zinc-500">
+                                                {formatRateDate(
+                                                    country.exchangeRateDate
+                                                )}
+                                            </div>
                                         </td>
 
                                         <td className="whitespace-nowrap px-3 py-3 font-mono text-[11px] text-white">
@@ -288,7 +336,10 @@ export default function CountrySettings() {
                                         </td>
 
                                         <td className="whitespace-nowrap px-3 py-3 font-mono text-[11px] text-white">
-                                            $ {country.freeShippingThresholdUSD.toFixed(2)}
+                                            ${" "}
+                                            {country.freeShippingThresholdUSD.toFixed(
+                                                2
+                                            )}
                                         </td>
 
                                         <td className="w-26.25 px-3 py-3">
@@ -297,26 +348,29 @@ export default function CountrySettings() {
                                                     type="button"
                                                     role="switch"
                                                     aria-checked={country.isActive}
-                                                    aria-label={`Set ${country.name} ${country.isActive
+                                                    aria-label={`Set ${country.name} ${
+                                                        country.isActive
                                                             ? "inactive"
                                                             : "active"
-                                                        }`}
+                                                    }`}
                                                     onClick={() =>
                                                         toggleCountry(country)
                                                     }
                                                     disabled={
                                                         toggleMutation.isPending
                                                     }
-                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${country.isActive
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${
+                                                        country.isActive
                                                             ? "bg-[#c8ff00]"
                                                             : "bg-[#2a2d30]"
-                                                        }`}
+                                                    }`}
                                                 >
                                                     <span
-                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${country.isActive
+                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${
+                                                            country.isActive
                                                                 ? "translate-x-4 bg-black"
                                                                 : "translate-x-0 bg-[#8b939e]"
-                                                            }`}
+                                                        }`}
                                                     />
                                                 </button>
                                             </div>
@@ -373,9 +427,11 @@ export default function CountrySettings() {
                 <div className="mt-3 flex items-start gap-2 border border-[#292929] bg-[#111111] p-3">
                     <span className="text-zinc-400">ⓘ</span>
                     <p className="text-[11px] leading-relaxed text-zinc-500">
-                        Shipping fees and free-shipping thresholds are stored
-                        in USD. Exchange rates will appear here after rate data
-                        is populated. Checkout integration is a separate step.
+                        Exchange rates are reference rates for 1 USD and may
+                        not match a bank or payment provider&apos;s rate.
+                        Refresh rates manually when needed. Shipping fees and
+                        free-shipping thresholds remain stored in USD;
+                        checkout conversion is a separate feature.
                     </p>
                 </div>
             </section>
