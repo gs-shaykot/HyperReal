@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { Eye, HandCoins, Shield, ShieldCheck } from "lucide-react";
 import type { Role } from "@prisma/client";
 import type { AdminUser } from "@/app/types/AdminUser";
@@ -171,7 +171,6 @@ export const UsersTable = ({
                                                 <Shield className="size-4  cursor-pointer" />
                                             )}
                                         </button>
-
                                         <button
                                             type="button"
                                             disabled={updateUser.isPending}
@@ -181,9 +180,13 @@ export const UsersTable = ({
                                                     isCODDisabled: !user.isCODDisabled,
                                                 })
                                             }
-                                            className={`transition-colors light:hover:text-zinc-900  cursor-pointer hover:text-orange-400 ${user.isCODDisabled ? "text-orange-400" : "text-zinc-500"}`}
+                                            className={`transition-colors cursor-pointer hover:text-orange-400 ${user.isCODDisabled ? "text-orange-400" : "text-zinc-500"
+                                                }`}
                                         >
-                                            <HandCoins className="size-3.5" />
+                                            <span
+                                                aria-hidden="true"
+                                                className="inline-block size-3.5 bg-current [mask-image:url(/hand-coins-off.svg)] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]"
+                                            />
                                         </button>
                                     </div>
                                 </td>
