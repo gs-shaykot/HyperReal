@@ -5,7 +5,7 @@ import { ProductModal } from "@/app/components/admin_component/products/ProductM
 import { Category } from "@prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Plus } from "lucide-react";
+import { ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -24,6 +24,9 @@ export const ProductHeader = ({
     const [categorySectionOpen, setCategorySectionOpen] = useState(false);
     const [categoryName, setCategoryName] = useState("");
     const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+    const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(
+        null
+    );
 
     const handleCreateCategory = async (
         event: React.FormEvent<HTMLFormElement>
@@ -54,8 +57,6 @@ export const ProductHeader = ({
             );
 
             setCategoryName("");
-
-            // Refresh server-provided categories used by the filter and product modal.
             router.refresh();
         } catch (error) {
             const message = axios.isAxiosError(error)
@@ -65,6 +66,36 @@ export const ProductHeader = ({
             toast.error(message || "Failed to create category.");
         } finally {
             setIsCreatingCategory(false);
+        }
+    };
+
+    const handleDeleteCategory = async (category: Category) => {
+        const confirmed = window.confirm(
+            `Delete the "${category.name}" category?\n\nCategories assigned to products cannot be deleted.`
+        );
+
+        if (!confirmed) return;
+
+        setDeletingCategoryId(category.id);
+
+        try {
+            const response = await axios.delete("/api/admin/categories", {
+                data: { id: category.id },
+            });
+
+            toast.success(
+                response.data.message || "Category deleted successfully."
+            );
+
+            router.refresh();
+        } catch (error) {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+
+            toast.error(message || "Failed to delete category.");
+        } finally {
+            setDeletingCategoryId(null);
         }
     };
 
@@ -90,7 +121,7 @@ export const ProductHeader = ({
                             }
                             aria-expanded={categorySectionOpen}
                             aria-controls="manage-categories"
-                            className={`inline-flex h-9 items-center gap-2 border px-4 font-mono text-[10px] font-bold uppercase tracking-[0.12em] transition-colors ${
+                            className={`inline-flex h-9 items-center gap-2 border px-4 font-mono text-[10px] font-bold uppercase tracking-[0.12em] transition-colors cursor-pointer ${
                                 categorySectionOpen
                                     ? "border-second text-second"
                                     : "border-zinc-800 text-white hover:border-second hover:text-second light:border-zinc-300 light:text-zinc-900"
@@ -110,7 +141,7 @@ export const ProductHeader = ({
                         <button
                             type="button"
                             onClick={() => setProductModalOpen(true)}
-                            className="inline-flex h-9 items-center gap-2 bg-second px-4 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90"
+                            className="inline-flex h-9 items-center gap-2 bg-second px-4 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-black transition-opacity cursor-pointer hover:opacity-90"
                         >
                             <Plus size={14} />
                             ADD PRODUCT
@@ -165,14 +196,43 @@ export const ProductHeader = ({
 
                         <div className="mt-4 flex flex-wrap gap-2">
                             {categories.length > 0 ? (
-                                categories.map((category) => (
-                                    <span
-                                        key={category.id}
-                                        className="border border-zinc-800 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide text-zinc-400 light:border-zinc-300 light:text-zinc-600"
-                                    >
-                                        {category.name}
-                                    </span>
-                                ))
+                                categories.map((category) => {
+                                    const isDeleting =
+                                        deletingCategoryId === category.id;
+
+                                    return (
+                                        <div
+                                            key={category.id}
+                                            className="inline-flex items-center border border-zinc-800 text-zinc-200 transition-colors hover:border-zinc-600 light:border-zinc-300 light:text-zinc-600"
+                                        >
+                                            <span className="px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide">
+                                                {category.name}
+                                            </span>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleDeleteCategory(
+                                                        category
+                                                    )
+                                                }
+                                                disabled={
+                                                    deletingCategoryId !==
+                                                    null
+                                                }
+                                                aria-label={`Delete ${category.name} category`}
+                                                title={`Delete ${category.name}`}
+                                                className="mr-1 flex size-6 items-center justify-center text-zinc-500 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                                            >
+                                                {isDeleting ? (
+                                                    <span className="size-3 animate-spin rounded-full border border-zinc-500 border-t-transparent" />
+                                                ) : (
+                                                    <Trash2 size={12} />
+                                                )}
+                                            </button>
+                                        </div>
+                                    );
+                                })
                             ) : (
                                 <p className="font-mono text-[10px] text-zinc-500">
                                     No categories created yet.
