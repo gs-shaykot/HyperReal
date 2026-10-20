@@ -1,11 +1,13 @@
-'use client'
-import { Sun, User, ShoppingBag, Moon } from "lucide-react"
-import Link from 'next/link'
-import { useSession } from 'next-auth/react'
-import LogoutButton from '@/app/components/LogoutButton'
-import { useTheme } from "next-themes"
-import { useQuery } from "@tanstack/react-query"
-import { countCartItems } from "@/lib/order_helpers/cartAPIs"
+
+"use client";
+
+import { Sun, User, ShoppingBag, Moon, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import LogoutButton from "@/app/components/LogoutButton";
+import { useTheme } from "next-themes";
+import { useQuery } from "@tanstack/react-query";
+import { countCartItems } from "@/lib/order_helpers/cartAPIs";
 
 export const Navbar = () => {
     const { data: session } = useSession();
@@ -17,119 +19,195 @@ export const Navbar = () => {
         enabled: !!session?.user?.id,
     });
 
+    const isAdmin = session?.user?.role === "ADMIN";
 
-    const navLinks =
+    const navLinks = (
         <>
-            <li><Link href="/products" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>Shop All</Link></li>
-            <li><a className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>New Arrivals</a></li>
-            <li><Link href="/lookbook" className={`light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!`}>LookBook</Link></li>
+            <li>
+                <Link
+                    href="/products"
+                    className="light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!"
+                >
+                    Shop All
+                </Link>
+            </li>
+            <li>
+                <a className="light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!">
+                    New Arrivals
+                </a>
+            </li>
+            <li>
+                <Link
+                    href="/lookbook"
+                    className="light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!"
+                >
+                    LookBook
+                </Link>
+            </li>
         </>
+    );
 
     return (
         <>
-            {/* <div>
-                    <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, rem.</p>
-                </div> */}
-            <div className={`bg-main/80 border-zinc-800 light:bg-white/70 light:border-gray-300/85 border-b backdrop-blur-xs sticky top-0 z-50 duration-300`}>
-                <div className={`text-white light:text-zinc-900 max-w-7xl mx-auto navbar `}>
+            <div className="bg-main/80 border-zinc-800 light:bg-white/70 light:border-gray-300/85 border-b backdrop-blur-xs sticky top-0 z-50 duration-300">
+                <div className="text-white light:text-zinc-900 max-w-7xl mx-auto navbar">
                     <div className="navbar-start w-[30%] md:w-[50%]">
                         <div className="dropdown">
-                            <div tabIndex={0} role="button" className={`text-white hover:bg-zinc-800 light:hover:bg-zinc-200 border-0 shadow-none light:text-zinc-900 btn btn-ghost lg:hidden `}>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" />
+                            <div
+                                tabIndex={0}
+                                role="button"
+                                className="text-white hover:bg-zinc-800 light:hover:bg-zinc-200 border-0 shadow-none light:text-zinc-900 btn btn-ghost lg:hidden"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M4 6h16M4 12h8m-8 6h16"
+                                    />
                                 </svg>
                             </div>
+
                             <ul
                                 tabIndex={0}
-                                className={`bg-zinc-900/95 border-zinc-800 border light:bg-white/95 light:border-gray-300/85 backdrop-blur-xs menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow`}>
+                                className="bg-zinc-900/95 border-zinc-800 border light:bg-white/95 light:border-gray-300/85 backdrop-blur-xs menu menu-sm dropdown-content rounded-box z-1 mt-3 w-52 p-2 shadow"
+                            >
                                 {navLinks}
                             </ul>
                         </div>
+
                         <ul className="menu menu-horizontal px-1 hidden lg:flex">
                             {navLinks}
                         </ul>
                     </div>
+
                     <div className="navbar-center">
-                        <Link href="/" className={`text-white light:text-zinc-900 text-xl md:text-3xl font-extrabold italic`}>
+                        <Link
+                            href="/"
+                            className="text-white light:text-zinc-900 text-xl md:text-3xl font-extrabold italic"
+                        >
                             HYPER<span className="text-second">REAL</span>
                         </Link>
                     </div>
-                    <div className="navbar-end gap-1">
-                        <button className={`text-white light:text-zinc-900`}>
-                            <label className="swap swap-rotate">
 
+                    <div className="navbar-end gap-1">
+                        <button className="text-white light:text-zinc-900">
+                            <label className="swap swap-rotate">
                                 <input
                                     type="checkbox"
-                                    checked={theme === 'light'}
+                                    checked={theme === "light"}
                                     onChange={(e) => {
-                                        setTheme(e.target.checked ? "light" : "dark");
+                                        setTheme(
+                                            e.target.checked ? "light" : "dark"
+                                        );
                                     }}
                                 />
 
-                                {/* sun icon */}
                                 <Sun
                                     size={20}
                                     strokeWidth={1.2}
-                                    className='swap-on fill-current'
+                                    className="swap-on fill-current"
                                 />
 
-                                {/* moon icon */}
                                 <Moon
                                     size={20}
                                     strokeWidth={1.2}
-                                    className='swap-off fill-current'
+                                    className="swap-off fill-current"
                                 />
-
                             </label>
                         </button>
-                        <div tabIndex={0} role="button" className={`text-white light:text-zinc-900 btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!`}>
+
+                        <div
+                            tabIndex={0}
+                            role="button"
+                            className="text-white light:text-zinc-900 btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!"
+                        >
                             <div className="indicator">
-                                <Link href='/cart'>
+                                <Link href="/cart">
                                     <ShoppingBag size={18} strokeWidth={1.2} />
-                                    <span className="badge badge-xs p-1 indicator-item border border-gray-500/85">{cartCount}</span>
+                                    <span className="badge badge-xs p-1 indicator-item border border-gray-500/85">
+                                        {cartCount}
+                                    </span>
                                 </Link>
                             </div>
                         </div>
+
                         <div className="dropdown dropdown-end flex items-center gap-2 justify-center">
-                            {
-                                session?.user ?
-                                    (
-                                        <div>
-                                            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar bg-transparent! border-none! shadow-none! ">
-                                                <div className="w-7 h-7 rounded-full">
-                                                    <img
-                                                        alt="User avatar"
-                                                        src={
-                                                            session?.user?.image ??
-                                                            "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png"
-                                                        }
-                                                        referrerPolicy="no-referrer" />
-                                                </div>
-                                            </div>
-                                            <ul
-                                                tabIndex={-1}
-                                                className="menu menu-sm dropdown-content light:bg-white bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1">
-                                                <li><a>{session.user?.name}</a></li>
-                                                <li>
-                                                    {
-                                                        session?.user ? <Link href="/account">Profile</Link> : <Link href="/login">Login</Link>
-                                                    }
-                                                </li>
-                                                <li>
-                                                    <LogoutButton />
-                                                </li>
-                                            </ul>
+                            {session?.user ? (
+                                <div>
+                                    <div
+                                        tabIndex={0}
+                                        role="button"
+                                        className="btn btn-ghost btn-circle avatar bg-transparent! border-none! shadow-none!"
+                                    >
+                                        <div className="w-7 h-7 rounded-full">
+                                            <img
+                                                alt="User avatar"
+                                                src={
+                                                    session.user.image ??
+                                                    "https://res.cloudinary.com/dskgvk9km/image/upload/v1767725926/user_bvoihx.png"
+                                                }
+                                                referrerPolicy="no-referrer"
+                                            />
                                         </div>
-                                    ) : (
-                                        <Link href="/login" className="btn btn-ghost btn-circle btn-sm">
-                                            <User size={20} strokeWidth={1.2} className={`text-white light:text-zinc-900`} />
-                                        </Link>
-                                    )
-                            }
+                                    </div>
+
+                                    <ul
+                                        tabIndex={-1}
+                                        className="menu menu-sm dropdown-content light:bg-white bg-main border border-gray-500/85 rounded-box z-1 mt-3 w-52 p-2 shadow space-y-1"
+                                    >
+                                        <li>
+                                            <a className="cursor-default">
+                                                {session.user.name}
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <Link href="/account">
+                                                <User size={15} />
+                                                Profile
+                                            </Link>
+                                        </li>
+
+                                        {isAdmin && (
+                                            <li>
+                                                <Link
+                                                    href="/admin"
+                                                    className="text-second font-semibold"
+                                                >
+                                                    <ShieldCheck size={15} />
+                                                    Admin Dashboard
+                                                </Link>
+                                            </li>
+                                        )}
+
+                                        <li>
+                                            <LogoutButton />
+                                        </li>
+                                    </ul>
+                                </div>
+                            ) : (
+                                <Link
+                                    href="/login"
+                                    className="btn btn-ghost btn-circle btn-sm"
+                                >
+                                    <User
+                                        size={20}
+                                        strokeWidth={1.2}
+                                        className="text-white light:text-zinc-900"
+                                    />
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
         </>
-    )
-}
+    );
+};
