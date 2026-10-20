@@ -4,5 +4,6 @@
   "typescript.suggest.autoImports": true,
   "javascript.suggest.autoImports": true,
   "typescript.preferences.includePackageJsonAutoImports": "on",
-  "javascript.preferences.includePackageJsonAutoImports": "on"
+  "javascript.preferences.includePackageJsonAutoImports": "on",
+  "C_Cpp.default.compilerPath": "C:/msys64/ucrt64/bin/gcc.exe"
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -7,8 +6,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import {
     CheckCircle2,
-    ChevronDown,
+    Pencil,
     ThumbsUp,
+    Trash2,
     X,
 } from "lucide-react";
 
@@ -95,8 +95,13 @@ export default function ReviewsSection({ productId }: Props) {
     const [loadError, setLoadError] = useState(false);
     const [sort, setSort] = useState<SortOption>("recent");
     const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+
     const [formOpen, setFormOpen] = useState(false);
+    const [editingReviewId, setEditingReviewId] = useState<string | null>(
+        null
+    );
     const [submitting, setSubmitting] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [votingId, setVotingId] = useState<string | null>(null);
 
     const [rating, setRating] = useState(0);
@@ -110,7 +115,10 @@ export default function ReviewsSection({ productId }: Props) {
 
         try {
             const params = new URLSearchParams({ sort });
-            if (ratingFilter) params.set("rating", String(ratingFilter));
+
+            if (ratingFilter) {
+                params.set("rating", String(ratingFilter));
+            }
 
             const response = await axios.get(
                 `/api/products/${productId}/reviews?${params.toString()}`
@@ -129,26 +137,37 @@ export default function ReviewsSection({ productId }: Props) {
     }, [loadReviews]);
 
     useEffect(() => {
-        if (session?.user?.name && !displayName) {
+        if (session?.user?.name && !displayName && !editingReviewId) {
             setDisplayName(session.user.name.slice(0, 40));
         }
-    }, [session?.user?.name, displayName]);
+    }, [session?.user?.name, displayName, editingReviewId]);
 
     const totalForBar = data?.totalReviews ?? 0;
 
-    const canWriteReview =
-        sessionStatus === "authenticated" && !data?.userHasReviewed;
-
     const reviewFormMessage = useMemo(() => {
-        if (sessionStatus === "loading") return "Checking your account...";
+        if (sessionStatus === "loading") {
+            return "Checking your account...";
+        }
+
         if (sessionStatus !== "authenticated") {
             return "Sign in to submit a review.";
         }
+
         if (data?.userHasReviewed) {
-            return "You have already reviewed this product.";
+            return "You have already reviewed this product. You can edit or delete your review below.";
         }
+
         return "";
     }, [sessionStatus, data?.userHasReviewed]);
+
+    const resetForm = () => {
+        setFormOpen(false);
+        setEditingReviewId(null);
+        setRating(0);
+        setHeadline("");
+        setBody("");
+        setDisplayName(session?.user?.name?.slice(0, 40) ?? "");
+    };
 
     const openReviewForm = () => {
         if (sessionStatus !== "authenticated") {
@@ -161,12 +180,30 @@ export default function ReviewsSection({ productId }: Props) {
             return;
         }
 
+        setEditingReviewId(null);
+        setRating(0);
+        setHeadline("");
+        setBody("");
+        setDisplayName(session.user?.name?.slice(0, 40) ?? "");
         setFormOpen(true);
+    };
+
+    const startEditing = (review: Review) => {
+        setEditingReviewId(review.id);
+        setRating(review.rating);
+        setHeadline(review.headline);
+        setDisplayName(review.displayName);
+        setBody(review.body);
+        setFormOpen(true);
+
+        document
+            .getElementById("product-review-form")
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
     };
 
     const closeReviewForm = () => {
         if (submitting) return;
-        setFormOpen(false);
+        resetForm();
     };
 
     const submitReview = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -190,33 +227,79 @@ export default function ReviewsSection({ productId }: Props) {
         setSubmitting(true);
 
         try {
-            const response = await axios.post(
-                `/api/products/${productId}/reviews`,
-                {
-                    rating,
-                    headline,
-                    displayName,
-                    body,
-                }
-            );
+            const payload = {
+                rating,
+                headline,
+                displayName,
+                body,
+            };
+
+            const response = editingReviewId
+                ? await axios.patch(
+                      `/api/products/${productId}/reviews/${editingReviewId}`,
+                      payload
+                  )
+                : await axios.post(
+                      `/api/products/${productId}/reviews`,
+                      payload
+                  );
 
             toast.success(
-                response.data.message || "Review submitted successfully."
+                response.data.message ||
+                    (editingReviewId
+                        ? "Review updated."
+                        : "Review submitted.")
             );
 
-            setFormOpen(false);
-            setRating(0);
-            setHeadline("");
-            setBody("");
+            resetForm();
             await loadReviews();
         } catch (error) {
             const message = axios.isAxiosError(error)
                 ? error.response?.data?.message
                 : undefined;
 
-            toast.error(message || "Could not submit your review.");
+            toast.error(
+                message ||
+                    (editingReviewId
+                        ? "Could not update your review."
+                        : "Could not submit your review.")
+            );
         } finally {
             setSubmitting(false);
+        }
+    };
+
+    const deleteReview = async (review: Review) => {
+        const confirmed = window.confirm(
+            `Delete your review "${review.headline}"?\n\nThis action cannot be undone.`
+        );
+
+        if (!confirmed) return;
+
+        setDeletingId(review.id);
+
+        try {
+            const response = await axios.delete(
+                `/api/products/${productId}/reviews/${review.id}`
+            );
+
+            toast.success(
+                response.data.message || "Your review has been deleted."
+            );
+
+            if (editingReviewId === review.id) {
+                resetForm();
+            }
+
+            await loadReviews();
+        } catch (error) {
+            const message = axios.isAxiosError(error)
+                ? error.response?.data?.message
+                : undefined;
+
+            toast.error(message || "Could not delete your review.");
+        } finally {
+            setDeletingId(null);
         }
     };
 
@@ -273,9 +356,10 @@ export default function ReviewsSection({ productId }: Props) {
                         type="button"
                         onClick={closeReviewForm}
                         disabled={submitting}
-                        className="flex items-center gap-1.5 border border-zinc-600 px-3 py-2 font-mono text-[10px] uppercase text-zinc-300 hover:border-white"
+                        className="flex items-center gap-1.5 border border-zinc-600 px-3 py-2 font-mono text-[10px] uppercase text-zinc-300 hover:border-white disabled:opacity-50"
                     >
-                        <X size={12} /> CLOSE
+                        <X size={12} />
+                        CLOSE
                     </button>
                 )}
             </div>
@@ -305,6 +389,7 @@ export default function ReviewsSection({ productId }: Props) {
                                     ? "—"
                                     : (data?.averageRating ?? 0).toFixed(1)}
                             </strong>
+
                             <div className="mt-2">
                                 <Stars
                                     value={Math.round(
@@ -313,6 +398,7 @@ export default function ReviewsSection({ productId }: Props) {
                                     size={16}
                                 />
                             </div>
+
                             <span className="mt-2 font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
                                 {data?.totalReviews ?? 0} REVIEWS
                             </span>
@@ -322,6 +408,7 @@ export default function ReviewsSection({ productId }: Props) {
                             {[5, 4, 3, 2, 1].map((stars) => {
                                 const count =
                                     data?.distribution[stars] ?? 0;
+
                                 const percentage =
                                     totalForBar > 0
                                         ? (count / totalForBar) * 100
@@ -348,6 +435,7 @@ export default function ReviewsSection({ productId }: Props) {
                                         <span className="w-5 font-mono text-[9px] text-zinc-400">
                                             {stars}★
                                         </span>
+
                                         <span className="h-1.5 flex-1 overflow-hidden bg-[#292929]">
                                             <span
                                                 className="block h-full"
@@ -357,6 +445,7 @@ export default function ReviewsSection({ productId }: Props) {
                                                 }}
                                             />
                                         </span>
+
                                         <span className="w-4 text-right font-mono text-[9px] text-zinc-500">
                                             {count}
                                         </span>
@@ -365,19 +454,35 @@ export default function ReviewsSection({ productId }: Props) {
                             })}
 
                             <p className="mt-3 font-mono text-[8px] uppercase tracking-[0.15em] text-zinc-600">
-                                // TAP A BAR TO FILTER
+                                *TAP A BAR TO FILTER
                             </p>
                         </div>
                     </div>
 
                     {formOpen && (
                         <form
+                            id="product-review-form"
                             onSubmit={submitReview}
                             className="mt-4 border border-[#364000] bg-[#111403] p-4 sm:p-5"
                         >
+                            <div className="mb-3 flex items-center justify-between gap-3">
+                                <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00]">
+                                    {editingReviewId
+                                        ? "EDIT YOUR REVIEW"
+                                        : "WRITE YOUR REVIEW"}
+                                </h3>
+
+                                {editingReviewId && (
+                                    <span className="font-mono text-[8px] uppercase text-zinc-500">
+                                        Editing saved review
+                                    </span>
+                                )}
+                            </div>
+
                             <label className="mb-2 block font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                                 YOUR RATING
                             </label>
+
                             <Stars
                                 value={rating}
                                 interactive
@@ -423,6 +528,7 @@ export default function ReviewsSection({ productId }: Props) {
                                 <span className="mb-2 block font-mono text-[9px] font-bold uppercase tracking-wider text-zinc-400">
                                     REVIEW
                                 </span>
+
                                 <textarea
                                     value={body}
                                     onChange={(event) =>
@@ -435,6 +541,7 @@ export default function ReviewsSection({ productId }: Props) {
                                     placeholder="Fit, material, durability..."
                                     className="w-full resize-y border border-zinc-800 bg-[#090909] p-3 font-mono text-[10px] leading-relaxed text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
                                 />
+
                                 <span className="mt-1 block text-right font-mono text-[9px] text-zinc-600">
                                     {body.length}/3000
                                 </span>
@@ -444,17 +551,20 @@ export default function ReviewsSection({ productId }: Props) {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="bg-[#c8ff00] px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-black disabled:opacity-50"
+                                    className="bg-[#c8ff00] px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {submitting
-                                        ? "SUBMITTING..."
-                                        : "SUBMIT REVIEW"}
+                                        ? "SAVING..."
+                                        : editingReviewId
+                                          ? "SAVE CHANGES"
+                                          : "SUBMIT REVIEW"}
                                 </button>
+
                                 <button
                                     type="button"
                                     onClick={closeReviewForm}
                                     disabled={submitting}
-                                    className="border border-zinc-600 px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-zinc-300 hover:border-white"
+                                    className="border border-zinc-600 px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-zinc-300 hover:border-white disabled:opacity-50"
                                 >
                                     CANCEL
                                 </button>
@@ -514,18 +624,22 @@ export default function ReviewsSection({ productId }: Props) {
                                     className="border border-zinc-800 bg-[#101010] p-4"
                                 >
                                     <div className="flex flex-wrap items-center gap-1.5">
-                                        <Stars value={review.rating} size={13} />
+                                        <Stars
+                                            value={review.rating}
+                                            size={13}
+                                        />
+
                                         <h3 className="font-mono text-[10px] font-bold uppercase tracking-wide text-white">
                                             {review.headline}
                                         </h3>
                                     </div>
 
                                     <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[8px] uppercase text-zinc-500">
-                                        <span>
-                                            {review.displayName}
-                                        </span>
+                                        <span>{review.displayName}</span>
                                         <span>·</span>
-                                        <span>{formatDate(review.createdAt)}</span>
+                                        <span>
+                                            {formatDate(review.createdAt)}
+                                        </span>
 
                                         {review.verifiedPurchase && (
                                             <span className="inline-flex items-center gap-1 border border-[#526600] px-1.5 py-0.5 text-[#c8ff00]">
@@ -535,7 +649,7 @@ export default function ReviewsSection({ productId }: Props) {
                                         )}
 
                                         {review.isOwnReview && (
-                                            <span className="text-zinc-600">
+                                            <span className="text-[#c8ff00]">
                                                 YOUR REVIEW
                                             </span>
                                         )}
@@ -545,25 +659,65 @@ export default function ReviewsSection({ productId }: Props) {
                                         {review.body}
                                     </p>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => void toggleHelpful(review)}
-                                        disabled={
-                                            votingId === review.id ||
-                                            review.isOwnReview
-                                        }
-                                        className={`mt-3 inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[8px] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                                            review.isHelpful
-                                                ? "border-[#526600] text-[#c8ff00]"
-                                                : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
-                                        }`}
-                                    >
-                                        <ThumbsUp size={10} />
-                                        {review.isHelpful
-                                            ? "HELPFUL"
-                                            : "HELPFUL?"}{" "}
-                                        ({review.helpfulCount})
-                                    </button>
+                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                void toggleHelpful(review)
+                                            }
+                                            disabled={
+                                                votingId === review.id ||
+                                                review.isOwnReview
+                                            }
+                                            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[8px] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                                                review.isHelpful
+                                                    ? "border-[#526600] text-[#c8ff00]"
+                                                    : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 cursor-pointer"
+                                            }`}
+                                        >
+                                            <ThumbsUp size={10} />
+                                            {review.isHelpful
+                                                ? "HELPFUL"
+                                                : "HELPFUL?"}{" "}
+                                            ({review.helpfulCount})
+                                        </button>
+
+                                        {review.isOwnReview && (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        startEditing(review)
+                                                    }
+                                                    disabled={
+                                                        submitting ||
+                                                        deletingId === review.id
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 border border-zinc-800 px-2.5 py-1.5 font-mono text-[8px] uppercase text-zinc-400 transition-colors hover:border-[#c8ff00] hover:text-[#c8ff00] disabled:opacity-40 cursor-pointer"
+                                                >
+                                                    <Pencil size={10} />
+                                                    EDIT
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        void deleteReview(review)
+                                                    }
+                                                    disabled={
+                                                        deletingId === review.id ||
+                                                        submitting
+                                                    }
+                                                    className="inline-flex items-center gap-1.5 border border-zinc-800 px-2.5 py-1.5 font-mono text-[8px] uppercase text-zinc-500 transition-colors hover:border-red-500 hover:text-red-400 disabled:opacity-40 cursor-pointer"
+                                                >
+                                                    <Trash2 size={10} />
+                                                    {deletingId === review.id
+                                                        ? "DELETING..."
+                                                        : "DELETE"}
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
                                 </article>
                             ))
                         ) : (
@@ -573,6 +727,7 @@ export default function ReviewsSection({ productId }: Props) {
                                         ? `No ${ratingFilter}-star reviews found.`
                                         : "No reviews yet. Be the first to review this product."}
                                 </p>
+
                                 {ratingFilter && (
                                     <button
                                         type="button"
