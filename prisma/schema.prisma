@@ -7,30 +7,34 @@ datasource db {
 }
 
 model User {
-  id                     String              @id @default(uuid())
+  id                     String    @id @default(uuid())
   name                   String
-  email                  String              @unique
+  email                  String    @unique
   password               String?
   PhotoUrl               String?
-  role                   Role                @default(USER)
-  isBlocked              Boolean             @default(false)
-  createdAt              DateTime            @default(now())
-  isVerified             Boolean             @default(false)
-  isCODDisabled          Boolean             @default(false)
+  role                   Role      @default(USER)
+  isBlocked              Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  isVerified             Boolean   @default(false)
+  isCODDisabled          Boolean   @default(false)
   otp                    String?
   otpExpiry              DateTime?
-  isNewUser              Boolean             @default(true)
+  isNewUser              Boolean   @default(true)
   phone                  String?
-  orderNotifications     Boolean             @default(true)
-  marketingNotifications Boolean             @default(true)
-  authProvider           AuthProvider        @default(EMAIL)
-  cart                   Cart?
-  orders                 Order[]
-  wishlist               Wishlist[]
-  addresses              Address[]
-  sessions               Session[]
-  reviews                Review[]
-  reviewVotes            ReviewHelpfulVote[]
+  orderNotifications     Boolean   @default(true)
+  marketingNotifications Boolean   @default(true)
+
+  authProvider AuthProvider        @default(EMAIL)
+  cart         Cart?
+  orders       Order[]
+  wishlist     Wishlist[]
+  addresses    Address[]
+  sessions     Session[]
+  reviews      Review[]
+  reviewVotes  ReviewHelpfulVote[]
+
+  assignedShipments Shipment[]           @relation("AssignedCourier")
+  trackingEvents    OrderTrackingEvent[] @relation("TrackingEventActor")
 
   @@map("user")
 }
@@ -157,15 +161,17 @@ model Coupon {
 }
 
 model Order {
-  id           String        @id @unique @default(uuid())
-  userId       String
-  status       OrderStatus   @default(PENDING)
-  orderCode    String        @unique
-  createdAt    DateTime      @default(now())
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderHistory OrderHistory?
-  orderItems   OrderItem[]
-  payments     Payment[]
+  id             String               @id @unique @default(uuid())
+  userId         String
+  status         OrderStatus          @default(PENDING)
+  orderCode      String               @unique
+  createdAt      DateTime             @default(now())
+  user           User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderHistory   OrderHistory?
+  orderItems     OrderItem[]
+  payments       Payment[]
+  shipment       Shipment?
+  trackingEvents OrderTrackingEvent[]
 }
 
 model OrderItem {
@@ -307,6 +313,79 @@ model ReviewHelpfulVote {
   @@index([reviewId])
 }
 
+model Shipment {
+  id                String            @id @default(uuid())
+  orderId           String            @unique
+  trackingCode      String            @unique @default(uuid())
+  parcelTokenHash   String?           @unique
+  fulfillmentStatus FulfillmentStatus @default(READY_TO_PACK)
+  status            ShipmentStatus    @default(PENDING)
+
+  assignedCourierId String?
+  assignedCourier   User?   @relation("AssignedCourier", fields: [assignedCourierId], references: [id], onDelete: SetNull)
+
+  otpHash       String?
+  otpExpiresAt  DateTime?
+  otpAttempts   Int       @default(0)
+  otpLastSentAt DateTime?
+
+  codCollected     Boolean   @default(false)
+  codCollectedAt   DateTime?
+  deliveryAttempts Int       @default(0)
+  failureReason    String?
+  deliveryNote     String?
+
+  packedAt     DateTime?
+  dispatchedAt DateTime?
+  deliveredAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  order      Order                @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  itemChecks ShipmentItemCheck[]
+  events     OrderTrackingEvent[]
+
+  @@index([fulfillmentStatus, createdAt])
+  @@index([status, createdAt])
+  @@index([assignedCourierId, status])
+}
+
+model ShipmentItemCheck {
+  id          String    @id @default(uuid())
+  shipmentId  String
+  orderItemId String
+  verified    Boolean   @default(false)
+  verifiedAt  DateTime?
+  verifiedBy  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([shipmentId, orderItemId])
+  @@index([shipmentId, verified])
+}
+
+model OrderTrackingEvent {
+  id          String            @id @default(uuid())
+  orderId     String
+  shipmentId  String?
+  actorId     String?
+  type        TrackingEventType
+  title       String
+  description String?
+  location    String?
+  metadata    Json?
+  createdAt   DateTime          @default(now())
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  shipment Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  actor    User?     @relation("TrackingEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, createdAt])
+  @@index([shipmentId, createdAt])
+}
+
 enum Role {
   USER
   ADMIN
@@ -341,4 +420,30 @@ enum CouponType {
 enum AuthProvider {
   EMAIL
   GOOGLE
+}
+
+enum FulfillmentStatus {
+  READY_TO_PACK
+  PACKING
+  PACKED
+  DISPATCHED
+}
+
+enum ShipmentStatus {
+  PENDING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+}
+
+enum TrackingEventType {
+  ORDER_CONFIRMED
+  PACKING_STARTED
+  ITEM_VERIFIED
+  PACKED
+  DISPATCHED
+  OUT_FOR_DELIVERY
+  DELIVERY_FAILED
+  DELIVERED
+  NOTE_ADDED
 }
