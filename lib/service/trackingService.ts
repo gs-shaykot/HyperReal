@@ -26,6 +26,40 @@ export class TrackingError extends Error {
 const hashToken = (token: string) =>
     createHash("sha256").update(token).digest("hex");
 
+
+function generateCustomCode(prefix: "HYP-PRT" | "HYP-TRK") {
+    // Six uppercase alphanumeric characters.
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const bytes = randomBytes(6);
+
+    const suffix = Array.from(
+        bytes,
+        (byte) => alphabet[byte % alphabet.length],
+    ).join("");
+
+    return `${prefix}-${suffix}`;
+}
+
+async function generateUniqueTrackingCode(
+    tx: Prisma.TransactionClient,
+): Promise<string> {
+    for (let attempt = 0; attempt < 10; attempt++) {
+        const trackingCode = generateCustomCode("HYP-TRK");
+
+        const existing = await tx.shipment.findUnique({
+            where: { trackingCode },
+            select: { id: true },
+        });
+
+        if (!existing) return trackingCode;
+    }
+
+    throw new TrackingError(
+        "Could not generate a unique tracking code. Please retry.",
+        503,
+    );
+}
+
 export async function ensureShipmentForOrder(orderId: string) {
     return prisma.$transaction(async (tx) => {
         const order = await tx.order.findUnique({
@@ -80,9 +114,12 @@ export async function ensureShipmentForOrder(orderId: string) {
 
         if (existing) return existing;
 
+        const trackingCode = await generateUniqueTrackingCode(tx);
+
         return tx.shipment.create({
             data: {
                 orderId,
+                trackingCode,
                 itemChecks: {
                     create: order.orderItems.map((item) => ({
                         orderItemId: item.id,
@@ -381,17 +418,27 @@ export async function dispatchShipment(
     });
 }
 
+
 export async function rotateParcelToken(shipmentId: string) {
-    const token = randomBytes(32).toString("base64url");
+    const token = generateCustomCode("HYP-PRT");
 
     const shipment = await prisma.shipment.update({
         where: { id: shipmentId },
-        data: { parcelTokenHash: hashToken(token) },
-        select: { id: true, trackingCode: true },
+        data: {
+            parcelTokenHash: hashToken(token),
+        },
+        select: {
+            id: true,
+            trackingCode: true,
+        },
     });
- 
-    return { ...shipment, token };
+
+    return {
+        ...shipment,
+        token,
+    };
 }
+
 
 export function hashParcelToken(token: string) {
     return hashToken(token);
