@@ -5,6 +5,7 @@ import {
     dispatchShipment,
     ensureShipmentForOrder,
     markShipmentPacked,
+    rotateParcelToken,
     startPacking,
     TrackingError,
     verifyShipmentItem,
@@ -170,6 +171,7 @@ export async function POST(req: Request) {
             orderItemId?: string;
         };
 
+
         if (data.action === "CREATE_SHIPMENT") {
             if (!data.orderId?.trim()) {
                 return NextResponse.json(
@@ -179,6 +181,25 @@ export async function POST(req: Request) {
             }
 
             const shipment = await ensureShipmentForOrder(data.orderId);
+ 
+            const current = await prisma.shipment.findUnique({
+                where: { id: shipment.id },
+                select: { parcelTokenHash: true },
+            });
+
+            if (current && !current.parcelTokenHash) {
+                const tokenData = await rotateParcelToken(shipment.id);
+
+                return NextResponse.json({
+                    success: true,
+                    message: "Shipment created and QR token generated.",
+                    data: {
+                        ...shipment,
+                        trackingCode: tokenData.trackingCode,
+                        parcelToken: tokenData.token,
+                    },
+                });
+            }
 
             return NextResponse.json({
                 success: true,
@@ -186,6 +207,7 @@ export async function POST(req: Request) {
                 data: shipment,
             });
         }
+
 
         if (!data.shipmentId?.trim()) {
             return NextResponse.json(
