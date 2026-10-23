@@ -12,7 +12,8 @@ import {
     Tag,
     Users,
     Eye,
-    LogOut
+    LogOut,
+    Truck,
 } from "lucide-react"
 
 import {
@@ -44,6 +45,11 @@ const navigationItems = [
         title: "Orders",
         href: "/admin/orders",
         icon: ShoppingCart,
+    },
+    {
+        title: "Fulfillment",
+        href: "/admin/fulfillment",
+        icon: Truck,
     },
     {
         title: "Users",
