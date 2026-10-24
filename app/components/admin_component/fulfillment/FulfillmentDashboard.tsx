@@ -548,11 +548,22 @@ export default function FulfillmentDashboard() {
             setSelectedOrder((current) => {
                 if (!current) return null;
 
-                return (
-                    result.data.orders.find(
-                        (order) => order.id === current.id,
-                    ) ?? current
+                const updatedOrder = result.data.orders.find(
+                    (order) => order.id === current.id,
                 );
+
+                if (!updatedOrder) return current;
+
+                return {
+                    ...updatedOrder,
+                    shipment: updatedOrder.shipment
+                        ? {
+                            ...updatedOrder.shipment,
+                            events: updatedOrder.shipment.events ?? [],
+                            itemChecks: updatedOrder.shipment.itemChecks ?? [],
+                        }
+                        : null,
+                };
             });
         } catch (err) {
             setError(
@@ -858,12 +869,24 @@ export default function FulfillmentDashboard() {
     }
 
     function openDetails(order: Order) {
-        setSelectedOrder(order);
+        const normalizedOrder: Order = {
+            ...order,
+            shipment: order.shipment
+                ? {
+                    ...order.shipment,
+                    events: order.shipment.events ?? [],
+                    itemChecks: order.shipment.itemChecks ?? [],
+                }
+                : null,
+        };
+
+        setSelectedOrder(normalizedOrder);
         setDetailTab("items");
         setParcelToken("");
         setExceptionNote("");
         setModal("details");
     }
+
 
     function openLabel(order: Order) {
         setSelectedOrder(order);
@@ -1010,23 +1033,22 @@ export default function FulfillmentDashboard() {
                                 tab.value === "ALL"
                                     ? total
                                     : tab.value === "READY_TO_PACK"
-                                      ? stats.readyToPack
-                                      : tab.value === "PACKING"
-                                        ? stats.packing
-                                        : tab.value === "PACKED"
-                                          ? stats.packed
-                                          : stats.awaitingDispatch;
+                                        ? stats.readyToPack
+                                        : tab.value === "PACKING"
+                                            ? stats.packing
+                                            : tab.value === "PACKED"
+                                                ? stats.packed
+                                                : stats.awaitingDispatch;
 
                             return (
                                 <button
                                     key={tab.value}
                                     type="button"
                                     onClick={() => changeTab(tab.value)}
-                                    className={`whitespace-nowrap border-b-2 px-1 pb-3 text-[10px] font-black tracking-[0.14em] transition ${
-                                        activeTab === tab.value
-                                            ? "border-second text-second"
-                                            : "border-transparent text-zinc-500 hover:text-zinc-200"
-                                    }`}
+                                    className={`whitespace-nowrap border-b-2 px-1 pb-3 text-[10px] font-black tracking-[0.14em] transition ${activeTab === tab.value
+                                        ? "border-second text-second"
+                                        : "border-transparent text-zinc-500 hover:text-zinc-200"
+                                        }`}
                                 >
                                     {tab.label}{" "}
                                     <span
@@ -1305,9 +1327,8 @@ export default function FulfillmentDashboard() {
                                 ref={videoRef}
                                 muted
                                 playsInline
-                                className={`absolute inset-0 h-full w-full object-cover ${
-                                    cameraActive ? "block" : "hidden"
-                                }`}
+                                className={`absolute inset-0 h-full w-full object-cover ${cameraActive ? "block" : "hidden"
+                                    }`}
                             />
 
                             {cameraActive ? (
@@ -1484,9 +1505,9 @@ export default function FulfillmentDashboard() {
                                                     !scanResult.shipment ||
                                                     scanResult.shipment
                                                         .fulfillmentStatus !==
-                                                        "READY_TO_PACK" ||
+                                                    "READY_TO_PACK" ||
                                                     busyAction ===
-                                                        "START_PACKING"
+                                                    "START_PACKING"
                                                 }
                                                 className={LIME_BUTTON}
                                             >
@@ -1613,7 +1634,7 @@ export default function FulfillmentDashboard() {
                                         <img
                                             src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=2&data=${encodeURIComponent(
                                                 parcelToken ||
-                                                    selectedOrder.shipment.trackingCode,
+                                                selectedOrder.shipment.trackingCode,
                                             )}`}
                                             alt="Parcel QR code"
                                             width={88}
@@ -1662,12 +1683,12 @@ export default function FulfillmentDashboard() {
                                     </p>
                                     <p className="mt-1 text-[10px] font-black">
                                         {getPayment(selectedOrder)?.method ===
-                                        "COD"
+                                            "COD"
                                             ? "COD"
                                             : getPayment(selectedOrder)?.status ===
                                                 "SUCCESS"
-                                              ? "PREPAID"
-                                              : "VERIFY"}
+                                                ? "PREPAID"
+                                                : "VERIFY"}
                                     </p>
                                 </div>
                             </div>
@@ -1687,8 +1708,8 @@ export default function FulfillmentDashboard() {
                                                         index % 4 === 0
                                                             ? "4px"
                                                             : index % 3 === 0
-                                                              ? "2px"
-                                                              : "1px",
+                                                                ? "2px"
+                                                                : "1px",
                                                     flex: index % 5 === 0
                                                         ? "2"
                                                         : "1",
@@ -1851,11 +1872,10 @@ export default function FulfillmentDashboard() {
                             <button
                                 type="button"
                                 onClick={() => setDetailTab("items")}
-                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${
-                                    detailTab === "items"
-                                        ? "border-second text-second"
-                                        : "border-transparent text-zinc-500"
-                                }`}
+                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${detailTab === "items"
+                                    ? "border-second text-second"
+                                    : "border-transparent text-zinc-500"
+                                    }`}
                             >
                                 VERIFY &amp; PACK (
                                 {selectedOrder.shipment?.itemChecks.filter(
@@ -1868,14 +1888,13 @@ export default function FulfillmentDashboard() {
                             <button
                                 type="button"
                                 onClick={() => setDetailTab("timeline")}
-                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${
-                                    detailTab === "timeline"
-                                        ? "border-second text-second"
-                                        : "border-transparent text-zinc-500"
-                                }`}
+                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${detailTab === "timeline"
+                                    ? "border-second text-second"
+                                    : "border-transparent text-zinc-500"
+                                    }`}
                             >
                                 TIMELINE (
-                                {selectedOrder.shipment?.events.length ?? 0})
+                                {selectedOrder.shipment?.events?.length ?? 0})
                             </button>
                         </div>
 
@@ -1904,11 +1923,10 @@ export default function FulfillmentDashboard() {
                                             className="flex items-center gap-3 border border-zinc-800 bg-[#0d0d0d] p-3"
                                         >
                                             <div
-                                                className={`flex h-5 w-5 shrink-0 items-center justify-center border ${
-                                                    verified
-                                                        ? "border-second bg-second text-black"
-                                                        : "border-zinc-700 text-zinc-600"
-                                                }`}
+                                                className={`flex h-5 w-5 shrink-0 items-center justify-center border ${verified
+                                                    ? "border-second bg-second text-black"
+                                                    : "border-zinc-700 text-zinc-600"
+                                                    }`}
                                             >
                                                 {verified && <Check size={13} />}
                                             </div>
@@ -1968,13 +1986,13 @@ export default function FulfillmentDashboard() {
                                                                                         entry,
                                                                                     ) =>
                                                                                         entry.orderItemId ===
-                                                                                        item.id
+                                                                                            item.id
                                                                                             ? {
-                                                                                                  ...entry,
-                                                                                                  verified: true,
-                                                                                                  verifiedAt:
-                                                                                                      new Date().toISOString(),
-                                                                                              }
+                                                                                                ...entry,
+                                                                                                verified: true,
+                                                                                                verifiedAt:
+                                                                                                    new Date().toISOString(),
+                                                                                            }
                                                                                             : entry,
                                                                                 ),
                                                                         },
@@ -2006,10 +2024,10 @@ export default function FulfillmentDashboard() {
 
                                 {selectedOrder.shipment?.fulfillmentStatus ===
                                     "READY_TO_PACK" && (
-                                    <p className="text-[10px] text-zinc-500">
-                                        Start packing to unlock the checklist.
-                                    </p>
-                                )}
+                                        <p className="text-[10px] text-zinc-500">
+                                            Start packing to unlock the checklist.
+                                        </p>
+                                    )}
 
                                 <label className="block pt-2">
                                     <span className="mb-2 block text-[9px] font-bold tracking-widest text-zinc-500">
@@ -2028,12 +2046,12 @@ export default function FulfillmentDashboard() {
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {!selectedOrder.shipment?.events.length ? (
+                                {!(selectedOrder.shipment?.events?.length ?? 0) ? (
                                     <p className="border border-zinc-800 p-4 text-[10px] text-zinc-500">
                                         No tracking events recorded yet.
                                     </p>
                                 ) : (
-                                    selectedOrder.shipment.events.map((event) => (
+                                    selectedOrder.shipment!.events!.map((event) => (
                                         <div
                                             key={event.id}
                                             className="flex gap-3 border-l border-zinc-700 pl-3"
@@ -2041,15 +2059,16 @@ export default function FulfillmentDashboard() {
                                             <div className="mt-1 text-second">
                                                 <CheckCircle2 size={14} />
                                             </div>
+
                                             <div className="flex-1">
-                                                <p className="text-xs font-bold">
-                                                    {event.title}
-                                                </p>
+                                                <p className="text-xs font-bold">{event.title}</p>
+
                                                 {event.description && (
                                                     <p className="mt-1 text-[10px] text-zinc-400">
                                                         {event.description}
                                                     </p>
                                                 )}
+
                                                 <p className="mt-1 text-[9px] text-zinc-600">
                                                     {formatDateTime(event.createdAt)}
                                                 </p>
@@ -2094,137 +2113,137 @@ export default function FulfillmentDashboard() {
 
                             {selectedOrder.shipment?.fulfillmentStatus ===
                                 "READY_TO_PACK" && (
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        const shipmentId =
-                                            selectedOrder.shipment?.id;
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const shipmentId =
+                                                selectedOrder.shipment?.id;
 
-                                        if (!shipmentId) return;
+                                            if (!shipmentId) return;
 
-                                        const success = await postAction(
-                                            "START_PACKING",
-                                            { shipmentId },
-                                        );
-
-                                        if (success) {
-                                            setSelectedOrder((current) =>
-                                                current?.shipment
-                                                    ? {
-                                                          ...current,
-                                                          shipment: {
-                                                              ...current.shipment,
-                                                              fulfillmentStatus:
-                                                                  "PACKING",
-                                                          },
-                                                      }
-                                                    : current,
+                                            const success = await postAction(
+                                                "START_PACKING",
+                                                { shipmentId },
                                             );
-                                        }
-                                    }}
-                                    disabled={busyAction !== null}
-                                    className={LIME_BUTTON}
-                                >
-                                    <Package size={14} />
-                                    Start Packing
-                                </button>
-                            )}
+
+                                            if (success) {
+                                                setSelectedOrder((current) =>
+                                                    current?.shipment
+                                                        ? {
+                                                            ...current,
+                                                            shipment: {
+                                                                ...current.shipment,
+                                                                fulfillmentStatus:
+                                                                    "PACKING",
+                                                            },
+                                                        }
+                                                        : current,
+                                                );
+                                            }
+                                        }}
+                                        disabled={busyAction !== null}
+                                        className={LIME_BUTTON}
+                                    >
+                                        <Package size={14} />
+                                        Start Packing
+                                    </button>
+                                )}
 
                             {selectedOrder.shipment?.fulfillmentStatus ===
                                 "PACKING" && (
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        const shipment = selectedOrder.shipment;
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const shipment = selectedOrder.shipment;
 
-                                        if (!shipment) return;
+                                            if (!shipment) return;
 
-                                        const allVerified =
-                                            selectedOrder.orderItems.length > 0 &&
-                                            selectedOrder.orderItems.every(
-                                                (item) =>
-                                                    shipment.itemChecks.some(
-                                                        (check) =>
-                                                            check.orderItemId ===
+                                            const allVerified =
+                                                selectedOrder.orderItems.length > 0 &&
+                                                selectedOrder.orderItems.every(
+                                                    (item) =>
+                                                        shipment.itemChecks.some(
+                                                            (check) =>
+                                                                check.orderItemId ===
                                                                 item.id &&
-                                                            check.verified,
-                                                    ),
+                                                                check.verified,
+                                                        ),
+                                                );
+
+                                            if (!allVerified) {
+                                                setError(
+                                                    "Verify every order item before marking the parcel packed.",
+                                                );
+                                                return;
+                                            }
+
+                                            const success = await postAction(
+                                                "MARK_PACKED",
+                                                { shipmentId: shipment.id },
                                             );
 
-                                        if (!allVerified) {
-                                            setError(
-                                                "Verify every order item before marking the parcel packed.",
-                                            );
-                                            return;
-                                        }
-
-                                        const success = await postAction(
-                                            "MARK_PACKED",
-                                            { shipmentId: shipment.id },
-                                        );
-
-                                        if (success) {
-                                            setSelectedOrder((current) =>
-                                                current?.shipment
-                                                    ? {
-                                                          ...current,
-                                                          shipment: {
-                                                              ...current.shipment,
-                                                              fulfillmentStatus:
-                                                                  "PACKED",
-                                                          },
-                                                      }
-                                                    : current,
-                                            );
-                                        }
-                                    }}
-                                    disabled={busyAction !== null}
-                                    className={LIME_BUTTON}
-                                >
-                                    <PackageCheck size={14} />
-                                    Mark Packed
-                                </button>
-                            )}
+                                            if (success) {
+                                                setSelectedOrder((current) =>
+                                                    current?.shipment
+                                                        ? {
+                                                            ...current,
+                                                            shipment: {
+                                                                ...current.shipment,
+                                                                fulfillmentStatus:
+                                                                    "PACKED",
+                                                            },
+                                                        }
+                                                        : current,
+                                                );
+                                            }
+                                        }}
+                                        disabled={busyAction !== null}
+                                        className={LIME_BUTTON}
+                                    >
+                                        <PackageCheck size={14} />
+                                        Mark Packed
+                                    </button>
+                                )}
 
                             {selectedOrder.shipment?.fulfillmentStatus ===
                                 "PACKED" && (
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        const shipmentId =
-                                            selectedOrder.shipment?.id;
+                                    <button
+                                        type="button"
+                                        onClick={async () => {
+                                            const shipmentId =
+                                                selectedOrder.shipment?.id;
 
-                                        if (!shipmentId) return;
+                                            if (!shipmentId) return;
 
-                                        const success = await postAction(
-                                            "DISPATCH",
-                                            { shipmentId },
-                                        );
-
-                                        if (success) {
-                                            setSelectedOrder((current) =>
-                                                current?.shipment
-                                                    ? {
-                                                          ...current,
-                                                          shipment: {
-                                                              ...current.shipment,
-                                                              fulfillmentStatus:
-                                                                  "DISPATCHED",
-                                                              dispatchedAt:
-                                                                  new Date().toISOString(),
-                                                          },
-                                                      }
-                                                    : current,
+                                            const success = await postAction(
+                                                "DISPATCH",
+                                                { shipmentId },
                                             );
-                                        }
-                                    }}
-                                    disabled={busyAction !== null}
-                                    className={LIME_BUTTON}
-                                >
-                                    <Truck size={14} />
-                                    Dispatch
-                                </button>
-                            )}
+
+                                            if (success) {
+                                                setSelectedOrder((current) =>
+                                                    current?.shipment
+                                                        ? {
+                                                            ...current,
+                                                            shipment: {
+                                                                ...current.shipment,
+                                                                fulfillmentStatus:
+                                                                    "DISPATCHED",
+                                                                dispatchedAt:
+                                                                    new Date().toISOString(),
+                                                            },
+                                                        }
+                                                        : current,
+                                                );
+                                            }
+                                        }}
+                                        disabled={busyAction !== null}
+                                        className={LIME_BUTTON}
+                                    >
+                                        <Truck size={14} />
+                                        Dispatch
+                                    </button>
+                                )}
                         </div>
                     </div>
                 </Modal>
