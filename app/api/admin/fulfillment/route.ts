@@ -43,7 +43,7 @@ const allowedFilters = new Set<string>([
 
 async function getAdmin(): Promise<AdminSessionUser | null> {
     const session = await getServerSession(authOptions);
-
+    console.log("Admin session:", session);
     if (
         !session?.user?.id ||
         session.user.role !== "ADMIN"

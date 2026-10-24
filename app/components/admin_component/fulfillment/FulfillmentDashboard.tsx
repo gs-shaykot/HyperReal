@@ -4,28 +4,24 @@
 import {
     useCallback,
     useEffect,
-    useMemo,
+    useRef,
     useState,
 } from "react";
 import {
     Activity,
     AlertCircle,
-    ArrowDownRight,
-    ArrowLeft,
-    ArrowRight,
-    ArrowUpRight,
-    Box,
+    Barcode,
+    Camera,
     Check,
     CheckCircle2,
-    ChevronDown,
     ChevronLeft,
     ChevronRight,
-    ClipboardCheck,
-    Clock3,
+    Eye,
     LoaderCircle,
     Package,
     PackageCheck,
-    PackageOpen,
+    Printer,
+    QrCode,
     RefreshCw,
     ScanLine,
     Search,
@@ -36,7 +32,7 @@ import {
 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
-/*                                    Types                                   */
+/* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 
 type FulfillmentTab =
@@ -61,6 +57,14 @@ type ShipmentStatus =
 type PaymentMethod = "STRIPE" | "COD" | "SSLC";
 type PaymentStatus = "SUCCESS" | "FAILED" | "PENDING";
 
+type ItemCheck = {
+    id: string;
+    orderItemId: string;
+    verified: boolean;
+    verifiedAt: string | null;
+    verifiedBy: string | null;
+};
+
 type TrackingEvent = {
     id: string;
     type: string;
@@ -68,19 +72,7 @@ type TrackingEvent = {
     description: string | null;
     location?: string | null;
     createdAt: string;
-    actor?: {
-        id: string;
-        name: string | null;
-    } | null;
-};
-
-type ShipmentItemCheck = {
-    id: string;
-    shipmentId: string;
-    orderItemId: string;
-    verified: boolean;
-    verifiedAt: string | null;
-    verifiedBy: string | null;
+    actor?: { id: string; name: string | null } | null;
 };
 
 type Shipment = {
@@ -89,13 +81,14 @@ type Shipment = {
     trackingCode: string;
     fulfillmentStatus: FulfillmentStatus;
     status: ShipmentStatus;
+    parcelTokenHash?: string | null;
     assignedCourier?: {
         id: string;
         name: string | null;
         email: string;
         phone: string | null;
     } | null;
-    itemChecks: ShipmentItemCheck[];
+    itemChecks: ItemCheck[];
     events: TrackingEvent[];
     packedAt?: string | null;
     dispatchedAt?: string | null;
@@ -111,10 +104,7 @@ type OrderItem = {
         id: string;
         size: string | null;
         color: string | null;
-        product: {
-            id: string;
-            name: string;
-        };
+        product: { id: string; name: string };
     };
 };
 
@@ -166,10 +156,7 @@ type FulfillmentStats = {
     outForDelivery: number;
     delivered: number;
     failed: number;
-    ordersByStatus: {
-        status: string;
-        count: number;
-    }[];
+    ordersByStatus: { status: string; count: number }[];
 };
 
 type FulfillmentResponse = {
@@ -196,25 +183,44 @@ type ScanResult = {
         status: ShipmentStatus;
     } | null;
     trackingCode: string | null;
-    order: {
-        id: string;
-        orderCode: string;
-    };
+    order: { id: string; orderCode: string };
 };
 
+type ModalName = "scan" | "label" | "details" | null;
+type DetailTab = "items" | "timeline";
+
+type BarcodeDetectorResult = {
+    rawValue: string;
+    format: string;
+};
+
+type BarcodeDetectorInstance = {
+    detect: (source: HTMLVideoElement) => Promise<BarcodeDetectorResult[]>;
+};
+
+type BarcodeDetectorConstructor = new (options?: {
+    formats?: string[];
+}) => BarcodeDetectorInstance;
+
+declare global {
+    interface Window {
+        BarcodeDetector?: BarcodeDetectorConstructor;
+    }
+}
+
 /* -------------------------------------------------------------------------- */
-/*                              Helper functions                              */
+/* Constants and helpers                                                      */
 /* -------------------------------------------------------------------------- */
 
-const tabs: { label: string; value: FulfillmentTab }[] = [
-    { label: "All Orders", value: "ALL" },
-    { label: "Ready to Pack", value: "READY_TO_PACK" },
-    { label: "Packing", value: "PACKING" },
-    { label: "Packed", value: "PACKED" },
-    { label: "Dispatched", value: "DISPATCHED" },
+const TABS: { label: string; value: FulfillmentTab }[] = [
+    { label: "ALL", value: "ALL" },
+    { label: "READY TO PACK", value: "READY_TO_PACK" },
+    { label: "PACKING", value: "PACKING" },
+    { label: "PACKED", value: "PACKED" },
+    { label: "DISPATCHED", value: "DISPATCHED" },
 ];
 
-const emptyStats: FulfillmentStats = {
+const EMPTY_STATS: FulfillmentStats = {
     readyToPack: 0,
     packing: 0,
     packed: 0,
@@ -225,6 +231,15 @@ const emptyStats: FulfillmentStats = {
     ordersByStatus: [],
 };
 
+const BASE =
+    "border border-zinc-800 bg-[#0a0a0a] text-zinc-200";
+const BUTTON =
+    "inline-flex items-center justify-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold uppercase tracking-wide transition hover:border-second hover:text-second disabled:cursor-not-allowed disabled:opacity-40";
+const LIME_BUTTON =
+    "inline-flex items-center justify-center gap-2 border border-second bg-second px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-black transition hover:bg-[#d9ff33] disabled:cursor-not-allowed disabled:opacity-40";
+const INPUT =
+    "h-9 w-full border border-zinc-800 bg-[#0d0d0d] px-3 text-xs text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-second";
+
 function formatDate(value: string | null | undefined) {
     if (!value) return "—";
 
@@ -232,174 +247,111 @@ function formatDate(value: string | null | undefined) {
 
     if (Number.isNaN(date.getTime())) return "—";
 
-    return new Intl.DateTimeFormat("en-GB", {
+    return date.toLocaleDateString("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    });
+}
+
+function formatDateTime(value: string | null | undefined) {
+    if (!value) return "—";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "—";
+
+    return date.toLocaleString("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-    }).format(date);
-}
-
-function formatMoney(
-    value: number | string | null | undefined,
-    currency = "USD",
-) {
-    if (value === null || value === undefined || value === "") {
-        return "—";
-    }
-
-    const amount = Number(value);
-
-    if (!Number.isFinite(amount)) return "—";
-
-    try {
-        return new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency,
-            maximumFractionDigits: 2,
-        }).format(amount);
-    } catch {
-        return `${currency} ${amount.toFixed(2)}`;
-    }
+    });
 }
 
 function getPayment(order: Order) {
     return order.payments?.[0] ?? null;
 }
 
-function getOrderAmount(order: Order) {
-    const payment = getPayment(order);
+function getPaymentLabel(payment: Payment | null) {
+    if (!payment) return "UNKNOWN";
+    if (payment.method === "COD") return "COD";
+    if (payment.method === "SSLC") return "SSLCOMMERZ";
+    return "STRIPE";
+}
 
+function getPaymentStatusLabel(payment: Payment | null) {
+    if (!payment) return "UNKNOWN";
+    if (payment.method === "COD" && payment.status !== "SUCCESS") {
+        return "COD DUE";
+    }
+
+    if (payment.status === "SUCCESS") return "PAID";
+    return payment.status;
+}
+
+function getAmount(order: Order) {
+    const payment = getPayment(order);
     if (!payment) return "—";
 
-    if (payment.country?.toLowerCase() === "bangladesh") {
-        return formatMoney(payment.paidAmountInBDT, "BDT");
-    }
+    const bangladesh =
+        payment.country?.toLowerCase() === "bangladesh";
 
-    return formatMoney(payment.paidAmountInUSD, "USD");
+    const value = bangladesh
+        ? payment.paidAmountInBDT
+        : payment.paidAmountInUSD;
+
+    if (value === null || value === undefined) return "—";
+
+    const amount = Number(value);
+    if (!Number.isFinite(amount)) return "—";
+
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: bangladesh ? "BDT" : "USD",
+        maximumFractionDigits: 2,
+    }).format(amount);
 }
 
-function getFulfillmentLabel(order: Order) {
-    if (!order.shipment) return "Ready to Pack";
-
-    switch (order.shipment.fulfillmentStatus) {
-        case "READY_TO_PACK":
-            return "Ready to Pack";
-        case "PACKING":
-            return "Packing";
-        case "PACKED":
-            return "Packed";
-        case "DISPATCHED":
-            return "Dispatched";
-        default:
-            return order.shipment.fulfillmentStatus;
-    }
+function fulfillmentLabel(order: Order) {
+    return order.shipment?.fulfillmentStatus ?? "READY_TO_PACK";
 }
 
-function getFulfillmentClasses(status: string) {
-    switch (status) {
-        case "READY_TO_PACK":
-            return "border-cyan-400/30 bg-cyan-400/10 text-cyan-300";
-        case "PACKING":
-            return "border-amber-400/30 bg-amber-400/10 text-amber-300";
-        case "PACKED":
-            return "border-violet-400/30 bg-violet-400/10 text-violet-300";
-        case "DISPATCHED":
-            return "border-emerald-400/30 bg-emerald-400/10 text-emerald-300";
-        case "OUT_FOR_DELIVERY":
-            return "border-blue-400/30 bg-blue-400/10 text-blue-300";
-        case "DELIVERED":
-            return "border-emerald-400/30 bg-emerald-400/10 text-emerald-300";
-        case "FAILED":
-            return "border-red-400/30 bg-red-400/10 text-red-300";
-        default:
-            return "border-zinc-700 bg-zinc-800 text-zinc-300";
-    }
+function badgeClasses(value: string) {
+    const styles: Record<string, string> = {
+        READY_TO_PACK:
+            "border-orange-500/40 bg-orange-500/10 text-orange-400",
+        PACKING:
+            "border-yellow-500/40 bg-yellow-500/10 text-yellow-400",
+        PACKED:
+            "border-blue-500/40 bg-blue-500/10 text-blue-400",
+        DISPATCHED:
+            "border-second/40 bg-second/10 text-second",
+        SUCCESS:
+            "border-second/40 bg-second/10 text-second",
+        PAID:
+            "border-second/40 bg-second/10 text-second",
+        "COD DUE":
+            "border-yellow-500/40 bg-yellow-500/10 text-yellow-400",
+        PENDING:
+            "border-orange-500/40 bg-orange-500/10 text-orange-400",
+        FAILED:
+            "border-red-500/40 bg-red-500/10 text-red-400",
+        UNKNOWN:
+            "border-zinc-700 bg-zinc-900 text-zinc-400",
+    };
+
+    return styles[value] ??
+        "border-zinc-700 bg-zinc-900 text-zinc-400";
 }
 
-function getPaymentClasses(status: string) {
-    switch (status) {
-        case "SUCCESS":
-            return "text-emerald-400";
-        case "PENDING":
-            return "text-amber-400";
-        case "FAILED":
-            return "text-red-400";
-        default:
-            return "text-zinc-400";
-    }
-}
-
-/* -------------------------------------------------------------------------- */
-/*                            Reusable UI components                           */
-/* -------------------------------------------------------------------------- */
-
-function StatCard({
-    title,
-    value,
-    description,
-    icon: Icon,
-    accent,
-    onClick,
-}: {
-    title: string;
-    value: number;
-    description: string;
-    icon: typeof Package;
-    accent: string;
-    onClick?: () => void;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={`group w-full rounded-xl border border-zinc-800 bg-zinc-950 p-4 text-left transition hover:border-zinc-600 ${
-                onClick ? "cursor-pointer" : "cursor-default"
-            }`}
-        >
-            <div className="flex items-start justify-between gap-3">
-                <div>
-                    <p className="text-sm text-zinc-400">{title}</p>
-                    <p className="mt-2 text-3xl font-semibold tracking-tight text-white">
-                        {value}
-                    </p>
-                </div>
-
-                <span
-                    className={`rounded-lg border border-current/20 bg-current/5 p-2 ${accent}`}
-                >
-                    <Icon size={19} />
-                </span>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-                <p className="text-xs text-zinc-500">{description}</p>
-                {onClick && (
-                    <ArrowUpRight
-                        size={15}
-                        className="text-zinc-500 transition group-hover:text-white"
-                    />
-                )}
-            </div>
-        </button>
-    );
-}
-
-function StatusBadge({
-    status,
-    children,
-}: {
-    status: string;
-    children?: React.ReactNode;
-}) {
+function StatusBadge({ value }: { value: string }) {
     return (
         <span
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${getFulfillmentClasses(
-                status,
-            )}`}
+            className={`inline-flex whitespace-nowrap border px-2 py-1 text-[10px] font-bold uppercase tracking-wide ${badgeClasses(value)}`}
         >
-            {children ?? status.replaceAll("_", " ")}
+            {value.replaceAll("_", " ")}
         </span>
     );
 }
@@ -409,33 +361,41 @@ function Modal({
     subtitle,
     onClose,
     children,
-    wide = false,
+    width = "max-w-xl",
 }: {
     title: string;
     subtitle?: string;
     onClose: () => void;
     children: React.ReactNode;
-    wide?: boolean;
+    width?: string;
 }) {
+    useEffect(() => {
+        function onKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") onClose();
+        }
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [onClose]);
+
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-6"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-3 backdrop-blur-[2px] sm:p-6"
             onMouseDown={(event) => {
                 if (event.target === event.currentTarget) onClose();
             }}
         >
-            <div
-                className={`flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-zinc-700 bg-zinc-950 shadow-2xl ${
-                    wide ? "max-w-4xl" : "max-w-2xl"
-                }`}
+            <section
+                className={`max-h-[94vh] w-full ${width} overflow-y-auto border border-zinc-800 bg-[#090909] shadow-2xl`}
             >
-                <div className="flex items-start justify-between gap-4 border-b border-zinc-800 px-5 py-4 sm:px-6">
+                <header className="sticky top-0 z-10 flex items-start justify-between border-b border-zinc-800 bg-[#090909] px-5 py-4">
                     <div>
-                        <h2 className="text-lg font-semibold text-white">
+                        <h2 className="flex items-center gap-2 text-sm font-black uppercase tracking-widest text-white">
+                            <span className="text-second">■</span>
                             {title}
                         </h2>
                         {subtitle && (
-                            <p className="mt-1 text-sm text-zinc-400">
+                            <p className="mt-1 text-[11px] text-zinc-500">
                                 {subtitle}
                             </p>
                         )}
@@ -444,106 +404,89 @@ function Modal({
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Close modal"
-                        className="rounded-lg p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+                        aria-label="Close"
+                        className="text-zinc-500 transition hover:text-second"
                     >
                         <X size={18} />
                     </button>
-                </div>
+                </header>
 
-                <div className="overflow-y-auto p-5 sm:p-6">
-                    {children}
-                </div>
-            </div>
+                <div className="p-4 sm:p-5">{children}</div>
+            </section>
         </div>
     );
 }
 
-function PrimaryButton({
-    children,
-    onClick,
-    disabled = false,
-    loading = false,
-}: {
-    children: React.ReactNode;
-    onClick: () => void;
-    disabled?: boolean;
-    loading?: boolean;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            disabled={disabled || loading}
-            className="inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-400 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-            {loading ? (
-                <LoaderCircle size={16} className="animate-spin" />
-            ) : null}
-            {children}
-        </button>
-    );
-}
-
-function SecondaryButton({
-    children,
-    onClick,
-    disabled = false,
-}: {
-    children: React.ReactNode;
-    onClick: () => void;
-    disabled?: boolean;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            disabled={disabled}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:border-zinc-500 hover:bg-zinc-900 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-            {children}
-        </button>
-    );
-}
-
 /* -------------------------------------------------------------------------- */
-/*                           Fulfillment dashboard                            */
+/* Dashboard                                                                  */
 /* -------------------------------------------------------------------------- */
 
 export default function FulfillmentDashboard() {
     const [orders, setOrders] = useState<Order[]>([]);
-    const [stats, setStats] = useState<FulfillmentStats | null>(null);
+    const [stats, setStats] = useState<FulfillmentStats>(EMPTY_STATS);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalOrders, setTotalOrders] = useState(0);
+    const [total, setTotal] = useState(0);
 
-    const [search, setSearch] = useState("");
     const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState("");
     const [activeTab, setActiveTab] = useState<FulfillmentTab>("ALL");
+    const [paymentFilter, setPaymentFilter] = useState("ALL");
+    const [dateFilter, setDateFilter] = useState("");
 
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [busyAction, setBusyAction] = useState<string | null>(null);
     const [error, setError] = useState("");
 
+    const [modal, setModal] = useState<ModalName>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [scanModalOpen, setScanModalOpen] = useState(false);
+    const [detailTab, setDetailTab] = useState<DetailTab>("items");
+
     const [scanInput, setScanInput] = useState("");
-    const [scanLoading, setScanLoading] = useState(false);
     const [scanResult, setScanResult] = useState<ScanResult | null>(null);
     const [scanError, setScanError] = useState("");
+    const [cameraError, setCameraError] = useState("");
+    const [cameraActive, setCameraActive] = useState(false);
+    const [scanLoading, setScanLoading] = useState(false);
+
     const [parcelToken, setParcelToken] = useState("");
+    const [exceptionNote, setExceptionNote] = useState("");
 
-    const currentStats = stats ?? emptyStats;
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+    const scannerActiveRef = useRef(false);
+    const scanBusyRef = useRef(false);
 
-    /* ------------------------------ Load orders ----------------------------- */
+    const stopCamera = useCallback(() => {
+        scannerActiveRef.current = false;
 
-    const loadOrders = useCallback(async (showRefresh = false) => {
-        if (showRefresh) {
-            setRefreshing(true);
-        } else {
-            setLoading(true);
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach((track) => track.stop());
+            streamRef.current = null;
         }
+
+        if (videoRef.current) {
+            videoRef.current.srcObject = null;
+        }
+
+        setCameraActive(false);
+    }, []);
+
+    const closeModal = useCallback(() => {
+        stopCamera();
+        setModal(null);
+        setScanError("");
+        setCameraError("");
+    }, [stopCamera]);
+
+    /* ---------------------------------------------------------------------- */
+    /* Fetch paginated orders and global stats                                */
+    /* ---------------------------------------------------------------------- */
+
+    const loadOrders = useCallback(async (refresh = false) => {
+        if (refresh) setRefreshing(true);
+        else setLoading(true);
 
         setError("");
 
@@ -565,16 +508,43 @@ export default function FulfillmentDashboard() {
 
             if (!response.ok || !result.success) {
                 throw new Error(
-                    result.message || "Failed to load fulfillment orders.",
+                    result.message ?? "Could not load fulfillment orders.",
                 );
             }
 
-            setOrders(result.data.orders);
-            setStats(result.data.stats);
-            setTotalPages(result.data.pagination.totalPages);
-            setTotalOrders(result.data.pagination.total);
+            let data = result.data;
 
-            // Keep the selected order updated when refreshing the list.
+            // Apply payment/date filters to the current result page.
+            // Search, fulfillment status and pagination remain server-side.
+            if (paymentFilter !== "ALL" || dateFilter) {
+                data = {
+                    ...data,
+                    orders: data.orders.filter((order) => {
+                        const payment = getPayment(order);
+
+                        const matchesPayment =
+                            paymentFilter === "ALL" ||
+                            (paymentFilter === "PAID" &&
+                                payment?.status === "SUCCESS") ||
+                            (paymentFilter === "COD" &&
+                                payment?.method === "COD") ||
+                            (paymentFilter === "PENDING" &&
+                                payment?.status === "PENDING");
+
+                        const matchesDate =
+                            !dateFilter ||
+                            formatDate(order.createdAt) === dateFilter;
+
+                        return matchesPayment && matchesDate;
+                    }),
+                };
+            }
+
+            setOrders(data.orders);
+            setStats(result.data.stats);
+            setTotal(result.data.pagination.total);
+            setTotalPages(result.data.pagination.totalPages);
+
             setSelectedOrder((current) => {
                 if (!current) return null;
 
@@ -588,82 +558,78 @@ export default function FulfillmentDashboard() {
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Something went wrong while loading orders.",
+                    : "Could not load fulfillment orders.",
             );
         } finally {
             setLoading(false);
             setRefreshing(false);
         }
-    }, [activeTab, page, search]);
+    }, [activeTab, dateFilter, page, paymentFilter, search]);
 
     useEffect(() => {
         void loadOrders();
     }, [loadOrders]);
 
-    /* ----------------------------- Search & tabs ---------------------------- */
+    useEffect(() => {
+        return () => {
+            scannerActiveRef.current = false;
+            streamRef.current?.getTracks().forEach((track) => track.stop());
+        };
+    }, []);
 
-    function handleSearchSubmit(event: React.FormEvent<HTMLFormElement>) {
+    function submitSearch(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setPage(1);
         setSearch(searchInput.trim());
     }
 
-    function handleTabChange(tab: FulfillmentTab) {
+    function changeTab(tab: FulfillmentTab) {
         setActiveTab(tab);
         setPage(1);
     }
 
-    /* ------------------------------ API actions ----------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* API actions                                                            */
+    /* ---------------------------------------------------------------------- */
 
-    const performAction = useCallback(
-        async (
-            action: string,
-            payload: Record<string, string>,
-        ): Promise<boolean> => {
-            setActionLoading(action);
-            setError("");
+    const postAction = useCallback(async (
+        action: string,
+        payload: Record<string, string>,
+    ) => {
+        setBusyAction(action);
+        setError("");
 
-            try {
-                const response = await fetch("/api/admin/fulfillment", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ action, ...payload }),
-                });
+        try {
+            const response = await fetch("/api/admin/fulfillment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action, ...payload }),
+            });
 
-                const result = (await response.json()) as ApiResponse<unknown>;
+            const result = (await response.json()) as ApiResponse<unknown>;
 
-                if (!response.ok || !result.success) {
-                    throw new Error(
-                        result.message || "The requested action failed.",
-                    );
-                }
-
-                await loadOrders(true);
-                return true;
-            } catch (err) {
-                setError(
-                    err instanceof Error
-                        ? err.message
-                        : "The requested action failed.",
-                );
-                return false;
-            } finally {
-                setActionLoading(null);
+            if (!response.ok || !result.success) {
+                throw new Error(result.message ?? "Fulfillment action failed.");
             }
-        },
-        [loadOrders],
-    );
+
+            await loadOrders(true);
+            return true;
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Fulfillment action failed.",
+            );
+            return false;
+        } finally {
+            setBusyAction(null);
+        }
+    }, [loadOrders]);
 
     async function createShipment(order: Order) {
-        const confirmed = window.confirm(
-            `Create a fulfillment shipment for ${order.orderCode}?`,
-        );
-
-        if (!confirmed) return;
-
+        setBusyAction("CREATE_SHIPMENT");
+        setError("");
         setParcelToken("");
-
-        setActionLoading("CREATE_SHIPMENT");
 
         try {
             const response = await fetch("/api/admin/fulfillment", {
@@ -677,55 +643,40 @@ export default function FulfillmentDashboard() {
 
             const result = (await response.json()) as ApiResponse<{
                 shipment: Shipment;
-                parcelToken?: string | null;
+                parcelToken: string | null;
             }>;
 
             if (!response.ok || !result.success) {
-                throw new Error(
-                    result.message || "Failed to create shipment.",
-                );
+                throw new Error(result.message ?? "Could not create shipment.");
             }
 
-            if (result.data.parcelToken) {
-                setParcelToken(result.data.parcelToken);
-            }
-
+            setParcelToken(result.data.parcelToken ?? "");
             await loadOrders(true);
 
-            // Keep the order details open with the newly created shipment.
             setSelectedOrder((current) =>
                 current?.id === order.id
-                    ? {
-                          ...current,
-                          shipment: result.data.shipment,
-                      }
+                    ? { ...current, shipment: result.data.shipment }
                     : current,
             );
         } catch (err) {
             setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to create shipment.",
+                err instanceof Error ? err.message : "Could not create shipment.",
             );
         } finally {
-            setActionLoading(null);
+            setBusyAction(null);
         }
     }
 
-    async function rotateToken(shipmentId: string) {
-        setActionLoading("ROTATE_TOKEN");
+    async function generateParcelToken(shipmentId: string) {
+        setBusyAction("TOKEN");
         setError("");
-        setParcelToken("");
 
         try {
-            const response = await fetch(
-                "/api/admin/fulfillment/token",
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ shipmentId }),
-                },
-            );
+            const response = await fetch("/api/admin/fulfillment/token", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ shipmentId }),
+            });
 
             const result = (await response.json()) as ApiResponse<{
                 shipmentId: string;
@@ -734,39 +685,34 @@ export default function FulfillmentDashboard() {
             }>;
 
             if (!response.ok || !result.success) {
-                throw new Error(
-                    result.message || "Failed to generate a parcel token.",
-                );
+                throw new Error(result.message ?? "Could not generate token.");
             }
 
             setParcelToken(result.data.parcelToken);
             await loadOrders(true);
         } catch (err) {
             setError(
-                err instanceof Error
-                    ? err.message
-                    : "Failed to generate a parcel token.",
+                err instanceof Error ? err.message : "Could not generate token.",
             );
         } finally {
-            setActionLoading(null);
+            setBusyAction(null);
         }
     }
 
-    /* ------------------------------- Scan flow ------------------------------ */
+    /* ---------------------------------------------------------------------- */
+    /* Parcel lookup and real camera scanning                                 */
+    /* ---------------------------------------------------------------------- */
 
-    async function handleScanSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-
-        const lookup = scanInput.trim();
+    async function lookupParcel(value = scanInput) {
+        const lookup = value.trim();
 
         if (!lookup) {
-            setScanError("Enter a parcel token, tracking code, or order code.");
+            setScanError("Enter an order code, tracking code, or parcel token.");
             return;
         }
 
         setScanLoading(true);
         setScanError("");
-        setScanResult(null);
 
         try {
             const response = await fetch("/api/admin/fulfillment/scan", {
@@ -778,1006 +724,1175 @@ export default function FulfillmentDashboard() {
             const result = (await response.json()) as ApiResponse<ScanResult>;
 
             if (!response.ok || !result.success) {
-                throw new Error(result.message || "Could not find this parcel.");
+                throw new Error(result.message ?? "No matching parcel found.");
             }
 
             setScanResult(result.data);
-
-            // The order may exist even if a shipment has not been created.
-            if (result.data.order?.id) {
-                const existingOrder = orders.find(
-                    (order) => order.id === result.data.order.id,
-                );
-
-                if (existingOrder) {
-                    setSelectedOrder(existingOrder);
-                }
-            }
-
-            if (!result.data.order) {
-                setScanError("No matching order was found.");
-            }
+            setScanInput(lookup);
         } catch (err) {
+            setScanResult(null);
             setScanError(
-                err instanceof Error
-                    ? err.message
-                    : "Could not find this parcel.",
+                err instanceof Error ? err.message : "No matching parcel found.",
             );
         } finally {
             setScanLoading(false);
         }
     }
 
-    function openOrderFromScan() {
-        if (!scanResult) return;
+    async function startCamera() {
+        setCameraError("");
+        setScanError("");
 
-        const order = orders.find(
-            (item) => item.id === scanResult.order.id,
-        );
-
-        if (order) {
-            setSelectedOrder(order);
-            setScanModalOpen(false);
+        if (!navigator.mediaDevices?.getUserMedia) {
+            setCameraError(
+                "Camera access requires HTTPS or localhost. Use the manual lookup below.",
+            );
             return;
         }
 
-        // The order might be on a different page. Search by its order code.
+        if (!window.BarcodeDetector) {
+            setCameraError(
+                "This browser does not support native QR/barcode scanning. Try the latest Chrome or use manual lookup.",
+            );
+            return;
+        }
+
+        try {
+            stopCamera();
+
+            const detector = new window.BarcodeDetector({
+                formats: ["qr_code", "code_128", "code_39", "ean_13", "ean_8"],
+            });
+
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    facingMode: { ideal: "environment" },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                },
+            });
+
+            streamRef.current = stream;
+
+            if (!videoRef.current) {
+                stream.getTracks().forEach((track) => track.stop());
+                streamRef.current = null;
+                return;
+            }
+
+            videoRef.current.srcObject = stream;
+            await videoRef.current.play();
+
+            scannerActiveRef.current = true;
+            setCameraActive(true);
+
+            const scanFrame = async () => {
+                if (!scannerActiveRef.current || !videoRef.current) return;
+
+                try {
+                    const video = videoRef.current;
+
+                    if (
+                        video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+                        !scanBusyRef.current
+                    ) {
+                        scanBusyRef.current = true;
+
+                        try {
+                            const results = await detector.detect(video);
+                            const decoded = results.find(
+                                (item) => item.rawValue.trim().length > 0,
+                            );
+
+                            if (decoded?.rawValue) {
+                                const value = decoded.rawValue.trim();
+
+                                stopCamera();
+                                setScanInput(value);
+                                await lookupParcel(value);
+                                return;
+                            }
+                        } finally {
+                            scanBusyRef.current = false;
+                        }
+                    }
+                } catch {
+                    // A frame can fail detection while the camera is adjusting.
+                }
+
+                if (scannerActiveRef.current) {
+                    window.setTimeout(() => void scanFrame(), 180);
+                }
+            };
+
+            void scanFrame();
+        } catch (err) {
+            stopCamera();
+
+            const errorName =
+                err instanceof Error ? err.name : "";
+
+            if (errorName === "NotAllowedError") {
+                setCameraError(
+                    "Camera permission was denied. Allow camera access in your browser settings, or use manual lookup.",
+                );
+            } else if (errorName === "NotFoundError") {
+                setCameraError(
+                    "No camera was found on this device. Use manual lookup.",
+                );
+            } else {
+                setCameraError(
+                    "Could not start the camera. Check browser permissions and try again.",
+                );
+            }
+        }
+    }
+
+    function openScanModal() {
+        setScanInput("");
+        setScanResult(null);
+        setScanError("");
+        setCameraError("");
+        setModal("scan");
+    }
+
+    function openDetails(order: Order) {
+        setSelectedOrder(order);
+        setDetailTab("items");
+        setParcelToken("");
+        setExceptionNote("");
+        setModal("details");
+    }
+
+    function openLabel(order: Order) {
+        setSelectedOrder(order);
+        setParcelToken("");
+        setModal("label");
+    }
+
+    function openScannedOrder() {
+        if (!scanResult) return;
+
+        const order =
+            orders.find((item) => item.id === scanResult.order.id) ??
+            null;
+
+        if (order) {
+            setSelectedOrder(order);
+            setDetailTab("items");
+            setModal("details");
+            return;
+        }
+
         setSearchInput(scanResult.order.orderCode);
         setSearch(scanResult.order.orderCode);
         setPage(1);
-        setScanModalOpen(false);
+        setModal(null);
     }
 
-    /* ---------------------------- Derived values ---------------------------- */
+    /* ---------------------------------------------------------------------- */
+    /* Print shipping label                                                   */
+    /* ---------------------------------------------------------------------- */
 
-    const selectedPayment = useMemo(
-        () => (selectedOrder ? getPayment(selectedOrder) : null),
-        [selectedOrder],
-    );
+    function printLabel() {
+        window.print();
+    }
 
-    const verifiedItems = useMemo(() => {
-        if (!selectedOrder?.shipment) return 0;
+    /* ---------------------------------------------------------------------- */
+    /* Render                                                                 */
+    /* ---------------------------------------------------------------------- */
 
-        return selectedOrder.shipment.itemChecks.filter(
-            (item) => item.verified,
-        ).length;
-    }, [selectedOrder]);
-
-    const totalItems = selectedOrder?.orderItems.length ?? 0;
-
-    /* --------------------------------- Render ------------------------------- */
+    const visibleTotal =
+        paymentFilter === "ALL" && !dateFilter ? total : orders.length;
 
     return (
-        <main className="min-h-screen bg-black px-4 py-6 text-zinc-100 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-[1600px] space-y-6">
-                {/* Header */}
+        <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-[1800px] space-y-6">
+                {/* Page heading */}
                 <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
-                        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-400">
-                            <Activity size={14} />
-                            Operations / Logistics
-                        </div>
-
-                        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                            Fulfillment Center
+                        <h1 className="text-lg font-black uppercase tracking-[0.18em]">
+                            Fulfillment
                         </h1>
-
-                        <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-                            Verify orders, prepare parcels, and manage
-                            dispatches from one place.
+                        <p className="mt-1 text-xs text-zinc-500">
+                            Pack, label &amp; dispatch physical parcels
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                        <SecondaryButton
-                            onClick={() => void loadOrders(true)}
-                            disabled={loading || refreshing}
-                        >
-                            <RefreshCw
-                                size={15}
-                                className={
-                                    refreshing ? "animate-spin" : undefined
-                                }
-                            />
-                            Refresh
-                        </SecondaryButton>
-
-                        <PrimaryButton
-                            onClick={() => {
-                                setScanInput("");
-                                setScanResult(null);
-                                setScanError("");
-                                setScanModalOpen(true);
-                            }}
-                        >
-                            <ScanLine size={16} />
-                            Scan Parcel
-                        </PrimaryButton>
-                    </div>
+                    <button
+                        type="button"
+                        onClick={openScanModal}
+                        className={LIME_BUTTON}
+                    >
+                        <ScanLine size={16} />
+                        Scan Parcel
+                    </button>
                 </header>
 
-                {/* Error banner */}
+                {/* Errors */}
                 {error && (
-                    <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                        <AlertCircle
-                            size={18}
-                            className="mt-0.5 shrink-0 text-red-400"
-                        />
-
-                        <div className="min-w-0 flex-1">{error}</div>
-
+                    <div className="flex items-start gap-3 border border-red-500/40 bg-red-500/5 p-3 text-xs text-red-300">
+                        <AlertCircle size={16} className="shrink-0" />
+                        <p className="flex-1">{error}</p>
                         <button
                             type="button"
                             onClick={() => setError("")}
                             aria-label="Dismiss error"
-                            className="text-red-300 hover:text-white"
                         >
-                            <X size={16} />
+                            <X size={15} />
                         </button>
                     </div>
                 )}
 
-                {/* Statistics */}
+                {/* Summary cards */}
                 <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard
-                        title="Ready to Pack"
-                        value={currentStats.readyToPack}
-                        description="Orders awaiting preparation"
-                        icon={PackageOpen}
-                        accent="text-cyan-300"
-                        onClick={() => handleTabChange("READY_TO_PACK")}
-                    />
+                    {[
+                        {
+                            title: "READY TO PACK",
+                            value: stats.readyToPack,
+                            description: "Paid & queued",
+                            icon: Package,
+                        },
+                        {
+                            title: "CURRENTLY PACKING",
+                            value: stats.packing,
+                            description: "On the bench",
+                            icon: Activity,
+                        },
+                        {
+                            title: "PACKED",
+                            value: stats.packed,
+                            description: "Boxed & labelled",
+                            icon: PackageCheck,
+                        },
+                        {
+                            title: "AWAITING DISPATCH",
+                            value: stats.awaitingDispatch,
+                            description: "Label printed, ready for courier",
+                            icon: Truck,
+                        },
+                    ].map((item) => {
+                        const Icon = item.icon;
 
-                    <StatCard
-                        title="Currently Packing"
-                        value={currentStats.packing}
-                        description="Orders being checked"
-                        icon={ClipboardCheck}
-                        accent="text-amber-300"
-                        onClick={() => handleTabChange("PACKING")}
-                    />
-
-                    <StatCard
-                        title="Packed"
-                        value={currentStats.packed}
-                        description="Ready for dispatch"
-                        icon={PackageCheck}
-                        accent="text-violet-300"
-                        onClick={() => handleTabChange("PACKED")}
-                    />
-
-                    <StatCard
-                        title="Awaiting Dispatch"
-                        value={currentStats.awaitingDispatch}
-                        description="Packed and awaiting handoff"
-                        icon={Truck}
-                        accent="text-emerald-300"
-                        onClick={() => handleTabChange("DISPATCHED")}
-                    />
-                </section>
-
-                {/* Delivery stats */}
-                <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
-                        <div>
-                            <p className="text-xs text-zinc-500">
-                                Out for Delivery
-                            </p>
-                            <p className="mt-1 text-xl font-semibold text-blue-300">
-                                {currentStats.outForDelivery}
-                            </p>
-                        </div>
-                        <ArrowUpRight size={19} className="text-blue-400" />
-                    </div>
-
-                    <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
-                        <div>
-                            <p className="text-xs text-zinc-500">
-                                Delivered
-                            </p>
-                            <p className="mt-1 text-xl font-semibold text-emerald-300">
-                                {currentStats.delivered}
-                            </p>
-                        </div>
-                        <CheckCircle2
-                            size={19}
-                            className="text-emerald-400"
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3">
-                        <div>
-                            <p className="text-xs text-zinc-500">
-                                Delivery Exceptions
-                            </p>
-                            <p className="mt-1 text-xl font-semibold text-red-300">
-                                {currentStats.failed}
-                            </p>
-                        </div>
-                        <AlertCircle size={19} className="text-red-400" />
-                    </div>
-                </section>
-
-                {/* Main table */}
-                <section className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">
-                    {/* Table header */}
-                    <div className="border-b border-zinc-800 p-4 sm:p-5">
-                        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-                            <div>
-                                <h2 className="font-semibold text-white">
-                                    Fulfillment Orders
-                                </h2>
-                                <p className="mt-1 text-sm text-zinc-500">
-                                    {totalOrders} eligible orders
-                                </p>
-                            </div>
-
-                            <form
-                                onSubmit={handleSearchSubmit}
-                                className="flex w-full gap-2 lg:max-w-md"
+                        return (
+                            <div
+                                key={item.title}
+                                className="border border-zinc-800 bg-[#0d0d0d] p-4"
                             >
-                                <div className="relative min-w-0 flex-1">
-                                    <Search
-                                        size={16}
-                                        className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
-                                    />
-
-                                    <input
-                                        value={searchInput}
-                                        onChange={(event) =>
-                                            setSearchInput(event.target.value)
-                                        }
-                                        placeholder="Order, customer, email, tracking..."
-                                        className="h-10 w-full rounded-lg border border-zinc-800 bg-black pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-cyan-400/60"
+                                <div className="flex items-center justify-between gap-3">
+                                    <p className="text-[10px] font-bold tracking-[0.16em] text-zinc-400">
+                                        {item.title}
+                                    </p>
+                                    <Icon
+                                        size={15}
+                                        className="text-second"
                                     />
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="rounded-lg border border-zinc-700 px-4 text-sm font-medium text-zinc-200 transition hover:border-cyan-400/50 hover:text-cyan-300"
-                                >
-                                    Search
-                                </button>
-                            </form>
-                        </div>
+                                <p className="mt-3 text-2xl font-black">
+                                    {item.value}
+                                </p>
 
-                        {/* Tabs */}
-                        <div className="mt-5 flex gap-1 overflow-x-auto border-b border-zinc-800">
-                            {tabs.map((tab) => (
+                                <p className="mt-1 text-[10px] text-zinc-500">
+                                    {item.description}
+                                </p>
+                            </div>
+                        );
+                    })}
+                </section>
+
+                {/* Status tabs */}
+                <section className="border-b border-zinc-800">
+                    <div className="flex gap-5 overflow-x-auto">
+                        {TABS.map((tab) => {
+                            const count =
+                                tab.value === "ALL"
+                                    ? total
+                                    : tab.value === "READY_TO_PACK"
+                                      ? stats.readyToPack
+                                      : tab.value === "PACKING"
+                                        ? stats.packing
+                                        : tab.value === "PACKED"
+                                          ? stats.packed
+                                          : stats.awaitingDispatch;
+
+                            return (
                                 <button
                                     key={tab.value}
                                     type="button"
-                                    onClick={() => handleTabChange(tab.value)}
-                                    className={`-mb-px whitespace-nowrap border-b-2 px-3 py-3 text-sm transition ${
+                                    onClick={() => changeTab(tab.value)}
+                                    className={`whitespace-nowrap border-b-2 px-1 pb-3 text-[10px] font-black tracking-[0.14em] transition ${
                                         activeTab === tab.value
-                                            ? "border-cyan-400 text-cyan-300"
+                                            ? "border-second text-second"
                                             : "border-transparent text-zinc-500 hover:text-zinc-200"
                                     }`}
                                 >
-                                    {tab.label}
+                                    {tab.label}{" "}
+                                    <span
+                                        className={
+                                            activeTab === tab.value
+                                                ? "text-second"
+                                                : "text-zinc-600"
+                                        }
+                                    >
+                                        {count}
+                                    </span>
                                 </button>
-                            ))}
-                        </div>
+                            );
+                        })}
                     </div>
+                </section>
 
-                    {/* Loading */}
-                    {loading ? (
-                        <div className="flex min-h-64 flex-col items-center justify-center gap-3 text-zinc-400">
-                            <LoaderCircle
-                                size={28}
-                                className="animate-spin text-cyan-400"
-                            />
-                            <p className="text-sm">Loading fulfillment data...</p>
-                        </div>
-                    ) : orders.length === 0 ? (
-                        <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
-                            <div className="rounded-2xl border border-zinc-800 bg-black p-4">
-                                <Package
-                                    size={28}
-                                    className="text-zinc-500"
-                                />
-                            </div>
+                {/* Search and filters */}
+                <section className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_140px_140px_auto]">
+                    <form
+                        onSubmit={submitSearch}
+                        className="relative"
+                    >
+                        <Search
+                            size={15}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
+                        />
+                        <input
+                            value={searchInput}
+                            onChange={(event) =>
+                                setSearchInput(event.target.value)
+                            }
+                            placeholder="Search order, parcel, customer or QR token"
+                            className={`${INPUT} pl-9`}
+                        />
+                    </form>
 
-                            <h3 className="mt-4 font-medium text-white">
-                                No orders found
-                            </h3>
+                    <select
+                        value={paymentFilter}
+                        onChange={(event) => {
+                            setPaymentFilter(event.target.value);
+                            setPage(1);
+                        }}
+                        className={INPUT}
+                        aria-label="Filter by payment"
+                    >
+                        <option value="ALL">ALL PAYMENTS</option>
+                        <option value="PAID">PAID</option>
+                        <option value="COD">COD</option>
+                        <option value="PENDING">PENDING</option>
+                    </select>
 
-                            <p className="mt-1 max-w-sm text-sm text-zinc-500">
-                                Try another search term or fulfillment status.
-                            </p>
+                    <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={(event) => {
+                            setDateFilter(event.target.value);
+                            setPage(1);
+                        }}
+                        className={INPUT}
+                        aria-label="Filter by date"
+                    />
 
-                            {(search || activeTab !== "ALL") && (
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setSearch("");
-                                        setSearchInput("");
-                                        setActiveTab("ALL");
-                                        setPage(1);
-                                    }}
-                                    className="mt-4 text-sm font-medium text-cyan-300 hover:text-cyan-200"
-                                >
-                                    Clear filters
-                                </button>
-                            )}
-                        </div>
-                    ) : (
-                        <>
-                            {/* Desktop table */}
-                            <div className="hidden overflow-x-auto lg:block">
-                                <table className="w-full min-w-[1050px] text-left">
-                                    <thead className="border-b border-zinc-800 bg-zinc-900/50">
-                                        <tr className="text-xs uppercase tracking-wider text-zinc-500">
-                                            <th className="px-5 py-3 font-medium">
-                                                Order
-                                            </th>
-                                            <th className="px-5 py-3 font-medium">
-                                                Customer
-                                            </th>
-                                            <th className="px-5 py-3 font-medium">
-                                                Payment
-                                            </th>
-                                            <th className="px-5 py-3 font-medium">
-                                                Fulfillment
-                                            </th>
-                                            <th className="px-5 py-3 font-medium">
-                                                Items
-                                            </th>
-                                            <th className="px-5 py-3 font-medium">
-                                                Created
-                                            </th>
-                                            <th className="px-5 py-3 text-right font-medium">
-                                                Action
-                                            </th>
-                                        </tr>
-                                    </thead>
+                    <button
+                        type="button"
+                        onClick={() => void loadOrders(true)}
+                        disabled={loading || refreshing}
+                        className={BUTTON}
+                        aria-label="Refresh orders"
+                    >
+                        <RefreshCw
+                            size={14}
+                            className={
+                                refreshing ? "animate-spin" : undefined
+                            }
+                        />
+                    </button>
+                </section>
 
-                                    <tbody className="divide-y divide-zinc-800/80">
-                                        {orders.map((order) => {
-                                            const payment = getPayment(order);
+                {/* Orders table */}
+                <section className="overflow-x-auto border border-zinc-800">
+                    <table className="w-full min-w-[1050px] border-collapse text-left">
+                        <thead className="bg-[#111]">
+                            <tr className="border-b border-zinc-800 text-[9px] font-bold tracking-[0.14em] text-zinc-400">
+                                <th className="px-3 py-3">ORDER</th>
+                                <th className="px-3 py-3">CUSTOMER</th>
+                                <th className="px-3 py-3">ITEMS</th>
+                                <th className="px-3 py-3">PAYMENT</th>
+                                <th className="px-3 py-3">PAY STATUS</th>
+                                <th className="px-3 py-3">FULFILLMENT</th>
+                                <th className="px-3 py-3">DATE</th>
+                                <th className="px-3 py-3 text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
 
-                                            return (
-                                                <tr
-                                                    key={order.id}
-                                                    className="transition hover:bg-zinc-900/40"
-                                                >
-                                                    <td className="px-5 py-4">
-                                                        <p className="font-medium text-white">
-                                                            {order.orderCode}
-                                                        </p>
-                                                        <p className="mt-1 text-xs text-zinc-500">
-                                                            {getOrderAmount(order)}
-                                                        </p>
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <p className="max-w-48 truncate text-sm text-zinc-200">
-                                                            {order.user.name ||
-                                                                "Unnamed customer"}
-                                                        </p>
-                                                        <p className="mt-1 max-w-48 truncate text-xs text-zinc-500">
-                                                            {order.user.email}
-                                                        </p>
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <p className="text-sm text-zinc-200">
-                                                            {payment?.method ??
-                                                                "—"}
-                                                        </p>
-                                                        <p
-                                                            className={`mt-1 text-xs ${getPaymentClasses(
-                                                                payment?.status ??
-                                                                    "",
-                                                            )}`}
-                                                        >
-                                                            {payment?.status ??
-                                                                "No payment"}
-                                                        </p>
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <StatusBadge
-                                                            status={
-                                                                order.shipment
-                                                                    ?.fulfillmentStatus ??
-                                                                "READY_TO_PACK"
-                                                            }
-                                                        >
-                                                            {getFulfillmentLabel(
-                                                                order,
-                                                            )}
-                                                        </StatusBadge>
-
-                                                        {order.shipment && (
-                                                            <p className="mt-1.5 text-xs text-zinc-500">
-                                                                {order.shipment.trackingCode}
-                                                            </p>
-                                                        )}
-                                                    </td>
-
-                                                    <td className="px-5 py-4 text-sm text-zinc-300">
-                                                        {order.orderItems.length}{" "}
-                                                        {order.orderItems.length ===
-                                                        1
-                                                            ? "item"
-                                                            : "items"}
-                                                    </td>
-
-                                                    <td className="px-5 py-4 text-xs text-zinc-400">
-                                                        {formatDate(
-                                                            order.createdAt,
-                                                        )}
-                                                    </td>
-
-                                                    <td className="px-5 py-4 text-right">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setSelectedOrder(
-                                                                    order,
-                                                                )
-                                                            }
-                                                            className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-200 transition hover:border-cyan-400/50 hover:text-cyan-300"
-                                                        >
-                                                            Manage
-                                                            <ArrowRight
-                                                                size={13}
-                                                            />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Mobile/tablet cards */}
-                            <div className="divide-y divide-zinc-800 lg:hidden">
-                                {orders.map((order) => {
+                        <tbody className="divide-y divide-zinc-800">
+                            {loading ? (
+                                <tr>
+                                    <td
+                                        colSpan={8}
+                                        className="h-48 text-center text-xs text-zinc-500"
+                                    >
+                                        <LoaderCircle
+                                            size={22}
+                                            className="mx-auto mb-3 animate-spin text-second"
+                                        />
+                                        Loading fulfillment orders...
+                                    </td>
+                                </tr>
+                            ) : orders.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={8}
+                                        className="h-48 text-center text-xs text-zinc-500"
+                                    >
+                                        No matching orders found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                orders.map((order) => {
                                     const payment = getPayment(order);
+                                    const payStatus =
+                                        getPaymentStatusLabel(payment);
 
                                     return (
-                                        <div
+                                        <tr
                                             key={order.id}
-                                            className="space-y-3 p-4"
+                                            className="transition hover:bg-[#111]"
                                         >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div className="min-w-0">
-                                                    <p className="font-semibold text-white">
-                                                        {order.orderCode}
-                                                    </p>
-                                                    <p className="mt-1 truncate text-sm text-zinc-400">
-                                                        {order.user.name ||
-                                                            order.user.email}
-                                                    </p>
-                                                </div>
+                                            <td className="px-3 py-3">
+                                                <p className="text-xs font-black text-white">
+                                                    {order.orderCode}
+                                                </p>
+                                                <p className="mt-1 text-[9px] text-zinc-500">
+                                                    {order.shipment?.trackingCode ??
+                                                        "NO PARCEL"}
+                                                </p>
+                                            </td>
 
+                                            <td className="px-3 py-3">
+                                                <p className="text-xs font-bold text-white">
+                                                    {order.user.name ??
+                                                        "Unknown customer"}
+                                                </p>
+                                                <p className="mt-1 text-[9px] text-zinc-500">
+                                                    {order.orderHistory?.country ??
+                                                        "—"}
+                                                </p>
+                                            </td>
+
+                                            <td className="px-3 py-3 text-xs">
+                                                {order.orderItems.reduce(
+                                                    (sum, item) =>
+                                                        sum + item.quantity,
+                                                    0,
+                                                )}
+                                            </td>
+
+                                            <td className="px-3 py-3 text-[10px] font-black">
+                                                {getPaymentLabel(payment)}
+                                            </td>
+
+                                            <td className="px-3 py-3">
+                                                <StatusBadge value={payStatus} />
+                                            </td>
+
+                                            <td className="px-3 py-3">
                                                 <StatusBadge
-                                                    status={
-                                                        order.shipment
-                                                            ?.fulfillmentStatus ??
-                                                        "READY_TO_PACK"
-                                                    }
-                                                >
-                                                    {getFulfillmentLabel(order)}
-                                                </StatusBadge>
-                                            </div>
+                                                    value={fulfillmentLabel(order)}
+                                                />
+                                            </td>
 
-                                            <div className="grid grid-cols-2 gap-3 rounded-lg border border-zinc-800 bg-black p-3">
-                                                <div>
-                                                    <p className="text-xs text-zinc-500">
-                                                        Payment
-                                                    </p>
-                                                    <p className="mt-1 text-sm text-zinc-200">
-                                                        {payment?.method ?? "—"}
-                                                    </p>
-                                                    <p
-                                                        className={`text-xs ${getPaymentClasses(
-                                                            payment?.status ??
-                                                                "",
-                                                        )}`}
+                                            <td className="px-3 py-3 text-[10px] text-zinc-400">
+                                                {formatDate(order.createdAt)}
+                                            </td>
+
+                                            <td className="px-3 py-3">
+                                                <div className="flex justify-end gap-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openDetails(order)
+                                                        }
+                                                        className="border border-zinc-800 p-2 text-zinc-400 transition hover:border-second hover:text-second"
+                                                        title="View details"
+                                                        aria-label={`View ${order.orderCode}`}
                                                     >
-                                                        {payment?.status ??
-                                                            "No payment"}
-                                                    </p>
+                                                        <Eye size={14} />
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openScanModal()
+                                                        }
+                                                        className="border border-zinc-800 p-2 text-zinc-400 transition hover:border-second hover:text-second"
+                                                        title="Scan parcel"
+                                                        aria-label="Scan parcel"
+                                                    >
+                                                        <QrCode size={14} />
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openLabel(order)
+                                                        }
+                                                        className="border border-zinc-800 p-2 text-zinc-400 transition hover:border-second hover:text-second"
+                                                        title="Print label"
+                                                        aria-label="Print shipping label"
+                                                    >
+                                                        <Printer size={14} />
+                                                    </button>
                                                 </div>
-
-                                                <div>
-                                                    <p className="text-xs text-zinc-500">
-                                                        Items / Amount
-                                                    </p>
-                                                    <p className="mt-1 text-sm text-zinc-200">
-                                                        {order.orderItems.length}{" "}
-                                                        items
-                                                    </p>
-                                                    <p className="text-xs text-zinc-400">
-                                                        {getOrderAmount(order)}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center justify-between gap-3">
-                                                <span className="text-xs text-zinc-500">
-                                                    {formatDate(order.createdAt)}
-                                                </span>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setSelectedOrder(order)
-                                                    }
-                                                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-200 hover:border-cyan-400/50 hover:text-cyan-300"
-                                                >
-                                                    Manage
-                                                    <ArrowRight size={13} />
-                                                </button>
-                                            </div>
-                                        </div>
+                                            </td>
+                                        </tr>
                                     );
-                                })}
-                            </div>
-                        </>
-                    )}
+                                })
+                            )}
+                        </tbody>
+                    </table>
 
                     {/* Pagination */}
-                    <footer className="flex flex-col justify-between gap-3 border-t border-zinc-800 px-4 py-4 sm:flex-row sm:items-center sm:px-5">
-                        <p className="text-xs text-zinc-500">
-                            Page {page} of {totalPages} · {totalOrders} orders
+                    <footer className="flex items-center justify-between border-t border-zinc-800 bg-[#0b0b0b] px-3 py-3">
+                        <p className="text-[10px] text-zinc-500">
+                            {visibleTotal} orders · Page {page} of{" "}
+                            {Math.max(totalPages, 1)}
                         </p>
 
-                        <div className="flex items-center gap-2">
-                            <SecondaryButton
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                disabled={page <= 1 || loading}
                                 onClick={() =>
                                     setPage((current) =>
                                         Math.max(1, current - 1),
                                     )
                                 }
-                                disabled={page <= 1 || loading}
+                                className={BUTTON}
                             >
-                                <ChevronLeft size={15} />
+                                <ChevronLeft size={14} />
                                 Previous
-                            </SecondaryButton>
+                            </button>
 
-                            <SecondaryButton
+                            <button
+                                type="button"
+                                disabled={page >= totalPages || loading}
                                 onClick={() =>
                                     setPage((current) =>
                                         Math.min(totalPages, current + 1),
                                     )
                                 }
-                                disabled={page >= totalPages || loading}
+                                className={BUTTON}
                             >
                                 Next
-                                <ChevronRight size={15} />
-                            </SecondaryButton>
+                                <ChevronRight size={14} />
+                            </button>
                         </div>
                     </footer>
                 </section>
-
-                {/* Order status breakdown */}
-                {currentStats.ordersByStatus.length > 0 && (
-                    <section className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 sm:p-5">
-                        <div className="mb-4 flex items-center gap-2">
-                            <Activity size={17} className="text-cyan-400" />
-                            <h2 className="font-semibold text-white">
-                                Order Status Overview
-                            </h2>
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {currentStats.ordersByStatus.map((item) => (
-                                <div
-                                    key={item.status}
-                                    className="rounded-lg border border-zinc-800 bg-black px-3 py-2"
-                                >
-                                    <p className="text-xs text-zinc-500">
-                                        {item.status.replaceAll("_", " ")}
-                                    </p>
-                                    <p className="mt-1 text-lg font-semibold text-zinc-100">
-                                        {item.count}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                )}
             </div>
 
-            {/* ---------------------------------------------------------------- */}
-            {/* Scan parcel modal                                                */}
-            {/* ---------------------------------------------------------------- */}
+            {/* ================================================================= */}
+            {/* SCAN PARCEL MODAL                                                */}
+            {/* ================================================================= */}
 
-            {scanModalOpen && (
+            {modal === "scan" && (
                 <Modal
-                    title="Scan or Find a Parcel"
-                    subtitle="Use a parcel token, tracking code, or order code."
-                    onClose={() => setScanModalOpen(false)}
+                    title="Scan Parcel"
+                    subtitle="Point the camera at the parcel QR or barcode."
+                    onClose={closeModal}
                 >
-                    <form onSubmit={handleScanSubmit} className="space-y-4">
-                        <label
-                            htmlFor="parcel-lookup"
-                            className="block text-sm font-medium text-zinc-300"
-                        >
-                            Parcel identifier
-                        </label>
+                    <div className="space-y-4">
+                        <div className="relative flex min-h-[250px] flex-col items-center justify-center overflow-hidden border border-zinc-800 bg-[#101010] p-5">
+                            <video
+                                ref={videoRef}
+                                muted
+                                playsInline
+                                className={`absolute inset-0 h-full w-full object-cover ${
+                                    cameraActive ? "block" : "hidden"
+                                }`}
+                            />
 
-                        <div className="relative">
-                            <ScanLine
-                                size={18}
-                                className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
-                            />
-                            <input
-                                id="parcel-lookup"
-                                autoFocus
-                                value={scanInput}
-                                onChange={(event) =>
-                                    setScanInput(event.target.value)
-                                }
-                                placeholder="HYP-TRK-..., token, or order code"
-                                className="h-12 w-full rounded-lg border border-zinc-700 bg-black pl-10 pr-3 text-sm text-white outline-none focus:border-cyan-400/70"
-                            />
+                            {cameraActive ? (
+                                <>
+                                    <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+                                        <div className="relative h-40 w-64 max-w-[85%]">
+                                            <span className="absolute left-0 top-0 h-6 w-6 border-l-2 border-t-2 border-second" />
+                                            <span className="absolute right-0 top-0 h-6 w-6 border-r-2 border-t-2 border-second" />
+                                            <span className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-second" />
+                                            <span className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-second" />
+                                            <span className="absolute left-0 right-0 top-1/2 h-px animate-pulse bg-second/80" />
+                                        </div>
+                                    </div>
+
+                                    <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 bg-black/70 px-2 py-1 text-[10px] text-second">
+                                        <span className="h-2 w-2 animate-pulse rounded-full bg-second" />
+                                        CAMERA ACTIVE · SCANNING
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex flex-col items-center text-center">
+                                    <div className="mb-4 flex h-12 w-12 items-center justify-center border border-zinc-700 text-zinc-400">
+                                        <Camera size={24} />
+                                    </div>
+
+                                    <p className="max-w-xs text-[11px] text-zinc-400">
+                                        Point the camera at the parcel QR or
+                                        barcode.
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => void startCamera()}
+                                        className={`${BUTTON} mt-4 border-second text-second`}
+                                    >
+                                        <ScanLine size={14} />
+                                        Start Camera
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
-                        {scanError && (
-                            <p className="flex items-start gap-2 text-sm text-red-300">
-                                <AlertCircle
-                                    size={16}
-                                    className="mt-0.5 shrink-0"
+                        {cameraActive && (
+                            <button
+                                type="button"
+                                onClick={stopCamera}
+                                className={BUTTON}
+                            >
+                                Stop Camera
+                            </button>
+                        )}
+
+                        {cameraError && (
+                            <p className="flex gap-2 border border-orange-500/30 bg-orange-500/5 p-3 text-[10px] text-orange-300">
+                                <AlertCircle size={15} className="shrink-0" />
+                                {cameraError}
+                            </p>
+                        )}
+
+                        <form
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                void lookupParcel();
+                            }}
+                            className="flex gap-2"
+                        >
+                            <div className="relative min-w-0 flex-1">
+                                <Barcode
+                                    size={14}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"
                                 />
+                                <input
+                                    value={scanInput}
+                                    onChange={(event) =>
+                                        setScanInput(event.target.value)
+                                    }
+                                    placeholder="Enter order / tracking code / QR token"
+                                    className={`${INPUT} pl-9`}
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={scanLoading}
+                                className={LIME_BUTTON}
+                            >
+                                {scanLoading ? (
+                                    <LoaderCircle
+                                        size={14}
+                                        className="animate-spin"
+                                    />
+                                ) : (
+                                    <Search size={14} />
+                                )}
+                                Lookup
+                            </button>
+                        </form>
+
+                        <p className="text-[9px] leading-relaxed text-zinc-500">
+                            Camera scanning works in supported browsers on
+                            HTTPS or localhost. Manual lookup is available
+                            regardless of camera support.
+                        </p>
+
+                        {scanError && (
+                            <p className="border border-red-500/30 bg-red-500/5 p-3 text-[10px] text-red-300">
                                 {scanError}
                             </p>
                         )}
 
-                        <PrimaryButton
-                            onClick={() =>
-                                void handleScanSubmit(
-                                    new Event("submit") as unknown as React.FormEvent<HTMLFormElement>,
-                                )
-                            }
-                            loading={scanLoading}
+                        {scanResult && (
+                            <div className="border border-second/40 bg-second/[0.04]">
+                                <div className="flex items-center gap-2 border-b border-second/20 p-3 text-second">
+                                    <CheckCircle2 size={16} />
+                                    <span className="text-[11px] font-black uppercase tracking-wide">
+                                        Parcel Matched
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3 p-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-black">
+                                                {scanResult.order.orderCode}
+                                            </p>
+                                            <p className="mt-1 text-[10px] text-zinc-400">
+                                                {scanResult.trackingCode ??
+                                                    "Shipment not created"}{" "}
+                                                {scanResult.shipment
+                                                    ? `· ${scanResult.shipment.fulfillmentStatus.replaceAll("_", " ").toLowerCase()}`
+                                                    : ""}
+                                            </p>
+                                        </div>
+
+                                        {scanResult.shipment && (
+                                            <StatusBadge
+                                                value={
+                                                    scanResult.shipment
+                                                        .fulfillmentStatus
+                                                }
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={openScannedOrder}
+                                            className={BUTTON}
+                                        >
+                                            Open Order
+                                        </button>
+
+                                        {scanResult.shipment ? (
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    const success =
+                                                        await postAction(
+                                                            "START_PACKING",
+                                                            {
+                                                                shipmentId:
+                                                                    scanResult
+                                                                        .shipment!
+                                                                        .id,
+                                                            },
+                                                        );
+
+                                                    if (success) {
+                                                        closeModal();
+                                                    }
+                                                }}
+                                                disabled={
+                                                    !scanResult.shipment ||
+                                                    scanResult.shipment
+                                                        .fulfillmentStatus !==
+                                                        "READY_TO_PACK" ||
+                                                    busyAction ===
+                                                        "START_PACKING"
+                                                }
+                                                className={LIME_BUTTON}
+                                            >
+                                                Start Packing
+                                            </button>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={async () => {
+                                                    const order =
+                                                        orders.find(
+                                                            (item) =>
+                                                                item.id ===
+                                                                scanResult.order
+                                                                    .id,
+                                                        );
+
+                                                    if (!order) {
+                                                        setSearch(
+                                                            scanResult.order
+                                                                .orderCode,
+                                                        );
+                                                        setSearchInput(
+                                                            scanResult.order
+                                                                .orderCode,
+                                                        );
+                                                        setPage(1);
+                                                        closeModal();
+                                                        return;
+                                                    }
+
+                                                    await createShipment(order);
+                                                }}
+                                                className={LIME_BUTTON}
+                                            >
+                                                Create Shipment
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            )}
+
+            {/* ================================================================= */}
+            {/* SHIPPING LABEL MODAL                                             */}
+            {/* ================================================================= */}
+
+            {modal === "label" && selectedOrder && (
+                <Modal
+                    title="Shipping Label"
+                    subtitle="Parcel label preview"
+                    onClose={closeModal}
+                    width="max-w-md"
+                >
+                    <div id="fulfillment-print-label">
+                        <div className="border-2 border-zinc-300 bg-[#101010] p-3 text-white">
+                            <div className="flex items-start justify-between border-b-2 border-zinc-300 pb-3">
+                                <div className="flex gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center border border-zinc-300 text-xs font-black">
+                                        HR
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-black tracking-[0.22em]">
+                                            HYPERREAL
+                                        </p>
+                                        <p className="text-[8px] tracking-wider text-zinc-400">
+                                            TECHWEAR DIVISION
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-[8px] text-zinc-400">
+                                        SERVICE
+                                    </p>
+                                    <p className="text-[10px] font-black">
+                                        {getPayment(selectedOrder)?.shippingMethod ??
+                                            "INTL EXPRESS"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-[1fr_100px] gap-3 border-b border-zinc-700 py-3">
+                                <div>
+                                    <p className="text-[8px] text-zinc-400">
+                                        SHIP TO
+                                    </p>
+                                    <p className="mt-1 text-xs font-black uppercase">
+                                        {selectedOrder.orderHistory?.fullName ??
+                                            selectedOrder.user.name ??
+                                            "CUSTOMER"}
+                                    </p>
+                                    <p className="mt-1 text-[10px]">
+                                        {selectedOrder.orderHistory?.street ??
+                                            "Address not available"}
+                                    </p>
+                                    {selectedOrder.orderHistory?.house && (
+                                        <p className="text-[10px]">
+                                            {selectedOrder.orderHistory.house}
+                                        </p>
+                                    )}
+                                    <p className="text-[10px]">
+                                        {selectedOrder.orderHistory?.city ?? ""}
+                                        {selectedOrder.orderHistory?.zipCode
+                                            ? ` ${selectedOrder.orderHistory.zipCode}`
+                                            : ""}
+                                    </p>
+                                    <p className="text-[10px] font-bold">
+                                        {selectedOrder.orderHistory?.country ??
+                                            "—"}
+                                    </p>
+                                    <p className="mt-2 text-[9px] text-zinc-300">
+                                        {selectedOrder.orderHistory?.phone ??
+                                            selectedOrder.user.phone ??
+                                            ""}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col items-center justify-center">
+                                    {selectedOrder.shipment ? (
+                                        <img
+                                            src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=2&data=${encodeURIComponent(
+                                                parcelToken ||
+                                                    selectedOrder.shipment.trackingCode,
+                                            )}`}
+                                            alt="Parcel QR code"
+                                            width={88}
+                                            height={88}
+                                            className="border border-white bg-white p-1"
+                                        />
+                                    ) : (
+                                        <div className="flex h-[88px] w-[88px] flex-col items-center justify-center border border-dashed border-zinc-500 text-center">
+                                            <QrCode size={24} />
+                                            <span className="mt-1 text-[8px]">
+                                                NO SHIPMENT
+                                            </span>
+                                        </div>
+                                    )}
+                                    <p className="mt-1 text-center text-[8px] text-zinc-400">
+                                        SCAN PARCEL
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 border-b border-zinc-700 text-center">
+                                <div className="border-r border-zinc-700 p-2">
+                                    <p className="text-[8px] text-zinc-400">
+                                        ORDER
+                                    </p>
+                                    <p className="mt-1 text-[10px] font-black">
+                                        {selectedOrder.orderCode}
+                                    </p>
+                                </div>
+
+                                <div className="border-r border-zinc-700 p-2">
+                                    <p className="text-[8px] text-zinc-400">
+                                        ITEMS
+                                    </p>
+                                    <p className="mt-1 text-[10px] font-black">
+                                        {selectedOrder.orderItems.reduce(
+                                            (sum, item) => sum + item.quantity,
+                                            0,
+                                        )}
+                                    </p>
+                                </div>
+
+                                <div className="p-2">
+                                    <p className="text-[8px] text-zinc-400">
+                                        PAYMENT
+                                    </p>
+                                    <p className="mt-1 text-[10px] font-black">
+                                        {getPayment(selectedOrder)?.method ===
+                                        "COD"
+                                            ? "COD"
+                                            : getPayment(selectedOrder)?.status ===
+                                                "SUCCESS"
+                                              ? "PREPAID"
+                                              : "VERIFY"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="py-3">
+                                <div className="flex h-12 items-stretch gap-[3px] overflow-hidden bg-white px-1 py-1">
+                                    {Array.from(
+                                        {
+                                            length: 52,
+                                        },
+                                        (_, index) => (
+                                            <span
+                                                key={index}
+                                                className="block bg-black"
+                                                style={{
+                                                    width:
+                                                        index % 4 === 0
+                                                            ? "4px"
+                                                            : index % 3 === 0
+                                                              ? "2px"
+                                                              : "1px",
+                                                    flex: index % 5 === 0
+                                                        ? "2"
+                                                        : "1",
+                                                }}
+                                            />
+                                        ),
+                                    )}
+                                </div>
+
+                                <div className="mt-1 flex justify-between gap-2 text-[9px] font-bold">
+                                    <span>
+                                        {selectedOrder.shipment?.trackingCode ??
+                                            "SHIPMENT NOT CREATED"}
+                                    </span>
+                                    <span>HYPERREAL</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                if (!selectedOrder.shipment) {
+                                    await createShipment(selectedOrder);
+                                    return;
+                                }
+
+                                await generateParcelToken(
+                                    selectedOrder.shipment.id,
+                                );
+                            }}
+                            className={`${BUTTON} flex-1`}
+                            disabled={busyAction !== null}
                         >
-                            <Search size={15} />
-                            Find Parcel
-                        </PrimaryButton>
-                    </form>
-
-                    {scanResult && (
-                        <div className="mt-5 space-y-4 rounded-xl border border-zinc-800 bg-black p-4">
-                            <div className="flex items-start justify-between gap-3">
-                                <div>
-                                    <p className="text-xs text-zinc-500">
-                                        Order
-                                    </p>
-                                    <p className="mt-1 font-semibold text-white">
-                                        {scanResult.order.orderCode}
-                                    </p>
-                                </div>
-
-                                {scanResult.shipment ? (
-                                    <StatusBadge
-                                        status={
-                                            scanResult.shipment
-                                                .fulfillmentStatus
-                                        }
-                                    />
-                                ) : (
-                                    <StatusBadge status="READY_TO_PACK">
-                                        No shipment yet
-                                    </StatusBadge>
-                                )}
-                            </div>
-
-                            {scanResult.trackingCode && (
-                                <div>
-                                    <p className="text-xs text-zinc-500">
-                                        Tracking code
-                                    </p>
-                                    <p className="mt-1 break-all font-mono text-sm text-cyan-300">
-                                        {scanResult.trackingCode}
-                                    </p>
-                                </div>
+                            {busyAction ? (
+                                <LoaderCircle
+                                    size={14}
+                                    className="animate-spin"
+                                />
+                            ) : (
+                                <ShieldCheck size={14} />
                             )}
+                            {selectedOrder.shipment
+                                ? "Generate QR Token"
+                                : "Create Shipment"}
+                        </button>
 
-                            <div className="flex flex-wrap gap-2">
-                                <PrimaryButton onClick={openOrderFromScan}>
-                                    Open Order
-                                    <ArrowRight size={15} />
-                                </PrimaryButton>
+                        <button
+                            type="button"
+                            onClick={printLabel}
+                            disabled={!selectedOrder.shipment}
+                            className={`${LIME_BUTTON} flex-1`}
+                        >
+                            <Printer size={14} />
+                            Print Label
+                        </button>
+                    </div>
 
-                                <SecondaryButton
-                                    onClick={() => {
-                                        setScanResult(null);
-                                        setScanError("");
-                                        setScanInput("");
-                                    }}
-                                >
-                                    Scan Another
-                                </SecondaryButton>
-                            </div>
+                    {parcelToken && (
+                        <div className="mt-3 border border-second/30 p-3">
+                            <p className="text-[10px] font-bold text-second">
+                                PARCEL TOKEN — COPY NOW
+                            </p>
+                            <code className="mt-2 block break-all text-xs">
+                                {parcelToken}
+                            </code>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    void navigator.clipboard.writeText(
+                                        parcelToken,
+                                    )
+                                }
+                                className={`${BUTTON} mt-2`}
+                            >
+                                Copy Token
+                            </button>
                         </div>
                     )}
                 </Modal>
             )}
 
-            {/* ---------------------------------------------------------------- */}
-            {/* Order details / packing modal                                    */}
-            {/* ---------------------------------------------------------------- */}
+            {/* ================================================================= */}
+            {/* ORDER DETAILS MODAL                                              */}
+            {/* ================================================================= */}
 
-            {selectedOrder && (
+            {modal === "details" && selectedOrder && (
                 <Modal
-                    title={`Order ${selectedOrder.orderCode}`}
-                    subtitle={`Created ${formatDate(selectedOrder.createdAt)}`}
-                    onClose={() => {
-                        setSelectedOrder(null);
-                        setParcelToken("");
-                    }}
-                    wide
+                    title={selectedOrder.orderCode}
+                    subtitle={`${selectedOrder.shipment?.trackingCode ?? "NO PARCEL"} · ${selectedOrder.shipment?.trackingCode ? "TRACKING ENABLED" : "SHIPMENT NOT CREATED"}`}
+                    onClose={closeModal}
+                    width="max-w-3xl"
                 >
-                    <div className="space-y-6">
-                        {/* Shipment status */}
-                        <div className="flex flex-col justify-between gap-3 rounded-xl border border-zinc-800 bg-black p-4 sm:flex-row sm:items-center">
-                            <div>
-                                <p className="text-xs text-zinc-500">
-                                    Fulfillment status
-                                </p>
-                                <div className="mt-2 flex flex-wrap items-center gap-2">
-                                    <StatusBadge
-                                        status={
-                                            selectedOrder.shipment
-                                                ?.fulfillmentStatus ??
-                                            "READY_TO_PACK"
-                                        }
-                                    >
-                                        {getFulfillmentLabel(selectedOrder)}
-                                    </StatusBadge>
-
-                                    {selectedOrder.shipment && (
-                                        <span className="font-mono text-xs text-cyan-300">
-                                            {selectedOrder.shipment.trackingCode}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {!selectedOrder.shipment ? (
-                                <PrimaryButton
-                                    onClick={() =>
-                                        void createShipment(selectedOrder)
-                                    }
-                                    loading={
-                                        actionLoading === "CREATE_SHIPMENT"
-                                    }
-                                >
-                                    <Package size={15} />
-                                    Create Shipment
-                                </PrimaryButton>
-                            ) : (
-                                <SecondaryButton
-                                    onClick={() =>
-                                        void rotateToken(
-                                            selectedOrder.shipment!.id,
-                                        )
-                                    }
-                                    disabled={
-                                        actionLoading === "ROTATE_TOKEN"
-                                    }
-                                >
-                                    {actionLoading === "ROTATE_TOKEN" ? (
-                                        <LoaderCircle
-                                            size={15}
-                                            className="animate-spin"
-                                        />
-                                    ) : (
-                                        <ShieldCheck size={15} />
-                                    )}
-                                    Generate Parcel Token
-                                </SecondaryButton>
-                            )}
-                        </div>
-
-                        {/* Newly generated token */}
-                        {parcelToken && (
-                            <div className="rounded-xl border border-cyan-400/30 bg-cyan-400/5 p-4">
-                                <p className="flex items-center gap-2 text-sm font-semibold text-cyan-300">
-                                    <ShieldCheck size={16} />
-                                    Parcel token generated
-                                </p>
-
-                                <p className="mt-2 text-xs text-zinc-400">
-                                    Copy this token now. The raw token is only
-                                    returned when it is generated.
-                                </p>
-
-                                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                                    <code className="min-w-0 flex-1 break-all rounded-lg border border-zinc-800 bg-black p-3 font-mono text-sm text-white">
-                                        {parcelToken}
-                                    </code>
-
-                                    <SecondaryButton
-                                        onClick={() => {
-                                            void navigator.clipboard.writeText(
-                                                parcelToken,
-                                            );
-                                        }}
-                                    >
-                                        Copy Token
-                                    </SecondaryButton>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Customer + address */}
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="rounded-xl border border-zinc-800 p-4">
-                                <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-                                    <UserRound
-                                        size={16}
-                                        className="text-cyan-400"
-                                    />
-                                    Customer
-                                </h3>
-
-                                <div className="mt-3 space-y-2 text-sm">
-                                    <p className="text-zinc-200">
-                                        {selectedOrder.user.name ||
-                                            "Unnamed customer"}
-                                    </p>
-                                    <p className="break-all text-zinc-400">
-                                        {selectedOrder.user.email}
-                                    </p>
-                                    <p className="text-zinc-400">
-                                        {selectedOrder.user.phone || "No phone"}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="rounded-xl border border-zinc-800 p-4">
-                                <h3 className="flex items-center gap-2 text-sm font-semibold text-white">
-                                    <Box
-                                        size={16}
-                                        className="text-cyan-400"
-                                    />
-                                    Shipping Address
-                                </h3>
-
-                                {selectedOrder.orderHistory ? (
-                                    <div className="mt-3 space-y-1 text-sm text-zinc-300">
-                                        <p className="font-medium text-white">
-                                            {
-                                                selectedOrder.orderHistory
-                                                    .fullName
-                                            }
-                                        </p>
-                                        <p>
-                                            {
-                                                selectedOrder.orderHistory
-                                                    .street
-                                            }
-                                        </p>
-                                        {selectedOrder.orderHistory.house && (
-                                            <p>
-                                                {
-                                                    selectedOrder.orderHistory
-                                                        .house
-                                                }
-                                            </p>
-                                        )}
-                                        <p>
-                                            {selectedOrder.orderHistory.city},{" "}
-                                            {
-                                                selectedOrder.orderHistory
-                                                    .zipCode
-                                            }
-                                        </p>
-                                        <p>
-                                            {
-                                                selectedOrder.orderHistory
-                                                    .country
-                                            }
-                                        </p>
-                                        <p className="pt-1 text-zinc-400">
-                                            {
-                                                selectedOrder.orderHistory
-                                                    .phone
-                                            }
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <p className="mt-3 text-sm text-zinc-500">
-                                        No shipping address available.
-                                    </p>
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap gap-2">
+                            <StatusBadge
+                                value={fulfillmentLabel(selectedOrder)}
+                            />
+                            <StatusBadge
+                                value={getPaymentStatusLabel(
+                                    getPayment(selectedOrder),
                                 )}
-                            </div>
+                            />
                         </div>
 
-                        {/* Payment summary */}
-                        <div className="rounded-xl border border-zinc-800 p-4">
-                            <h3 className="text-sm font-semibold text-white">
-                                Payment Summary
-                            </h3>
-
-                            {selectedPayment ? (
-                                <div className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                                    <div>
-                                        <p className="text-xs text-zinc-500">
-                                            Method
-                                        </p>
-                                        <p className="mt-1 text-sm text-zinc-200">
-                                            {selectedPayment.method}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-zinc-500">
-                                            Status
-                                        </p>
-                                        <p
-                                            className={`mt-1 text-sm ${getPaymentClasses(
-                                                selectedPayment.status,
-                                            )}`}
-                                        >
-                                            {selectedPayment.status}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-zinc-500">
-                                            Amount
-                                        </p>
-                                        <p className="mt-1 text-sm text-zinc-200">
-                                            {getOrderAmount(selectedOrder)}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xs text-zinc-500">
-                                            Transaction
-                                        </p>
-                                        <p className="mt-1 break-all text-sm text-zinc-300">
-                                            {selectedPayment.transactionId ||
-                                                "—"}
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p className="mt-3 text-sm text-zinc-500">
-                                    No payment record available.
+                        <div className="grid grid-cols-1 border border-zinc-800 sm:grid-cols-2">
+                            <div className="border-b border-zinc-800 p-4 sm:border-b-0 sm:border-r">
+                                <p className="mb-3 flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-500">
+                                    <UserRound size={13} />
+                                    DELIVER TO
                                 </p>
-                            )}
-                        </div>
 
-                        {/* Item checklist */}
-                        <div className="rounded-xl border border-zinc-800">
-                            <div className="flex flex-col justify-between gap-2 border-b border-zinc-800 p-4 sm:flex-row sm:items-center">
-                                <div>
-                                    <h3 className="font-semibold text-white">
-                                        Order Item Checklist
-                                    </h3>
-                                    <p className="mt-1 text-xs text-zinc-500">
-                                        Verify each item against the order
-                                        before marking the parcel packed.
-                                    </p>
-                                </div>
-
-                                {selectedOrder.shipment && (
-                                    <span className="text-sm text-zinc-400">
-                                        {verifiedItems}/{totalItems} verified
-                                    </span>
-                                )}
+                                <p className="text-xs font-black">
+                                    {selectedOrder.orderHistory?.fullName ??
+                                        selectedOrder.user.name ??
+                                        "Unknown customer"}
+                                </p>
+                                <p className="mt-1 text-[11px] text-zinc-300">
+                                    {selectedOrder.orderHistory?.street ?? "—"}
+                                </p>
+                                <p className="text-[11px] text-zinc-300">
+                                    {selectedOrder.orderHistory?.city ?? ""}
+                                    {selectedOrder.orderHistory?.zipCode
+                                        ? ` ${selectedOrder.orderHistory.zipCode}`
+                                        : ""}
+                                    {selectedOrder.orderHistory?.country
+                                        ? `, ${selectedOrder.orderHistory.country}`
+                                        : ""}
+                                </p>
+                                <p className="mt-2 text-[10px] text-zinc-500">
+                                    {selectedOrder.orderHistory?.phone ??
+                                        selectedOrder.user.phone ??
+                                        selectedOrder.user.email}
+                                </p>
                             </div>
 
-                            <div className="divide-y divide-zinc-800">
+                            <div className="p-4">
+                                <p className="mb-3 flex items-center gap-2 text-[10px] font-bold tracking-widest text-zinc-500">
+                                    <Package size={13} />
+                                    PAYMENT
+                                </p>
+
+                                <p className="text-xs font-black">
+                                    {getPaymentLabel(getPayment(selectedOrder))}
+                                </p>
+                                <p className="mt-1 text-sm font-bold">
+                                    Order total {getAmount(selectedOrder)}
+                                </p>
+                                <p className="mt-1 text-[10px] text-zinc-500">
+                                    {getPayment(selectedOrder)?.transactionId ??
+                                        "No transaction reference"}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Detail tabs */}
+                        <div className="grid grid-cols-2 border-b border-zinc-800">
+                            <button
+                                type="button"
+                                onClick={() => setDetailTab("items")}
+                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${
+                                    detailTab === "items"
+                                        ? "border-second text-second"
+                                        : "border-transparent text-zinc-500"
+                                }`}
+                            >
+                                VERIFY &amp; PACK (
+                                {selectedOrder.shipment?.itemChecks.filter(
+                                    (item) => item.verified,
+                                ).length ?? 0}
+                                /
+                                {selectedOrder.orderItems.length})
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setDetailTab("timeline")}
+                                className={`border-b-2 py-3 text-[10px] font-black tracking-widest ${
+                                    detailTab === "timeline"
+                                        ? "border-second text-second"
+                                        : "border-transparent text-zinc-500"
+                                }`}
+                            >
+                                TIMELINE (
+                                {selectedOrder.shipment?.events.length ?? 0})
+                            </button>
+                        </div>
+
+                        {detailTab === "items" ? (
+                            <div className="space-y-2">
+                                <p className="text-[9px] font-bold tracking-widest text-zinc-500">
+                                    ITEM CHECKLIST
+                                </p>
+
                                 {selectedOrder.orderItems.map((item) => {
-                                    const itemCheck =
+                                    const check =
                                         selectedOrder.shipment?.itemChecks.find(
-                                            (check) =>
-                                                check.orderItemId === item.id,
+                                            (entry) =>
+                                                entry.orderItemId === item.id,
                                         );
 
-                                    const verified =
-                                        itemCheck?.verified ?? false;
-
+                                    const verified = check?.verified ?? false;
                                     const canVerify =
                                         selectedOrder.shipment
                                             ?.fulfillmentStatus === "PACKING" &&
@@ -1786,372 +1901,331 @@ export default function FulfillmentDashboard() {
                                     return (
                                         <div
                                             key={item.id}
-                                            className="flex items-center gap-3 p-4"
+                                            className="flex items-center gap-3 border border-zinc-800 bg-[#0d0d0d] p-3"
                                         >
                                             <div
-                                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
+                                                className={`flex h-5 w-5 shrink-0 items-center justify-center border ${
                                                     verified
-                                                        ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                                                        : "border-zinc-800 bg-black text-zinc-500"
+                                                        ? "border-second bg-second text-black"
+                                                        : "border-zinc-700 text-zinc-600"
                                                 }`}
                                             >
-                                                {verified ? (
-                                                    <Check size={17} />
-                                                ) : (
-                                                    <Package size={17} />
-                                                )}
+                                                {verified && <Check size={13} />}
                                             </div>
 
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-medium text-zinc-100">
+                                                <p className="text-[11px] font-bold">
                                                     {item.variant.product.name}
                                                 </p>
-
-                                                <p className="mt-1 text-xs text-zinc-500">
-                                                    Size:{" "}
-                                                    {item.variant.size || "—"}{" "}
-                                                    <span className="px-1">
-                                                        ·
-                                                    </span>
-                                                    Color:{" "}
-                                                    {item.variant.color || "—"}{" "}
-                                                    <span className="px-1">
-                                                        ·
-                                                    </span>
-                                                    Qty: {item.quantity}
+                                                <p className="mt-1 text-[9px] text-zinc-500">
+                                                    Size {item.variant.size ?? "—"}
+                                                    {" · "}
+                                                    {item.variant.color ?? "—"}
                                                 </p>
                                             </div>
 
-                                            <div className="text-right">
-                                                {verified ? (
-                                                    <span className="text-xs font-medium text-emerald-300">
-                                                        Verified
-                                                    </span>
-                                                ) : canVerify ? (
-                                                    <button
-                                                        type="button"
-                                                        disabled={
-                                                            actionLoading ===
-                                                            `VERIFY_ITEM_${item.id}`
+                                            <p className="text-xs font-black">
+                                                ×{item.quantity}
+                                            </p>
+
+                                            {canVerify && (
+                                                <button
+                                                    type="button"
+                                                    disabled={busyAction !== null}
+                                                    onClick={async () => {
+                                                        const shipmentId =
+                                                            selectedOrder.shipment
+                                                                ?.id;
+
+                                                        if (!shipmentId) return;
+
+                                                        const success =
+                                                            await postAction(
+                                                                "VERIFY_ITEM",
+                                                                {
+                                                                    shipmentId,
+                                                                    orderItemId:
+                                                                        item.id,
+                                                                },
+                                                            );
+
+                                                        if (success) {
+                                                            setSelectedOrder(
+                                                                (current) => {
+                                                                    if (
+                                                                        !current?.shipment
+                                                                    ) {
+                                                                        return current;
+                                                                    }
+
+                                                                    return {
+                                                                        ...current,
+                                                                        shipment: {
+                                                                            ...current.shipment,
+                                                                            itemChecks:
+                                                                                current.shipment.itemChecks.map(
+                                                                                    (
+                                                                                        entry,
+                                                                                    ) =>
+                                                                                        entry.orderItemId ===
+                                                                                        item.id
+                                                                                            ? {
+                                                                                                  ...entry,
+                                                                                                  verified: true,
+                                                                                                  verifiedAt:
+                                                                                                      new Date().toISOString(),
+                                                                                              }
+                                                                                            : entry,
+                                                                                ),
+                                                                        },
+                                                                    };
+                                                                },
+                                                            );
                                                         }
-                                                        onClick={async () => {
-                                                            const success =
-                                                                await performAction(
-                                                                    "VERIFY_ITEM",
-                                                                    {
-                                                                        shipmentId:
-                                                                            selectedOrder
-                                                                                .shipment!
-                                                                                .id,
-                                                                        orderItemId:
-                                                                            item.id,
-                                                                    },
-                                                                );
+                                                    }}
+                                                    className={`${BUTTON} border-second text-second`}
+                                                >
+                                                    Verify
+                                                </button>
+                                            )}
 
-                                                            if (success) {
-                                                                setSelectedOrder(
-                                                                    (current) => {
-                                                                        if (
-                                                                            !current?.shipment
-                                                                        ) {
-                                                                            return current;
-                                                                        }
-
-                                                                        return {
-                                                                            ...current,
-                                                                            shipment: {
-                                                                                ...current.shipment,
-                                                                                itemChecks:
-                                                                                    current.shipment.itemChecks.map(
-                                                                                        (
-                                                                                            check,
-                                                                                        ) =>
-                                                                                            check.orderItemId ===
-                                                                                            item.id
-                                                                                                ? {
-                                                                                                      ...check,
-                                                                                                      verified: true,
-                                                                                                      verifiedAt:
-                                                                                                          new Date().toISOString(),
-                                                                                                  }
-                                                                                                : check,
-                                                                                    ),
-                                                                            },
-                                                                        };
-                                                                    },
-                                                                );
-                                                            }
-                                                        }}
-                                                        className="rounded-lg border border-cyan-400/30 px-3 py-2 text-xs font-medium text-cyan-300 hover:bg-cyan-400/10 disabled:opacity-40"
-                                                    >
-                                                        Verify
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-xs text-zinc-600">
-                                                        Pending
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {verified && (
+                                                <span className="text-[9px] font-bold text-second">
+                                                    VERIFIED
+                                                </span>
+                                            )}
                                         </div>
                                     );
                                 })}
-                            </div>
 
-                            {/* Packing actions */}
-                            {selectedOrder.shipment && (
-                                <div className="flex flex-col gap-3 border-t border-zinc-800 bg-black/50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                    <p className="text-xs text-zinc-500">
-                                        {selectedOrder.shipment.fulfillmentStatus ===
-                                        "READY_TO_PACK"
-                                            ? "Start packing to enable item verification."
-                                            : selectedOrder.shipment
-                                                  .fulfillmentStatus ===
-                                              "PACKING"
-                                            ? "All items must be verified before packing is completed."
-                                            : selectedOrder.shipment
-                                                  .fulfillmentStatus ===
-                                              "PACKED"
-                                            ? "The parcel is packed and ready to dispatch."
-                                            : "The parcel has been dispatched."}
+                                {!selectedOrder.shipment && (
+                                    <p className="border border-zinc-800 p-3 text-[10px] text-zinc-500">
+                                        Create a shipment before packing this order.
                                     </p>
+                                )}
 
-                                    <div className="flex flex-wrap gap-2">
-                                        {selectedOrder.shipment
-                                            .fulfillmentStatus ===
-                                            "READY_TO_PACK" && (
-                                            <PrimaryButton
-                                                loading={
-                                                    actionLoading ===
-                                                    "START_PACKING"
-                                                }
-                                                onClick={async () => {
-                                                    const success =
-                                                        await performAction(
-                                                            "START_PACKING",
-                                                            {
-                                                                shipmentId:
-                                                                    selectedOrder
-                                                                        .shipment!
-                                                                        .id,
-                                                            },
-                                                        );
+                                {selectedOrder.shipment?.fulfillmentStatus ===
+                                    "READY_TO_PACK" && (
+                                    <p className="text-[10px] text-zinc-500">
+                                        Start packing to unlock the checklist.
+                                    </p>
+                                )}
 
-                                                    if (success) {
-                                                        setSelectedOrder(
-                                                            (current) =>
-                                                                current?.shipment
-                                                                    ? {
-                                                                          ...current,
-                                                                          shipment:
-                                                                              {
-                                                                                  ...current.shipment,
-                                                                                  fulfillmentStatus:
-                                                                                      "PACKING",
-                                                                              },
-                                                                      }
-                                                                    : current,
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                <ClipboardCheck size={15} />
-                                                Start Packing
-                                            </PrimaryButton>
-                                        )}
-
-                                        {selectedOrder.shipment
-                                            .fulfillmentStatus === "PACKING" && (
-                                            <PrimaryButton
-                                                loading={
-                                                    actionLoading ===
-                                                    "MARK_PACKED"
-                                                }
-                                                disabled={
-                                                    verifiedItems !==
-                                                        totalItems ||
-                                                    totalItems === 0
-                                                }
-                                                onClick={async () => {
-                                                    const success =
-                                                        await performAction(
-                                                            "MARK_PACKED",
-                                                            {
-                                                                shipmentId:
-                                                                    selectedOrder
-                                                                        .shipment!
-                                                                        .id,
-                                                            },
-                                                        );
-
-                                                    if (success) {
-                                                        setSelectedOrder(
-                                                            (current) =>
-                                                                current?.shipment
-                                                                    ? {
-                                                                          ...current,
-                                                                          shipment:
-                                                                              {
-                                                                                  ...current.shipment,
-                                                                                  fulfillmentStatus:
-                                                                                      "PACKED",
-                                                                              },
-                                                                      }
-                                                                    : current,
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                <PackageCheck size={15} />
-                                                Mark as Packed
-                                            </PrimaryButton>
-                                        )}
-
-                                        {selectedOrder.shipment
-                                            .fulfillmentStatus === "PACKED" && (
-                                            <PrimaryButton
-                                                loading={
-                                                    actionLoading ===
-                                                    "DISPATCH"
-                                                }
-                                                onClick={async () => {
-                                                    const confirmed =
-                                                        window.confirm(
-                                                            "Confirm that this parcel is being handed over for dispatch?",
-                                                        );
-
-                                                    if (!confirmed) return;
-
-                                                    const success =
-                                                        await performAction(
-                                                            "DISPATCH",
-                                                            {
-                                                                shipmentId:
-                                                                    selectedOrder
-                                                                        .shipment!
-                                                                        .id,
-                                                            },
-                                                        );
-
-                                                    if (success) {
-                                                        setSelectedOrder(
-                                                            (current) =>
-                                                                current?.shipment
-                                                                    ? {
-                                                                          ...current,
-                                                                          status: "SHIPPED",
-                                                                          shipment:
-                                                                              {
-                                                                                  ...current.shipment,
-                                                                                  fulfillmentStatus:
-                                                                                      "DISPATCHED",
-                                                                                  dispatchedAt:
-                                                                                      new Date().toISOString(),
-                                                                              },
-                                                                      }
-                                                                    : current,
-                                                        );
-                                                    }
-                                                }}
-                                            >
-                                                <Truck size={15} />
-                                                Dispatch Parcel
-                                            </PrimaryButton>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Tracking timeline */}
-                        {selectedOrder.shipment && (
-                            <div className="rounded-xl border border-zinc-800 p-4">
-                                <div className="mb-4 flex items-center gap-2">
-                                    <Clock3
-                                        size={17}
-                                        className="text-cyan-400"
+                                <label className="block pt-2">
+                                    <span className="mb-2 block text-[9px] font-bold tracking-widest text-zinc-500">
+                                        EXCEPTION NOTES
+                                    </span>
+                                    <textarea
+                                        value={exceptionNote}
+                                        onChange={(event) =>
+                                            setExceptionNote(event.target.value)
+                                        }
+                                        rows={2}
+                                        placeholder="e.g. Customer requested gift wrap; replaced torn polybag"
+                                        className="w-full resize-y border border-zinc-800 bg-[#0d0d0d] p-3 text-[11px] outline-none placeholder:text-zinc-600 focus:border-second"
                                     />
-                                    <h3 className="font-semibold text-white">
-                                        Fulfillment Timeline
-                                    </h3>
-                                </div>
-
-                                {selectedOrder.shipment.events.length === 0 ? (
-                                    <p className="text-sm text-zinc-500">
+                                </label>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {!selectedOrder.shipment?.events.length ? (
+                                    <p className="border border-zinc-800 p-4 text-[10px] text-zinc-500">
                                         No tracking events recorded yet.
                                     </p>
                                 ) : (
-                                    <div className="space-y-4">
-                                        {selectedOrder.shipment.events.map(
-                                            (event, index) => (
-                                                <div
-                                                    key={event.id}
-                                                    className="flex gap-3"
-                                                >
-                                                    <div className="flex flex-col items-center">
-                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
-                                                            {event.type ===
-                                                            "DELIVERED" ? (
-                                                                <CheckCircle2
-                                                                    size={15}
-                                                                />
-                                                            ) : event.type ===
-                                                              "DISPATCHED" ? (
-                                                                <Truck
-                                                                    size={15}
-                                                                />
-                                                            ) : (
-                                                                <Activity
-                                                                    size={15}
-                                                                />
-                                                            )}
-                                                        </div>
-
-                                                        {index <
-                                                            selectedOrder
-                                                                .shipment!
-                                                                .events.length -
-                                                                1 && (
-                                                            <div className="mt-1 min-h-6 w-px flex-1 bg-zinc-800" />
-                                                        )}
-                                                    </div>
-
-                                                    <div className="min-w-0 flex-1 pb-2">
-                                                        <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-start">
-                                                            <p className="text-sm font-medium text-zinc-100">
-                                                                {event.title}
-                                                            </p>
-                                                            <span className="text-xs text-zinc-500">
-                                                                {formatDate(
-                                                                    event.createdAt,
-                                                                )}
-                                                            </span>
-                                                        </div>
-
-                                                        {event.description && (
-                                                            <p className="mt-1 text-sm text-zinc-400">
-                                                                {
-                                                                    event.description
-                                                                }
-                                                            </p>
-                                                        )}
-
-                                                        {event.actor?.name && (
-                                                            <p className="mt-1 text-xs text-zinc-600">
-                                                                By{" "}
-                                                                {
-                                                                    event.actor
-                                                                        .name
-                                                                }
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ),
-                                        )}
-                                    </div>
+                                    selectedOrder.shipment.events.map((event) => (
+                                        <div
+                                            key={event.id}
+                                            className="flex gap-3 border-l border-zinc-700 pl-3"
+                                        >
+                                            <div className="mt-1 text-second">
+                                                <CheckCircle2 size={14} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs font-bold">
+                                                    {event.title}
+                                                </p>
+                                                {event.description && (
+                                                    <p className="mt-1 text-[10px] text-zinc-400">
+                                                        {event.description}
+                                                    </p>
+                                                )}
+                                                <p className="mt-1 text-[9px] text-zinc-600">
+                                                    {formatDateTime(event.createdAt)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
                                 )}
                             </div>
                         )}
+
+                        {/* Action footer */}
+                        <div className="flex flex-wrap justify-end gap-2 border-t border-zinc-800 pt-4">
+                            <button
+                                type="button"
+                                onClick={() => openLabel(selectedOrder)}
+                                className={BUTTON}
+                            >
+                                <Printer size={14} />
+                                Label
+                            </button>
+
+                            {!selectedOrder.shipment && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        void createShipment(selectedOrder)
+                                    }
+                                    disabled={busyAction !== null}
+                                    className={LIME_BUTTON}
+                                >
+                                    {busyAction === "CREATE_SHIPMENT" ? (
+                                        <LoaderCircle
+                                            size={14}
+                                            className="animate-spin"
+                                        />
+                                    ) : (
+                                        <Package size={14} />
+                                    )}
+                                    Create Shipment
+                                </button>
+                            )}
+
+                            {selectedOrder.shipment?.fulfillmentStatus ===
+                                "READY_TO_PACK" && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const shipmentId =
+                                            selectedOrder.shipment?.id;
+
+                                        if (!shipmentId) return;
+
+                                        const success = await postAction(
+                                            "START_PACKING",
+                                            { shipmentId },
+                                        );
+
+                                        if (success) {
+                                            setSelectedOrder((current) =>
+                                                current?.shipment
+                                                    ? {
+                                                          ...current,
+                                                          shipment: {
+                                                              ...current.shipment,
+                                                              fulfillmentStatus:
+                                                                  "PACKING",
+                                                          },
+                                                      }
+                                                    : current,
+                                            );
+                                        }
+                                    }}
+                                    disabled={busyAction !== null}
+                                    className={LIME_BUTTON}
+                                >
+                                    <Package size={14} />
+                                    Start Packing
+                                </button>
+                            )}
+
+                            {selectedOrder.shipment?.fulfillmentStatus ===
+                                "PACKING" && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const shipment = selectedOrder.shipment;
+
+                                        if (!shipment) return;
+
+                                        const allVerified =
+                                            selectedOrder.orderItems.length > 0 &&
+                                            selectedOrder.orderItems.every(
+                                                (item) =>
+                                                    shipment.itemChecks.some(
+                                                        (check) =>
+                                                            check.orderItemId ===
+                                                                item.id &&
+                                                            check.verified,
+                                                    ),
+                                            );
+
+                                        if (!allVerified) {
+                                            setError(
+                                                "Verify every order item before marking the parcel packed.",
+                                            );
+                                            return;
+                                        }
+
+                                        const success = await postAction(
+                                            "MARK_PACKED",
+                                            { shipmentId: shipment.id },
+                                        );
+
+                                        if (success) {
+                                            setSelectedOrder((current) =>
+                                                current?.shipment
+                                                    ? {
+                                                          ...current,
+                                                          shipment: {
+                                                              ...current.shipment,
+                                                              fulfillmentStatus:
+                                                                  "PACKED",
+                                                          },
+                                                      }
+                                                    : current,
+                                            );
+                                        }
+                                    }}
+                                    disabled={busyAction !== null}
+                                    className={LIME_BUTTON}
+                                >
+                                    <PackageCheck size={14} />
+                                    Mark Packed
+                                </button>
+                            )}
+
+                            {selectedOrder.shipment?.fulfillmentStatus ===
+                                "PACKED" && (
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        const shipmentId =
+                                            selectedOrder.shipment?.id;
+
+                                        if (!shipmentId) return;
+
+                                        const success = await postAction(
+                                            "DISPATCH",
+                                            { shipmentId },
+                                        );
+
+                                        if (success) {
+                                            setSelectedOrder((current) =>
+                                                current?.shipment
+                                                    ? {
+                                                          ...current,
+                                                          shipment: {
+                                                              ...current.shipment,
+                                                              fulfillmentStatus:
+                                                                  "DISPATCHED",
+                                                              dispatchedAt:
+                                                                  new Date().toISOString(),
+                                                          },
+                                                      }
+                                                    : current,
+                                            );
+                                        }
+                                    }}
+                                    disabled={busyAction !== null}
+                                    className={LIME_BUTTON}
+                                >
+                                    <Truck size={14} />
+                                    Dispatch
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </Modal>
             )}
