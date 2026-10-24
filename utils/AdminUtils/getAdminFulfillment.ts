@@ -29,14 +29,6 @@ export interface GetAdminFulfillmentParams {
 // The table must contain only orders that are still being processed.
 const processingOrderWhere: Prisma.OrderWhereInput = {
     status: OrderStatus.PROCESSING,
-    payments: {
-        some: {
-            OR: [
-                { method: PaymentMethod.COD },
-                { status: PaymentStatus.SUCCESS },
-            ],
-        },
-    },
 };
 
 // Keep dashboard totals inclusive of shipments that have already been dispatched
