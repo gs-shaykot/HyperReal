@@ -1,163 +1,201 @@
 
 import { createHash, randomBytes } from "node:crypto";
+
 import {
     FulfillmentStatus,
     OrderStatus,
     PaymentMethod,
     PaymentStatus,
+    Prisma,
     ShipmentStatus,
     TrackingEventType,
-    Prisma,
 } from "@prisma/client";
+
 import prisma from "@/lib/prisma";
 
-type DbClient = Prisma.TransactionClient;
+type TransactionClient = Prisma.TransactionClient;
 
 export class TrackingError extends Error {
     constructor(
         message: string,
-        public statusCode = 400,
+        public readonly statusCode = 400,
     ) {
         super(message);
         this.name = "TrackingError";
     }
 }
 
-const hashToken = (token: string) =>
-    createHash("sha256").update(token).digest("hex");
+function hashToken(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
+}
 
-
-function generateCustomCode(prefix: "HYP-PRT" | "HYP-TRK") {
-    // Six uppercase alphanumeric characters.
-    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    const bytes = randomBytes(6);
-
-    const suffix = Array.from(
-        bytes,
-        (byte) => alphabet[byte % alphabet.length],
-    ).join("");
-
+function generateCode(prefix: "HYP-TRK" | "HYP-PRT"): string {
+    const suffix = randomBytes(5).toString("hex").toUpperCase();
     return `${prefix}-${suffix}`;
 }
 
-async function generateUniqueTrackingCode(
-    tx: Prisma.TransactionClient,
-): Promise<string> {
-    for (let attempt = 0; attempt < 10; attempt++) {
-        const trackingCode = generateCustomCode("HYP-TRK");
-
-        const existing = await tx.shipment.findUnique({
-            where: { trackingCode },
-            select: { id: true },
-        });
-
-        if (!existing) return trackingCode;
-    }
-
-    throw new TrackingError(
-        "Could not generate a unique tracking code. Please retry.",
-        503,
-    );
-}
-
-export async function ensureShipmentForOrder(orderId: string) {
-    return prisma.$transaction(async (tx) => {
-        const order = await tx.order.findUnique({
-            where: { id: orderId },
-            select: {
-                id: true,
-                orderCode: true,
-                status: true,
-                orderItems: {
-                    select: { id: true },
-                },
-                payments: {
-                    orderBy: { createdAt: "desc" },
-                    select: {
-                        method: true,
-                        status: true,
-                    },
-                },
-            },
-        });
-
-        if (!order) {
-            throw new TrackingError("Order not found.", 404);
-        }
-
-        if (order.status !== OrderStatus.PROCESSING) {
-            throw new TrackingError(
-                "Only confirmed orders can enter fulfillment.",
-            );
-        }
-
-        const payment = order.payments[0];
-
-        if (!payment) {
-            throw new TrackingError("Payment record not found.");
-        }
-
-        const isEligible =
-            payment.method === PaymentMethod.COD ||
-            payment.status === PaymentStatus.SUCCESS;
-
-        if (!isEligible) {
-            throw new TrackingError(
-                "Payment must be confirmed before fulfillment.",
-            );
-        }
-
-        const existing = await tx.shipment.findUnique({
-            where: { orderId },
-            include: { itemChecks: true },
-        });
-
-        if (existing) return existing;
-
-        const trackingCode = await generateUniqueTrackingCode(tx);
-
-        return tx.shipment.create({
-            data: {
-                orderId,
-                trackingCode,
-                itemChecks: {
-                    create: order.orderItems.map((item) => ({
-                        orderItemId: item.id,
-                    })),
-                },
-                events: {
-                    create: {
-                        orderId,
-                        type: TrackingEventType.ORDER_CONFIRMED,
-                        title: "Order confirmed for fulfillment",
-                        description:
-                            "The order is eligible for fulfillment.",
-                    },
-                },
-            },
-            include: { itemChecks: true },
-        });
-    });
-}
-
-async function addEvent(
-    tx: DbClient,
+async function createTrackingEvent(
+    tx: TransactionClient,
     input: {
         orderId: string;
         shipmentId: string;
-        actorId: string;
+        actorId?: string;
         type: TrackingEventType;
         title: string;
         description?: string;
         metadata?: Prisma.InputJsonValue;
     },
-) {
+): Promise<void> {
     await tx.orderTrackingEvent.create({
         data: {
-            ...input,
+            orderId: input.orderId,
+            shipmentId: input.shipmentId,
+            actorId: input.actorId,
+            type: input.type,
+            title: input.title,
+            description: input.description,
             metadata: input.metadata,
         },
     });
+}
+
+async function getShipmentOrThrow(
+    tx: TransactionClient,
+    shipmentId: string,
+) {
+    const shipment = await tx.shipment.findUnique({
+        where: { id: shipmentId },
+        include: {
+            order: {
+                select: {
+                    id: true,
+                    orderCode: true,
+                    status: true,
+                },
+            },
+            itemChecks: true,
+        },
+    });
+
+    if (!shipment) {
+        throw new TrackingError("Shipment not found.", 404);
+    }
+
+    return shipment;
+}
+
+/**
+ * Creates one shipment for an eligible order.
+ * The unique orderId constraint remains the final concurrency guard.
+ */
+export async function ensureShipmentForOrder(orderId: string) {
+    try {
+        return await prisma.$transaction(async (tx) => {
+            const order = await tx.order.findUnique({
+                where: { id: orderId },
+                select: {
+                    id: true,
+                    orderCode: true,
+                    status: true,
+                    orderItems: {
+                        select: { id: true },
+                    },
+                    payments: {
+                        orderBy: { createdAt: "desc" },
+                        take: 1,
+                        select: {
+                            method: true,
+                            status: true,
+                        },
+                    },
+                },
+            });
+
+            if (!order) {
+                throw new TrackingError("Order not found.", 404);
+            }
+
+            if (order.status !== OrderStatus.PROCESSING) {
+                throw new TrackingError(
+                    "Only processing orders can enter fulfillment.",
+                );
+            }
+
+            if (order.orderItems.length === 0) {
+                throw new TrackingError(
+                    "Cannot create a shipment for an order without items.",
+                );
+            }
+
+            const payment = order.payments[0];
+
+            if (!payment) {
+                throw new TrackingError(
+                    "A payment record is required before fulfillment.",
+                );
+            }
+
+            const paymentEligible =
+                payment.method === PaymentMethod.COD ||
+                payment.status === PaymentStatus.SUCCESS;
+
+            if (!paymentEligible) {
+                throw new TrackingError(
+                    "Online payment must succeed before fulfillment.",
+                );
+            }
+
+            const existing = await tx.shipment.findUnique({
+                where: { orderId },
+                include: { itemChecks: true },
+            });
+
+            if (existing) {
+                return existing;
+            }
+
+            const shipment = await tx.shipment.create({
+                data: {
+                    orderId,
+                    trackingCode: generateCode("HYP-TRK"),
+                    itemChecks: {
+                        create: order.orderItems.map((item) => ({
+                            orderItemId: item.id,
+                        })),
+                    },
+                },
+                include: { itemChecks: true },
+            });
+
+            await createTrackingEvent(tx, {
+                orderId,
+                shipmentId: shipment.id,
+                type: TrackingEventType.ORDER_CONFIRMED,
+                title: "Order ready for fulfillment",
+                description:
+                    "The order passed payment eligibility checks and entered fulfillment.",
+            });
+
+            return shipment;
+        });
+    } catch (error) {
+        // Concurrent requests may both try to create the unique order shipment.
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            const existing = await prisma.shipment.findUnique({
+                where: { orderId },
+                include: { itemChecks: true },
+            });
+
+            if (existing) {
+                return existing;
+            }
+        }
+
+        throw error;
+    }
 }
 
 export async function startPacking(
@@ -165,25 +203,19 @@ export async function startPacking(
     actorId: string,
 ) {
     return prisma.$transaction(async (tx) => {
-        const shipment = await tx.shipment.findUnique({
-            where: { id: shipmentId },
-            include: { order: true },
-        });
-
-        if (!shipment) {
-            throw new TrackingError("Shipment not found.", 404);
-        }
+        const shipment = await getShipmentOrThrow(tx, shipmentId);
 
         if (
             shipment.fulfillmentStatus !==
             FulfillmentStatus.READY_TO_PACK
         ) {
             throw new TrackingError(
-                "This parcel is not ready to start packing.",
+                "This shipment is not ready to start packing.",
+                409,
             );
         }
 
-        const updated = await tx.shipment.updateMany({
+        const result = await tx.shipment.updateMany({
             where: {
                 id: shipmentId,
                 fulfillmentStatus: FulfillmentStatus.READY_TO_PACK,
@@ -193,14 +225,14 @@ export async function startPacking(
             },
         });
 
-        if (updated.count !== 1) {
+        if (result.count !== 1) {
             throw new TrackingError(
-                "Shipment changed. Refresh and try again.",
+                "Shipment state changed. Refresh and try again.",
                 409,
             );
         }
 
-        await addEvent(tx, {
+        await createTrackingEvent(tx, {
             orderId: shipment.orderId,
             shipmentId,
             actorId,
@@ -211,6 +243,7 @@ export async function startPacking(
 
         return tx.shipment.findUniqueOrThrow({
             where: { id: shipmentId },
+            include: { itemChecks: true },
         });
     });
 }
@@ -221,46 +254,40 @@ export async function verifyShipmentItem(
     actorId: string,
 ) {
     return prisma.$transaction(async (tx) => {
-        const shipment = await tx.shipment.findUnique({
-            where: { id: shipmentId },
-            select: {
-                id: true,
-                orderId: true,
-                fulfillmentStatus: true,
-                itemChecks: {
-                    where: { orderItemId },
-                    select: { id: true, verified: true },
-                },
-            },
-        });
-
-        if (!shipment) {
-            throw new TrackingError("Shipment not found.", 404);
-        }
+        const shipment = await getShipmentOrThrow(tx, shipmentId);
 
         if (
             shipment.fulfillmentStatus !== FulfillmentStatus.PACKING
         ) {
             throw new TrackingError(
                 "Items can only be verified while packing.",
+                409,
             );
         }
 
-        const check = shipment.itemChecks[0];
+        const itemCheck = shipment.itemChecks.find(
+            (item) => item.orderItemId === orderItemId,
+        );
 
-        if (!check) {
+        if (!itemCheck) {
             throw new TrackingError(
                 "This item does not belong to the shipment.",
                 404,
             );
         }
 
-        if (check.verified) {
-            return { success: true, alreadyVerified: true };
+        if (itemCheck.verified) {
+            return {
+                alreadyVerified: true,
+                itemCheck,
+            };
         }
 
-        await tx.shipmentItemCheck.update({
-            where: { id: check.id },
+        const updated = await tx.shipmentItemCheck.updateMany({
+            where: {
+                id: itemCheck.id,
+                verified: false,
+            },
             data: {
                 verified: true,
                 verifiedAt: new Date(),
@@ -268,17 +295,29 @@ export async function verifyShipmentItem(
             },
         });
 
-        await addEvent(tx, {
+        if (updated.count !== 1) {
+            throw new TrackingError(
+                "Item verification changed. Refresh and try again.",
+                409,
+            );
+        }
+
+        await createTrackingEvent(tx, {
             orderId: shipment.orderId,
             shipmentId,
             actorId,
             type: TrackingEventType.ITEM_VERIFIED,
-            title: "Item verified",
-            description: "An order item was checked during packing.",
+            title: "Order item verified",
+            description: "An item passed the fulfillment checklist.",
             metadata: { orderItemId },
         });
 
-        return { success: true, alreadyVerified: false };
+        return {
+            alreadyVerified: false,
+            itemCheck: await tx.shipmentItemCheck.findUniqueOrThrow({
+                where: { id: itemCheck.id },
+            }),
+        };
     });
 }
 
@@ -287,22 +326,14 @@ export async function markShipmentPacked(
     actorId: string,
 ) {
     return prisma.$transaction(async (tx) => {
-        const shipment = await tx.shipment.findUnique({
-            where: { id: shipmentId },
-            include: {
-                itemChecks: true,
-            },
-        });
-
-        if (!shipment) {
-            throw new TrackingError("Shipment not found.", 404);
-        }
+        const shipment = await getShipmentOrThrow(tx, shipmentId);
 
         if (
             shipment.fulfillmentStatus !== FulfillmentStatus.PACKING
         ) {
             throw new TrackingError(
-                "Only a parcel being packed can be marked packed.",
+                "Only a shipment being packed can be marked packed.",
+                409,
             );
         }
 
@@ -315,35 +346,38 @@ export async function markShipmentPacked(
             );
         }
 
-        const updated = await tx.shipment.updateMany({
+        const packedAt = new Date();
+
+        const result = await tx.shipment.updateMany({
             where: {
                 id: shipmentId,
                 fulfillmentStatus: FulfillmentStatus.PACKING,
             },
             data: {
                 fulfillmentStatus: FulfillmentStatus.PACKED,
-                packedAt: new Date(),
+                packedAt,
             },
         });
 
-        if (updated.count !== 1) {
+        if (result.count !== 1) {
             throw new TrackingError(
-                "Shipment changed. Refresh and try again.",
+                "Shipment state changed. Refresh and try again.",
                 409,
             );
         }
 
-        await addEvent(tx, {
+        await createTrackingEvent(tx, {
             orderId: shipment.orderId,
             shipmentId,
             actorId,
             type: TrackingEventType.PACKED,
-            title: "Items verified and packed",
-            description: "All order items passed the packing checklist.",
+            title: "Parcel packed",
+            description: "All order items were verified and packed.",
         });
 
         return tx.shipment.findUniqueOrThrow({
             where: { id: shipmentId },
+            include: { itemChecks: true },
         });
     });
 }
@@ -353,19 +387,7 @@ export async function dispatchShipment(
     actorId: string,
 ) {
     return prisma.$transaction(async (tx) => {
-        const shipment = await tx.shipment.findUnique({
-            where: { id: shipmentId },
-            select: {
-                id: true,
-                orderId: true,
-                fulfillmentStatus: true,
-                status: true,
-            },
-        });
-
-        if (!shipment) {
-            throw new TrackingError("Shipment not found.", 404);
-        }
+        const shipment = await getShipmentOrThrow(tx, shipmentId);
 
         if (
             shipment.fulfillmentStatus !== FulfillmentStatus.PACKED ||
@@ -373,10 +395,11 @@ export async function dispatchShipment(
         ) {
             throw new TrackingError(
                 "Only a packed parcel awaiting dispatch can be dispatched.",
+                409,
             );
         }
 
-        const updated = await tx.shipment.updateMany({
+        const result = await tx.shipment.updateMany({
             where: {
                 id: shipmentId,
                 fulfillmentStatus: FulfillmentStatus.PACKED,
@@ -388,22 +411,31 @@ export async function dispatchShipment(
             },
         });
 
-        if (updated.count !== 1) {
+        if (result.count !== 1) {
             throw new TrackingError(
-                "Shipment changed. Refresh and try again.",
+                "Shipment state changed. Refresh and try again.",
                 409,
             );
         }
 
-        await tx.order.updateMany({
+        const orderResult = await tx.order.updateMany({
             where: {
                 id: shipment.orderId,
                 status: OrderStatus.PROCESSING,
             },
-            data: { status: OrderStatus.SHIPPED },
+            data: {
+                status: OrderStatus.SHIPPED,
+            },
         });
 
-        await addEvent(tx, {
+        if (orderResult.count !== 1) {
+            throw new TrackingError(
+                "The order is no longer eligible for dispatch.",
+                409,
+            );
+        }
+
+        await createTrackingEvent(tx, {
             orderId: shipment.orderId,
             shipmentId,
             actorId,
@@ -414,13 +446,17 @@ export async function dispatchShipment(
 
         return tx.shipment.findUniqueOrThrow({
             where: { id: shipmentId },
+            include: { itemChecks: true },
         });
     });
 }
 
-
+/**
+ * Generates a new parcel token.
+ * The raw token is returned only to the caller; only its hash is stored.
+ */
 export async function rotateParcelToken(shipmentId: string) {
-    const token = generateCustomCode("HYP-PRT");
+    const token = generateCode("HYP-PRT");
 
     const shipment = await prisma.shipment.update({
         where: { id: shipmentId },
@@ -429,17 +465,17 @@ export async function rotateParcelToken(shipmentId: string) {
         },
         select: {
             id: true,
+            orderId: true,
             trackingCode: true,
         },
     });
 
     return {
-        ...shipment,
+        shipment,
         token,
     };
 }
 
-
-export function hashParcelToken(token: string) {
+export function hashParcelToken(token: string): string {
     return hashToken(token);
 }

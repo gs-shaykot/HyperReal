@@ -1,42 +1,60 @@
 
+import { Prisma } from "@prisma/client";
+
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import { rotateParcelToken, TrackingError } from "@/lib/service/trackingService";
+
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
 
-        if (!session?.user?.id || session.user.role !== "ADMIN") {
+        if (
+            !session?.user?.id ||
+            session.user.role !== "ADMIN"
+        ) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized." },
                 { status: 401 },
             );
         }
 
-        const body: unknown = await req.json();
+        let body: { shipmentId?: unknown };
 
-        if (
-            typeof body !== "object" ||
-            body === null ||
-            !("shipmentId" in body) ||
-            typeof body.shipmentId !== "string" ||
-            !body.shipmentId.trim()
-        ) {
+        try {
+            body = await request.json();
+        } catch {
             return NextResponse.json(
-                { success: false, message: "A valid shipment ID is required." },
+                { success: false, message: "Invalid JSON body." },
                 { status: 400 },
             );
         }
 
-        const shipment = await rotateParcelToken(body.shipmentId.trim());
+        if (
+            typeof body.shipmentId !== "string" ||
+            !body.shipmentId.trim()
+        ) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "A valid shipment ID is required.",
+                },
+                { status: 400 },
+            );
+        }
+
+        const result = await rotateParcelToken(body.shipmentId.trim());
 
         return NextResponse.json({
             success: true,
-            message: "Parcel QR token generated. Save it now; it will not be returned again.",
-            data: shipment,
+            message: "Parcel token rotated. The previous token is no longer valid.",
+            data: {
+                shipmentId: result.shipment.id,
+                trackingCode: result.shipment.trackingCode,
+                parcelToken: result.token,
+            },
         });
     } catch (error) {
         if (error instanceof TrackingError) {
@@ -46,10 +64,23 @@ export async function POST(req: Request) {
             );
         }
 
-        console.error("Parcel token generation error:", error);
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === "P2025"
+        ) {
+            return NextResponse.json(
+                { success: false, message: "Shipment not found." },
+                { status: 404 },
+            );
+        }
+
+        console.error("Parcel token rotation failed:", error);
 
         return NextResponse.json(
-            { success: false, message: "Could not generate the parcel token." },
+            {
+                success: false,
+                message: "Could not rotate the parcel token.",
+            },
             { status: 500 },
         );
     }

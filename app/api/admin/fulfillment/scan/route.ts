@@ -1,136 +1,145 @@
 
+import { Prisma } from "@prisma/client";
+
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { hashParcelToken } from "@/lib/service/trackingService";
+
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-    try {
-        const session = await getServerSession(authOptions);
+async function isAdmin(): Promise<boolean> {
+    const session = await getServerSession(authOptions);
 
-        if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return Boolean(
+        session?.user?.id &&
+        session.user.role === "ADMIN",
+    );
+}
+
+export async function POST(request: Request) {
+    try {
+        if (!(await isAdmin())) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized." },
                 { status: 401 },
             );
         }
 
-        const body: unknown = await req.json();
-
-        if (typeof body !== "object" || body === null) {
-            return NextResponse.json(
-                { success: false, message: "Invalid request body." },
-                { status: 400 },
-            );
-        }
-
-        const input = body as {
+        let body: {
             token?: unknown;
             lookup?: unknown;
         };
 
-        const token =
-            typeof input.token === "string" ? input.token.trim() : "";
-
-        const lookup =
-            typeof input.lookup === "string" ? input.lookup.trim() : "";
-
-        if (!token && !lookup) {
+        try {
+            body = await request.json();
+        } catch {
             return NextResponse.json(
-                { success: false, message: "Scan a parcel QR or enter a tracking/order code." },
+                { success: false, message: "Invalid JSON body." },
                 { status: 400 },
             );
         }
 
-        const shipment = await prisma.shipment.findFirst({
-            where: token
-                ? { parcelTokenHash: hashParcelToken(token) }
-                : {
-                    OR: [
-                        { trackingCode: lookup },
-                        { order: { orderCode: lookup } },
-                    ],
+        const token =
+            typeof body.token === "string" ? body.token.trim() : "";
+        const lookup =
+            typeof body.lookup === "string" ? body.lookup.trim() : "";
+
+        if (!token && !lookup) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Enter a parcel token, tracking code, or order code.",
                 },
-            select: {
-                id: true,
-                trackingCode: true,
-                fulfillmentStatus: true,
-                status: true,
-                packedAt: true,
-                dispatchedAt: true,
-                deliveredAt: true,
-                failureReason: true,
-                order: {
-                    select: {
-                        id: true,
-                        orderCode: true,
-                        status: true,
-                        createdAt: true,
-                        user: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                phone: true,
+                { status: 400 },
+            );
+        }
+
+        const shipment = token
+            ? await prisma.shipment.findUnique({
+                where: {
+                    parcelTokenHash: hashParcelToken(token),
+                },
+                select: {
+                    id: true,
+                    trackingCode: true,
+                    fulfillmentStatus: true,
+                    status: true,
+                    order: {
+                        select: {
+                            id: true,
+                            orderCode: true,
+                        },
+                    },
+                },
+            })
+            : await prisma.shipment.findFirst({
+                where: {
+                    OR: [
+                        {
+                            trackingCode: {
+                                equals: lookup,
+                                mode: "insensitive",
                             },
                         },
-                        orderHistory: true,
-                        orderItems: {
-                            select: {
-                                id: true,
-                                quantity: true,
-                                priceAtPurchase: true,
-                                variant: {
-                                    select: {
-                                        size: true,
-                                        color: true,
-                                        product: {
-                                            select: {
-                                                id: true,
-                                                name: true,
-                                            },
-                                        },
+                        {
+                            order: {
+                                is: {
+                                    orderCode: {
+                                        equals: lookup,
+                                        mode: "insensitive",
                                     },
                                 },
                             },
                         },
-                        payments: {
-                            orderBy: { createdAt: "desc" },
-                            take: 1,
-                            select: {
-                                method: true,
-                                status: true,
-                                paidAmountInUSD: true,
-                                totalProductPriceInUSD: true,
-                                shippingCost: true,
-                            },
-                        },
-                        trackingEvents: {
-                            orderBy: { createdAt: "desc" },
+                    ],
+                },
+                select: {
+                    id: true,
+                    trackingCode: true,
+                    fulfillmentStatus: true,
+                    status: true,
+                    order: {
+                        select: {
+                            id: true,
+                            orderCode: true,
                         },
                     },
                 },
-                itemChecks: true,
-                assignedCourier: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        phone: true,
-                    },
-                },
-            },
-        });
+            });
 
         if (!shipment) {
+            // Support locating an eligible order that has not yet had
+            // a shipment created.
+            if (!token && lookup) {
+                const order = await prisma.order.findFirst({
+                    where: {
+                        orderCode: {
+                            equals: lookup,
+                            mode: "insensitive",
+                        },
+                    },
+                    select: {
+                        id: true,
+                        orderCode: true,
+                    },
+                });
+
+                if (order) {
+                    return NextResponse.json({
+                        success: true,
+                        message: "Order found; no shipment has been created yet.",
+                        data: {
+                            shipment: null,
+                            trackingCode: null,
+                            order,
+                        },
+                    });
+                }
+            }
+
             return NextResponse.json(
-                {
-                    success: false,
-                    message: token
-                        ? "Invalid or expired parcel QR token."
-                        : "No matching parcel was found.",
-                },
+                { success: false, message: "Parcel not found." },
                 { status: 404 },
             );
         }
@@ -138,13 +147,31 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             message: "Parcel found.",
-            data: shipment,
+            data: {
+                shipment: {
+                    id: shipment.id,
+                    fulfillmentStatus: shipment.fulfillmentStatus,
+                    status: shipment.status,
+                },
+                trackingCode: shipment.trackingCode,
+                order: shipment.order,
+            },
         });
-    } catch (error) {
-        console.error("Parcel scan error:", error);
+    }
+    catch (error) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError
+        ) {
+            console.error("Fulfillment parcel lookup failed:", error);
+        } else {
+            console.error("Fulfillment parcel lookup failed:", error);
+        }
 
         return NextResponse.json(
-            { success: false, message: "Could not look up this parcel." },
+            {
+                success: false,
+                message: "Could not look up the parcel.",
+            },
             { status: 500 },
         );
     }

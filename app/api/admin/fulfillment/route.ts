@@ -1,4 +1,9 @@
 
+import {
+    FulfillmentStatus,
+    Prisma,
+} from "@prisma/client";
+
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {
@@ -10,11 +15,33 @@ import {
     TrackingError,
     verifyShipmentItem,
 } from "@/lib/service/trackingService";
-import { OrderStatus } from "@prisma/client";
+import {
+    getAdminFulfillment,
+    type FulfillmentFilter,
+} from "@/utils/AdminUtils/getAdminFulfillment";
+
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function getAdmin() {
+type AdminSessionUser = {
+    id: string;
+    role: string;
+};
+
+type ActionBody = {
+    action?: unknown;
+    orderId?: unknown;
+    shipmentId?: unknown;
+    orderItemId?: unknown;
+};
+
+const allowedFilters = new Set<string>([
+    "ALL",
+    ...Object.values(FulfillmentStatus),
+    "DISPATCHED",
+]);
+
+async function getAdmin(): Promise<AdminSessionUser | null> {
     const session = await getServerSession(authOptions);
 
     if (
@@ -24,262 +51,252 @@ async function getAdmin() {
         return null;
     }
 
-    return session.user;
+    return {
+        id: session.user.id,
+        role: session.user.role,
+    };
 }
 
-function handleError(error: unknown) {
+function errorResponse(error: unknown) {
     if (error instanceof TrackingError) {
         return NextResponse.json(
-            { success: false, message: error.message },
+            {
+                success: false,
+                message: error.message,
+            },
             { status: error.statusCode },
         );
     }
 
-    console.error("Fulfillment API error:", error);
+    if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === "P2025"
+    ) {
+        return NextResponse.json(
+            {
+                success: false,
+                message: "The requested record was not found.",
+            },
+            { status: 404 },
+        );
+    }
+
+    console.error("Admin fulfillment API error:", error);
 
     return NextResponse.json(
-        { success: false, message: "Fulfillment request failed." },
+        {
+            success: false,
+            message: "The fulfillment request could not be completed.",
+        },
         { status: 500 },
     );
 }
 
-export async function GET() {
-    try {
-        if (!(await getAdmin())) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized" },
-                { status: 401 },
-            );
-        }
-
-        const orders = await prisma.order.findMany({
-            where: {
-                status: {
-                    in: [
-                        OrderStatus.PROCESSING,
-                        OrderStatus.SHIPPED,
-                        OrderStatus.DELIVERED,
-                    ],
-                },
-                payments: {
-                    some: {
-                        OR: [
-                            { method: "COD" },
-                            { status: "SUCCESS" },
-                        ],
-                    },
-                },
-            },
-            orderBy: { createdAt: "desc" },
-            select: {
-                id: true,
-                orderCode: true,
-                status: true,
-                createdAt: true,
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    },
-                },
-                orderHistory: true,
-                orderItems: {
-                    select: {
-                        id: true,
-                        quantity: true,
-                        priceAtPurchase: true,
-                        variant: {
-                            select: {
-                                size: true,
-                                color: true,
-                                product: {
-                                    select: { id: true, name: true },
-                                },
-                            },
-                        },
-                    },
-                },
-                payments: {
-                    orderBy: { createdAt: "desc" },
-                    take: 1,
-                    select: {
-                        method: true,
-                        status: true,
-                        paidAmountInUSD: true,
-                        totalProductPriceInUSD: true,
-                        shippingCost: true,
-                    },
-                },
-                shipment: {
-                    include: {
-                        itemChecks: true,
-                        assignedCourier: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                phone: true,
-                            },
-                        },
-                        events: {
-                            orderBy: { createdAt: "desc" },
-                        },
-                    },
-                },
-            },
-        });
-
-        return NextResponse.json({
-            success: true,
-            data: orders,
-        });
-    } catch (error) {
-        return handleError(error);
-    }
+function isNonEmptyString(value: unknown): value is string {
+    return typeof value === "string" && value.trim().length > 0;
 }
 
-export async function POST(req: Request) {
+export async function GET(request: Request) {
     try {
         const admin = await getAdmin();
 
         if (!admin) {
             return NextResponse.json(
-                { success: false, message: "Unauthorized" },
+                { success: false, message: "Unauthorized." },
                 { status: 401 },
             );
         }
 
-        const body: unknown = await req.json();
+        const { searchParams } = new URL(request.url);
 
-        if (
-            typeof body !== "object" ||
-            body === null ||
-            !("action" in body) ||
-            typeof body.action !== "string"
-        ) {
+        const search = searchParams.get("search") ?? "";
+        const rawFilter = searchParams.get("filter") ?? "ALL";
+        const rawPage = Number(searchParams.get("page") ?? "1");
+        const rawPageSize = Number(
+            searchParams.get("pageSize") ?? "10",
+        );
+
+        if (!allowedFilters.has(rawFilter)) {
             return NextResponse.json(
-                { success: false, message: "Invalid request body." },
+                {
+                    success: false,
+                    message: "Invalid fulfillment filter.",
+                },
                 { status: 400 },
             );
         }
 
-        const data = body as {
-            action: string;
-            orderId?: string;
-            shipmentId?: string;
-            orderItemId?: string;
-        };
+        const data = await getAdminFulfillment({
+            search,
+            filter: rawFilter as FulfillmentFilter,
+            page: Number.isFinite(rawPage) ? rawPage : 1,
+            pageSize: Number.isFinite(rawPageSize) ? rawPageSize : 10,
+        });
 
+        return NextResponse.json({
+            success: true,
+            data,
+        });
+    } catch (error) {
+        return errorResponse(error);
+    }
+}
 
-        if (data.action === "CREATE_SHIPMENT") {
-            if (!data.orderId?.trim()) {
-                return NextResponse.json(
-                    { success: false, message: "Order ID is required." },
-                    { status: 400 },
-                );
-            }
+export async function POST(request: Request) {
+    try {
+        const admin = await getAdmin();
 
-            const shipment = await ensureShipmentForOrder(data.orderId);
- 
-            const current = await prisma.shipment.findUnique({
-                where: { id: shipment.id },
-                select: { parcelTokenHash: true },
-            });
-
-            if (current && !current.parcelTokenHash) {
-                const tokenData = await rotateParcelToken(shipment.id);
-
-                return NextResponse.json({
-                    success: true,
-                    message: "Shipment created and QR token generated.",
-                    data: {
-                        ...shipment,
-                        trackingCode: tokenData.trackingCode,
-                        parcelToken: tokenData.token,
-                    },
-                });
-            }
-
-            return NextResponse.json({
-                success: true,
-                message: "Shipment is ready.",
-                data: shipment,
-            });
+        if (!admin) {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized." },
+                { status: 401 },
+            );
         }
 
+        let body: ActionBody;
 
-        if (!data.shipmentId?.trim()) {
+        try {
+            body = (await request.json()) as ActionBody;
+        } catch {
             return NextResponse.json(
-                { success: false, message: "Shipment ID is required." },
+                { success: false, message: "Invalid JSON body." },
                 { status: 400 },
             );
         }
 
-        switch (data.action) {
-            case "START_PACKING": {
-                const shipment = await startPacking(
-                    data.shipmentId,
-                    admin.id,
-                );
+        if (!isNonEmptyString(body.action)) {
+            return NextResponse.json(
+                { success: false, message: "An action is required." },
+                { status: 400 },
+            );
+        }
 
-                return NextResponse.json({
-                    success: true,
-                    message: "Packing started.",
-                    data: shipment,
-                });
-            }
-
-            case "VERIFY_ITEM": {
-                if (!data.orderItemId?.trim()) {
+        switch (body.action) {
+            case "CREATE_SHIPMENT": {
+                if (!isNonEmptyString(body.orderId)) {
                     return NextResponse.json(
                         {
                             success: false,
-                            message: "Order item ID is required.",
+                            message: "A valid order ID is required.",
                         },
                         { status: 400 },
                     );
                 }
 
-                const result = await verifyShipmentItem(
-                    data.shipmentId,
-                    data.orderItemId,
-                    admin.id,
+                const shipment = await ensureShipmentForOrder(
+                    body.orderId.trim(),
                 );
+
+                // Do not expose or rotate an existing token during a normal
+                // refresh or repeat create-shipment request.
+                const storedToken = await prisma.shipment.findUnique({
+                    where: { id: shipment.id },
+                    select: { parcelTokenHash: true },
+                });
+
+                let parcelToken: string | null = null;
+
+                if (!storedToken?.parcelTokenHash) {
+                    const generated = await rotateParcelToken(shipment.id);
+                    parcelToken = generated.token;
+                }
 
                 return NextResponse.json({
                     success: true,
-                    message: result.alreadyVerified
-                        ? "Item was already verified."
-                        : "Item verified.",
-                    data: result,
+                    message: parcelToken
+                        ? "Shipment created and parcel token generated."
+                        : "Shipment is ready.",
+                    data: {
+                        shipment,
+                        parcelToken,
+                    },
                 });
             }
 
-            case "MARK_PACKED": {
-                const shipment = await markShipmentPacked(
-                    data.shipmentId,
-                    admin.id,
-                );
-
-                return NextResponse.json({
-                    success: true,
-                    message: "Parcel marked as packed.",
-                    data: shipment,
-                });
-            }
-
+            case "START_PACKING":
+            case "VERIFY_ITEM":
+            case "MARK_PACKED":
             case "DISPATCH": {
-                const shipment = await dispatchShipment(
-                    data.shipmentId,
-                    admin.id,
-                );
+                if (!isNonEmptyString(body.shipmentId)) {
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            message: "A valid shipment ID is required.",
+                        },
+                        { status: 400 },
+                    );
+                }
 
-                return NextResponse.json({
-                    success: true,
-                    message: "Parcel dispatched.",
-                    data: shipment,
-                });
+                const shipmentId = body.shipmentId.trim();
+
+                switch (body.action) {
+                    case "START_PACKING": {
+                        const data = await startPacking(
+                            shipmentId,
+                            admin.id,
+                        );
+
+                        return NextResponse.json({
+                            success: true,
+                            message: "Packing started.",
+                            data,
+                        });
+                    }
+
+                    case "VERIFY_ITEM": {
+                        if (!isNonEmptyString(body.orderItemId)) {
+                            return NextResponse.json(
+                                {
+                                    success: false,
+                                    message: "A valid order item ID is required.",
+                                },
+                                { status: 400 },
+                            );
+                        }
+
+                        const data = await verifyShipmentItem(
+                            shipmentId,
+                            body.orderItemId.trim(),
+                            admin.id,
+                        );
+
+                        return NextResponse.json({
+                            success: true,
+                            message: data.alreadyVerified
+                                ? "This item was already verified."
+                                : "Item verified.",
+                            data,
+                        });
+                    }
+
+                    case "MARK_PACKED": {
+                        const data = await markShipmentPacked(
+                            shipmentId,
+                            admin.id,
+                        );
+
+                        return NextResponse.json({
+                            success: true,
+                            message: "Shipment marked as packed.",
+                            data,
+                        });
+                    }
+
+                    case "DISPATCH": {
+                        const data = await dispatchShipment(
+                            shipmentId,
+                            admin.id,
+                        );
+
+                        return NextResponse.json({
+                            success: true,
+                            message: "Shipment dispatched.",
+                            data,
+                        });
+                    }
+                }
+
+                break;
             }
 
             default:
@@ -288,7 +305,12 @@ export async function POST(req: Request) {
                     { status: 400 },
                 );
         }
+
+        return NextResponse.json(
+            { success: false, message: "Unsupported action." },
+            { status: 400 },
+        );
     } catch (error) {
-        return handleError(error);
+        return errorResponse(error);
     }
 }
