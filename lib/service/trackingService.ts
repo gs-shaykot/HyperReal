@@ -283,6 +283,45 @@ export async function verifyShipmentItem(
             };
         }
 
+        // Check the real, current inventory for this exact order-item variant.
+        // A quantity equal to available stock is valid; only stock < quantity fails.
+        const orderItem = await tx.orderItem.findFirst({
+            where: {
+                id: orderItemId,
+                orderId: shipment.orderId,
+            },
+            select: {
+                id: true,
+                quantity: true,
+                variant: {
+                    select: {
+                        stock: true,
+                        product: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        size: true,
+                        color: true,
+                    },
+                },
+            },
+        });
+
+        if (!orderItem) {
+            throw new TrackingError(
+                "The order item could not be found for this shipment.",
+                404,
+            );
+        }
+
+        if (orderItem.variant.stock < orderItem.quantity) {
+            throw new TrackingError(
+                `Insufficient stock for ${orderItem.variant.product.name} (Size ${orderItem.variant.size}, ${orderItem.variant.color}). Required: ${orderItem.quantity}; available: ${orderItem.variant.stock}.`,
+                409,
+            );
+        }
+
         const updated = await tx.shipmentItemCheck.updateMany({
             where: {
                 id: itemCheck.id,
