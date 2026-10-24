@@ -26,6 +26,21 @@ export interface GetAdminFulfillmentParams {
     pageSize?: number;
 }
 
+// The table must contain only orders that are still being processed.
+const processingOrderWhere: Prisma.OrderWhereInput = {
+    status: OrderStatus.PROCESSING,
+    payments: {
+        some: {
+            OR: [
+                { method: PaymentMethod.COD },
+                { status: PaymentStatus.SUCCESS },
+            ],
+        },
+    },
+};
+
+// Keep dashboard totals inclusive of shipments that have already been dispatched
+// or delivered, even though those orders are no longer shown in the table.
 const eligibleOrderWhere: Prisma.OrderWhereInput = {
     status: {
         in: [
@@ -146,7 +161,7 @@ export async function getAdminFulfillment({
 
     const where: Prisma.OrderWhereInput = {
         AND: [
-            eligibleOrderWhere,
+            processingOrderWhere,
             buildSearchWhere(search),
             buildFilterWhere(filter),
         ],
