@@ -29,9 +29,7 @@ export interface GetAdminFulfillmentParams {
 const eligibleOrderWhere: Prisma.OrderWhereInput = {
     status: {
         in: [
-            OrderStatus.PROCESSING,
-            OrderStatus.SHIPPED,
-            OrderStatus.DELIVERED,
+            OrderStatus.PROCESSING, 
         ],
     },
     payments: {

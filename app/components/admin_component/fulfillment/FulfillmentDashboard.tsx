@@ -380,7 +380,7 @@ function Modal({
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-3 backdrop-blur-[2px] sm:p-6"
+            className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-3 backdrop-blur-[2px] sm:p-6"
             onMouseDown={(event) => {
                 if (event.target === event.currentTarget) onClose();
             }}
@@ -931,7 +931,7 @@ export default function FulfillmentDashboard() {
 
     return (
         <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-[1800px] space-y-6">
+            <div className="mx-auto max-w-450 space-y-6">
                 {/* Page heading */}
                 <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
@@ -1130,7 +1130,7 @@ export default function FulfillmentDashboard() {
 
                 {/* Orders table */}
                 <section className="overflow-x-auto border border-zinc-800">
-                    <table className="w-full min-w-[1050px] border-collapse text-left">
+                    <table className="w-full min-w-262.5 border-collapse text-left">
                         <thead className="bg-[#111]">
                             <tr className="border-b border-zinc-800 text-[9px] font-bold tracking-[0.14em] text-zinc-400">
                                 <th className="px-3 py-3">ORDER</th>
@@ -1322,7 +1322,7 @@ export default function FulfillmentDashboard() {
                     onClose={closeModal}
                 >
                     <div className="space-y-4">
-                        <div className="relative flex min-h-[250px] flex-col items-center justify-center overflow-hidden border border-zinc-800 bg-[#101010] p-5">
+                        <div className="relative flex min-h-62.5 flex-col items-center justify-center overflow-hidden border border-zinc-800 bg-[#101010] p-5">
                             <video
                                 ref={videoRef}
                                 muted
@@ -1440,7 +1440,7 @@ export default function FulfillmentDashboard() {
                         )}
 
                         {scanResult && (
-                            <div className="border border-second/40 bg-second/[0.04]">
+                            <div className="border border-second/40 bg-second/4">
                                 <div className="flex items-center gap-2 border-b border-second/20 p-3 text-second">
                                     <CheckCircle2 size={16} />
                                     <span className="text-[11px] font-black uppercase tracking-wide">
@@ -1642,7 +1642,7 @@ export default function FulfillmentDashboard() {
                                             className="border border-white bg-white p-1"
                                         />
                                     ) : (
-                                        <div className="flex h-[88px] w-[88px] flex-col items-center justify-center border border-dashed border-zinc-500 text-center">
+                                        <div className="flex h-22 w-22 flex-col items-center justify-center border border-dashed border-zinc-500 text-center">
                                             <QrCode size={24} />
                                             <span className="mt-1 text-[8px]">
                                                 NO SHIPMENT
@@ -1694,7 +1694,7 @@ export default function FulfillmentDashboard() {
                             </div>
 
                             <div className="py-3">
-                                <div className="flex h-12 items-stretch gap-[3px] overflow-hidden bg-white px-1 py-1">
+                                <div className="flex h-12 items-stretch gap-0.75 overflow-hidden bg-white px-1 py-1">
                                     {Array.from(
                                         {
                                             length: 52,
