@@ -46,7 +46,7 @@ const processingOrderWhere: Prisma.OrderWhereInput = {
     },
 };
 
-const eligibleOrderWhere: Prisma.OrderWhereInput = processingOrderWhere;
+const eligibleOrderWhere: Prisma.OrderWhereInput =  processingOrderWhere;
 
 
 function buildSearchWhere(search: string): Prisma.OrderWhereInput {
