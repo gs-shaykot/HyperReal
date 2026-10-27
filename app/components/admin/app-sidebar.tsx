@@ -14,6 +14,7 @@ import {
     Eye,
     LogOut,
     Truck,
+    UserRoundCog,
 } from "lucide-react"
 
 import {
@@ -50,6 +51,11 @@ const navigationItems = [
         title: "Fulfillment",
         href: "/admin/fulfillment",
         icon: Truck,
+    },
+    {
+        title: "Couriers",
+        href: "/admin/couriers",
+        icon: UserRoundCog,
     },
     {
         title: "Users",
