@@ -1,5 +1,5 @@
 "use client"
-import { Heart, MapPin, Package, Settings, User } from "lucide-react";
+import { Heart, MapPin, Package, Settings, User, Truck } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -31,15 +31,18 @@ const menus = [
   },
 ];
 
-export const AccountSidebar = ({ orderCount, TotalPayment }: { orderCount: number; TotalPayment: number }) => {
+export const AccountSidebar = ({ orderCount, TotalPayment, hasCourierAccess = false }: { orderCount: number; TotalPayment: number; hasCourierAccess?: boolean }) => {
   const pathname = usePathname();
+  const visibleMenus = hasCourierAccess
+    ? [...menus, { title: "Courier", href: "/courier", icon: Truck }]
+    : menus;
 
   return (
     <div className="w-full lg:sticky lg:top-19.5 lg:self-start">
       {/* Menu */}
       <div className='w-full bg-dark light:bg-white border border-zinc-800 p-2 mb-3'>
         <ul className='scrollbar-hidden flex flex-row flex-nowrap gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0'>
-          {menus.map((menu) => (
+          {visibleMenus.map((menu) => (
             <li key={menu.title} className='shrink-0 lg:w-full'>
               <Link
                 href={menu.href}
