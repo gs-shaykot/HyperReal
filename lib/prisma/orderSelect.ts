@@ -39,5 +39,28 @@ export const orderDetailsSelect = {
         }
     },
     orderHistory: true,
-    payments: true
+    payments: true,
+    shipment: {
+        select: {
+            id: true,
+            trackingCode: true,
+            fulfillmentStatus: true,
+            status: true,
+            dispatchedAt: true,
+            deliveredAt: true,
+            deliveryAttempts: true,
+            failureReason: true,
+            events: {
+                orderBy: { createdAt: "desc" },
+                select: {
+                    id: true,
+                    type: true,
+                    title: true,
+                    description: true,
+                    location: true,
+                    createdAt: true,
+                },
+            },
+        },
+    }
 } satisfies Prisma.OrderSelect;
