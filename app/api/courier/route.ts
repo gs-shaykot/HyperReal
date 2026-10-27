@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     const note = typeof body.note === "string" ? body.note.trim() : "";
     const otp = typeof body.otp === "string" ? body.otp.trim() : "";
 
-    if (!shipmentId || !["START_DELIVERY", "COLLECT_COD", "REQUEST_DELIVERY_OTP", "MARK_DELIVERED", "MARK_FAILED"].includes(action)) {
+    if (!shipmentId || !["START_DELIVERY", "COLLECT_COD", "MARK_DELIVERED", "MARK_FAILED"].includes(action)) {
         return NextResponse.json({ success: false, message: "A valid shipment and action are required." }, { status: 400 });
     }
 
@@ -178,8 +178,6 @@ export async function POST(request: Request) {
                         data: { orderId: shipment.orderId, shipmentId, actorId: courierId, type: TrackingEventType.NOTE_ADDED, title: "Cash collected", description: "Courier confirmed cash-on-delivery payment collection." },
                     });
                 }
-            } else if (action === "REQUEST_DELIVERY_OTP") {
-                return { error: "Use the secure delivery OTP endpoint to request a code.", status: 400 as const };
             } else if (action === "MARK_DELIVERED") {
                 if (shipment.status !== ShipmentStatus.OUT_FOR_DELIVERY) {
                     return { error: "Start delivery before marking this parcel delivered.", status: 409 as const };
