@@ -1,5 +1,5 @@
 import argon2 from "argon2";
-import { AuthProvider, FulfillmentStatus, OrderStatus, PaymentMethod, PaymentStatus, PrismaClient, ShipmentStatus, TrackingEventType, Role } from "@prisma/client";
+import { AuthProvider, FulfillmentStatus, OrderStatus, PaymentMethod, PrismaClient, ShipmentStatus, TrackingEventType, Role } from "@prisma/client";
 
 const DEMO_COURIER_PASSWORD = "CourierDemo@2026";
 
@@ -14,6 +14,7 @@ const couriers = [
     { id: "66666666-6666-4666-8666-666666666601", name: "Daniel Ahmed", email: "courier.daniel@hyperreal.demo", phone: "+8801700000601", courierCode: "HRC-DHK-001", vehicleType: "Motorcycle", zoneName: "Dhaka North" },
     { id: "66666666-6666-4666-8666-666666666602", name: "Sophia Rahman", email: "courier.sophia@hyperreal.demo", phone: "+8801700000602", courierCode: "HRC-DHK-002", vehicleType: "Motorcycle", zoneName: "Dhaka South" },
     { id: "66666666-6666-4666-8666-666666666603", name: "Oliver Hasan", email: "courier.oliver@hyperreal.demo", phone: "+8801700000603", courierCode: "HRC-CTG-001", vehicleType: "Delivery Van", zoneName: "Chattogram Central" },
+    { id: "66666666-6666-4666-8666-666666666604", name: "Emily Chowdhury", email: "courier.emily@hyperreal.demo", phone: "+8801700000604", courierCode: "HRC-CUM-001", vehicleType: "Motorcycle", zoneName: "Cumilla Central" },
 ];
 
 const addressSamples = [
@@ -134,7 +135,11 @@ export async function seedCourierDemoData(prisma: PrismaClient) {
                 ? ShipmentStatus.OUT_FOR_DELIVERY
                 : ShipmentStatus.PENDING;
         const courierId = shouldDispatch
-            ? address.city === "Chattogram" ? courierIds[2] : index % 2 === 0 ? courierIds[0] : courierIds[1]
+            ? address.city === "Chattogram"
+                ? courierIds[2]
+                : address.city === "Cumilla"
+                    ? courierIds[3]
+                    : index % 2 === 0 ? courierIds[0] : courierIds[1]
             : null;
         const timestamp = order.createdAt;
 
