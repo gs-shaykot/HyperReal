@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import argon2 from "argon2";
 import { seedOctoberData } from "@/prisma/seed_october";
+import { seedCourierDemoData } from "@/prisma/seed_courier_demo";
 
 // ✅ Use SAME pattern as /lib/prisma.ts
 const pool = new Pool({
@@ -1031,6 +1032,8 @@ async function main() {
 
   await seedOctoberData();
   console.log("✅ October data seeded");
+
+  await seedCourierDemoData(prisma);
 
   console.log("✅ Seeding completed");
 }
