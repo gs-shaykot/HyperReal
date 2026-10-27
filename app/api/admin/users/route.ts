@@ -233,6 +233,16 @@ export async function PATCH(req: Request) {
                     ? "USER"
                     : normalizedRole;
 
+            if (mappedRole === "COURIER") {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Register couriers through Courier Management so a courier profile is created.",
+                    },
+                    { status: 400 }
+                );
+            }
+
             if (
                 !Object.values(Role).includes(
                     mappedRole as Role
