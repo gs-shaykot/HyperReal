@@ -58,14 +58,22 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
     try {
         if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
-        const body = await request.json().catch(() => null) as { id?: unknown; isActive?: unknown } | null;
-        const id = typeof body?.id === "string" ? body.id : "";
-        if (!id || typeof body?.isActive !== "boolean") {
-            return NextResponse.json({ success: false, message: "Zone ID and active status are required." }, { status: 400 });
+        const body = await request.json().catch(() => null) as { id?: unknown; isActive?: unknown; name?: unknown; city?: unknown; country?: unknown } | null;
+        const id = typeof body?.id === "string" ? body.id.trim() : "";
+        if (!id) return NextResponse.json({ success: false, message: "Zone ID is required." }, { status: 400 });
+        const data: { isActive?: boolean; name?: string; city?: string; country?: string } = {};
+        if (typeof body?.isActive === "boolean") data.isActive = body.isActive;
+        for (const field of ["name", "city", "country"] as const) {
+            if (body?.[field] !== undefined) {
+                const value = typeof body[field] === "string" ? body[field].trim() : "";
+                if (!value || value.length > 80) return NextResponse.json({ success: false, message: "Zone name, city, and country must be between 1 and 80 characters." }, { status: 400 });
+                data[field] = value;
+            }
         }
+        if (!Object.keys(data).length) return NextResponse.json({ success: false, message: "No valid changes supplied." }, { status: 400 });
         const zone = await prisma.deliveryZone.update({
             where: { id },
-            data: { isActive: body.isActive },
+            data,
             select: { id: true, name: true, city: true, country: true, isActive: true },
         });
         return NextResponse.json({ success: true, message: "Delivery zone updated.", data: zone });
