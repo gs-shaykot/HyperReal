@@ -237,6 +237,7 @@ export async function getAdminFulfillment({
                 shipment: {
                     include: {
                         itemChecks: true,
+                        deliveryZone: true,
                         assignedCourier: {
                             select: {
                                 id: true,
