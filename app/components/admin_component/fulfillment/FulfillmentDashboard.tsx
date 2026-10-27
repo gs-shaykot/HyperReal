@@ -9,6 +9,8 @@ import FulfillmentStatsCards from "./components/FulfillmentStats";
 import FulfillmentFilters from "./components/FulfillmentFilters";
 import FulfillmentTable from "./components/FulfillmentTable";
 import StatusBadge from "./components/StatusBadge";
+import ShippingBarcode from "./components/ShippingBarcode";
+import ShippingOrderQr from "./components/ShippingOrderQr";
 import { AlertCircle, Barcode, Camera, Check, CheckCircle2, LoaderCircle, Package, PackageCheck, Printer, QrCode, ScanLine, Search, ShieldCheck, Truck, UserRound, X } from "lucide-react";
 
 function Modal({
@@ -1136,16 +1138,7 @@ export default function FulfillmentDashboard() {
 
                                     <div className="flex flex-col items-center justify-center">
                                         {selectedOrder.shipment ? (
-                                            <img
-                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=2&data=${encodeURIComponent(
-                                                    parcelToken ||
-                                                    selectedOrder.shipment.trackingCode,
-                                                )}`}
-                                                alt="Parcel QR code"
-                                                width={88}
-                                                height={88}
-                                                className="border border-white bg-white p-1"
-                                            />
+                                            <ShippingOrderQr orderCode={selectedOrder.orderCode} />
                                         ) : (
                                             <div className="flex h-22 w-22 flex-col items-center justify-center border border-dashed border-zinc-500 text-center">
                                                 <QrCode size={24} />
@@ -1199,35 +1192,13 @@ export default function FulfillmentDashboard() {
                                 </div>
 
                                 <div className="py-3">
-                                    <div className="flex h-12 items-stretch gap-0.75 overflow-hidden bg-white px-1 py-1">
-                                        {Array.from(
-                                            {
-                                                length: 52,
-                                            },
-                                            (_, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="block bg-black"
-                                                    style={{
-                                                        width:
-                                                            index % 4 === 0
-                                                                ? "4px"
-                                                                : index % 3 === 0
-                                                                    ? "2px"
-                                                                    : "1px",
-                                                        flex: index % 5 === 0
-                                                            ? "2"
-                                                            : "1",
-                                                    }}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
+                                    <ShippingBarcode
+                                        value={parcelToken || selectedOrder.shipment?.trackingCode || ""}
+                                    />
 
                                     <div className="mt-1 flex justify-between gap-2 text-[9px] font-bold">
                                         <span>
-                                            {selectedOrder.shipment?.trackingCode ??
-                                                "SHIPMENT NOT CREATED"}
+                                            {parcelToken || selectedOrder.shipment?.trackingCode || "SHIPMENT NOT CREATED"}
                                         </span>
                                         <span>HYPERREAL</span>
                                     </div>
