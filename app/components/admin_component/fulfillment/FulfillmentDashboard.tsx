@@ -382,10 +382,13 @@ export default function FulfillmentDashboard() {
         setScanError("");
 
         try {
+            const isParcelToken = /^HYP-PRT-/i.test(lookup);
             const response = await fetch("/api/admin/fulfillment/scan", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ lookup }),
+                body: JSON.stringify(
+                    isParcelToken ? { token: lookup } : { lookup },
+                ),
             });
 
             const result = (await response.json()) as ApiResponse<ScanResult>;
@@ -586,7 +589,50 @@ export default function FulfillmentDashboard() {
         paymentFilter === "ALL" && !dateFilter ? total : orders.length;
 
     return (
-        <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
+        <>
+            <style jsx global>{`
+                @media print {
+                    @page {
+                        size: 100mm 150mm;
+                        margin: 0;
+                    }
+
+                    body * {
+                        visibility: hidden !important;
+                    }
+
+                    #fulfillment-print-label,
+                    #fulfillment-print-label * {
+                        visibility: visible !important;
+                    }
+
+                    #fulfillment-print-label {
+                        position: fixed !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100mm !important;
+                        margin: 0 !important;
+                        padding: 5mm !important;
+                        background: #ffffff !important;
+                        color: #000000 !important;
+                        box-sizing: border-box !important;
+                    }
+
+                    #fulfillment-print-label > div {
+                        width: 100% !important;
+                        background: #ffffff !important;
+                        color: #000000 !important;
+                        border-color: #000000 !important;
+                        box-shadow: none !important;
+                    }
+
+                    #fulfillment-print-label img {
+                        print-color-adjust: exact;
+                        -webkit-print-color-adjust: exact;
+                    }
+                }
+            `}</style>
+            <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
             <div className="mx-auto max-w-450 space-y-6">
                 {/* Page heading */}
                 <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -1568,6 +1614,7 @@ export default function FulfillmentDashboard() {
                     </div>
                 </Modal>
             )}
-        </main>
+            </main>
+        </>
     );
 }
