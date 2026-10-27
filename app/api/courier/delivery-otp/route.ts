@@ -72,18 +72,39 @@ export async function POST(request: Request) {
             auth: { user: emailUser, pass: emailPassword },
         });
 
-        await sender.sendMail({
-            from: `"HyperReal Delivery" <${emailUser}>`,
-            to: shipment.order.user.email,
-            subject: `Verify delivery for order ${shipment.order.orderCode}`,
-            text: `Your HyperReal delivery verification code is ${otp}. It expires in 5 minutes. Only share this code with the courier when you receive your parcel. If you did not expect this delivery, do not share the code.`,
-            html: `<div style="font-family:monospace;background:#09090b;color:#e4e4e7;padding:28px"><p style="color:#a3e635;letter-spacing:3px">HYPERREAL / DELIVERY SECURITY</p><h2>Confirm your parcel</h2><p>Use this code to confirm delivery for order <strong>${shipment.order.orderCode}</strong>.</p><h1 style="color:#a3e635;letter-spacing:8px">${otp}</h1><p>This code expires in 5 minutes. Only share it with the courier when your parcel is physically received.</p><p style="color:#a1a1aa;font-size:12px">If you did not expect this delivery, do not share the code.</p></div>`,
+        const sentAt = new Date();
+        const claimed = await prisma.shipment.updateMany({
+            where: {
+                id: shipment.id,
+                assignedCourierId: courier.id,
+                status: "OUT_FOR_DELIVERY",
+                OR: [
+                    { otpLastSentAt: null },
+                    { otpLastSentAt: { lt: new Date(Date.now() - 60_000) } },
+                ],
+            },
+            data: { otpHash, otpExpiresAt: expiresAt, otpAttempts: 0, otpLastSentAt: sentAt },
         });
 
-        await prisma.shipment.update({
-            where: { id: shipment.id },
-            data: { otpHash, otpExpiresAt: expiresAt, otpAttempts: 0, otpLastSentAt: new Date() },
-        });
+        if (claimed.count !== 1) {
+            return NextResponse.json({ success: false, message: "A code was just requested. Please wait 60 seconds before trying again." }, { status: 429 });
+        }
+
+        try {
+            await sender.sendMail({
+                from: `"HyperReal Delivery" <${emailUser}>`,
+                to: shipment.order.user.email,
+                subject: `Verify delivery for order ${shipment.order.orderCode}`,
+                text: `Your HyperReal delivery verification code is ${otp}. It expires in 5 minutes. Only share this code with the courier when you receive your parcel. If you did not expect this delivery, do not share the code.`,
+                html: `<div style="font-family:monospace;background:#09090b;color:#e4e4e7;padding:28px"><p style="color:#a3e635;letter-spacing:3px">HYPERREAL / DELIVERY SECURITY</p><h2>Confirm your parcel</h2><p>Use this code to confirm delivery for order <strong>${shipment.order.orderCode}</strong>.</p><h1 style="color:#a3e635;letter-spacing:8px">${otp}</h1><p>This code expires in 5 minutes. Only share it with the courier when your parcel is physically received.</p><p style="color:#a1a1aa;font-size:12px">If you did not expect this delivery, do not share the code.</p></div>`,
+            });
+        } catch (error) {
+            await prisma.shipment.updateMany({
+                where: { id: shipment.id, otpHash },
+                data: { otpHash: null, otpExpiresAt: null, otpAttempts: 0, otpLastSentAt: null },
+            });
+            throw error;
+        }
 
         return NextResponse.json({ success: true, message: "Verification code sent to the customer's email. It expires in 5 minutes." });
     } catch (error) {
