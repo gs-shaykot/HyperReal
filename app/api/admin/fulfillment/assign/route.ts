@@ -28,7 +28,7 @@ export async function GET() {
                 isActive: true,
                 user: { isBlocked: false, role: Role.COURIER },
             },
-            orderBy: [{ zone: { city: "asc" } }, { user: { name: "asc" } }],
+            orderBy: { courierCode: "asc" },
             select: {
                 id: true,
                 courierCode: true,
