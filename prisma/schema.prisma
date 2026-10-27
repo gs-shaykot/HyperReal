@@ -327,6 +327,13 @@ model Shipment {
   deliveryZoneId    String?
   deliveryZone      DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
 
+  shippingType          String   @default("DOMESTIC")
+  carrierName           String?
+  carrierTrackingNumber String?
+  estimatedDeliveryAt   DateTime?
+  customsStatus         String   @default("NOT_REQUIRED")
+  internationalNotes   String?
+
   otpHash       String?
   otpExpiresAt  DateTime?
   otpAttempts   Int       @default(0)
