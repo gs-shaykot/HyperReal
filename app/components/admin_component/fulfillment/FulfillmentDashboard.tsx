@@ -11,6 +11,7 @@ import FulfillmentTable from "./components/FulfillmentTable";
 import StatusBadge from "./components/StatusBadge";
 import ShippingBarcode from "./components/ShippingBarcode";
 import ShippingOrderQr from "./components/ShippingOrderQr";
+import CourierAssignment from "./components/CourierAssignment";
 import { AlertCircle, Barcode, Camera, Check, CheckCircle2, LoaderCircle, Package, PackageCheck, Printer, QrCode, ScanLine, Search, ShieldCheck, Truck, UserRound, X } from "lucide-react";
 
 function Modal({
@@ -1292,6 +1293,27 @@ export default function FulfillmentDashboard() {
                                     )}
                                 />
                             </div>
+
+                            {selectedOrder.shipment?.fulfillmentStatus === "DISPATCHED" && (
+                                <CourierAssignment
+                                    shipmentId={selectedOrder.shipment.id}
+                                    assignedCourier={selectedOrder.shipment.assignedCourier ?? null}
+                                    onAssigned={(courier) => {
+                                        setSelectedOrder((current) =>
+                                            current?.shipment
+                                                ? {
+                                                    ...current,
+                                                    shipment: {
+                                                        ...current.shipment,
+                                                        assignedCourier: courier,
+                                                    },
+                                                }
+                                                : current,
+                                        );
+                                        void loadOrders(true);
+                                    }}
+                                />
+                            )}
 
                             <div className="grid grid-cols-1 border border-zinc-800 sm:grid-cols-2">
                                 <div className="border-b border-zinc-800 p-4 sm:border-b-0 sm:border-r">
