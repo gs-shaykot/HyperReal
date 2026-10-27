@@ -578,7 +578,6 @@ export default function FulfillmentDashboard() {
     /* ---------------------------------------------------------------------- */
 
 
-
     function printLabel() {
         const label = document.getElementById("fulfillment-print-label");
 
@@ -587,54 +586,161 @@ export default function FulfillmentDashboard() {
             return;
         }
 
-        const printWindow = window.open("", "_blank", "width=700,height=700");
+        // Remove any leftover temporary print copy.
+        document.getElementById("fulfillment-print-copy")?.remove();
 
-        if (!printWindow) {
-            setError("Allow pop-ups to print the shipping label.");
-            return;
+        // Clone the label so React's original modal stays untouched.
+        const printCopy = label.cloneNode(true) as HTMLElement;
+        printCopy.id = "fulfillment-print-copy";
+        document.body.appendChild(printCopy);
+
+        const printStyle = document.createElement("style");
+        printStyle.id = "fulfillment-print-style";
+        printStyle.textContent = `
+        @media print {
+            @page {
+                size: 100mm 150mm;
+                margin: 0;
+            }
+
+            html,
+            body {
+                width: 100mm !important;
+                height: 150mm !important;
+                min-height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: white !important;
+            }
+
+            body > *:not(#fulfillment-print-copy):not(#fulfillment-print-style) {
+                display: none !important;
+            }
+
+            #fulfillment-print-copy {
+                display: block !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100mm !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 4mm !important;
+                box-sizing: border-box !important;
+                overflow: visible !important;
+                background: white !important;
+                visibility: visible !important;
+            }
+
+            #fulfillment-print-copy,
+            #fulfillment-print-copy * {
+                visibility: visible !important;
+                color: black !important;
+                border-color: black !important;
+                text-shadow: none !important;
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+
+            #fulfillment-print-copy > div {
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                background: white !important;
+                color: black !important;
+                border: 1px solid black !important;
+                box-shadow: none !important;
+                filter: none !important;
+            }
+
+            #fulfillment-print-copy img {
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
         }
 
-        const styles = Array.from(
-            document.querySelectorAll('link[rel="stylesheet"], style'),
-        )
-            .map((element) => element.outerHTML)
-            .join("\n");
+        @media screen {
+            #fulfillment-print-copy,
+            #fulfillment-print-style {
+                display: none !important;
+            }
+        }
+    `;
 
-        printWindow.document.open();
-        printWindow.document.write(`
-        <!doctype html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>HyperReal Shipping Label</title>
-            ${styles}
-            <style>
+        document.head.appendChild(printStyle);
+
+        const cleanup = () => {
+            printCopy.remove();
+            printStyle.remove();
+            window.removeEventListener("afterprint", cleanup);
+        };
+
+        window.addEventListener("afterprint", cleanup, { once: true });
+
+        // Wait for the QR image before opening the native print preview.
+        const images = Array.from(printCopy.querySelectorAll("img"));
+
+        void Promise.all(
+            images.map((img) => {
+                if (img.complete) return Promise.resolve();
+
+                return new Promise<void>((resolve) => {
+                    img.addEventListener("load", () => resolve(), { once: true });
+                    img.addEventListener("error", () => resolve(), { once: true });
+                });
+            }),
+        ).then(() => {
+            window.print();
+        });
+    }
+
+
+    /* ---------------------------------------------------------------------- */
+    /* Render                                                                 */
+    /* ---------------------------------------------------------------------- */
+
+    const visibleTotal =
+        paymentFilter === "ALL" && !dateFilter ? total : orders.length;
+
+    return (
+        <>
+            <style jsx global>{`
+            @media print {
                 @page {
                     size: 100mm 150mm;
                     margin: 0;
                 }
 
-                html, body {
+                html,
+                body {
+                    width: 100mm !important;
                     margin: 0 !important;
                     padding: 0 !important;
-                    width: 100mm !important;
-                    min-height: 0 !important;
-                    background: white !important;
+                    background: #fff !important;
                 }
 
-                body {
-                    display: block !important;
+                body * {
+                    visibility: hidden !important;
+                }
+
+                #fulfillment-print-label,
+                #fulfillment-print-label * {
+                    visibility: visible !important;
                 }
 
                 #fulfillment-print-label {
+                    position: fixed !important;
+                    left: 0 !important;
+                    top: 0 !important;
                     display: block !important;
-                    position: relative !important;
                     width: 100mm !important;
                     height: auto !important;
                     margin: 0 !important;
                     padding: 4mm !important;
                     overflow: visible !important;
                     box-sizing: border-box !important;
+                    background: #fff !important;
                 }
 
                 #fulfillment-print-label > div {
@@ -642,13 +748,11 @@ export default function FulfillmentDashboard() {
                     height: auto !important;
                     margin: 0 !important;
                     box-sizing: border-box !important;
-
                     background: #fff !important;
                     color: #000 !important;
                     border: 1px solid #000 !important;
                     box-shadow: none !important;
                     filter: none !important;
-
                     print-color-adjust: exact !important;
                     -webkit-print-color-adjust: exact !important;
                 }
@@ -665,53 +769,8 @@ export default function FulfillmentDashboard() {
                     print-color-adjust: exact !important;
                     -webkit-print-color-adjust: exact !important;
                 }
-
-                @media screen {
-                    body {
-                        margin: 20px auto !important;
-                    }
-                }
-            </style>
-        </head>
-        <body>${label.outerHTML}</body>
-        </html>
-    `);
-        printWindow.document.close();
-
-        const printWhenReady = async () => {
-            const images = Array.from(printWindow.document.images);
-
-            await Promise.all(images.map((img) => {
-                if (img.complete) return Promise.resolve();
-
-                return new Promise<void>((resolve) => {
-                    img.onload = () => resolve();
-                    img.onerror = () => resolve();
-                });
-            }));
-
-            printWindow.focus();
-
-            printWindow.addEventListener("afterprint", () => {
-                printWindow.close();
-            }, { once: true });
-
-            printWindow.print();
-        };
-
-        void printWhenReady();
-    }
-
-
-    /* ---------------------------------------------------------------------- */
-    /* Render                                                                 */
-    /* ---------------------------------------------------------------------- */
-
-    const visibleTotal =
-        paymentFilter === "ALL" && !dateFilter ? total : orders.length;
-
-    return (
-        <>
+            }
+        `}</style>
             <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-450 space-y-6">
                     {/* Page heading */}
