@@ -34,7 +34,6 @@ export async function GET() {
                     createdAt: true,
                     user: { select: { id: true, name: true, email: true, phone: true, isBlocked: true } },
                     zone: { select: { id: true, name: true, city: true, country: true, isActive: true } },
-                    _count: { select: { user: true } },
                 },
             }),
             prisma.deliveryZone.findMany({
@@ -54,7 +53,7 @@ export async function GET() {
         return NextResponse.json({
             success: true,
             data: {
-                couriers: couriers.map(({ _count, ...courier }) => ({
+                couriers: couriers.map((courier) => ({
                     ...courier,
                     activeDeliveries: workloadByCourier.get(courier.user.id) ?? 0,
                 })),
