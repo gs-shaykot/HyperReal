@@ -645,9 +645,8 @@ export default function FulfillmentDashboard() {
             const images = Array.from(printCopy.querySelectorAll("img"));
             await Promise.all(
                 images.map((img) => {
-                    if (img.complete && img.naturalWidth > 0) {
-                        return Promise.resolve();
-                    }
+                    // A completed image may have failed to load; don't wait for an event that already fired.
+                    if (img.complete) return Promise.resolve();
 
                     return new Promise<void>((resolve) => {
                         const finish = () => resolve();
