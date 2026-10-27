@@ -187,7 +187,7 @@ export async function POST(request: Request) {
                 if (payment?.method === PaymentMethod.COD && !shipment.codCollected) {
                     return { error: "Collect the COD payment before confirming delivery.", status: 409 as const };
                 }
-                if (!/^\\d{6}$/.test(otp)) {
+                if (!/^[0-9]{6}$/.test(otp)) {
                     return { error: "Enter the 6-digit customer verification code before completing delivery.", status: 400 as const };
                 }
                 if (!shipment.otpHash || !shipment.otpExpiresAt || shipment.otpExpiresAt <= new Date()) {
