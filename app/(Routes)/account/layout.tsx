@@ -13,7 +13,7 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
 
     const { id, name, email } = sessions?.user || {};
 
-    const [orderCount, TotalPayment] = await prisma.$transaction([
+    const [orderCount, TotalPayment, courierShipmentCount] = await prisma.$transaction([
         prisma.order.count({
             where: {
                 userId: id
@@ -28,7 +28,12 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
             _sum: {
                 totalProductPriceInUSD: true,
             }
-        })
+        }),
+        prisma.shipment.count({
+            where: {
+                assignedCourierId: id,
+            },
+        }),
     ]);
 
     return (
@@ -36,7 +41,11 @@ const AccountLayout = async ({ children }: { children: React.ReactNode }) => {
             {/* Account Header */}
             <AccountHeader />
             <div className='grid grid-cols-1 gap-6 py-7 lg:grid-cols-[260px_1fr]'>
-                <AccountSidebar orderCount={orderCount as number} TotalPayment={TotalPayment._sum.totalProductPriceInUSD as number} />
+                <AccountSidebar
+                    orderCount={orderCount as number}
+                    TotalPayment={TotalPayment._sum.totalProductPriceInUSD as number}
+                    hasCourierAccess={courierShipmentCount > 0}
+                />
                 <section className='min-w-0'>
                     {children}
                 </section>
