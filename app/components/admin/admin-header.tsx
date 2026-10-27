@@ -25,6 +25,8 @@ const pageTitles: Record<string, string> = {
   "/admin/coupons": "COUPONS",
   "/admin/analytics": "ANALYTICS",
   "/admin/settings": "SETTINGS",
+  "/admin/delivery-zones": "DELIVERY ZONES",
+  "/admin/international-shipping": "INTERNATIONAL SHIPPING",
 }
 
 export function AdminHeader() {
