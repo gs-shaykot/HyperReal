@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { LoaderCircle, MapPin, Plus, RefreshCw, Truck, UserRound, UserRoundCheck } from "lucide-react";
 
 type Zone = { id: string; name: string; city: string; country: string; isActive: boolean; _count?: { couriers: number; shipments: number } };
@@ -72,7 +73,7 @@ export default function CourierManagement() {
         }
     }
 
-    async function addCourier(event: React.FormEvent<HTMLFormElement>) {
+    async function addCourier(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const success = await submit("/api/admin/couriers", "POST", { email, zoneId: zoneId || null, vehicleType });
         if (success) { setEmail(""); setVehicleType(""); }
