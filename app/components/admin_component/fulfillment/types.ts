@@ -45,6 +45,8 @@ export type Shipment = {
     fulfillmentStatus: FulfillmentStatus;
     status: ShipmentStatus;
     parcelTokenHash?: string | null;
+    deliveryZoneId?: string | null;
+    deliveryZone?: { id: string; name: string; city: string; country: string } | null;
     assignedCourier?: {
         id: string;
         name: string | null;

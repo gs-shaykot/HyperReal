@@ -1298,6 +1298,7 @@ export default function FulfillmentDashboard() {
                                 <CourierAssignment
                                     shipmentId={selectedOrder.shipment.id}
                                     assignedCourier={selectedOrder.shipment.assignedCourier ?? null}
+                                    assignedZoneId={selectedOrder.shipment.deliveryZoneId ?? null}
                                     onAssigned={(courier) => {
                                         setSelectedOrder((current) =>
                                             current?.shipment

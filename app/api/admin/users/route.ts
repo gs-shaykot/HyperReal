@@ -219,6 +219,16 @@ export async function PATCH(req: Request) {
             );
         }
 
+        if (updatesRole && existingUser.role === "COURIER") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Manage courier accounts through Courier Management.",
+                },
+                { status: 400 }
+            );
+        }
+
         const data: {
             role?: Role;
             isBlocked?: boolean;
@@ -232,6 +242,16 @@ export async function PATCH(req: Request) {
                 normalizedRole === "CUSTOMER"
                     ? "USER"
                     : normalizedRole;
+
+            if (mappedRole === "COURIER") {
+                return NextResponse.json(
+                    {
+                        success: false,
+                        message: "Register couriers through Courier Management so a courier profile is created.",
+                    },
+                    { status: 400 }
+                );
+            }
 
             if (
                 !Object.values(Role).includes(
