@@ -15,6 +15,8 @@ import {
     LogOut,
     Truck,
     UserRoundCog,
+    Globe2,
+    MapPinned,
 } from "lucide-react"
 
 import {
@@ -56,6 +58,16 @@ const navigationItems = [
         title: "Couriers",
         href: "/admin/couriers",
         icon: UserRoundCog,
+    },
+    {
+        title: "Delivery Zones",
+        href: "/admin/delivery-zones",
+        icon: MapPinned,
+    },
+    {
+        title: "International Shipping",
+        href: "/admin/international-shipping",
+        icon: Globe2,
     },
     {
         title: "Users",
