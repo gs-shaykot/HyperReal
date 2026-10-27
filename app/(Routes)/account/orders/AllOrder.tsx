@@ -1,10 +1,11 @@
 'use client'
 import { OrderModal } from '@/app/(Routes)/account/orders/OrderModal'
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect'
+import { OrderFilters } from '@/app/(Routes)/account/orders/OrderFilters'
 import { Prisma } from '@prisma/client'
 import { CalendarDays, ClockArrowUp, Eye, Hourglass, OctagonX, Package, PackageCheck, Plus, Truck } from 'lucide-react'
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 export type OrderType = Prisma.OrderGetPayload<{
     select: typeof orderDetailsSelect
@@ -14,6 +15,65 @@ export type OrderType = Prisma.OrderGetPayload<{
 export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
     const [open, setOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
+    const [search, setSearch] = useState("");
+    const [status, setStatus] = useState("ALL");
+    const [payment, setPayment] = useState("ALL");
+    const [date, setDate] = useState("");
+
+    useEffect(() => {
+        const orderCode = new URLSearchParams(window.location.search).get("order");
+        if (!orderCode) return;
+
+        const matchingOrder = orders.find(
+            (order) =>
+                order.orderCode.toLowerCase() === orderCode.toLowerCase() ||
+                order.id === orderCode,
+        );
+
+        if (matchingOrder) {
+            setSelectedOrder(matchingOrder);
+            setOpen(true);
+        }
+    }, [orders]);
+
+    const filteredOrders = useMemo(() => {
+        const query = search.trim().toLowerCase();
+
+        return orders.filter((order) => {
+            const matchesSearch =
+                !query ||
+                order.orderCode.toLowerCase().includes(query) ||
+                order.orderItems.some((item) =>
+                    item.variant.product.name.toLowerCase().includes(query),
+                );
+
+            const matchesStatus = status === "ALL" || order.status === status;
+            const matchesPayment =
+                payment === "ALL" ||
+                order.payments.some((entry) =>
+                    payment === "COD"
+                        ? entry.method === "COD"
+                        : entry.status === payment,
+                );
+
+            const orderDate = new Date(order.createdAt);
+            const localDate = [
+                orderDate.getFullYear(),
+                String(orderDate.getMonth() + 1).padStart(2, "0"),
+                String(orderDate.getDate()).padStart(2, "0"),
+            ].join("-");
+            const matchesDate = !date || localDate === date;
+
+            return matchesSearch && matchesStatus && matchesPayment && matchesDate;
+        });
+    }, [orders, search, status, payment, date]);
+
+    const clearFilters = () => {
+        setSearch("");
+        setStatus("ALL");
+        setPayment("ALL");
+        setDate("");
+    };
 
     const OrderStatus = [
         {
@@ -47,15 +107,26 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
             {/* Header */}
             <div className='flex justify-between items-center mb-3'>
                 <h2 className='text-2xl font-bold italic light:text-zinc-900 text-white'>Order<span className='text-second'> History</span></h2>
-                <h2 className='text-xs text-zinc-500 light:text-zinc-800'>{orders?.length} TRANSMISSIONS</h2>
+                <h2 className='text-xs text-zinc-500 light:text-zinc-800'>{filteredOrders.length} / {orders.length} TRANSMISSIONS</h2>
             </div>
+            <OrderFilters
+                search={search}
+                onSearchChange={setSearch}
+                status={status}
+                onStatusChange={setStatus}
+                payment={payment}
+                onPaymentChange={setPayment}
+                date={date}
+                onDateChange={setDate}
+                onClear={clearFilters}
+            />
             <OrderModal open={open} onCloseAction={() => setOpen(false)} order={selectedOrder} />
             {
-                orders?.length > 0 ?
+                filteredOrders.length > 0 ?
                     (
                         <div>
                             {
-                                orders?.map((order) => (
+                                filteredOrders.map((order) => (
                                     <div key={order.id} className='flex flex-col md:flex-row md:justify-between items-start md:items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
 
                                         <div className='flex flex-col space-y-2 md:space-y-2'>
@@ -126,7 +197,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                             <span className="border border-second p-2 rounded-full">
                                 <Plus />
                             </span>
-                            <p className='text-zinc-400'>No orders to display yet. Your order history will appear here once you place a purchase.</p>
+                            <p className='text-zinc-400'>{orders.length === 0 ? "No orders to display yet. Your order history will appear here once you place a purchase." : "No orders match these filters. Try changing your search or clearing the filters."}</p>
                             <Link href="/products" className='light:text-white text-black group relative flex btn bg-second font-bold shadow-none border-0 rounded-none hover:shadow-[0_0_20px_rgba(163,230,53,0.8)] transition-all duration-300 hover:scale-105'>
 
                                 <span className={` flex items-center gap-2`}>
