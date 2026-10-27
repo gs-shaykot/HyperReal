@@ -7,7 +7,12 @@ import prisma from "@/lib/prisma";
 
 async function getCourierId() {
     const session = await getServerSession(authOptions);
-    return session?.user?.id ?? null;
+
+    if (!session?.user?.id || session.sessionRevoked) {
+        return null;
+    }
+
+    return session.user.id;
 }
 
 export async function GET() {
