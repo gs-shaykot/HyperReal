@@ -605,13 +605,13 @@ export default function FulfillmentDashboard() {
 
             html,
             body {
-                width: 100mm !important;
-                height: 150mm !important;
-                min-height: 0 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                overflow: hidden !important;
-                background: white !important;
+                width: 100mm ;
+                height: 150mm ;
+                min-height: 0 ;
+                margin: 0 ;
+                padding: 0 ;
+                overflow: hidden ;
+                background: white ;
             }
 
             body > *:not(#fulfillment-print-copy):not(#fulfillment-print-style) {
