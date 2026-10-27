@@ -136,8 +136,7 @@ export async function ensureShipmentForOrder(orderId: string) {
             }
 
             const paymentEligible =
-                payment.method === PaymentMethod.COD ||
-                payment.status === PaymentStatus.SUCCESS;
+                payment.method === PaymentMethod.COD || payment.status === PaymentStatus.SUCCESS;
 
             if (!paymentEligible) {
                 throw new TrackingError(
@@ -264,7 +263,7 @@ export async function verifyShipmentItem(
                 409,
             );
         }
-
+        console.log("Shipment: ", shipment);
         const itemCheck = shipment.itemChecks.find(
             (item) => item.orderItemId === orderItemId,
         );

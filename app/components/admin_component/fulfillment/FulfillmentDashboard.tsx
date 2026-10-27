@@ -9,7 +9,7 @@ import FulfillmentStatsCards from "./components/FulfillmentStats";
 import FulfillmentFilters from "./components/FulfillmentFilters";
 import FulfillmentTable from "./components/FulfillmentTable";
 import StatusBadge from "./components/StatusBadge";
-import { AlertCircle, Barcode, Camera, Check, CheckCircle2, LoaderCircle, Package, Printer, QrCode, ScanLine, Search, ShieldCheck, UserRound, X } from "lucide-react";
+import { AlertCircle, Barcode, Camera, Check, CheckCircle2, LoaderCircle, Package, PackageCheck, Printer, QrCode, ScanLine, Search, ShieldCheck, Truck, UserRound, X } from "lucide-react";
 
 function Modal({
     title,
