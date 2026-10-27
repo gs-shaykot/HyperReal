@@ -28,7 +28,7 @@ export async function GET(request: Request) {
                     { order: { orderHistory: { is: { country: { not: "Bangladesh" } } } } },
                 ],
                 ...(status && status !== "ALL" ? { status: status as "PENDING" | "OUT_FOR_DELIVERY" | "DELIVERED" | "FAILED" } : {}),
-                ...(country && country !== "ALL" ? { order: { orderHistory: { is: { country: { equals: country, mode: "insensitive" } } } } : {}),
+                ...(country && country !== "ALL" ? { order: { orderHistory: { is: { country: { equals: country, mode: "insensitive" } } } } } : {}),
             },
             orderBy: { updatedAt: "desc" },
             take: 200,
