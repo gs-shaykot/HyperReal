@@ -7,12 +7,28 @@ import prisma from "@/lib/prisma";
 
 async function getCourierId() {
     const session = await getServerSession(authOptions);
+    if (!session?.user?.id || session.sessionRevoked) return null;
 
-    if (!session?.user?.id || session.sessionRevoked) {
+    const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+            id: true,
+            role: true,
+            isBlocked: true,
+            courierProfile: { select: { isActive: true } },
+        },
+    });
+
+    if (
+        !user ||
+        user.isBlocked ||
+        user.role !== "COURIER" ||
+        !user.courierProfile?.isActive
+    ) {
         return null;
     }
 
-    return session.user.id;
+    return user.id;
 }
 
 export async function GET() {
