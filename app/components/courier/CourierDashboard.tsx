@@ -51,6 +51,7 @@ export default function CourierDashboard() {
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const [notes, setNotes] = useState<Record<string, string>>({});
+    const [otpCodes, setOtpCodes] = useState<Record<string, string>>({});
 
     const loadDeliveries = useCallback(async () => {
         setLoading(true);
@@ -93,7 +94,7 @@ export default function CourierDashboard() {
             const response = await fetch("/api/courier", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ shipmentId: delivery.id, action, note: notes[delivery.id] || "" }),
+                body: JSON.stringify({ shipmentId: delivery.id, action, note: notes[delivery.id] || "", otp: otpCodes[delivery.id] || "" }),
             });
             const result = await response.json();
             if (!response.ok || !result.success) throw new Error(result.message || "Could not update delivery.");
@@ -104,6 +105,17 @@ export default function CourierDashboard() {
         } finally {
             setBusyId("");
         }
+    };
+
+    const requestDeliveryOtp = async (delivery: Delivery) => {
+        setBusyId(delivery.id); setError(""); setNotice("");
+        try {
+            const response = await fetch("/api/courier/delivery-otp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ shipmentId: delivery.id }) });
+            const result = await response.json();
+            if (!response.ok || !result.success) throw new Error(result.message || "Could not send verification code.");
+            setNotice(result.message || "Verification code sent.");
+        } catch (err) { setError(err instanceof Error ? err.message : "Could not send verification code."); }
+        finally { setBusyId(""); }
     };
 
     const activeCount = deliveries.filter((delivery) => delivery.status !== "DELIVERED").length;
@@ -170,7 +182,7 @@ export default function CourierDashboard() {
                                             <div className="flex flex-wrap gap-2">
                                                 {canStart && <button type="button" onClick={()=>void updateDelivery(delivery,"START_DELIVERY")} disabled={busy} className={limeButton}><Truck size={14}/>{busy?"Updating...":"Start delivery"}</button>}
                                                 {active && payment?.method === "COD" && !delivery.codCollected && <button type="button" onClick={()=>void updateDelivery(delivery,"COLLECT_COD")} disabled={busy} className={button}><CheckCircle2 size={14}/>Confirm cash collected</button>}
-                                                {active && <button type="button" onClick={()=>void updateDelivery(delivery,"MARK_DELIVERED")} disabled={busy || (payment?.method === "COD" && !delivery.codCollected)} className={limeButton}><CheckCircle2 size={14}/>Mark delivered</button>}
+                                                {active && <div className="w-full space-y-2 border border-zinc-800 bg-black/40 p-3"><p className="text-[10px] font-bold tracking-widest text-zinc-400">CUSTOMER VERIFICATION</p><p className="text-xs text-zinc-500">Send a one-time code to the customer email. Only confirm delivery after handing over the parcel and receiving the code.</p><button type="button" onClick={() => void requestDeliveryOtp(delivery)} disabled={busy} className={button}><RefreshCw size={13}/>{busy ? "Sending..." : "Send email code"}</button><label className="block text-xs text-zinc-400">6-digit customer code<input inputMode="numeric" maxLength={6} value={otpCodes[delivery.id] || ""} onChange={(event) => setOtpCodes((current) => ({ ...current, [delivery.id]: event.target.value.replace(/[^0-9]/g, "").slice(0, 6) }))} placeholder="000000" className="mt-1 w-full border border-zinc-700 bg-[#0d0d0d] px-3 py-2 text-sm tracking-[0.3em] outline-none focus:border-lime-400"/></label><button type="button" onClick={() => void updateDelivery(delivery,"MARK_DELIVERED")} disabled={busy || (payment?.method === "COD" && !delivery.codCollected) || (otpCodes[delivery.id] || "").length !== 6} className={limeButton}><CheckCircle2 size={14}/>Verify &amp; mark delivered</button></div>}
                                                 {active && <button type="button" onClick={()=>void updateDelivery(delivery,"MARK_FAILED")} disabled={busy || !(notes[delivery.id] || "").trim()} className={button}><AlertCircle size={14}/>Delivery failed</button>}
                                             </div>
                                             {delivery.deliveredAt && <p className="text-xs text-zinc-500"><Clock3 className="mr-1 inline" size={13}/>Delivered {new Date(delivery.deliveredAt).toLocaleString()}</p>}
