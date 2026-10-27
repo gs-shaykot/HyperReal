@@ -2,6 +2,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toPng } from "html-to-image";
+import { jsPDF } from "jspdf";
 import type { FulfillmentTab, FulfillmentStatus, ShipmentStatus, ItemCheck, TrackingEvent, Shipment, OrderItem, Payment, ShippingAddress, Order, FulfillmentStats, FulfillmentResponse, ApiResponse, ScanResult, ModalName, DetailTab, BarcodeDetectorResult, BarcodeDetectorInstance, BarcodeDetectorConstructor } from "./types";
 import { EMPTY_STATS, BUTTON, LIME_BUTTON, INPUT } from "./constants";
 import { formatDate, formatDateTime, getPayment, getPaymentLabel, getPaymentStatusLabel, getAmount, fulfillmentLabel } from "./fulfillment.utils";
@@ -578,7 +580,7 @@ export default function FulfillmentDashboard() {
     /* ---------------------------------------------------------------------- */
 
 
-    function printLabel() {
+    async function printLabel() {
         const label = document.getElementById("fulfillment-print-label");
 
         if (!label) {
@@ -586,115 +588,129 @@ export default function FulfillmentDashboard() {
             return;
         }
 
-        // Remove any leftover temporary print copy.
-        document.getElementById("fulfillment-print-copy")?.remove();
+        let printCopy: HTMLElement | null = null;
+        let printStyle: HTMLStyleElement | null = null;
 
-        // Clone the label so React's original modal stays untouched.
-        const printCopy = label.cloneNode(true) as HTMLElement;
-        printCopy.id = "fulfillment-print-copy";
-        document.body.appendChild(printCopy);
+        try {
+            // Build an isolated, monochrome copy so the original modal remains unchanged.
+            printCopy = label.cloneNode(true) as HTMLElement;
+            printCopy.id = "fulfillment-print-copy";
+            printCopy.style.cssText = [
+                "display:block",
+                "position:fixed",
+                "left:-10000px",
+                "top:0",
+                "width:378px",
+                "margin:0",
+                "padding:0",
+                "background:#fff",
+                "box-sizing:border-box",
+            ].join(";");
 
-        const printStyle = document.createElement("style");
-        printStyle.id = "fulfillment-print-style";
-        printStyle.textContent = `
-        @media print {
-            @page {
-                size: 100mm 150mm;
-                margin: 0;
-            }
+            printStyle = document.createElement("style");
+            printStyle.textContent = `
+                #fulfillment-print-copy,
+                #fulfillment-print-copy * {
+                    color: #000 !important;
+                    border-color: #000 !important;
+                    text-shadow: none !important;
+                    box-shadow: none !important;
+                    filter: none !important;
+                    print-color-adjust: exact !important;
+                    -webkit-print-color-adjust: exact !important;
+                }
 
-            html,
-            body {
-                width: 100mm ;
-                height: 150mm ;
-                min-height: 0 ;
-                margin: 0 ;
-                padding: 0 ;
-                overflow: hidden ;
-                background: white ;
-            }
+                #fulfillment-print-copy > div {
+                    width: 100% !important;
+                    box-sizing: border-box !important;
+                    background: #fff !important;
+                    color: #000 !important;
+                    border-color: #000 !important;
+                }
 
-            body > *:not(#fulfillment-print-copy):not(#fulfillment-print-style) {
-                display: none !important;
-            }
+                #fulfillment-print-copy .bg-white,
+                #fulfillment-print-copy img {
+                    background-color: #fff !important;
+                }
 
-            #fulfillment-print-copy {
-                display: block !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100mm !important;
-                height: auto !important;
-                margin: 0 !important;
-                padding: 4mm !important;
-                box-sizing: border-box !important;
-                overflow: visible !important;
-                background: white !important;
-                visibility: visible !important;
-            }
+                #fulfillment-print-copy .bg-black {
+                    background-color: #000 !important;
+                }
+            `;
 
-            #fulfillment-print-copy,
-            #fulfillment-print-copy * {
-                visibility: visible !important;
-                color: black !important;
-                border-color: black !important;
-                text-shadow: none !important;
-                print-color-adjust: exact !important;
-                -webkit-print-color-adjust: exact !important;
-            }
+            document.head.appendChild(printStyle);
+            document.body.appendChild(printCopy);
 
-            #fulfillment-print-copy > div {
-                width: 100% !important;
-                height: auto !important;
-                margin: 0 !important;
-                background: white !important;
-                color: black !important;
-                border: 1px solid black !important;
-                box-shadow: none !important;
-                filter: none !important;
-            }
+            // Wait for the QR image to finish loading before rasterizing the label.
+            const images = Array.from(printCopy.querySelectorAll("img"));
+            await Promise.all(
+                images.map((img) => {
+                    if (img.complete && img.naturalWidth > 0) {
+                        return Promise.resolve();
+                    }
 
-            #fulfillment-print-copy img {
-                print-color-adjust: exact !important;
-                -webkit-print-color-adjust: exact !important;
-            }
+                    return new Promise<void>((resolve) => {
+                        const finish = () => resolve();
+                        img.addEventListener("load", finish, { once: true });
+                        img.addEventListener("error", finish, { once: true });
+                    });
+                }),
+            );
+
+            const imageData = await toPng(printCopy, {
+                backgroundColor: "#ffffff",
+                pixelRatio: 3,
+                cacheBust: true,
+            });
+
+            const image = new Image();
+            image.src = imageData;
+            await new Promise<void>((resolve, reject) => {
+                image.onload = () => resolve();
+                image.onerror = () => reject(new Error("Could not prepare the shipping label image."));
+            });
+
+            // jsPDF's custom format fixes the PDF page itself at 100 × 150 mm,
+            // independently of the selected Windows PDF printer or its paper forms.
+            const pageWidth = 100;
+            const pageHeight = 150;
+            const margin = 3;
+            const availableWidth = pageWidth - margin * 2;
+            const availableHeight = pageHeight - margin * 2;
+            const scale = Math.min(
+                availableWidth / image.naturalWidth,
+                availableHeight / image.naturalHeight,
+            );
+            const imageWidth = image.naturalWidth * scale;
+            const imageHeight = image.naturalHeight * scale;
+            const x = (pageWidth - imageWidth) / 2;
+            const y = (pageHeight - imageHeight) / 2;
+
+            const pdf = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: [pageWidth, pageHeight],
+                compress: true,
+            });
+
+            pdf.setProperties({
+                title: "HYPERREAL Shipping Label",
+                subject: "100 × 150 mm shipping label",
+                creator: "HYPERREAL",
+            });
+            pdf.addImage(imageData, "PNG", x, y, imageWidth, imageHeight, undefined, "FAST");
+            pdf.save("hyperreal-shipping-label.pdf");
+        } catch (err) {
+            setError(
+                err instanceof Error
+                    ? `Could not generate the shipping label PDF: ${err.message}`
+                    : "Could not generate the shipping label PDF.",
+            );
+        } finally {
+            printCopy?.remove();
+            printStyle?.remove();
         }
-
-        @media screen {
-            #fulfillment-print-copy,
-            #fulfillment-print-style {
-                display: none !important;
-            }
-        }
-    `;
-
-        document.head.appendChild(printStyle);
-
-        const cleanup = () => {
-            printCopy.remove();
-            printStyle.remove();
-            window.removeEventListener("afterprint", cleanup);
-        };
-
-        window.addEventListener("afterprint", cleanup, { once: true });
-
-        // Wait for the QR image before opening the native print preview.
-        const images = Array.from(printCopy.querySelectorAll("img"));
-
-        void Promise.all(
-            images.map((img) => {
-                if (img.complete) return Promise.resolve();
-
-                return new Promise<void>((resolve) => {
-                    img.addEventListener("load", () => resolve(), { once: true });
-                    img.addEventListener("error", () => resolve(), { once: true });
-                });
-            }),
-        ).then(() => {
-            window.print();
-        });
     }
-
 
     /* ---------------------------------------------------------------------- */
     /* Render                                                                 */
@@ -1271,7 +1287,7 @@ export default function FulfillmentDashboard() {
                                 className={`${LIME_BUTTON} flex-1`}
                             >
                                 <Printer size={14} />
-                                Print Label
+                                Download 4×6 PDF
                             </button>
                         </div>
 
