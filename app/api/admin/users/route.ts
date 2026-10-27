@@ -219,6 +219,16 @@ export async function PATCH(req: Request) {
             );
         }
 
+        if (updatesRole && existingUser.role === "COURIER") {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Manage courier accounts through Courier Management.",
+                },
+                { status: 400 }
+            );
+        }
+
         const data: {
             role?: Role;
             isBlocked?: boolean;
