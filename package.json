@@ -8,6 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "seed:courier-demo": "tsx prisma/seed-courier-demo.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

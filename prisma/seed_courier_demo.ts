@@ -45,6 +45,7 @@ export async function seedCourierDemoData(prisma: PrismaClient) {
             update: {
                 name: courier.name,
                 role: Role.COURIER,
+                PhotoUrl: "https://res.cloudinary.com/dloasaxt1/image/upload/v1789834185/gray-male-head-placeholder-vector-23804676_r9yoa9.jpg",
                 isBlocked: false,
                 isVerified: true,
                 isNewUser: false,
