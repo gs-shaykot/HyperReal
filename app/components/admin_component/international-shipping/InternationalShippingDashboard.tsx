@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Globe2, RefreshCw, Search, Save, Truck, PackageCheck, Clock3, ShieldAlert } from "lucide-react";
 
 type ShipmentRow = {
-    id: string; trackingCode: string; status: string; fulfillmentStatus: string; shippingType: string;
+    id: string; trackingCode: string; status: string; fulfillmentStatus: string; shippingType: string; internationalStatus: string;
     carrierName: string | null; carrierTrackingNumber: string | null; estimatedDeliveryAt: string | null;
     customsStatus: string; internationalNotes: string | null; dispatchedAt: string | null; updatedAt: string;
     order: { id: string; orderCode: string; status: string; createdAt: string; user: { name: string; email: string };
@@ -12,14 +12,14 @@ type ShipmentRow = {
         payments: { status: string; method: string; paidAmountInUSD: number }[] };
 };
 type Payload = { shipments: ShipmentRow[]; countries: string[] };
-type EditState = { carrierName: string; carrierTrackingNumber: string; estimatedDeliveryAt: string; customsStatus: string; internationalNotes: string };
+type EditState = { carrierName: string; carrierTrackingNumber: string; estimatedDeliveryAt: string; customsStatus: string; internationalNotes: string; internationalStatus: string };
 
 const CUSTOMS = [
     ["NOT_REQUIRED", "Not required"], ["DOCUMENTS_PENDING", "Documents pending"], ["DOCUMENTS_READY", "Documents ready"],
     ["UNDER_REVIEW", "Under review"], ["CLEARED", "Cleared"], ["ON_HOLD", "On hold"],
 ];
 
-const inputClass = "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-lime-400 light:bg-white light:text-zinc-900 light:border-zinc-300";
+const INTERNATIONAL = [\n    ["PREPARING", "Preparing for export"], ["HANDED_TO_CARRIER", "Handed to international carrier"],\n    ["IN_TRANSIT", "In transit"], ["CUSTOMS_CLEARANCE", "Customs clearance"],\n    ["OUT_FOR_DELIVERY", "Out for final delivery"], ["DELIVERED", "Delivered"],\n    ["EXCEPTION", "Exception"], ["RETURNING", "Return to sender"],\n];\n\nconst inputClass = "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-lime-400 light:bg-white light:text-zinc-900 light:border-zinc-300";
 const labelClass = "mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400";
 
 function localDateInput(value: string | null) {
@@ -48,7 +48,7 @@ export default function InternationalShippingDashboard() {
             setEdits(Object.fromEntries(json.data.shipments.map((s: ShipmentRow) => [s.id, {
                 carrierName: s.carrierName ?? "", carrierTrackingNumber: s.carrierTrackingNumber ?? "",
                 estimatedDeliveryAt: localDateInput(s.estimatedDeliveryAt), customsStatus: s.customsStatus ?? "NOT_REQUIRED",
-                internationalNotes: s.internationalNotes ?? "",
+                internationalNotes: s.internationalNotes ?? "", internationalStatus: s.internationalStatus ?? "PREPARING",
             }])));
             setNotice(null);
         } catch (error) {
@@ -129,7 +129,7 @@ export default function InternationalShippingDashboard() {
             return <article key={row.id} className="border border-zinc-800 bg-zinc-950 light:border-zinc-200 light:bg-white">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3 light:border-zinc-200">
                     <div><p className="text-xs font-black text-lime-300">{row.order.orderCode}</p><p className="mt-1 text-[10px] text-zinc-500">Tracking reference: {row.trackingCode}</p><p className="mt-1 text-xs font-bold">{address?.country ?? "Destination unavailable"} <span className="font-normal text-zinc-400">· {address?.city}</span></p></div>
-                    <div className="flex flex-wrap gap-2"><span className="border border-zinc-700 px-2 py-1 text-[9px] font-bold">{row.status.replaceAll("_"," ")}</span><span className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-lime-400/50 text-lime-300" : "border-zinc-700 text-zinc-300"}`}>{edit.customsStatus.replaceAll("_"," ")}</span></div>
+                    <div className="flex flex-wrap gap-2"><span className="border border-sky-500/40 px-2 py-1 text-[9px] font-bold text-sky-300">{(row.internationalStatus ?? "PREPARING").replaceAll("_"," ")}</span><span className="border border-zinc-700 px-2 py-1 text-[9px] font-bold">{row.status.replaceAll("_"," ")}</span><span className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-lime-400/50 text-lime-300" : "border-zinc-700 text-zinc-300"}`}>{edit.customsStatus.replaceAll("_"," ")}</span></div>
                 </div>
                 <div className="grid gap-4 p-4 lg:grid-cols-[1fr_1fr]">
                     <div className="space-y-3">
@@ -142,6 +142,7 @@ export default function InternationalShippingDashboard() {
                         <label><span className={labelClass}>Carrier tracking number</span><input value={edit.carrierTrackingNumber} onChange={(e) => updateEdit(row.id,"carrierTrackingNumber",e.target.value)} placeholder="Enter carrier reference" className={inputClass}/></label>
                         <label><span className={labelClass}>Estimated delivery</span><input type="datetime-local" value={edit.estimatedDeliveryAt} onChange={(e) => updateEdit(row.id,"estimatedDeliveryAt",e.target.value)} className={inputClass}/></label>
                         <label><span className={labelClass}>Customs status</span><select value={edit.customsStatus} onChange={(e) => updateEdit(row.id,"customsStatus",e.target.value)} className={inputClass}>{CUSTOMS.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+                        <label><span className={labelClass}>International delivery status</span><select value={edit.internationalStatus} onChange={(e) => updateEdit(row.id,"internationalStatus",e.target.value)} className={inputClass}>{INTERNATIONAL.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select></label>
                         <label className="sm:col-span-2"><span className={labelClass}>Shipping / customs notes</span><textarea rows={2} value={edit.internationalNotes} onChange={(e) => updateEdit(row.id,"internationalNotes",e.target.value)} placeholder="Invoice prepared, customs hold reason, carrier updates..." className={inputClass}/></label>
                         <div className="sm:col-span-2 flex justify-end"><button disabled={saving === row.id} onClick={() => void save(row)} className="inline-flex items-center gap-2 bg-lime-300 px-4 py-2 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"><Save size={14}/>{saving === row.id ? "Saving..." : "Save shipping details"}</button></div>
                     </div>
