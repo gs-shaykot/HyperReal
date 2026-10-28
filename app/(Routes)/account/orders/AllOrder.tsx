@@ -5,6 +5,7 @@ import { OrderFilters } from '@/app/(Routes)/account/orders/OrderFilters'
 import { Prisma } from '@prisma/client'
 import { CalendarDays, ClockArrowUp, Eye, Hourglass, OctagonX, Package, PackageCheck, Plus, Truck } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
 
 export type OrderType = Prisma.OrderGetPayload<{
@@ -13,6 +14,7 @@ export type OrderType = Prisma.OrderGetPayload<{
 
 
 export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<OrderType | null>(null);
     const [search, setSearch] = useState("");
@@ -35,6 +37,19 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
             setOpen(true);
         }
     }, [orders]);
+
+    useEffect(() => {
+        if (!selectedOrder) return;
+        const refreshedOrder = orders.find((item) => item.id === selectedOrder.id);
+        if (refreshedOrder) setSelectedOrder(refreshedOrder);
+    }, [orders, selectedOrder?.id]);
+
+    const refreshSelectedOrder = async () => {
+        router.refresh();
+        await new Promise<void>((resolve) => {
+            window.setTimeout(resolve, 700);
+        });
+    };
 
     const filteredOrders = useMemo(() => {
         const query = search.trim().toLowerCase();
@@ -120,7 +135,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                 onDateChange={setDate}
                 onClear={clearFilters}
             />
-            <OrderModal open={open} onCloseAction={() => setOpen(false)} order={selectedOrder} />
+            <OrderModal open={open} onCloseAction={() => setOpen(false)} order={selectedOrder} onRefreshAction={refreshSelectedOrder} />
             {
                 filteredOrders.length > 0 ?
                     (
