@@ -41,7 +41,7 @@ export async function GET() {
 
     try {
         const shipments = await prisma.shipment.findMany({
-            where: { assignedCourierId: courierId },
+            where: { assignedCourierId: courierId, shippingType: { not: "INTERNATIONAL" } },
             orderBy: [{ status: "asc" }, { dispatchedAt: "desc" }],
             select: {
                 id: true,
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
     try {
         const result = await prisma.$transaction(async (tx) => {
             const shipment = await tx.shipment.findFirst({
-                where: { id: shipmentId, assignedCourierId: courierId },
+                where: { id: shipmentId, assignedCourierId: courierId, shippingType: { not: "INTERNATIONAL" } },
                 include: {
                     order: {
                         select: {
@@ -166,18 +166,23 @@ export async function POST(request: Request) {
                 if (shipment.status !== ShipmentStatus.OUT_FOR_DELIVERY || payment?.method !== PaymentMethod.COD) {
                     return { error: "COD can only be collected for an active cash-on-delivery shipment.", status: 409 as const };
                 }
-                if (!shipment.codCollected) {
-                    await tx.shipment.update({
-                        where: { id: shipmentId },
-                        data: { codCollected: true, codCollectedAt: new Date() },
-                    });
-                    if (payment) {
-                        await tx.payment.update({ where: { id: payment.id }, data: { status: PaymentStatus.SUCCESS } });
-                    }
-                    await tx.orderTrackingEvent.create({
-                        data: { orderId: shipment.orderId, shipmentId, actorId: courierId, type: TrackingEventType.NOTE_ADDED, title: "Cash collected", description: "Courier confirmed cash-on-delivery payment collection." },
-                    });
+                if (!payment) {
+                    return { error: "No payment record exists for this COD order. Contact an administrator.", status: 409 as const };
                 }
+                if (payment.status === PaymentStatus.SUCCESS) {
+                    return { error: "This COD payment is already marked as paid.", status: 409 as const };
+                }
+                const collected = await tx.shipment.updateMany({
+                    where: { id: shipmentId, assignedCourierId: courierId, shippingType: { not: "INTERNATIONAL" }, status: ShipmentStatus.OUT_FOR_DELIVERY, codCollected: false },
+                    data: { codCollected: true, codCollectedAt: new Date() },
+                });
+                if (collected.count !== 1) {
+                    return { error: "COD collection was already recorded or the delivery changed. Refresh and verify the payment.", status: 409 as const };
+                }
+                await tx.payment.update({ where: { id: payment.id }, data: { status: PaymentStatus.SUCCESS } });
+                await tx.orderTrackingEvent.create({
+                    data: { orderId: shipment.orderId, shipmentId, actorId: courierId, type: TrackingEventType.NOTE_ADDED, title: "Cash collected", description: "Courier confirmed cash-on-delivery payment collection." },
+                });
             } else if (action === "MARK_DELIVERED") {
                 if (shipment.status !== ShipmentStatus.OUT_FOR_DELIVERY) {
                     return { error: "Start delivery before marking this parcel delivered.", status: 409 as const };
