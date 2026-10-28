@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     try {
         const shipment = await prisma.shipment.findFirst({
-            where: { id: shipmentId, assignedCourierId: courier.id },
+            where: { id: shipmentId, assignedCourierId: courier.id, shippingType: { not: "INTERNATIONAL" } },
             select: {
                 id: true, status: true, otpLastSentAt: true,
                 order: { select: { orderCode: true, user: { select: { email: true, name: true } } } },
