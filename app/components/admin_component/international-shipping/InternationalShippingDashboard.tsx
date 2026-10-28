@@ -69,7 +69,7 @@ export default function InternationalShippingDashboard() {
         return (!q || [s.order.orderCode, s.trackingCode, s.carrierTrackingNumber, destination?.fullName, destination?.country, s.order.user.email]
             .some((v) => v?.toLowerCase().includes(q)))
             && (country === "ALL" || destination?.country === country)
-            && (status === "ALL" || s.status === status);
+            && (status === "ALL" || (s.internationalStatus ?? "PREPARING") === status);
     }), [payload.shipments, search, country, status]);
 
     const updateEdit = (id: string, key: keyof EditState, value: string) => setEdits((old) => ({ ...old, [id]: { ...old[id], [key]: value } }));
@@ -93,7 +93,7 @@ export default function InternationalShippingDashboard() {
     }
 
     const count = payload.shipments.length;
-    const inTransit = payload.shipments.filter((s) => ["OUT_FOR_DELIVERY"].includes(s.status) || s.fulfillmentStatus === "DISPATCHED").length;
+    const inTransit = payload.shipments.filter((s) => ["HANDED_TO_CARRIER", "IN_TRANSIT", "CUSTOMS_CLEARANCE", "OUT_FOR_DELIVERY"].includes(s.internationalStatus ?? "")).length;
     const customsHold = payload.shipments.filter((s) => s.customsStatus === "ON_HOLD" || s.customsStatus === "UNDER_REVIEW").length;
 
     return <section className="mx-auto max-w-[1500px] space-y-5 text-white light:text-zinc-900">
@@ -122,7 +122,7 @@ export default function InternationalShippingDashboard() {
         <div className="flex flex-wrap gap-2 border border-zinc-800 bg-zinc-950 p-3 light:border-zinc-200 light:bg-zinc-50">
             <div className="relative min-w-[220px] flex-1"><Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"/><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search order, tracking, recipient..." className={`${inputClass} pl-9`}/></div>
             <select value={country} onChange={(e) => setCountry(e.target.value)} className={inputClass}><option value="ALL">All destination countries</option>{payload.countries.map((c) => <option key={c} value={c}>{c}</option>)}</select>
-            <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}><option value="ALL">All delivery statuses</option>{["PENDING","OUT_FOR_DELIVERY","DELIVERED","FAILED"].map((s) => <option key={s} value={s}>{s.replaceAll("_"," ")}</option>)}</select>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass}><option value="ALL">All delivery statuses</option>{INTERNATIONAL.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select>
         </div>
 
         {loading ? <div className="border border-zinc-800 p-12 text-center text-xs text-zinc-400"><RefreshCw className="mx-auto mb-3 animate-spin" size={20}/>Loading international shipments...</div>
