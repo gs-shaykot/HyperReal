@@ -1,4 +1,5 @@
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
+import { randomBytes } from "node:crypto";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -104,27 +105,48 @@ export async function POST(request: Request) {
             if (!zone) return NextResponse.json({ success: false, message: "Choose an active delivery zone." }, { status: 400 });
         }
 
-        const profile = await prisma.$transaction(async (tx) => {
-            const updatedUser = await tx.user.updateMany({
-                where: { id: user.id, role: Role.USER, isBlocked: false },
-                data: { role: Role.COURIER },
-            });
-            if (updatedUser.count !== 1) throw new Error("ACCOUNT_ROLE_CHANGED");
+        // The old code used the first eight UUID characters, which can collide
+        // with existing demo/seeded courier codes. Generate a unique random code
+        // and retry only if another request happens to claim the same code.
+        let profile = null;
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            const courierCode = `HYP-RDR-${randomBytes(4).toString("hex").toUpperCase()}`;
+            try {
+                profile = await prisma.$transaction(async (tx) => {
+                    const updatedUser = await tx.user.updateMany({
+                        where: { id: user.id, role: Role.USER, isBlocked: false },
+                        data: { role: Role.COURIER },
+                    });
+                    if (updatedUser.count !== 1) throw new Error("ACCOUNT_ROLE_CHANGED");
 
-            return tx.courierProfile.create({
-                data: {
-                    userId: user.id,
-                    courierCode: `HYP-RDR-${user.id.replaceAll("-", "").slice(0, 8).toUpperCase()}`,
-                    zoneId,
-                    vehicleType: vehicleType || null,
-                },
-                select: {
-                    id: true, courierCode: true, vehicleType: true, isActive: true,
-                    user: { select: { id: true, name: true, email: true, phone: true, isBlocked: true } },
-                    zone: { select: { id: true, name: true, city: true, country: true, isActive: true } },
-                },
-            });
-        });
+                    return tx.courierProfile.create({
+                        data: {
+                            userId: user.id,
+                            courierCode,
+                            zoneId,
+                            vehicleType: vehicleType || null,
+                        },
+                        select: {
+                            id: true, courierCode: true, vehicleType: true, isActive: true,
+                            user: { select: { id: true, name: true, email: true, phone: true, isBlocked: true } },
+                            zone: { select: { id: true, name: true, city: true, country: true, isActive: true } },
+                        },
+                    });
+                });
+                break;
+            } catch (error) {
+                const duplicateCourierCode =
+                    error instanceof Prisma.PrismaClientKnownRequestError &&
+                    error.code === "P2002" &&
+                    Array.isArray(error.meta?.target) &&
+                    error.meta.target.some((field) => String(field).includes("courierCode"));
+                if (!duplicateCourierCode || attempt === 4) throw error;
+            }
+        }
+
+        if (!profile) {
+            return NextResponse.json({ success: false, message: "Could not generate a unique courier code. Please retry." }, { status: 409 });
+        }
 
         return NextResponse.json({ success: true, message: "Courier registered.", data: profile }, { status: 201 });
     } catch (error) {
