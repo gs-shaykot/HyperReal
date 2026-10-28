@@ -74,6 +74,8 @@ export const OrdersTable = ({ orders }: Props) => {
                                 "Customer",
                                 "Items",
                                 "Total",
+                                "Payment Method",
+                                "Payment Status",
                                 "Date",
                                 "Status",
                                 "Actions",
@@ -139,6 +141,32 @@ export const OrdersTable = ({ orders }: Props) => {
                                             {getOrderTotal(
                                                 order
                                             ).toFixed(2)}
+                                        </td>
+
+                                        {/* PAYMENT METHOD */}
+                                        <td className="px-3 py-4">
+                                            <span className="inline-flex border border-zinc-700 bg-white/5 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-zinc-300 light:border-zinc-300 light:text-zinc-700">
+                                                {order.payments[0]?.method?.replaceAll("_", " ") ?? "N/A"}
+                                            </span>
+                                        </td>
+
+                                        {/* PAYMENT STATUS */}
+                                        <td className="px-3 py-4">
+                                            {(() => {
+                                                const paymentStatus = order.payments[0]?.status;
+                                                const className = paymentStatus === "SUCCESS"
+                                                    ? "border-lime-700/60 bg-lime-500/10 text-lime-400"
+                                                    : paymentStatus === "FAILED"
+                                                        ? "border-red-700/60 bg-red-500/10 text-red-400"
+                                                        : paymentStatus === "PENDING"
+                                                            ? "border-yellow-700/60 bg-yellow-500/10 text-yellow-400"
+                                                            : "border-zinc-700 bg-white/5 text-zinc-400";
+                                                return (
+                                                    <span className={`inline-flex border px-2 py-1 text-[9px] font-bold uppercase tracking-wide ${className}`}>
+                                                        {paymentStatus?.replaceAll("_", " ") ?? "NO PAYMENT"}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
 
                                         {/* DATE */}
