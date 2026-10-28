@@ -80,11 +80,25 @@ export const OrderModal = ({
             FAILED: { label: "DELIVERY ATTEMPT FAILED", description: shipment.failureReason || "The courier could not complete delivery." },
         }[shipment.status]
         : null;
+    // Fulfillment describes warehouse handling; after delivery, show the
+    // final shipment milestone here so customers don't see a stale DISPATCHED label.
+    const effectiveFulfillmentStatus =
+        shipment?.status === "DELIVERED"
+            ? "DELIVERED"
+            : shipment?.status === "OUT_FOR_DELIVERY"
+                ? "OUT_FOR_DELIVERY"
+                : shipment?.status === "FAILED"
+                    ? "DELIVERY_FAILED"
+                    : shipment?.fulfillmentStatus ?? null;
+
     const fulfillmentLabels: Record<string, string> = {
         READY_TO_PACK: "READY TO PACK",
         PACKING: "PACKING",
         PACKED: "PACKED",
         DISPATCHED: "DISPATCHED",
+        OUT_FOR_DELIVERY: "OUT FOR DELIVERY",
+        DELIVERY_FAILED: "DELIVERY FAILED",
+        DELIVERED: "DELIVERED",
     };
     const formatTrackingDate = (value: Date | string) =>
         new Date(value).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
@@ -175,7 +189,7 @@ export const OrderModal = ({
                                     <div className="border border-zinc-800 p-3 light:border-zinc-200">
                                         <p className="text-[10px] tracking-widest text-zinc-500">FULFILLMENT STATUS</p>
                                         <p className="mt-1 text-sm font-bold">
-                                            {fulfillmentLabels[shipment.fulfillmentStatus] ?? shipment.fulfillmentStatus}
+                                            {effectiveFulfillmentStatus ? (fulfillmentLabels[effectiveFulfillmentStatus] ?? effectiveFulfillmentStatus) : "—"}
                                         </p>
                                         <p className="mt-1 text-xs text-zinc-500">{trackingStatus?.description}</p>
                                     </div>
