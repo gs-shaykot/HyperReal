@@ -328,6 +328,7 @@ model Shipment {
   deliveryZone      DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
 
   shippingType          String   @default("DOMESTIC")
+  internationalStatus   String   @default("PREPARING")
   carrierName           String?
   carrierTrackingNumber String?
   estimatedDeliveryAt   DateTime?
