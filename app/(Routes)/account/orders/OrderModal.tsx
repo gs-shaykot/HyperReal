@@ -1,6 +1,7 @@
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect';
 import { Prisma } from '@prisma/client';
-import { CalendarDays, ClockArrowUp, Hourglass, OctagonX, PackageCheck, Truck, X, CheckCircle2, MapPin, Package } from 'lucide-react';
+import { CalendarDays, ClockArrowUp, Hourglass, OctagonX, PackageCheck, Truck, X, CheckCircle2, MapPin, Package, RefreshCw } from 'lucide-react';
+import { useState } from "react";
 
 export type OrderType = Prisma.OrderGetPayload<{
     select: typeof orderDetailsSelect
@@ -9,13 +10,20 @@ type OrderModalProps = {
     open: boolean;
     onCloseAction: () => void;
     order: OrderType | null;
+    onRefreshAction: () => Promise<void>;
 };
 
 export const OrderModal = ({
     open,
     onCloseAction,
-    order
+    order,
+    onRefreshAction
 }: OrderModalProps) => {
+    const [refreshing, setRefreshing] = useState(false);
+    const refreshOrder = async () => {
+        setRefreshing(true);
+        try { await onRefreshAction(); } finally { setRefreshing(false); }
+    };
 
     if (!open || !order) return null;
 
@@ -91,6 +99,11 @@ export const OrderModal = ({
                         <h2 className="text-xl font-bold uppercase tracking-widest light:text-zinc-900 text-white">
                             Order Transmission
                         </h2>
+                        <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => void refreshOrder()} disabled={refreshing} title="Refresh order details" aria-label="Refresh order details" className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold text-zinc-300 transition hover:border-second hover:text-second disabled:opacity-50">
+                                <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
+                                {refreshing ? "Refreshing..." : "Refresh"}
+                            </button>
                         {currentStatus && StatusIcon && (
                             <span
                                 className={` flex items-center text-xs border ${currentStatus.classname} p-1 rounded-full shrink-0 `}
@@ -100,6 +113,7 @@ export const OrderModal = ({
                                 {currentStatus.status}
                             </span>
                         )}
+                        </div>
                     </div>
 
                     <div className="w-64 flex items-center gap-2 text-sm text-zinc-300 light:text-zinc-700">
