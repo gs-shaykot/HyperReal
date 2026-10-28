@@ -332,6 +332,12 @@ export async function getAdminFulfillment({
             (entry) => entry.status === status,
         )?._count._all ?? 0;
 
+    // Delivered orders stay out of the active table, but the dashboard's
+    // delivered KPI should still report the historical delivered total.
+    const deliveredShipmentCount = await prisma.shipment.count({
+        where: { status: ShipmentStatus.DELIVERED },
+    });
+
     return {
         orders,
         pagination: {
@@ -350,7 +356,7 @@ export async function getAdminFulfillment({
             outForDelivery: countShipmentStatus(
                 ShipmentStatus.OUT_FOR_DELIVERY,
             ),
-            delivered: countShipmentStatus(ShipmentStatus.DELIVERED),
+            delivered: deliveredShipmentCount,
             failed: countShipmentStatus(ShipmentStatus.FAILED),
             ordersByStatus: statusCounts.map((entry) => ({
                 status: entry.status,
