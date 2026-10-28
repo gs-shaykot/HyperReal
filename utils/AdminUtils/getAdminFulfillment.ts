@@ -26,27 +26,40 @@ export interface GetAdminFulfillmentParams {
     pageSize?: number;
 }
 
-// The table must contain only orders that are still being processed.
-
-const processingOrderWhere: Prisma.OrderWhereInput = {
-    status: OrderStatus.PROCESSING,
-    payments: {
-        some: {
+// Keep active fulfillment work visible after dispatch, including COD orders
+// whose payment was marked successful when the courier collected cash.
+const eligibleOrderWhere: Prisma.OrderWhereInput = {
+    AND: [
+        {
             OR: [
+                { status: OrderStatus.PROCESSING },
                 {
-                    method: PaymentMethod.COD,
-                    status: PaymentStatus.PENDING,
-                },
-                {
-                    method: { not: PaymentMethod.COD },
-                    status: PaymentStatus.SUCCESS,
+                    status: OrderStatus.SHIPPED,
+                    shipment: { is: { status: { not: ShipmentStatus.DELIVERED } } },
                 },
             ],
         },
-    },
+        {
+            payments: {
+                some: {
+                    OR: [
+                        { method: PaymentMethod.COD, status: { in: [PaymentStatus.PENDING, PaymentStatus.SUCCESS] } },
+                        { method: { not: PaymentMethod.COD }, status: PaymentStatus.SUCCESS },
+                    ],
+                },
+            },
+        },
+        {
+            OR: [
+                { shipment: { is: null } },
+                { shipment: { is: { status: { not: ShipmentStatus.DELIVERED } } } },
+            ],
+        },
+    ],
 };
 
-const eligibleOrderWhere: Prisma.OrderWhereInput =  processingOrderWhere;
+// The same eligibility rules apply to the active queue and its status filters.
+const processingOrderWhere: Prisma.OrderWhereInput = eligibleOrderWhere;
 
 
 function buildSearchWhere(search: string): Prisma.OrderWhereInput {
