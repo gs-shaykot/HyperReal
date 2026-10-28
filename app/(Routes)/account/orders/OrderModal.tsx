@@ -166,6 +166,38 @@ export const OrderModal = ({
                                         <p className="mt-1 text-xs text-zinc-500">{trackingStatus?.description}</p>
                                     </div>
                                 </div>
+                                {shipment.shippingType === "INTERNATIONAL" && (
+                                    <div className="border border-sky-500/30 bg-sky-500/5 p-3">
+                                        <h4 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sky-300">
+                                            <Truck size={14} /> International Carrier Tracking
+                                        </h4>
+                                        <div className="grid gap-3 sm:grid-cols-2">
+                                            <div>
+                                                <p className="text-[9px] uppercase tracking-wider text-zinc-500">Carrier</p>
+                                                <p className="mt-1 text-xs font-bold">{shipment.carrierName || "Carrier not assigned yet"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] uppercase tracking-wider text-zinc-500">Carrier tracking reference</p>
+                                                <p className="mt-1 break-all font-mono text-xs font-bold">{shipment.carrierTrackingNumber || "Tracking reference pending"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] uppercase tracking-wider text-zinc-500">Customs status</p>
+                                                <p className={`mt-1 text-xs font-bold ${shipment.customsStatus === "ON_HOLD" ? "text-red-400" : shipment.customsStatus === "CLEARED" ? "text-lime-400" : "text-sky-300"}`}>
+                                                    {(shipment.customsStatus || "NOT_REQUIRED").replaceAll("_", " ")}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] uppercase tracking-wider text-zinc-500">Estimated delivery</p>
+                                                <p className="mt-1 text-xs font-bold">
+                                                    {shipment.estimatedDeliveryAt ? formatTrackingDate(shipment.estimatedDeliveryAt) : "Not available yet"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {shipment.internationalNotes && (
+                                            <p className="mt-3 border-t border-sky-500/20 pt-3 text-xs text-zinc-400">{shipment.internationalNotes}</p>
+                                        )}
+                                    </div>
+                                )}
                                 <div className="flex flex-wrap justify-between gap-2 text-xs text-zinc-500">
                                     <span>
                                         {shipment.dispatchedAt
