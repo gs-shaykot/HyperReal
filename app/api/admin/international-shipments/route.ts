@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
         const before = await prisma.shipment.findUnique({
             where: { id: shipmentId },
             select: {
-                id: true, orderId: true, status: true, shippingType: true,
+                id: true, orderId: true, status: true, shippingType: true, internationalStatus: true,
                 carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true,
                 customsStatus: true, internationalNotes: true,
             },
@@ -98,6 +98,8 @@ export async function PATCH(request: Request) {
         const nextCarrier = carrierName !== null ? (carrierName || null) : before.carrierName;
         const nextTracking = carrierTrackingNumber !== null ? (carrierTrackingNumber || null) : before.carrierTrackingNumber;
         const nextCustoms = typeof body?.customsStatus === "string" ? body.customsStatus : before.customsStatus;
+        const nextInternationalStatus = typeof body?.internationalStatus === "string" && INTERNATIONAL_STATUSES.has(body.internationalStatus) ? body.internationalStatus : before.internationalStatus;
+        const internationalStatusChanged = nextInternationalStatus !== before.internationalStatus;
         const carrierChanged = nextCarrier !== before.carrierName || nextTracking !== before.carrierTrackingNumber;
         const customsChanged = nextCustoms !== before.customsStatus;
         const notesChanged = internationalNotes !== null && (internationalNotes || null) !== before.internationalNotes;
@@ -108,13 +110,14 @@ export async function PATCH(request: Request) {
                 where: { id: shipmentId },
                 data: {
                     shippingType: "INTERNATIONAL",
+                    internationalStatus: nextInternationalStatus,
                     ...(carrierName !== null ? { carrierName: carrierName || null } : {}),
                     ...(carrierTrackingNumber !== null ? { carrierTrackingNumber: carrierTrackingNumber || null } : {}),
                     ...(internationalNotes !== null ? { internationalNotes: internationalNotes || null } : {}),
                     ...(typeof body?.customsStatus === "string" ? { customsStatus: body.customsStatus } : {}),
                     ...(estimatedDeliveryAt !== undefined ? { estimatedDeliveryAt } : {}),
                 },
-                select: { id: true, carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true, customsStatus: true, internationalNotes: true, shippingType: true },
+                select: { id: true, carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true, customsStatus: true, internationalNotes: true, shippingType: true, internationalStatus: true },
             });
 
             const events: { title: string; description: string }[] = [];
@@ -123,6 +126,20 @@ export async function PATCH(request: Request) {
                     title: "International carrier assigned",
                     description: [nextCarrier ? `Carrier: ${nextCarrier}` : null, nextTracking ? `Tracking reference: ${nextTracking}` : null].filter(Boolean).join(" · "),
                 });
+            }
+            if (internationalStatusChanged) {
+                const messages: Record<string, { title: string; description: string }> = {
+                    PREPARING: { title: "Preparing for export", description: "The international parcel is being prepared for export." },
+                    HANDED_TO_CARRIER: { title: "Handed to international carrier", description: nextCarrier ? "The parcel has been handed to " + nextCarrier + "." : "The parcel has been handed to the international carrier." },
+                    IN_TRANSIT: { title: "International shipment in transit", description: "The parcel is travelling through the international carrier network." },
+                    CUSTOMS_CLEARANCE: { title: "Customs clearance in progress", description: "The parcel is being processed by customs." },
+                    OUT_FOR_DELIVERY: { title: "Out for final delivery", description: "The destination delivery partner is taking the parcel to the recipient." },
+                    DELIVERED: { title: "International parcel delivered", description: "The international parcel has been marked as delivered by the admin." },
+                    EXCEPTION: { title: "International delivery exception", description: internationalNotes || "The international shipment needs attention." },
+                    RETURNING: { title: "International parcel returning to sender", description: "The shipment is being returned to the sender." },
+                };
+                const event = messages[nextInternationalStatus];
+                if (event) events.push(event);
             }
             if (customsChanged) {
                 const labels: Record<string, string> = {
