@@ -252,7 +252,7 @@ export const OrderModal = ({
                                     <div key={event.id} className="flex gap-3">
                                         <div className="flex flex-col items-center">
                                             <span className="mt-1 flex size-6 shrink-0 items-center justify-center border border-zinc-700 text-second">
-                                                {index === 0 ? <CheckCircle2 size={13} /> : <Package size={13} />}
+                                                {event.type === "DELIVERED" ? <CheckCircle2 size={13} /> : event.title.toLowerCase().includes("reassign") ? <RefreshCw size={13} /> : event.type === "DISPATCHED" || event.type === "OUT_FOR_DELIVERY" ? <Truck size={13} /> : index === 0 ? <CheckCircle2 size={13} /> : <Package size={13} />}
                                             </span>
                                             {index < shipment.events.length - 1 && (
                                                 <span className="my-1 min-h-6 w-px flex-1 bg-zinc-700" />
