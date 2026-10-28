@@ -158,6 +158,14 @@ export async function PATCH(request: Request) {
             if (notesChanged && internationalNotes) {
                 events.push({ title: "International shipping update", description: internationalNotes });
             }
+            if (internationalStatusChanged && nextInternationalStatus === "DELIVERED") {
+                await tx.shipment.update({ where: { id: shipmentId }, data: { status: "DELIVERED", deliveredAt: new Date() } });
+                await tx.order.update({ where: { id: before.orderId }, data: { status: "DELIVERED" } });
+            } else if (internationalStatusChanged && nextInternationalStatus === "OUT_FOR_DELIVERY") {
+                await tx.shipment.update({ where: { id: shipmentId }, data: { status: "OUT_FOR_DELIVERY" } });
+            } else if (internationalStatusChanged && nextInternationalStatus === "EXCEPTION") {
+                await tx.shipment.update({ where: { id: shipmentId }, data: { status: "FAILED" } });
+            }
             for (const event of events) {
                 await tx.orderTrackingEvent.create({
                     data: {
