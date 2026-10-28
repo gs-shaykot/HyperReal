@@ -84,19 +84,77 @@ export async function PATCH(request: Request) {
             estimatedDeliveryAt = new Date(body.estimatedDeliveryAt);
             if (Number.isNaN(estimatedDeliveryAt.getTime())) return NextResponse.json({ success: false, message: "Invalid estimated delivery date." }, { status: 400 });
         }
-        const updated = await prisma.shipment.update({
+        const before = await prisma.shipment.findUnique({
             where: { id: shipmentId },
-            data: {
-                shippingType: "INTERNATIONAL",
-                ...(carrierName !== null ? { carrierName: carrierName || null } : {}),
-                ...(carrierTrackingNumber !== null ? { carrierTrackingNumber: carrierTrackingNumber || null } : {}),
-                ...(internationalNotes !== null ? { internationalNotes: internationalNotes || null } : {}),
-                ...(typeof body?.customsStatus === "string" ? { customsStatus: body.customsStatus } : {}),
-                ...(estimatedDeliveryAt !== undefined ? { estimatedDeliveryAt } : {}),
+            select: {
+                id: true, orderId: true, status: true, shippingType: true,
+                carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true,
+                customsStatus: true, internationalNotes: true,
             },
-            select: { id: true, carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true, customsStatus: true, internationalNotes: true, shippingType: true },
         });
-        return NextResponse.json({ success: true, message: "International shipping details saved.", data: updated });
+        if (!before) return NextResponse.json({ success: false, message: "Shipment not found." }, { status: 404 });
+
+        const nextCarrier = carrierName !== null ? (carrierName || null) : before.carrierName;
+        const nextTracking = carrierTrackingNumber !== null ? (carrierTrackingNumber || null) : before.carrierTrackingNumber;
+        const nextCustoms = typeof body?.customsStatus === "string" ? body.customsStatus : before.customsStatus;
+        const carrierChanged = nextCarrier !== before.carrierName || nextTracking !== before.carrierTrackingNumber;
+        const customsChanged = nextCustoms !== before.customsStatus;
+        const notesChanged = internationalNotes !== null && (internationalNotes || null) !== before.internationalNotes;
+        const dateChanged = estimatedDeliveryAt !== undefined && estimatedDeliveryAt?.toISOString() !== before.estimatedDeliveryAt?.toISOString();
+
+        const updated = await prisma.$transaction(async (tx) => {
+            const shipment = await tx.shipment.update({
+                where: { id: shipmentId },
+                data: {
+                    shippingType: "INTERNATIONAL",
+                    ...(carrierName !== null ? { carrierName: carrierName || null } : {}),
+                    ...(carrierTrackingNumber !== null ? { carrierTrackingNumber: carrierTrackingNumber || null } : {}),
+                    ...(internationalNotes !== null ? { internationalNotes: internationalNotes || null } : {}),
+                    ...(typeof body?.customsStatus === "string" ? { customsStatus: body.customsStatus } : {}),
+                    ...(estimatedDeliveryAt !== undefined ? { estimatedDeliveryAt } : {}),
+                },
+                select: { id: true, carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true, customsStatus: true, internationalNotes: true, shippingType: true },
+            });
+
+            const events: { title: string; description: string }[] = [];
+            if (carrierChanged && (nextCarrier || nextTracking)) {
+                events.push({
+                    title: "International carrier assigned",
+                    description: [nextCarrier ? `Carrier: ${nextCarrier}` : null, nextTracking ? `Tracking reference: ${nextTracking}` : null].filter(Boolean).join(" · "),
+                });
+            }
+            if (customsChanged) {
+                const labels: Record<string, string> = {
+                    NOT_REQUIRED: "Customs documentation is not required.",
+                    DOCUMENTS_PENDING: "Required customs documents are pending.",
+                    DOCUMENTS_READY: "Customs documents have been prepared.",
+                    UNDER_REVIEW: "The shipment is under customs review.",
+                    CLEARED: "The shipment has been marked as customs cleared.",
+                    ON_HOLD: "The shipment is on customs hold. Please review the shipping notes.",
+                };
+                events.push({ title: `Customs status updated: ${nextCustoms.replaceAll("_", " ")}`, description: labels[nextCustoms] ?? "International customs status updated." });
+            }
+            if (dateChanged && estimatedDeliveryAt) {
+                events.push({ title: "Estimated delivery updated", description: `Current estimated delivery: ${estimatedDeliveryAt.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.` });
+            }
+            if (notesChanged && internationalNotes) {
+                events.push({ title: "International shipping update", description: internationalNotes });
+            }
+            for (const event of events) {
+                await tx.orderTrackingEvent.create({
+                    data: {
+                        orderId: before.orderId,
+                        shipmentId,
+                        type: "NOTE_ADDED",
+                        title: event.title,
+                        description: event.description,
+                        metadata: { source: "international_shipping_admin" },
+                    },
+                });
+            }
+            return shipment;
+        });
+        return NextResponse.json({ success: true, message: "International shipping details saved and customer tracking updated.", data: updated });
     } catch (error) {
         console.error("International shipment update failed:", error);
         return NextResponse.json({ success: false, message: "Could not update international shipping details." }, { status: 500 });
