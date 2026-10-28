@@ -19,7 +19,12 @@ const CUSTOMS = [
     ["UNDER_REVIEW", "Under review"], ["CLEARED", "Cleared"], ["ON_HOLD", "On hold"],
 ];
 
-const INTERNATIONAL = [\n    ["PREPARING", "Preparing for export"], ["HANDED_TO_CARRIER", "Handed to international carrier"],\n    ["IN_TRANSIT", "In transit"], ["CUSTOMS_CLEARANCE", "Customs clearance"],\n    ["OUT_FOR_DELIVERY", "Out for final delivery"], ["DELIVERED", "Delivered"],\n    ["EXCEPTION", "Exception"], ["RETURNING", "Return to sender"],\n];\n\nconst inputClass = "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-lime-400 light:bg-white light:text-zinc-900 light:border-zinc-300";
+const INTERNATIONAL = [
+    ["PREPARING", "Preparing for export"], ["HANDED_TO_CARRIER", "Handed to international carrier"],
+    ["IN_TRANSIT", "In transit"], ["CUSTOMS_CLEARANCE", "Customs clearance"],
+    ["OUT_FOR_DELIVERY", "Out for final delivery"], ["DELIVERED", "Delivered"],
+    ["EXCEPTION", "Exception"], ["RETURNING", "Return to sender"],
+];\n\nconst inputClass = "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-lime-400 light:bg-white light:text-zinc-900 light:border-zinc-300";
 const labelClass = "mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400";
 
 function localDateInput(value: string | null) {
