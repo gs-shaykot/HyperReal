@@ -1,0 +1,2 @@
+ALTER TABLE "Shipment"
+  ADD COLUMN "internationalStatus" TEXT NOT NULL DEFAULT 'PREPARING';
