@@ -48,7 +48,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        if (!(await requireAdmin())) {
+        const admin = await requireAdmin();
+        if (!admin) {
             return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }
 
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
                     data: {
                         orderId: shipment.orderId,
                         shipmentId,
-                        actorId: (await requireAdmin())?.id,
+                        actorId: admin.id,
                         type: TrackingEventType.NOTE_ADDED,
                         title: changedCourier ? "Courier reassigned" : "Delivery zone updated",
                         description: changedCourier
