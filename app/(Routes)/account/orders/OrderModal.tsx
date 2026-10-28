@@ -171,6 +171,12 @@ export const OrderModal = ({
                                         <h4 className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-sky-300">
                                             <Truck size={14} /> International Carrier Tracking
                                         </h4>
+                                        <div className="mb-3 border border-sky-500/30 px-3 py-2">
+                                            <p className="text-[9px] uppercase tracking-wider text-zinc-500">International delivery progress</p>
+                                            <p className={"mt-1 text-xs font-black uppercase " + (shipment.internationalStatus === "DELIVERED" ? "text-lime-400" : shipment.internationalStatus === "EXCEPTION" || shipment.internationalStatus === "RETURNING" ? "text-red-400" : "text-sky-300")}>
+                                                {(shipment.internationalStatus || "PREPARING").replaceAll("_", " ")}
+                                            </p>
+                                        </div>
                                         <div className="grid gap-3 sm:grid-cols-2">
                                             <div>
                                                 <p className="text-[9px] uppercase tracking-wider text-zinc-500">Carrier</p>
