@@ -29,6 +29,8 @@ export default function CourierManagement() {
     const [country, setCountry] = useState("Bangladesh");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [savingCourier, setSavingCourier] = useState(false);
+    const [savingZone, setSavingZone] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
 
@@ -50,8 +52,9 @@ export default function CourierManagement() {
 
     useEffect(() => { void loadData(); }, [loadData]);
 
-    async function submit(path: string, method: string, body: unknown) {
-        setSaving(true);
+    async function submit(path: string, method: string, body: unknown, form: "courier" | "zone" | "directory" = "directory") {
+        const setFormSaving = form === "courier" ? setSavingCourier : form === "zone" ? setSavingZone : setSaving;
+        setFormSaving(true);
         setError("");
         setNotice("");
         try {
@@ -69,19 +72,19 @@ export default function CourierManagement() {
             setError(err instanceof Error ? err.message : "Request failed.");
             return false;
         } finally {
-            setSaving(false);
+            setFormSaving(false);
         }
     }
 
     async function addCourier(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const success = await submit("/api/admin/couriers", "POST", { email, zoneId: zoneId || null, vehicleType });
+        const success = await submit("/api/admin/couriers", "POST", { email, zoneId: zoneId || null, vehicleType }, "courier");
         if (success) { setEmail(""); setVehicleType(""); }
     }
 
     async function addZone(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const success = await submit("/api/admin/delivery-zones", "POST", { name: zoneName, city, country });
+        const success = await submit("/api/admin/delivery-zones", "POST", { name: zoneName, city, country }, "zone");
         if (success) { setZoneName(""); setCity(""); }
     }
 
@@ -106,7 +109,7 @@ export default function CourierManagement() {
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">EXISTING ACCOUNT EMAIL</span><input required type="email" value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="rider@example.com" className={inputClass}/></label>
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">DEFAULT DELIVERY ZONE</span><select value={zoneId} onChange={(event)=>setZoneId(event.target.value)} className={inputClass}><option value="">No zone assigned</option>{zones.filter((zone)=>zone.isActive).map((zone)=><option key={zone.id} value={zone.id}>{zone.name} · {zone.city}, {zone.country}</option>)}</select></label>
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">VEHICLE TYPE (OPTIONAL)</span><input value={vehicleType} onChange={(event)=>setVehicleType(event.target.value)} placeholder="Motorcycle, bicycle, van..." maxLength={60} className={inputClass}/></label>
-                        <button disabled={saving} className={buttonClass}><Plus size={14}/>{saving ? "Saving..." : "Register courier"}</button>
+                        <button disabled={savingCourier} className={buttonClass}><Plus size={14}/>{savingCourier ? "Saving..." : "Register courier"}</button>
                     </form>
 
                     <form onSubmit={addZone} className="space-y-3 border border-zinc-800 bg-[#0d0d0d] p-4">
@@ -115,7 +118,7 @@ export default function CourierManagement() {
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">ZONE NAME</span><input required value={zoneName} onChange={(event)=>setZoneName(event.target.value)} placeholder="Dhaka North" maxLength={80} className={inputClass}/></label>
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">CITY</span><input required value={city} onChange={(event)=>setCity(event.target.value)} placeholder="Dhaka" maxLength={80} className={inputClass}/></label>
                         <label className="block space-y-1"><span className="text-[10px] text-zinc-500">COUNTRY</span><input required value={country} onChange={(event)=>setCountry(event.target.value)} maxLength={80} className={inputClass}/></label>
-                        <button disabled={saving} className={buttonClass}><Plus size={14}/>{saving ? "Saving..." : "Create zone"}</button>
+                        <button disabled={savingZone} className={buttonClass}><Plus size={14}/>{savingZone ? "Saving..." : "Create zone"}</button>
                     </form>
                 </div>
 
