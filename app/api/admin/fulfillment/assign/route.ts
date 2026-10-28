@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Role, ShipmentStatus, TrackingEventType } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -69,7 +69,15 @@ export async function POST(request: Request) {
         const [shipment, zone, courier] = await Promise.all([
             prisma.shipment.findUnique({
                 where: { id: shipmentId },
-                select: { id: true, fulfillmentStatus: true, status: true, deliveryZoneId: true },
+                select: {
+                    id: true,
+                    orderId: true,
+                    fulfillmentStatus: true,
+                    status: true,
+                    shippingType: true,
+                    assignedCourierId: true,
+                    deliveryZoneId: true,
+                },
             }),
             prisma.deliveryZone.findFirst({
                 where: { id: zoneId, isActive: true },
@@ -91,22 +99,69 @@ export async function POST(request: Request) {
         ]);
 
         if (!shipment) return NextResponse.json({ success: false, message: "Shipment not found." }, { status: 404 });
+        if (shipment.shippingType === "INTERNATIONAL") {
+            return NextResponse.json({ success: false, message: "International shipments must be managed through international shipping, not domestic courier assignment." }, { status: 409 });
+        }
         if (shipment.fulfillmentStatus !== "DISPATCHED") {
             return NextResponse.json({ success: false, message: "Only dispatched shipments can be assigned." }, { status: 409 });
+        }
+        if (shipment.status === ShipmentStatus.DELIVERED) {
+            return NextResponse.json({ success: false, message: "Delivered shipments cannot be reassigned." }, { status: 409 });
         }
         if (!zone) return NextResponse.json({ success: false, message: "Choose an active delivery zone." }, { status: 400 });
         if (!courier) return NextResponse.json({ success: false, message: "Choose an active courier assigned to this zone." }, { status: 400 });
 
-        const updated = await prisma.shipment.update({
-            where: { id: shipmentId },
-            data: { assignedCourierId: courier.user.id, deliveryZoneId: zoneId },
-            select: {
-                id: true,
-                deliveryZoneId: true,
-                assignedCourier: { select: { id: true, name: true, email: true, phone: true } },
-                deliveryZone: { select: { id: true, name: true, city: true, country: true } },
-            },
+        const result = await prisma.$transaction(async (tx) => {
+            const updatedCount = await tx.shipment.updateMany({
+                where: {
+                    id: shipmentId,
+                    fulfillmentStatus: "DISPATCHED",
+                    status: { not: ShipmentStatus.DELIVERED },
+                    shippingType: { not: "INTERNATIONAL" },
+                },
+                data: { assignedCourierId: courier.user.id, deliveryZoneId: zoneId },
+            });
+
+            if (updatedCount.count !== 1) return null;
+
+            const changedCourier = shipment.assignedCourierId !== courier.user.id;
+            const changedZone = shipment.deliveryZoneId !== zoneId;
+            if (changedCourier || changedZone) {
+                await tx.orderTrackingEvent.create({
+                    data: {
+                        orderId: shipment.orderId,
+                        shipmentId,
+                        actorId: (await requireAdmin())?.id,
+                        type: TrackingEventType.NOTE_ADDED,
+                        title: changedCourier ? "Courier reassigned" : "Delivery zone updated",
+                        description: changedCourier
+                            ? "The shipment was reassigned to a different active courier by an administrator."
+                            : "The delivery zone was updated by an administrator.",
+                        metadata: {
+                            previousCourierId: shipment.assignedCourierId,
+                            newCourierId: courier.user.id,
+                            previousZoneId: shipment.deliveryZoneId,
+                            newZoneId: zoneId,
+                        },
+                    },
+                });
+            }
+
+            return tx.shipment.findUnique({
+                where: { id: shipmentId },
+                select: {
+                    id: true,
+                    deliveryZoneId: true,
+                    assignedCourier: { select: { id: true, name: true, email: true, phone: true } },
+                    deliveryZone: { select: { id: true, name: true, city: true, country: true } },
+                },
+            });
         });
+
+        if (!result) {
+            return NextResponse.json({ success: false, message: "Shipment status changed during reassignment. Refresh and try again." }, { status: 409 });
+        }
+        const updated = result;
 
         return NextResponse.json({ success: true, message: "Courier assigned successfully.", data: updated });
     } catch (error) {
