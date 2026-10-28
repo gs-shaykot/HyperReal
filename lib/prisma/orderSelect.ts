@@ -45,6 +45,7 @@ export const orderDetailsSelect = {
             id: true,
             trackingCode: true,
             shippingType: true,
+            internationalStatus: true,
             carrierName: true,
             carrierTrackingNumber: true,
             estimatedDeliveryAt: true,
