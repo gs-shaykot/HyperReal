@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 const CUSTOMS_STATUSES = new Set(["NOT_REQUIRED", "DOCUMENTS_PENDING", "DOCUMENTS_READY", "UNDER_REVIEW", "CLEARED", "ON_HOLD"]);
+const INTERNATIONAL_STATUSES = new Set(["PREPARING", "HANDED_TO_CARRIER", "IN_TRANSIT", "CUSTOMS_CLEARANCE", "OUT_FOR_DELIVERY", "DELIVERED", "EXCEPTION", "RETURNING"]);
 
 async function requireAdmin() {
     const session = await getServerSession(authOptions);
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
             orderBy: { updatedAt: "desc" },
             take: 200,
             select: {
-                id: true, trackingCode: true, status: true, fulfillmentStatus: true, shippingType: true,
+                id: true, trackingCode: true, status: true, fulfillmentStatus: true, shippingType: true, internationalStatus: true,
                 carrierName: true, carrierTrackingNumber: true, estimatedDeliveryAt: true, customsStatus: true,
                 internationalNotes: true, dispatchedAt: true, deliveredAt: true, updatedAt: true,
                 order: {
@@ -59,7 +60,7 @@ export async function PATCH(request: Request) {
         if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const body = await request.json().catch(() => null) as {
             shipmentId?: unknown; carrierName?: unknown; carrierTrackingNumber?: unknown;
-            estimatedDeliveryAt?: unknown; customsStatus?: unknown; internationalNotes?: unknown;
+            estimatedDeliveryAt?: unknown; customsStatus?: unknown; internationalNotes?: unknown; internationalStatus?: unknown;
         } | null;
         const shipmentId = typeof body?.shipmentId === "string" ? body.shipmentId.trim() : "";
         if (!shipmentId) return NextResponse.json({ success: false, message: "Shipment ID is required." }, { status: 400 });
