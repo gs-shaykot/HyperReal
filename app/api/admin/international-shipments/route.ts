@@ -76,6 +76,9 @@ export async function PATCH(request: Request) {
         if (typeof body?.customsStatus === "string" && !CUSTOMS_STATUSES.has(body.customsStatus)) {
             return NextResponse.json({ success: false, message: "Invalid customs status." }, { status: 400 });
         }
+        if (typeof body?.internationalStatus === "string" && !INTERNATIONAL_STATUSES.has(body.internationalStatus)) {
+            return NextResponse.json({ success: false, message: "Invalid international delivery status." }, { status: 400 });
+        }
         const carrierName = typeof body?.carrierName === "string" ? body.carrierName.trim().slice(0, 100) : null;
         const carrierTrackingNumber = typeof body?.carrierTrackingNumber === "string" ? body.carrierTrackingNumber.trim().slice(0, 120) : null;
         const internationalNotes = typeof body?.internationalNotes === "string" ? body.internationalNotes.trim().slice(0, 2000) : null;
