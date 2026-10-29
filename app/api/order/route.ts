@@ -119,6 +119,21 @@ export async function POST(req: Request) {
                     idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
                 });
 
+                if (recoveredIntent.status === "canceled") {
+                    await releaseOrderStock(previousAttempt.id);
+                    return NextResponse.json(
+                        { success: false, message: "The previous payment attempt is no longer usable. Your reservation was released; start a new checkout attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                if (recoveredIntent.status === "succeeded") {
+                    return NextResponse.json(
+                        { success: false, message: "Stripe reports a successful payment that is still being reconciled. Do not retry payment; refresh shortly or contact support." },
+                        { status: 409 }
+                    );
+                }
+
                 if (!recoveredIntent.client_secret) {
                     return NextResponse.json(
                         { success: false, message: "Payment attempt is still being reconciled. Retry shortly with the same attempt." },
@@ -642,7 +657,9 @@ export async function POST(req: Request) {
                     // retain the reservation for reconciliation rather than risking
                     // a captured payment with released inventory.
                     let safeToRelease = false;
-                    if (paymentIntent && paymentIntent.status !== "succeeded") {
+                    if (paymentIntent?.status === "canceled") {
+                        safeToRelease = true;
+                    } else if (paymentIntent && paymentIntent.status !== "succeeded") {
                         try {
                             const cancelled = await stripe.paymentIntents.cancel(paymentIntent.id);
                             safeToRelease = cancelled.status === "canceled";
