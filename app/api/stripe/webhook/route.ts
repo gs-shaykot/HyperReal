@@ -139,15 +139,59 @@ export async function POST(req: Request) {
                     });
                 }
 
-                // Record only after processing succeeds. The unique event ID makes
-                // subsequent Stripe retries safe; completion itself is also guarded
-                // by the order/payment state transition.
-                await prisma.stripeWebhookEvent.create({
-                    data: { id: event.id, type: event.type },
-                }).catch(async (error: { code?: string }) => {
-                    if (error?.code !== "P2002") throw error;
+                break;
+            }
+            case "payment_intent.canceled": {
+                const paymentIntent = event.data.object as Stripe.PaymentIntent;
+                const orderId = paymentIntent.metadata.orderId;
+                if (!orderId) {
+                    return NextResponse.json(
+                        { success: false, message: "Missing orderId in cancelled PaymentIntent metadata." },
+                        { status: 400 }
+                    );
+                }
+
+                const order = await prisma.order.findUnique({
+                    where: { id: orderId },
+                    select: {
+                        id: true,
+                        status: true,
+                        payments: {
+                            select: {
+                                method: true,
+                                status: true,
+                                paymentIntentId: true,
+                            },
+                        },
+                    },
                 });
 
+                if (!order) {
+                    return new NextResponse("Order not found", { status: 404 });
+                }
+
+                const payment = order.payments[0];
+                if (
+                    !payment ||
+                    payment.method !== "STRIPE" ||
+                    payment.paymentIntentId !== paymentIntent.id
+                ) {
+                    return NextResponse.json(
+                        { success: false, message: "Cancelled PaymentIntent does not match the saved order payment." },
+                        { status: 400 }
+                    );
+                }
+
+                // Only a signed Stripe cancellation event can release this
+                // reservation. Browser return URLs never call this path.
+                if (order.status === "PENDING" && payment.status === "PENDING") {
+                    await releaseOrderStock(order.id);
+                } else if (payment.status !== "FAILED" && order.status !== "CANCELLED") {
+                    return NextResponse.json(
+                        { success: false, message: "Cancellation conflicts with current order/payment state." },
+                        { status: 409 }
+                    );
+                }
                 break;
             }
             default: {
