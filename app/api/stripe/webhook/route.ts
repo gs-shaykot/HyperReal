@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { completePayment } from "@/lib/service/paymentService";
+import { completePayment, releaseOrderStock } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
