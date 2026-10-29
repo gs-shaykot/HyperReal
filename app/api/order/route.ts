@@ -478,6 +478,7 @@ export async function POST(req: Request) {
                     product_profile: "general",
                 };
 
+                let sslInitializationResponseReceived = false;
                 try {
                     const response = await axios.post(
                         `${process.env.SSLCOMMERZ_API_BASE_URL || "https://sandbox.sslcommerz.com"}/gwprocess/v4/api.php`,
@@ -490,6 +491,7 @@ export async function POST(req: Request) {
                         }
                     );
 
+                    sslInitializationResponseReceived = true;
                     const data = response.data;
 
                     if (
@@ -517,13 +519,19 @@ export async function POST(req: Request) {
                         error
                     );
 
-                    await releaseOrderStock(order.id);
+                    // If the request timed out or the connection failed, the gateway
+                    // may still have created a session. Do not release inventory on
+                    // an ambiguous outcome; reconcile it with the gateway first.
+                    if (sslInitializationResponseReceived) {
+                        await releaseOrderStock(order.id);
+                    }
 
                     return NextResponse.json(
                         {
                             success: false,
-                            message:
-                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                            message: sslInitializationResponseReceived
+                                ? "Unable to initialize payment. Your reservation was released; please start a new attempt."
+                                : "Payment initialization outcome is uncertain. Your reservation is being held while the gateway status is reconciled; do not start another payment yet.",
                         },
                         { status: 502 }
                     );
