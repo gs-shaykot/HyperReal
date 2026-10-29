@@ -79,6 +79,7 @@ export async function POST(req: Request) {
                         status: true,
                         paymentIntentId: true,
                         checkoutUrl: true,
+                        sslSessionKey: true,
                         paidAmountInUSD: true,
                     },
                 },
@@ -574,10 +575,16 @@ export async function POST(req: Request) {
                         throw new Error("SSLCOMMERZ did not return a gateway URL.");
                     }
                     sslGatewayUrl = data.GatewayPageURL;
+                    if (typeof data.sessionkey !== "string" || !data.sessionkey) {
+                        throw new Error("SSLCOMMERZ did not return a session key for reconciliation.");
+                    }
 
                     const savedCheckoutUrl = await prisma.payment.updateMany({
                         where: { orderId: order.id, status: "PENDING" },
-                        data: { checkoutUrl: data.GatewayPageURL },
+                        data: {
+                            checkoutUrl: data.GatewayPageURL,
+                            sslSessionKey: data.sessionkey,
+                        },
                     });
                     if (savedCheckoutUrl.count !== 1) {
                         throw new Error("Could not persist SSLCOMMERZ checkout URL.");
