@@ -108,7 +108,7 @@ export async function POST(req: Request) {
                 }
 
                 if (
-                    savedPayment.paymentIntentId !== paymentIntent.id ||
+                    (savedPayment.paymentIntentId !== null && savedPayment.paymentIntentId !== paymentIntent.id) ||
                     paymentIntent.metadata.orderCode !== order.orderCode ||
                     paymentIntent.metadata.userId !== order.userId ||
                     paymentIntent.amount_received !== Math.round(savedPayment.paidAmountInUSD * 100)
@@ -171,11 +171,20 @@ export async function POST(req: Request) {
                 }
 
                 const payment = order.payments[0];
-                if (
-                    !payment ||
-                    payment.method !== "STRIPE" ||
-                    payment.paymentIntentId !== paymentIntent.id
-                ) {
+                if (!payment || payment.method !== "STRIPE") {
+                    return NextResponse.json(
+                        { success: false, message: "Order does not have a Stripe payment." },
+                        { status: 400 }
+                    );
+                }
+
+                // If the intent could not be saved but the initialization
+                // handler already confirmed cancellation and released the order,
+                // acknowledge its webhook without trying to release twice.
+                if (payment.paymentIntentId !== paymentIntent.id) {
+                    if (order.status === "CANCELLED" && payment.status === "FAILED") {
+                        break;
+                    }
                     return NextResponse.json(
                         { success: false, message: "Cancelled PaymentIntent does not match the saved order payment." },
                         { status: 400 }
