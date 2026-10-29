@@ -7,14 +7,15 @@ export type SslCommerzTransactionState = "SUCCESS" | "FAILED" | "UNKNOWN";
  * fields alone are never trusted to release stock.
  */
 export async function getSslCommerzTransactionState(
-    transactionId: string
+    transactionId: string,
+    sessionKey?: string | null
 ): Promise<SslCommerzTransactionState> {
     try {
         const baseUrl =
             process.env.SSLCOMMERZ_VALIDATOR_BASE_URL ||
             "https://sandbox.sslcommerz.com";
         const params = new URLSearchParams({
-            tran_id: transactionId,
+            ...(sessionKey ? { sessionkey: sessionKey } : { tran_id: transactionId }),
             store_id: process.env.SSLC_STORE_ID || "",
             store_passwd: process.env.SSLC_STORE_PASSWORD || "",
             v: "1",
@@ -27,8 +28,24 @@ export async function getSslCommerzTransactionState(
         );
         const data = response.data as {
             APIConnect?: string;
+            tran_id?: string;
+            sessionkey?: string;
+            status?: string;
             element?: Array<{ tran_id?: string; status?: string }>;
         };
+
+        if (sessionKey) {
+            if (
+                data.sessionkey !== sessionKey ||
+                data.tran_id !== transactionId
+            ) {
+                return "UNKNOWN";
+            }
+            const sessionStatus = data.status?.toUpperCase();
+            if (sessionStatus === "VALID" || sessionStatus === "VALIDATED") return "SUCCESS";
+            if (sessionStatus === "FAILED" || sessionStatus === "CANCELLED") return "FAILED";
+            return "UNKNOWN";
+        }
 
         if (data.APIConnect !== "DONE" || !Array.isArray(data.element)) {
             return "UNKNOWN";
