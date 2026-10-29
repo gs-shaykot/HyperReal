@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { releaseOrderStock } from "@/lib/service/paymentService";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -24,6 +23,7 @@ export async function POST(req: Request) {
             },
             select: {
                 id: true,
+                payments: { select: { method: true, status: true } },
             },
         });
 
@@ -37,7 +37,13 @@ export async function POST(req: Request) {
             );
         }
 
-        await releaseOrderStock(order.id);
+        // A browser-return callback containing only tran_id is not proof that
+        // the gateway transaction failed. Keep the reservation until a trusted
+        // gateway validation/reconciliation confirms its terminal state.
+
+        if (order.payments.some((payment) => payment.method !== "SSLC")) {
+            return NextResponse.json({ success: false, message: "Payment method mismatch." }, { status: 400 });
+        }
 
         return NextResponse.redirect(
             `${process.env.BASE_URL}/cancel?orderId=${order.id}`
