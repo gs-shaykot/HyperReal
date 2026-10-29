@@ -263,7 +263,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 // Only rotate the key when the server confirms that the previous
                 // attempt is unusable; transient/network errors keep the key so
                 // a retry recovers the same order/payment attempt.
-                if (message.includes("no longer usable")) {
+                if (message.includes("no longer usable") || message.includes("reservation was released")) {
                     const nextKey = window.crypto.randomUUID();
                     window.localStorage.setItem("hyperreal_checkout_attempt_key", nextKey);
                     setCheckoutKey(nextKey);
