@@ -134,6 +134,13 @@ export async function POST(req: Request) {
                 );
             }
 
+            if (previousPayment?.method === "SSLC" && previousAttempt.status === "CANCELLED") {
+                return NextResponse.json(
+                    { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
             if (previousPayment?.method === "SSLC" && previousPayment.checkoutUrl) {
                 return NextResponse.json({
                     success: true,
