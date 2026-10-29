@@ -97,9 +97,29 @@ export async function POST(req: Request) {
             const previousPayment = previousAttempt.payments[0];
             if (previousPayment?.method === "STRIPE" && previousPayment.paymentIntentId) {
                 const intent = await stripe.paymentIntents.retrieve(previousPayment.paymentIntentId);
+
                 if (intent.status === "succeeded") {
-                    return NextResponse.json({ success: true, orderId: previousAttempt.id, alreadyCompleted: true });
+                    if (previousPayment.status === "SUCCESS") {
+                        return NextResponse.json({ success: true, orderId: previousAttempt.id, alreadyCompleted: true });
+                    }
+                    return NextResponse.json(
+                        { success: false, message: "Payment was captured but order state needs reconciliation. Please contact support and do not retry payment." },
+                        { status: 409 }
+                    );
                 }
+
+                if (previousAttempt.status === "CANCELLED") {
+                    if (["requires_payment_method", "requires_confirmation", "requires_action", "requires_capture"].includes(intent.status)) {
+                        await stripe.paymentIntents.cancel(intent.id).catch((error) => {
+                            console.error("[Order API] Could not cancel intent for cancelled order:", error);
+                        });
+                    }
+                    return NextResponse.json(
+                        { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                        { status: 409 }
+                    );
+                }
+
                 if (intent.client_secret && intent.status !== "canceled") {
                     return NextResponse.json({
                         success: true,
@@ -512,60 +532,70 @@ export async function POST(req: Request) {
             }
 
             case "STRIPE": {
+                let paymentIntent: Awaited<ReturnType<typeof stripe.paymentIntents.create>> | null = null;
                 try {
-                    const paymentIntent =
-                        await stripe.paymentIntents.create({
-                            amount: Math.round(USD_finalTotal * 100),
-                            currency: "usd",
-                            payment_method_types: ["card"],
-                            metadata: {
-                                orderId: order.id,
-                                orderCode: order.orderCode,
-                                userId: session.user.id,
-                            },
-                        }, {
-                            idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
-                        });
+                    paymentIntent = await stripe.paymentIntents.create({
+                        amount: Math.round(USD_finalTotal * 100),
+                        currency: "usd",
+                        payment_method_types: ["card"],
+                        metadata: {
+                            orderId: order.id,
+                            orderCode: order.orderCode,
+                            userId: session.user.id,
+                        },
+                    }, {
+                        idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                    });
 
                     if (!paymentIntent.client_secret) {
-                        throw new Error(
-                            "Stripe did not return a client secret."
-                        );
+                        throw new Error("Stripe did not return a client secret.");
                     }
 
-                    await prisma.payment.updateMany({
-                        where: {
-                            orderId: order.id,
-                        },
-                        data: {
-                            paymentIntentId: paymentIntent.id,
-                        },
+                    const saved = await prisma.payment.updateMany({
+                        where: { orderId: order.id, status: "PENDING" },
+                        data: { paymentIntentId: paymentIntent.id },
                     });
+
+                    if (saved.count !== 1) {
+                        throw new Error("Could not persist Stripe PaymentIntent.");
+                    }
 
                     return NextResponse.json({
                         success: true,
                         orderId: order.id,
                         clientSecret: paymentIntent.client_secret,
                     });
-
                 } catch (error) {
-                    console.error(
-                        "[Order API] Stripe initialization failed:",
-                        error
-                    );
+                    console.error("[Order API] Stripe initialization failed:", error);
 
-                    await releaseOrderStock(order.id);
+                    // If Stripe created an intent but the DB save failed, cancel it
+                    // before releasing stock. If cancellation cannot be confirmed,
+                    // retain the reservation for reconciliation rather than risking
+                    // a captured payment with released inventory.
+                    let safeToRelease = !paymentIntent;
+                    if (paymentIntent && paymentIntent.status !== "succeeded") {
+                        try {
+                            const cancelled = await stripe.paymentIntents.cancel(paymentIntent.id);
+                            safeToRelease = cancelled.status === "canceled";
+                        } catch (cancelError) {
+                            console.error("[Order API] Could not cancel orphaned PaymentIntent:", cancelError);
+                        }
+                    }
+
+                    if (safeToRelease) {
+                        await releaseOrderStock(order.id);
+                    }
 
                     return NextResponse.json(
                         {
                             success: false,
-                            message:
-                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                            message: safeToRelease
+                                ? "Unable to initialize payment. Your reservation was released; please start a new attempt."
+                                : "Payment initialization is being reconciled. Do not start another payment yet; retry shortly or contact support.",
                         },
                         { status: 502 }
                     );
                 }
-
             }
 
             case "COD": {
