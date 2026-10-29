@@ -5,7 +5,8 @@ ALTER TABLE "Order"
 CREATE UNIQUE INDEX "Order_checkoutKey_key" ON "Order"("checkoutKey");
 
 ALTER TABLE "Payment"
-  ADD COLUMN "checkoutUrl" TEXT;
+  ADD COLUMN "checkoutUrl" TEXT,
+  ADD COLUMN "sslSessionKey" TEXT;
 
 CREATE TABLE "StripeWebhookEvent" (
   "id" TEXT NOT NULL,
