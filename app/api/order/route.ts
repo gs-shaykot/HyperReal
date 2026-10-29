@@ -479,6 +479,7 @@ export async function POST(req: Request) {
                 };
 
                 let sslInitializationResponseReceived = false;
+                let sslGatewayUrl: string | null = null;
                 try {
                     const response = await axios.post(
                         `${process.env.SSLCOMMERZ_API_BASE_URL || "https://sandbox.sslcommerz.com"}/gwprocess/v4/api.php`,
@@ -498,15 +499,17 @@ export async function POST(req: Request) {
                         typeof data.GatewayPageURL !== "string" ||
                         !data.GatewayPageURL
                     ) {
-                        throw new Error(
-                            "SSLCOMMERZ did not return a gateway URL."
-                        );
+                        throw new Error("SSLCOMMERZ did not return a gateway URL.");
                     }
+                    sslGatewayUrl = data.GatewayPageURL;
 
-                    await prisma.payment.updateMany({
+                    const savedCheckoutUrl = await prisma.payment.updateMany({
                         where: { orderId: order.id, status: "PENDING" },
                         data: { checkoutUrl: data.GatewayPageURL },
                     });
+                    if (savedCheckoutUrl.count !== 1) {
+                        throw new Error("Could not persist SSLCOMMERZ checkout URL.");
+                    }
 
                     return NextResponse.json({
                         success: true,
@@ -522,14 +525,15 @@ export async function POST(req: Request) {
                     // If the request timed out or the connection failed, the gateway
                     // may still have created a session. Do not release inventory on
                     // an ambiguous outcome; reconcile it with the gateway first.
-                    if (sslInitializationResponseReceived) {
+                    const safeToRelease = sslInitializationResponseReceived && !sslGatewayUrl;
+                    if (safeToRelease) {
                         await releaseOrderStock(order.id);
                     }
 
                     return NextResponse.json(
                         {
                             success: false,
-                            message: sslInitializationResponseReceived
+                            message: safeToRelease
                                 ? "Unable to initialize payment. Your reservation was released; please start a new attempt."
                                 : "Payment initialization outcome is uncertain. Your reservation is being held while the gateway status is reconciled; do not start another payment yet.",
                         },
