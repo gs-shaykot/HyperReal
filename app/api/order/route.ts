@@ -1,4 +1,5 @@
 
+import { createHash } from "node:crypto";
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { CouponError } from "@/lib/errors/CouponError";
@@ -27,6 +28,14 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
+        const checkoutKey = req.headers.get("Idempotency-Key");
+
+        if (!checkoutKey || checkoutKey.length < 16 || checkoutKey.length > 128) {
+            return NextResponse.json(
+                { success: false, message: "A valid Idempotency-Key header is required." },
+                { status: 400 }
+            );
+        }
 
         const {
             country,
@@ -41,6 +50,91 @@ export async function POST(req: Request) {
             typeof coupon === "string" && coupon.trim()
                 ? coupon.trim().toUpperCase()
                 : null;
+
+        // Bind the key to the checkout choices. Reusing a key with a different
+        // payload must never silently reuse an unrelated order.
+        const checkoutFingerprint = createHash("sha256")
+            .update(JSON.stringify({
+                userId: session.user.id,
+                country: country?.value,
+                coupon: normalizedCouponCode,
+                paymentMethod,
+                address,
+                saveAddress: Boolean(saveAddress),
+                deliveryOption,
+            }))
+            .digest("hex");
+
+        const previousAttempt = await prisma.order.findUnique({
+            where: { checkoutKey },
+            select: {
+                id: true,
+                userId: true,
+                status: true,
+                checkoutFingerprint: true,
+                payments: {
+                    select: {
+                        method: true,
+                        status: true,
+                        paymentIntentId: true,
+                        checkoutUrl: true,
+                    },
+                },
+            },
+        });
+
+        if (previousAttempt) {
+            if (
+                previousAttempt.userId !== session.user.id ||
+                previousAttempt.checkoutFingerprint !== checkoutFingerprint
+            ) {
+                return NextResponse.json(
+                    { success: false, message: "This checkout key is already associated with a different checkout. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
+            const previousPayment = previousAttempt.payments[0];
+            if (previousPayment?.method === "STRIPE" && previousPayment.paymentIntentId) {
+                const intent = await stripe.paymentIntents.retrieve(previousPayment.paymentIntentId);
+                if (intent.status === "succeeded") {
+                    return NextResponse.json({ success: true, orderId: previousAttempt.id, alreadyCompleted: true });
+                }
+                if (intent.client_secret && intent.status !== "canceled") {
+                    return NextResponse.json({
+                        success: true,
+                        orderId: previousAttempt.id,
+                        clientSecret: intent.client_secret,
+                        reusedAttempt: true,
+                    });
+                }
+                return NextResponse.json(
+                    { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
+            if (previousPayment?.method === "SSLC" && previousPayment.checkoutUrl) {
+                return NextResponse.json({
+                    success: true,
+                    paymentUrl: previousPayment.checkoutUrl,
+                    reusedAttempt: true,
+                });
+            }
+
+            if (previousPayment?.method === "COD" && previousAttempt.status !== "CANCELLED") {
+                return NextResponse.json({
+                    success: true,
+                    orderId: previousAttempt.id,
+                    alreadyCompleted: true,
+                });
+            }
+
+            return NextResponse.json(
+                { success: false, message: "This checkout attempt is still being initialized. Retry shortly using the same attempt." },
+                { status: 409 }
+            );
+        }
 
         const allowedPaymentMethods = [
             "SSLC",
@@ -257,6 +351,8 @@ export async function POST(req: Request) {
                     userId: session.user.id,
                     status: "PENDING",
                     orderCode,
+                    checkoutKey,
+                    checkoutFingerprint,
 
                     orderHistory: {
                         create: {
@@ -364,7 +460,7 @@ export async function POST(req: Request) {
 
                 try {
                     const response = await axios.post(
-                        "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                        `${process.env.SSLCOMMERZ_API_BASE_URL || "https://sandbox.sslcommerz.com"}/gwprocess/v4/api.php`,
                         new URLSearchParams(sslData as any),
                         {
                             headers: {
@@ -384,6 +480,11 @@ export async function POST(req: Request) {
                             "SSLCOMMERZ did not return a gateway URL."
                         );
                     }
+
+                    await prisma.payment.updateMany({
+                        where: { orderId: order.id, status: "PENDING" },
+                        data: { checkoutUrl: data.GatewayPageURL },
+                    });
 
                     return NextResponse.json({
                         success: true,
@@ -422,6 +523,8 @@ export async function POST(req: Request) {
                                 orderCode: order.orderCode,
                                 userId: session.user.id,
                             },
+                        }, {
+                            idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
                         });
 
                     if (!paymentIntent.client_secret) {
@@ -509,6 +612,23 @@ export async function POST(req: Request) {
                 },
                 { status: 400 }
             );
+        }
+
+        // A concurrent request using the same unique checkout key may have
+        // won the insert. Do not create another order; ask the client to retry
+        // with the same key so the saved attempt can be recovered.
+        const checkoutKey = req.headers.get("Idempotency-Key");
+        if (checkoutKey && (error as { code?: string })?.code === "P2002") {
+            const existing = await prisma.order.findUnique({
+                where: { checkoutKey },
+                select: { id: true },
+            });
+            if (existing) {
+                return NextResponse.json(
+                    { success: false, message: "This checkout attempt is being initialized. Retry shortly with the same attempt.", orderId: existing.id },
+                    { status: 409 }
+                );
+            }
         }
 
         console.error("Error creating order:", error);
