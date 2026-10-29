@@ -222,6 +222,7 @@ model Payment {
   paymentIntentId        String?  @unique
   receiptUrl             String?
   checkoutUrl            String?
+  sslSessionKey          String?
   stripeChargeId         String?  @unique
   order                  Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
