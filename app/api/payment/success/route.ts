@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        if (validationData.status !== "VALID") {
+        if (!["VALID", "VALIDATED"].includes(validationData.status)) {
             console.warn("[SSLCOMMERZ] Validation was not successful; leaving reservation unchanged until verified reconciliation.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
@@ -58,7 +58,8 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
-        if (validationData.currency !== "BDT") {
+        const validatedCurrency = validationData.currency ?? validationData.currency_type;
+        if (validatedCurrency !== "BDT") {
             console.warn("[SSLCOMMERZ] Currency mismatch; no payment state changed.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
