@@ -70,6 +70,7 @@ export async function POST(req: Request) {
             select: {
                 id: true,
                 userId: true,
+                orderCode: true,
                 status: true,
                 checkoutFingerprint: true,
                 payments: {
@@ -78,6 +79,7 @@ export async function POST(req: Request) {
                         status: true,
                         paymentIntentId: true,
                         checkoutUrl: true,
+                        paidAmountInUSD: true,
                     },
                 },
             },
@@ -95,6 +97,54 @@ export async function POST(req: Request) {
             }
 
             const previousPayment = previousAttempt.payments[0];
+            if (
+                previousPayment?.method === "STRIPE" &&
+                !previousPayment.paymentIntentId &&
+                previousAttempt.status === "PENDING" &&
+                previousPayment.status === "PENDING"
+            ) {
+                // Recover a Stripe create request whose response may have been
+                // lost. Stripe's same idempotency key returns the original intent
+                // instead of creating another one.
+                const recoveredIntent = await stripe.paymentIntents.create({
+                    amount: Math.round(previousPayment.paidAmountInUSD * 100),
+                    currency: "usd",
+                    payment_method_types: ["card"],
+                    metadata: {
+                        orderId: previousAttempt.id,
+                        orderCode: previousAttempt.orderCode,
+                        userId: session.user.id,
+                    },
+                }, {
+                    idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                });
+
+                if (!recoveredIntent.client_secret) {
+                    return NextResponse.json(
+                        { success: false, message: "Payment attempt is still being reconciled. Retry shortly with the same attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                const saved = await prisma.payment.updateMany({
+                    where: { orderId: previousAttempt.id, status: "PENDING", paymentIntentId: null },
+                    data: { paymentIntentId: recoveredIntent.id },
+                });
+                if (saved.count !== 1) {
+                    return NextResponse.json(
+                        { success: false, message: "Payment attempt is still being reconciled. Retry shortly with the same attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    orderId: previousAttempt.id,
+                    clientSecret: recoveredIntent.client_secret,
+                    reusedAttempt: true,
+                });
+            }
+
             if (previousPayment?.method === "STRIPE" && previousPayment.paymentIntentId) {
                 const intent = await stripe.paymentIntents.retrieve(previousPayment.paymentIntentId);
 
@@ -591,7 +641,7 @@ export async function POST(req: Request) {
                     // before releasing stock. If cancellation cannot be confirmed,
                     // retain the reservation for reconciliation rather than risking
                     // a captured payment with released inventory.
-                    let safeToRelease = !paymentIntent;
+                    let safeToRelease = false;
                     if (paymentIntent && paymentIntent.status !== "succeeded") {
                         try {
                             const cancelled = await stripe.paymentIntents.cancel(paymentIntent.id);
