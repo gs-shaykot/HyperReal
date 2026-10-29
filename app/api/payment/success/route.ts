@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { completePayment, markPaymentFailed } from "@/lib/service/paymentService";
+import { completePayment } from "@/lib/service/paymentService";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
@@ -14,7 +14,8 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        const validationUrl = `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${process.env.SSLC_STORE_ID}&store_passwd=${process.env.SSLC_STORE_PASSWORD}&format=json`;
+        const validatorBaseUrl = process.env.SSLCOMMERZ_VALIDATOR_BASE_URL || "https://sandbox.sslcommerz.com";
+        const validationUrl = `${validatorBaseUrl}/validator/api/validationserverAPI.php?val_id=${encodeURIComponent(val_id)}&store_id=${encodeURIComponent(process.env.SSLC_STORE_ID || "")}&store_passwd=${encodeURIComponent(process.env.SSLC_STORE_PASSWORD || "")}&format=json`;
 
         const validationRes = await axios.get(validationUrl);
         const validationData = validationRes.data;
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
                 id: true,
                 userId: true,
                 orderCode: true,
+                status: true,
                 orderItems: {
                     select: {
                         quantity: true,
@@ -36,6 +38,7 @@ export async function POST(req: Request) {
                         paidAmountInBDT: true,
                         couponCode: true,
                         status: true,
+                        method: true,
                     },
                 },
             },
@@ -45,28 +48,25 @@ export async function POST(req: Request) {
             return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
         }
 
-        if (validationData.status !== "VALID" ) {
-            await markPaymentFailed(order.id);
-
-            return NextResponse.redirect(
-                `${process.env.BASE_URL}/failed`
-            );
+        if (validationData.status !== "VALID") {
+            console.warn("[SSLCOMMERZ] Validation was not successful; leaving reservation unchanged until verified reconciliation.", order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         if (validationData.tran_id !== order.orderCode) {
-            await markPaymentFailed(order.id);
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+            console.warn("[SSLCOMMERZ] Transaction/order mismatch; no payment state changed.", order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         if (validationData.currency !== "BDT") {
-            await markPaymentFailed(order.id);
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+            console.warn("[SSLCOMMERZ] Currency mismatch; no payment state changed.", order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         const payment = order.payments[0];
 
-        if (!payment) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        if (!payment || payment.method !== "SSLC") {
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         if (payment.status === "SUCCESS") {
@@ -77,8 +77,8 @@ export async function POST(req: Request) {
         const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
 
         if (validationAmount !== paidAmount) {
-            await markPaymentFailed(order.id);
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+            console.warn("[SSLCOMMERZ] Amount mismatch; no payment state changed.", order.id);
+            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         await completePayment(order);
