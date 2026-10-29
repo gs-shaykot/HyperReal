@@ -11,11 +11,13 @@ export async function getSslCommerzTransactionState(
     sessionKey?: string | null
 ): Promise<SslCommerzTransactionState> {
     try {
+        if (!sessionKey) return "UNKNOWN";
+
         const baseUrl =
             process.env.SSLCOMMERZ_VALIDATOR_BASE_URL ||
             "https://sandbox.sslcommerz.com";
         const params = new URLSearchParams({
-            ...(sessionKey ? { sessionkey: sessionKey } : { tran_id: transactionId }),
+            sessionkey: sessionKey,
             store_id: process.env.SSLC_STORE_ID || "",
             store_passwd: process.env.SSLC_STORE_PASSWORD || "",
             v: "1",
@@ -31,44 +33,22 @@ export async function getSslCommerzTransactionState(
             tran_id?: string;
             sessionkey?: string;
             status?: string;
-            element?: Array<{ tran_id?: string; status?: string }>;
         };
 
-        if (sessionKey) {
-            if (
-                data.sessionkey !== sessionKey ||
-                data.tran_id !== transactionId
-            ) {
-                return "UNKNOWN";
-            }
-            const sessionStatus = data.status?.toUpperCase();
-            if (sessionStatus === "VALID" || sessionStatus === "VALIDATED") return "SUCCESS";
-            if (sessionStatus === "FAILED" || sessionStatus === "CANCELLED") return "FAILED";
+        if (
+            data.sessionkey !== sessionKey ||
+            data.tran_id !== transactionId
+        ) {
             return "UNKNOWN";
         }
 
-        if (data.APIConnect !== "DONE" || !Array.isArray(data.element)) {
-            return "UNKNOWN";
-        }
-
-        const attempts = data.element.filter(
-            (item) => item.tran_id === transactionId
-        );
-        if (attempts.length === 0) return "UNKNOWN";
-
-        const statuses = attempts.map((item) => item.status?.toUpperCase());
-        if (statuses.some((status) => status === "VALID" || status === "VALIDATED")) {
+        const sessionStatus = data.status?.toUpperCase();
+        if (sessionStatus === "VALID" || sessionStatus === "VALIDATED") {
             return "SUCCESS";
         }
-
-        if (
-            statuses.every(
-                (status) => status === "FAILED" || status === "CANCELLED"
-            )
-        ) {
+        if (sessionStatus === "FAILED" || sessionStatus === "CANCELLED") {
             return "FAILED";
         }
-
         return "UNKNOWN";
     } catch (error) {
         console.error("[SSLCOMMERZ] Transaction status query failed:", error);
