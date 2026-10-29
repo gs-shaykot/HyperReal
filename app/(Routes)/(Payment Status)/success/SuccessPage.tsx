@@ -12,9 +12,17 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useRef } from "react"; 
+import { useEffect, useMemo, useRef } from "react"; 
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
+  useEffect(() => {
+    // Only clear the key when the server supplied an order that has actually
+    // advanced to processing; visiting this URL manually must not reset it.
+    if (order?.status === "PROCESSING" && order?.payments?.[0]) {
+      window.localStorage.removeItem("hyperreal_checkout_attempt_key");
+    }
+  }, [order?.status, order?.payments]);
+
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
 
   const totalInUSD = order?.payments[0]?.totalProductPriceInUSD || 0;

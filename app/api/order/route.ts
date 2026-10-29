@@ -1,4 +1,5 @@
 
+import { createHash } from "node:crypto";
 import { CartItemWithProductType } from "@/app/types/cartType";
 import { authOptions } from "@/lib/auth";
 import { CouponError } from "@/lib/errors/CouponError";
@@ -27,6 +28,14 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
+        const checkoutKey = req.headers.get("Idempotency-Key");
+
+        if (!checkoutKey || checkoutKey.length < 16 || checkoutKey.length > 128) {
+            return NextResponse.json(
+                { success: false, message: "A valid Idempotency-Key header is required." },
+                { status: 400 }
+            );
+        }
 
         const {
             country,
@@ -41,6 +50,184 @@ export async function POST(req: Request) {
             typeof coupon === "string" && coupon.trim()
                 ? coupon.trim().toUpperCase()
                 : null;
+
+        // Bind the key to the checkout choices. Reusing a key with a different
+        // payload must never silently reuse an unrelated order.
+        const checkoutFingerprint = createHash("sha256")
+            .update(JSON.stringify({
+                userId: session.user.id,
+                country: country?.value,
+                coupon: normalizedCouponCode,
+                paymentMethod,
+                address,
+                saveAddress: Boolean(saveAddress),
+                deliveryOption,
+            }))
+            .digest("hex");
+
+        const previousAttempt = await prisma.order.findUnique({
+            where: { checkoutKey },
+            select: {
+                id: true,
+                userId: true,
+                orderCode: true,
+                status: true,
+                checkoutFingerprint: true,
+                payments: {
+                    select: {
+                        method: true,
+                        status: true,
+                        paymentIntentId: true,
+                        checkoutUrl: true,
+                        sslSessionKey: true,
+                        paidAmountInUSD: true,
+                    },
+                },
+            },
+        });
+
+        if (previousAttempt) {
+            if (
+                previousAttempt.userId !== session.user.id ||
+                previousAttempt.checkoutFingerprint !== checkoutFingerprint
+            ) {
+                return NextResponse.json(
+                    { success: false, message: "This checkout key is already associated with a different checkout. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
+            const previousPayment = previousAttempt.payments[0];
+            if (
+                previousPayment?.method === "STRIPE" &&
+                !previousPayment.paymentIntentId &&
+                previousAttempt.status === "PENDING" &&
+                previousPayment.status === "PENDING"
+            ) {
+                // Recover a Stripe create request whose response may have been
+                // lost. Stripe's same idempotency key returns the original intent
+                // instead of creating another one.
+                const recoveredIntent = await stripe.paymentIntents.create({
+                    amount: Math.round(previousPayment.paidAmountInUSD * 100),
+                    currency: "usd",
+                    payment_method_types: ["card"],
+                    metadata: {
+                        orderId: previousAttempt.id,
+                        orderCode: previousAttempt.orderCode,
+                        userId: session.user.id,
+                    },
+                }, {
+                    idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                });
+
+                if (recoveredIntent.status === "canceled") {
+                    await releaseOrderStock(previousAttempt.id);
+                    return NextResponse.json(
+                        { success: false, message: "The previous payment attempt is no longer usable. Your reservation was released; start a new checkout attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                if (recoveredIntent.status === "succeeded") {
+                    return NextResponse.json(
+                        { success: false, message: "Stripe reports a successful payment that is still being reconciled. Do not retry payment; refresh shortly or contact support." },
+                        { status: 409 }
+                    );
+                }
+
+                if (!recoveredIntent.client_secret) {
+                    return NextResponse.json(
+                        { success: false, message: "Payment attempt is still being reconciled. Retry shortly with the same attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                const saved = await prisma.payment.updateMany({
+                    where: { orderId: previousAttempt.id, status: "PENDING", paymentIntentId: null },
+                    data: { paymentIntentId: recoveredIntent.id },
+                });
+                if (saved.count !== 1) {
+                    return NextResponse.json(
+                        { success: false, message: "Payment attempt is still being reconciled. Retry shortly with the same attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                return NextResponse.json({
+                    success: true,
+                    orderId: previousAttempt.id,
+                    clientSecret: recoveredIntent.client_secret,
+                    reusedAttempt: true,
+                });
+            }
+
+            if (previousPayment?.method === "STRIPE" && previousPayment.paymentIntentId) {
+                const intent = await stripe.paymentIntents.retrieve(previousPayment.paymentIntentId);
+
+                if (intent.status === "succeeded") {
+                    if (previousPayment.status === "SUCCESS") {
+                        return NextResponse.json({ success: true, orderId: previousAttempt.id, alreadyCompleted: true });
+                    }
+                    return NextResponse.json(
+                        { success: false, message: "Payment was captured but order state needs reconciliation. Please contact support and do not retry payment." },
+                        { status: 409 }
+                    );
+                }
+
+                if (previousAttempt.status === "CANCELLED") {
+                    if (["requires_payment_method", "requires_confirmation", "requires_action", "requires_capture"].includes(intent.status)) {
+                        await stripe.paymentIntents.cancel(intent.id).catch((error) => {
+                            console.error("[Order API] Could not cancel intent for cancelled order:", error);
+                        });
+                    }
+                    return NextResponse.json(
+                        { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                        { status: 409 }
+                    );
+                }
+
+                if (intent.client_secret && intent.status !== "canceled") {
+                    return NextResponse.json({
+                        success: true,
+                        orderId: previousAttempt.id,
+                        clientSecret: intent.client_secret,
+                        reusedAttempt: true,
+                    });
+                }
+                return NextResponse.json(
+                    { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
+            if (previousPayment?.method === "SSLC" && previousAttempt.status === "CANCELLED") {
+                return NextResponse.json(
+                    { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                    { status: 409 }
+                );
+            }
+
+            if (previousPayment?.method === "SSLC" && previousPayment.checkoutUrl) {
+                return NextResponse.json({
+                    success: true,
+                    paymentUrl: previousPayment.checkoutUrl,
+                    reusedAttempt: true,
+                });
+            }
+
+            if (previousPayment?.method === "COD" && previousAttempt.status !== "CANCELLED") {
+                return NextResponse.json({
+                    success: true,
+                    orderId: previousAttempt.id,
+                    alreadyCompleted: true,
+                });
+            }
+
+            return NextResponse.json(
+                { success: false, message: "This checkout attempt is still being initialized. Retry shortly using the same attempt." },
+                { status: 409 }
+            );
+        }
 
         const allowedPaymentMethods = [
             "SSLC",
@@ -257,6 +444,8 @@ export async function POST(req: Request) {
                     userId: session.user.id,
                     status: "PENDING",
                     orderCode,
+                    checkoutKey,
+                    checkoutFingerprint,
 
                     orderHistory: {
                         create: {
@@ -362,9 +551,11 @@ export async function POST(req: Request) {
                     product_profile: "general",
                 };
 
+                let sslInitializationResponseReceived = false;
+                let sslGatewayUrl: string | null = null;
                 try {
                     const response = await axios.post(
-                        "https://sandbox.sslcommerz.com/gwprocess/v4/api.php",
+                        `${process.env.SSLCOMMERZ_API_BASE_URL || "https://sandbox.sslcommerz.com"}/gwprocess/v4/api.php`,
                         new URLSearchParams(sslData as any),
                         {
                             headers: {
@@ -374,15 +565,29 @@ export async function POST(req: Request) {
                         }
                     );
 
+                    sslInitializationResponseReceived = true;
                     const data = response.data;
 
                     if (
                         typeof data.GatewayPageURL !== "string" ||
                         !data.GatewayPageURL
                     ) {
-                        throw new Error(
-                            "SSLCOMMERZ did not return a gateway URL."
-                        );
+                        throw new Error("SSLCOMMERZ did not return a gateway URL.");
+                    }
+                    sslGatewayUrl = data.GatewayPageURL;
+                    if (typeof data.sessionkey !== "string" || !data.sessionkey) {
+                        throw new Error("SSLCOMMERZ did not return a session key for reconciliation.");
+                    }
+
+                    const savedCheckoutUrl = await prisma.payment.updateMany({
+                        where: { orderId: order.id, status: "PENDING" },
+                        data: {
+                            checkoutUrl: data.GatewayPageURL,
+                            sslSessionKey: data.sessionkey,
+                        },
+                    });
+                    if (savedCheckoutUrl.count !== 1) {
+                        throw new Error("Could not persist SSLCOMMERZ checkout URL.");
                     }
 
                     return NextResponse.json({
@@ -396,13 +601,20 @@ export async function POST(req: Request) {
                         error
                     );
 
-                    await releaseOrderStock(order.id);
+                    // If the request timed out or the connection failed, the gateway
+                    // may still have created a session. Do not release inventory on
+                    // an ambiguous outcome; reconcile it with the gateway first.
+                    const safeToRelease = sslInitializationResponseReceived && !sslGatewayUrl;
+                    if (safeToRelease) {
+                        await releaseOrderStock(order.id);
+                    }
 
                     return NextResponse.json(
                         {
                             success: false,
-                            message:
-                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                            message: safeToRelease
+                                ? "Unable to initialize payment. Your reservation was released; please start a new attempt."
+                                : "Payment initialization outcome is uncertain. Your reservation is being held while the gateway status is reconciled; do not start another payment yet.",
                         },
                         { status: 502 }
                     );
@@ -411,58 +623,72 @@ export async function POST(req: Request) {
             }
 
             case "STRIPE": {
+                let paymentIntent: Awaited<ReturnType<typeof stripe.paymentIntents.create>> | null = null;
                 try {
-                    const paymentIntent =
-                        await stripe.paymentIntents.create({
-                            amount: Math.round(USD_finalTotal * 100),
-                            currency: "usd",
-                            payment_method_types: ["card"],
-                            metadata: {
-                                orderId: order.id,
-                                orderCode: order.orderCode,
-                                userId: session.user.id,
-                            },
-                        });
+                    paymentIntent = await stripe.paymentIntents.create({
+                        amount: Math.round(USD_finalTotal * 100),
+                        currency: "usd",
+                        payment_method_types: ["card"],
+                        metadata: {
+                            orderId: order.id,
+                            orderCode: order.orderCode,
+                            userId: session.user.id,
+                        },
+                    }, {
+                        idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                    });
 
                     if (!paymentIntent.client_secret) {
-                        throw new Error(
-                            "Stripe did not return a client secret."
-                        );
+                        throw new Error("Stripe did not return a client secret.");
                     }
 
-                    await prisma.payment.updateMany({
-                        where: {
-                            orderId: order.id,
-                        },
-                        data: {
-                            paymentIntentId: paymentIntent.id,
-                        },
+                    const saved = await prisma.payment.updateMany({
+                        where: { orderId: order.id, status: "PENDING" },
+                        data: { paymentIntentId: paymentIntent.id },
                     });
+
+                    if (saved.count !== 1) {
+                        throw new Error("Could not persist Stripe PaymentIntent.");
+                    }
 
                     return NextResponse.json({
                         success: true,
                         orderId: order.id,
                         clientSecret: paymentIntent.client_secret,
                     });
-
                 } catch (error) {
-                    console.error(
-                        "[Order API] Stripe initialization failed:",
-                        error
-                    );
+                    console.error("[Order API] Stripe initialization failed:", error);
 
-                    await releaseOrderStock(order.id);
+                    // If Stripe created an intent but the DB save failed, cancel it
+                    // before releasing stock. If cancellation cannot be confirmed,
+                    // retain the reservation for reconciliation rather than risking
+                    // a captured payment with released inventory.
+                    let safeToRelease = false;
+                    if (paymentIntent?.status === "canceled") {
+                        safeToRelease = true;
+                    } else if (paymentIntent && paymentIntent.status !== "succeeded") {
+                        try {
+                            const cancelled = await stripe.paymentIntents.cancel(paymentIntent.id);
+                            safeToRelease = cancelled.status === "canceled";
+                        } catch (cancelError) {
+                            console.error("[Order API] Could not cancel orphaned PaymentIntent:", cancelError);
+                        }
+                    }
+
+                    if (safeToRelease) {
+                        await releaseOrderStock(order.id);
+                    }
 
                     return NextResponse.json(
                         {
                             success: false,
-                            message:
-                                "Unable to initialize payment. Your order reservation has been released. Please try again.",
+                            message: safeToRelease
+                                ? "Unable to initialize payment. Your reservation was released; please start a new attempt."
+                                : "Payment initialization is being reconciled. Do not start another payment yet; retry shortly or contact support.",
                         },
                         { status: 502 }
                     );
                 }
-
             }
 
             case "COD": {
@@ -509,6 +735,23 @@ export async function POST(req: Request) {
                 },
                 { status: 400 }
             );
+        }
+
+        // A concurrent request using the same unique checkout key may have
+        // won the insert. Do not create another order; ask the client to retry
+        // with the same key so the saved attempt can be recovered.
+        const checkoutKey = req.headers.get("Idempotency-Key");
+        if (checkoutKey && (error as { code?: string })?.code === "P2002") {
+            const existing = await prisma.order.findUnique({
+                where: { checkoutKey },
+                select: { id: true },
+            });
+            if (existing) {
+                return NextResponse.json(
+                    { success: false, message: "This checkout attempt is being initialized. Retry shortly with the same attempt.", orderId: existing.id },
+                    { status: 409 }
+                );
+            }
         }
 
         console.error("Error creating order:", error);

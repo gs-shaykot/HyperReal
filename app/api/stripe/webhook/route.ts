@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { completePayment } from "@/lib/service/paymentService";
+import { completePayment, releaseOrderStock } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
@@ -29,13 +29,33 @@ export async function POST(req: Request) {
     }
 
     try {
+        const alreadyProcessed = await prisma.stripeWebhookEvent.findUnique({
+            where: { id: event.id },
+            select: { id: true },
+        });
+        if (alreadyProcessed) {
+            return NextResponse.json({ received: true, duplicate: true });
+        }
+
         switch (event.type) {
             case "payment_intent.succeeded": {
-                const paymentIntent = event.data.object as Stripe.PaymentIntent;
-                const paymentIntentWithCharge = await stripe.paymentIntents.retrieve(paymentIntent.id, {
+                const eventPaymentIntent = event.data.object as Stripe.PaymentIntent;
+                const paymentIntentWithCharge = await stripe.paymentIntents.retrieve(eventPaymentIntent.id, {
                     expand: ["latest_charge"]
                 });
-                const charge = paymentIntentWithCharge.latest_charge as Stripe.Charge;
+                const paymentIntent = paymentIntentWithCharge;
+                const charge = paymentIntent.latest_charge as Stripe.Charge;
+
+                if (
+                    paymentIntent.status !== "succeeded" ||
+                    paymentIntent.currency.toLowerCase() !== "usd" ||
+                    paymentIntent.amount_received !== paymentIntent.amount
+                ) {
+                    return NextResponse.json(
+                        { success: false, message: "Stripe payment is not a fully captured USD payment." },
+                        { status: 400 }
+                    );
+                }
  
 
                 const orderId = paymentIntent.metadata.orderId;
@@ -52,6 +72,8 @@ export async function POST(req: Request) {
                     select: {
                         id: true,
                         userId: true,
+                        orderCode: true,
+                        status: true,
 
                         orderItems: {
                             select: {
@@ -64,6 +86,9 @@ export async function POST(req: Request) {
                             select: {
                                 status: true,
                                 couponCode: true,
+                                method: true,
+                                paymentIntentId: true,
+                                paidAmountInUSD: true,
                             },
                         },
                     }
@@ -71,18 +96,111 @@ export async function POST(req: Request) {
 
                 if (!order) {
                     console.error("[Stripe Webhook] Order not found:", orderId);
-
                     return new NextResponse("Order not found", { status: 404 });
-                } 
-                await completePayment(order, {
+                }
+
+                const savedPayment = order.payments[0];
+                if (!savedPayment || savedPayment.method !== "STRIPE") {
+                    return NextResponse.json(
+                        { success: false, message: "Order does not have a Stripe payment." },
+                        { status: 400 }
+                    );
+                }
+
+                if (
+                    (savedPayment.paymentIntentId !== null && savedPayment.paymentIntentId !== paymentIntent.id) ||
+                    paymentIntent.metadata.orderCode !== order.orderCode ||
+                    paymentIntent.metadata.userId !== order.userId ||
+                    paymentIntent.amount_received !== Math.round(savedPayment.paidAmountInUSD * 100)
+                ) {
+                    console.error("[Stripe Webhook] Payment/order association or amount mismatch.", {
+                        orderId,
+                        paymentIntentId: paymentIntent.id,
+                    });
+                    return NextResponse.json(
+                        { success: false, message: "Stripe payment does not match the saved order." },
+                        { status: 400 }
+                    );
+                }
+
+                if (savedPayment.status !== "SUCCESS") {
+                    if (order.status !== "PENDING") {
+                        return NextResponse.json(
+                            { success: false, message: "Payment/order state conflict requires reconciliation." },
+                            { status: 409 }
+                        );
+                    }
+                    await completePayment(order, {
                     paymentIntentId: paymentIntent.id,
                     stripeChargeId: charge?.id!,
                     cardBrand: charge?.payment_method_details?.card?.brand!,
                     last4: charge?.payment_method_details?.card?.last4!,
                     receiptUrl: charge?.receipt_url!,
-                });
- 
+                    });
+                }
 
+                break;
+            }
+            case "payment_intent.canceled": {
+                const paymentIntent = event.data.object as Stripe.PaymentIntent;
+                const orderId = paymentIntent.metadata.orderId;
+                if (!orderId) {
+                    return NextResponse.json(
+                        { success: false, message: "Missing orderId in cancelled PaymentIntent metadata." },
+                        { status: 400 }
+                    );
+                }
+
+                const order = await prisma.order.findUnique({
+                    where: { id: orderId },
+                    select: {
+                        id: true,
+                        status: true,
+                        payments: {
+                            select: {
+                                method: true,
+                                status: true,
+                                paymentIntentId: true,
+                            },
+                        },
+                    },
+                });
+
+                if (!order) {
+                    return new NextResponse("Order not found", { status: 404 });
+                }
+
+                const payment = order.payments[0];
+                if (!payment || payment.method !== "STRIPE") {
+                    return NextResponse.json(
+                        { success: false, message: "Order does not have a Stripe payment." },
+                        { status: 400 }
+                    );
+                }
+
+                // If the intent could not be saved but the initialization
+                // handler already confirmed cancellation and released the order,
+                // acknowledge its webhook without trying to release twice.
+                if (payment.paymentIntentId !== paymentIntent.id) {
+                    if (order.status === "CANCELLED" && payment.status === "FAILED") {
+                        break;
+                    }
+                    return NextResponse.json(
+                        { success: false, message: "Cancelled PaymentIntent does not match the saved order payment." },
+                        { status: 400 }
+                    );
+                }
+
+                // Only a signed Stripe cancellation event can release this
+                // reservation. Browser return URLs never call this path.
+                if (order.status === "PENDING" && payment.status === "PENDING") {
+                    await releaseOrderStock(order.id);
+                } else if (payment.status !== "FAILED" && order.status !== "CANCELLED") {
+                    return NextResponse.json(
+                        { success: false, message: "Cancellation conflicts with current order/payment state." },
+                        { status: 409 }
+                    );
+                }
                 break;
             }
             default: {
@@ -92,7 +210,14 @@ export async function POST(req: Request) {
                 );
             }
         }
-        return NextResponse.json({ received: true, });
+        // Store ignored event types too, so Stripe retries do not repeatedly
+        // execute non-actionable event handling.
+        await prisma.stripeWebhookEvent.create({
+            data: { id: event.id, type: event.type },
+        }).catch(async (error: { code?: string }) => {
+            if (error?.code !== "P2002") throw error;
+        });
+        return NextResponse.json({ received: true });
     }
     catch (err) {
         console.error("[Stripe Webhook] Error handling webhook event:", err);

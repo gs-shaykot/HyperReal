@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { getSslCommerzTransactionState } from "@/lib/service/sslcommerzService";
 import { releaseOrderStock } from "@/lib/service/paymentService";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
             },
             select: {
                 id: true,
+                payments: { select: { method: true, status: true, sslSessionKey: true } },
             },
         });
 
@@ -37,7 +39,30 @@ export async function POST(req: Request) {
             );
         }
 
-        await releaseOrderStock(order.id);
+        if (
+            order.payments.length !== 1 ||
+            order.payments[0].method !== "SSLC"
+        ) {
+            return NextResponse.json(
+                { success: false, message: "Payment method mismatch." },
+                { status: 400 }
+            );
+        }
+
+        // Never trust the browser callback by itself. Query SSLCommerz using
+        // our merchant transaction ID and release only a confirmed failed/cancelled
+        // transaction. Unknown states retain the reservation for reconciliation.
+        if (order.payments[0].status === "PENDING") {
+            const gatewayState = await getSslCommerzTransactionState(
+                tran_id,
+                order.payments[0].sslSessionKey
+            );
+            if (gatewayState === "FAILED") {
+                await releaseOrderStock(order.id);
+            } else if (gatewayState === "UNKNOWN") {
+                console.warn("[SSLCOMMERZ] Callback status is unverified; reservation retained.", order.id);
+            }
+        }
 
         return NextResponse.redirect(
             `${process.env.BASE_URL}/failed?orderId=${order.id}`

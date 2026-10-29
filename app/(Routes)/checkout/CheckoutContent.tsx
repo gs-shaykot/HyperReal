@@ -51,6 +51,17 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [checkoutKey, setCheckoutKey] = useState("");
+
+    useEffect(() => {
+        const storageKey = "hyperreal_checkout_attempt_key";
+        let key = window.localStorage.getItem(storageKey);
+        if (!key) {
+            key = window.crypto.randomUUID();
+            window.localStorage.setItem(storageKey, key);
+        }
+        setCheckoutKey(key);
+    }, []);
 
     const [selectedCountry, setSelectedCountry] = useState({
         name: 'Bangladesh',
@@ -196,6 +207,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
     const convertedTotal = convertPrice(total);
     const handlePayment: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
         setIsSubmitting(true);
 
         try {
@@ -233,13 +245,29 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             
             let data;
 
+            let activeCheckoutKey = checkoutKey;
+            if (!activeCheckoutKey) {
+                activeCheckoutKey = window.crypto.randomUUID();
+                window.localStorage.setItem("hyperreal_checkout_attempt_key", activeCheckoutKey);
+                setCheckoutKey(activeCheckoutKey);
+            }
+
             try {
-                const res = await axios.post("/api/order", paymentData);
+                const res = await axios.post("/api/order", paymentData, {
+                    headers: { "Idempotency-Key": activeCheckoutKey },
+                });
                 data = res.data;
             } catch (error: any) {
-                const message =
-                    error.response?.data?.message ||
-                    "Failed to create order";
+                const message = error.response?.data?.message || "Failed to create order";
+
+                // Only rotate the key when the server confirms that the previous
+                // attempt is unusable; transient/network errors keep the key so
+                // a retry recovers the same order/payment attempt.
+                if (message.includes("no longer usable") || message.includes("reservation was released")) {
+                    const nextKey = window.crypto.randomUUID();
+                    window.localStorage.setItem("hyperreal_checkout_attempt_key", nextKey);
+                    setCheckoutKey(nextKey);
+                }
 
                 toast.error(message);
                 setIsSubmitting(false);
@@ -249,6 +277,11 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             if (!data.success) {
                 toast.error(data.message || "Failed to create order");
                 setIsSubmitting(false);
+                return;
+            }
+
+            if (data.alreadyCompleted && data.orderId) {
+                window.location.href = `/success?orderId=${encodeURIComponent(data.orderId)}`;
                 return;
             }
 

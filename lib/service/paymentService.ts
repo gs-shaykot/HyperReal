@@ -69,6 +69,8 @@ export async function completePayment(
     const transactionId = await generatePaymentTrxId();
 
     await prisma.$transaction(async (tx) => {
+        // Claim the order first. All payment state transitions use the same
+        // order -> payment lock order to reduce deadlock risk.
         const claimedOrder = await tx.order.updateMany({
             where: {
                 id: order.id,
@@ -79,16 +81,16 @@ export async function completePayment(
             },
         });
 
-        if (claimedOrder.count === 0) {
+        if (claimedOrder.count !== 1) {
             return;
         }
 
+        // A successful online payment can only complete an order whose
+        // reservation is still pending. COD remains PENDING until collection.
         const updatedPayment = await tx.payment.updateMany({
             where: {
                 orderId: order.id,
-                status: {
-                    not: PaymentStatus.SUCCESS,
-                },
+                status: PaymentStatus.PENDING,
             },
             data: {
                 status:
@@ -148,23 +150,29 @@ export async function completePayment(
 }
 
 
-export async function markPaymentFailed(orderId: string) {
-    await prisma.payment.updateMany({
-        where: {
-            orderId,
-        },
-        data: {
-            status: PaymentStatus.FAILED,
-        },
-    });
-}
-
-
-
+/**
+ * Release a reservation only for a still-pending order/payment pair.
+ * This must only be called after a trusted server-side failure (for example,
+ * gateway initialization failed). Browser return URLs are not proof of failure.
+ */
 export async function releaseOrderStock(orderId: string) {
     await prisma.$transaction(async (tx) => {
-        // Claim the cleanup operation so stock and coupon reservations
-        // can only be released once.
+        // Order is always claimed before payment to keep transition lock order
+        // consistent with completePayment().
+        const cancelledOrder = await tx.order.updateMany({
+            where: {
+                id: orderId,
+                status: OrderStatus.PENDING,
+            },
+            data: {
+                status: OrderStatus.CANCELLED,
+            },
+        });
+
+        if (cancelledOrder.count !== 1) {
+            return;
+        }
+
         const failedPayment = await tx.payment.updateMany({
             where: {
                 orderId,
@@ -175,21 +183,13 @@ export async function releaseOrderStock(orderId: string) {
             },
         });
 
+        // Roll back the order cancellation if payment was already completed
+        // or otherwise left PENDING. Never restore stock in that case.
         if (failedPayment.count !== 1) {
-            return;
+            throw new Error(
+                `Cannot release reservation for order ${orderId}: payment is not pending`
+            );
         }
-
-        // Mark the order cancelled only if it is still pending.
-        // Do not overwrite an order that has already advanced.
-        await tx.order.updateMany({
-            where: {
-                id: orderId,
-                status: OrderStatus.PENDING,
-            },
-            data: {
-                status: OrderStatus.CANCELLED,
-            },
-        });
 
         const [orderItems, payment] = await Promise.all([
             tx.orderItem.findMany({
