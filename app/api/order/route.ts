@@ -678,7 +678,11 @@ export async function POST(req: Request) {
                             userId: session.user.id,
                         },
                     }, {
-                        idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                        // A Stripe idempotency key belongs to one immutable order
+                        // initialization, not the browser's reusable checkout key.
+                        // This prevents a changed checkout payload from colliding
+                        // with a prior Stripe request made with the same client key.
+                        idempotencyKey: `hyperreal-order-${order.id}`,
                     });
 
                     if (!paymentIntent.client_secret) {
