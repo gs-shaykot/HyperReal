@@ -796,7 +796,6 @@ export async function POST(req: Request) {
 
         console.error("[checkout:create-order] Unexpected failure", {
             checkoutKey: req.headers.get("Idempotency-Key"),
-            userId: session?.user?.id,
             errorName: error instanceof Error ? error.name : "UnknownError",
             errorMessage: error instanceof Error ? error.message : String(error),
             prismaCode: (error as { code?: string })?.code,
