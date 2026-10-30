@@ -51,15 +51,43 @@ export async function POST(req: Request) {
                 ? coupon.trim().toUpperCase()
                 : null;
 
-        // Bind the key to the checkout choices. Reusing a key with a different
-        // payload must never silently reuse an unrelated order.
+        // Read the current cart before fingerprinting the attempt. The cart is
+        // part of the checkout identity: changing a variant or quantity must
+        // never silently reuse an order created for different items.
+        const cart = await prisma.cart.findUnique({
+            where: { userId: session.user.id },
+            select: cartItemsSelect,
+        });
+
+        const cartFingerprint = (cart?.cartItems ?? [])
+            .map((item) => ({
+                variantId: item.variantId,
+                quantity: item.quantity,
+            }))
+            .sort((a, b) => a.variantId.localeCompare(b.variantId));
+
+        // Normalize address fields rather than serializing the whole object.
+        // Saved-address objects may contain extra fields that are irrelevant
+        // to shipping and can otherwise make equivalent checkouts hash differently.
+        const addressFingerprint = {
+            label: address?.label ?? "",
+            fullName: address?.fullName ?? "",
+            street: address?.street ?? "",
+            city: address?.city ?? "",
+            house: address?.house ?? "",
+            zipCode: address?.zipCode ?? "",
+            country: address?.country ?? country?.name ?? "",
+            phone: address?.phone ?? "",
+        };
+
         const checkoutFingerprint = createHash("sha256")
             .update(JSON.stringify({
                 userId: session.user.id,
+                cart: cartFingerprint,
                 country: country?.value,
                 coupon: normalizedCouponCode,
                 paymentMethod,
-                address,
+                address: addressFingerprint,
                 saveAddress: Boolean(saveAddress),
                 deliveryOption,
             }))
@@ -87,17 +115,45 @@ export async function POST(req: Request) {
         });
 
         if (previousAttempt) {
+            const previousPayment = previousAttempt.payments[0];
+
+            // A completed order is authoritative even though completePayment()
+            // has already emptied the user's cart. Retrying the same request
+            // must return the completed order, not fail its cart fingerprint.
+            if (
+                previousAttempt.userId === session.user.id &&
+                previousAttempt.status === "PROCESSING" &&
+                previousPayment?.status === "SUCCESS"
+            ) {
+                return NextResponse.json({
+                    success: true,
+                    orderId: previousAttempt.id,
+                    alreadyCompleted: true,
+                });
+            }
+
             if (
                 previousAttempt.userId !== session.user.id ||
                 previousAttempt.checkoutFingerprint !== checkoutFingerprint
             ) {
+                const previousAttemptReleased =
+                    previousAttempt.status === "CANCELLED" ||
+                    previousPayment?.status === "FAILED";
+
                 return NextResponse.json(
-                    { success: false, message: "This checkout key is already associated with a different checkout. Start a new checkout attempt." },
+                    {
+                        success: false,
+                        code: previousAttemptReleased
+                            ? "CHECKOUT_ATTEMPT_RELEASED"
+                            : "CHECKOUT_KEY_CONFLICT",
+                        orderId: previousAttempt.id,
+                        message: previousAttemptReleased
+                            ? "The previous checkout attempt was cancelled and its reservation was released. A new checkout attempt can be started."
+                            : "This checkout key belongs to a different checkout that may still have an active reservation or payment. Do not start another payment. Retry the original checkout or resolve the previous order first.",
+                    },
                     { status: 409 }
                 );
             }
-
-            const previousPayment = previousAttempt.payments[0];
             if (
                 previousPayment?.method === "STRIPE" &&
                 !previousPayment.paymentIntentId &&
@@ -292,13 +348,6 @@ export async function POST(req: Request) {
                 { status: 400 }
             );
         }
-
-        const cart = await prisma.cart.findUnique({
-            where: {
-                userId: session.user.id,
-            },
-            select: cartItemsSelect,
-        });
 
         if (!cart || cart.cartItems.length === 0) {
             return NextResponse.json(
@@ -745,10 +794,20 @@ export async function POST(req: Request) {
             }
         }
 
+        console.error("[checkout:create-order] Unexpected failure", {
+            checkoutKey: req.headers.get("Idempotency-Key"),
+            userId: session?.user?.id,
+            errorName: error instanceof Error ? error.name : "UnknownError",
+            errorMessage: error instanceof Error ? error.message : String(error),
+            prismaCode: (error as { code?: string })?.code,
+            stack: error instanceof Error ? error.stack : undefined,
+        });
+
         return NextResponse.json(
             {
                 success: false,
-                message: "Failed to create order",
+                code: "ORDER_CREATION_FAILED",
+                message: "We couldn't create your order. Please retry. If this continues, contact support with the time of the attempt.",
             },
             { status: 500 }
         );
