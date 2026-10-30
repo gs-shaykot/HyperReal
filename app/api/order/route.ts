@@ -178,8 +178,27 @@ export async function POST(req: Request) {
 
                 if (recoveredIntent.status === "canceled") {
                     await releaseOrderStock(previousAttempt.id);
+                    const releasedAttempt = await prisma.order.findUnique({
+                        where: { id: previousAttempt.id },
+                        select: {
+                            status: true,
+                            payments: { select: { status: true } },
+                        },
+                    });
+
+                    if (releasedAttempt?.status === "CANCELLED" && releasedAttempt.payments[0]?.status === "FAILED") {
+                        return NextResponse.json(
+                            {
+                                success: false,
+                                code: "CHECKOUT_ATTEMPT_RELEASED",
+                                message: "The previous Stripe payment was cancelled and its reservation was released. Retrying checkout.",
+                            },
+                            { status: 409 }
+                        );
+                    }
+
                     return NextResponse.json(
-                        { success: false, message: "The previous payment attempt is no longer usable. Your reservation was released; start a new checkout attempt." },
+                        { success: false, code: "CHECKOUT_KEY_CONFLICT", message: "The previous Stripe payment is being reconciled. Do not start another payment yet." },
                         { status: 409 }
                     );
                 }
@@ -232,11 +251,22 @@ export async function POST(req: Request) {
 
                 if (previousAttempt.status === "CANCELLED") {
                     if (["requires_payment_method", "requires_confirmation", "requires_action", "requires_capture"].includes(intent.status)) {
-                        await stripe.paymentIntents.cancel(intent.id).catch((error) => {
-                        });
+                        await stripe.paymentIntents.cancel(intent.id).catch(() => undefined);
                     }
+
+                    if (previousPayment.status === "FAILED") {
+                        return NextResponse.json(
+                            {
+                                success: false,
+                                code: "CHECKOUT_ATTEMPT_RELEASED",
+                                message: "The previous Stripe payment was cancelled and its reservation was released. Retrying checkout.",
+                            },
+                            { status: 409 }
+                        );
+                    }
+
                     return NextResponse.json(
-                        { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                        { success: false, code: "CHECKOUT_KEY_CONFLICT", message: "The previous Stripe payment is being reconciled. Do not start another payment yet." },
                         { status: 409 }
                     );
                 }
@@ -416,17 +446,31 @@ export async function POST(req: Request) {
             orderCode = generateCustomId("HYP-ORD");
         }
 
-        // Convert USD to BDT for SSLCOMMERZ.
-        const res = await axios.get(
-            "https://open.er-api.com/v6/latest/USD"
-        );
+        // Exchange-rate lookup is required only for SSLCOMMERZ (BDT).
+        // Stripe and COD checkout must not depend on an unrelated FX API.
+        let finalTotal = 0;
+        if (paymentMethod === "SSLC") {
+            const res = await axios.get(
+                "https://open.er-api.com/v6/latest/USD",
+                { timeout: 8000 }
+            );
+            const bdtRate = Number(res.data?.rates?.BDT);
 
-        const rates = res.data.rates;
+            if (!Number.isFinite(bdtRate) || bdtRate <= 0) {
+                return NextResponse.json(
+                    { success: false, message: "Unable to retrieve a valid BDT exchange rate. Please retry shortly." },
+                    { status: 503 }
+                );
+            }
 
-        const finalTotal =
-            paymentMethod === "SSLC"
-                ? USD_finalTotal * rates.BDT
-                : 0;
+            finalTotal = Number((USD_finalTotal * bdtRate).toFixed(2));
+            if (!Number.isFinite(finalTotal) || finalTotal <= 0) {
+                return NextResponse.json(
+                    { success: false, message: "The payment amount is invalid. Please review your cart and retry." },
+                    { status: 400 }
+                );
+            }
+        }
 
         if (saveAddress) {
             const addressCount = await prisma.address.count({
