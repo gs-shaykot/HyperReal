@@ -346,6 +346,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             if (selectedPaymentMethod === 'STRIPE') {
                 if (!stripe || !elements) {
                     toast.error("Stripe is not ready yet.");
+                    setIsSubmitting(false);
                     return;
                 }
 
@@ -404,7 +405,11 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     }
                 }
                 finally {
+                    // A declined/failed card leaves the order reservation and
+                    // PaymentIntent reusable. Re-enable checkout so the customer
+                    // can submit another card attempt without refreshing.
                     setIsProcessingPayment(false);
+                    setIsSubmitting(false);
                 }
             }
             else if (selectedPaymentMethod === "COD") {
