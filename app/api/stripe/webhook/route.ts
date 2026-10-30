@@ -120,13 +120,30 @@ export async function POST(req: Request) {
                             { status: 409 }
                         );
                     }
-                    await completePayment(order, {
-                    paymentIntentId: paymentIntent.id,
-                    stripeChargeId: charge?.id!,
-                    cardBrand: charge?.payment_method_details?.card?.brand!,
-                    last4: charge?.payment_method_details?.card?.last4!,
-                    receiptUrl: charge?.receipt_url!,
+                    const completed = await completePayment(order, {
+                        paymentIntentId: paymentIntent.id,
+                        stripeChargeId: charge?.id,
+                        cardBrand: charge?.payment_method_details?.card?.brand,
+                        last4: charge?.payment_method_details?.card?.last4,
+                        receiptUrl: charge?.receipt_url,
                     });
+
+                    if (!completed) {
+                        const latest = await prisma.order.findUnique({
+                            where: { id: order.id },
+                            select: {
+                                status: true,
+                                payments: { select: { status: true } },
+                            },
+                        });
+
+                        if (!(latest?.status === "PROCESSING" && latest.payments[0]?.status === "SUCCESS")) {
+                            return NextResponse.json(
+                                { success: false, message: "Stripe captured payment but the order transition did not complete. Manual reconciliation is required." },
+                                { status: 409 }
+                            );
+                        }
+                    }
                 }
 
                 break;
