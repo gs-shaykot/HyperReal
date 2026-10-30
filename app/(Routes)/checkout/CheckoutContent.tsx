@@ -269,12 +269,17 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 storedAttempt = null;
             }
 
+            // Adopt the legacy key once instead of silently abandoning it. It may
+            // identify a pending server-side reservation from the previous version;
+            // reusing it lets the API recover or explicitly report that attempt.
+            const legacyKey = window.localStorage.getItem("hyperreal_checkout_attempt_key");
+
             // Keep the same key for an identical retry (including a page refresh),
             // but generate a new key whenever the actual checkout payload changes.
             let activeCheckoutKey =
                 storedAttempt?.fingerprint === attemptFingerprint
                     ? storedAttempt.key
-                    : window.crypto.randomUUID();
+                    : (!storedAttempt && legacyKey ? legacyKey : window.crypto.randomUUID());
 
             if (!activeCheckoutKey || activeCheckoutKey.length < 16) {
                 activeCheckoutKey = window.crypto.randomUUID();
