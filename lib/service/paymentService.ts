@@ -130,11 +130,31 @@ export async function completePayment(
 
 
         if (cart) {
-            await tx.cartItem.deleteMany({
-                where: {
-                    cartId: cart.id,
-                },
-            });
+            // Remove only quantities that belonged to this order. A customer
+            // may have changed the cart while the gateway was open; clearing
+            // the whole cart here would also delete items added after checkout.
+            for (const item of order.orderItems) {
+                const decremented = await tx.cartItem.updateMany({
+                    where: {
+                        cartId: cart.id,
+                        variantId: item.variantId,
+                        quantity: { gt: item.quantity },
+                    },
+                    data: {
+                        quantity: { decrement: item.quantity },
+                    },
+                });
+
+                if (decremented.count === 0) {
+                    await tx.cartItem.deleteMany({
+                        where: {
+                            cartId: cart.id,
+                            variantId: item.variantId,
+                            quantity: { lte: item.quantity },
+                        },
+                    });
+                }
+            }
         }
 
         await tx.user.updateMany({
