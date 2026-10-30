@@ -137,7 +137,7 @@ export async function POST(req: Request) {
                 previousAttempt.checkoutFingerprint !== checkoutFingerprint
             ) {
                 const previousAttemptReleased =
-                    previousAttempt.status === "CANCELLED" ||
+                    previousAttempt.status === "CANCELLED" &&
                     previousPayment?.status === "FAILED";
 
                 return NextResponse.json(
