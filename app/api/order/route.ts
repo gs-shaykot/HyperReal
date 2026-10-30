@@ -173,7 +173,7 @@ export async function POST(req: Request) {
                         userId: session.user.id,
                     },
                 }, {
-                    idempotencyKey: `hyperreal-checkout-${checkoutKey}`,
+                    idempotencyKey: `hyperreal-order-${previousAttempt.id}`,
                 });
 
                 if (recoveredIntent.status === "canceled") {
