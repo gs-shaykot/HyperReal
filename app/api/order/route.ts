@@ -256,8 +256,30 @@ export async function POST(req: Request) {
             }
 
             if (previousPayment?.method === "SSLC" && previousAttempt.status === "CANCELLED") {
+                // A confirmed failed SSLCommerz attempt has already transitioned
+                // the order/payment to CANCELLED/FAILED and released its stock.
+                // Tell the client it is safe to rotate the checkout key so the
+                // next submit creates a fresh order and a fresh gateway session.
+                // Do not rotate for inconsistent states: they may still require
+                // reconciliation and must not create another stock reservation.
+                if (previousPayment.status === "FAILED") {
+                    return NextResponse.json(
+                        {
+                            success: false,
+                            code: "CHECKOUT_ATTEMPT_RELEASED",
+                            orderId: previousAttempt.id,
+                            message: "The previous SSLCommerz payment failed and its reservation was released. You can retry checkout.",
+                        },
+                        { status: 409 }
+                    );
+                }
+
                 return NextResponse.json(
-                    { success: false, message: "The previous payment attempt is no longer usable. Start a new checkout attempt." },
+                    {
+                        success: false,
+                        code: "CHECKOUT_KEY_CONFLICT",
+                        message: "The previous SSLCommerz attempt is cancelled but its payment state is not confirmed as failed. Do not retry payment yet; please refresh or contact support.",
+                    },
                     { status: 409 }
                 );
             }
