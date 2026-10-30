@@ -294,32 +294,40 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             );
             setCheckoutKey(activeCheckoutKey);
 
-            try {
-                const res = await axios.post("/api/order", paymentData, {
-                    headers: { "Idempotency-Key": activeCheckoutKey },
-                });
-                data = res.data;
-            } catch (error: any) {
-                const message = error.response?.data?.message || "Failed to create order";
-                const errorCode = error.response?.data?.code;
+            // A released attempt is safe to replace. Retry exactly once with a
+            // fresh key so the customer does not need to submit the form twice.
+            // Any other error keeps the same key to avoid duplicate reservations.
+            for (let attempt = 0; attempt < 2; attempt += 1) {
+                try {
+                    const res = await axios.post("/api/order", paymentData, {
+                        headers: { "Idempotency-Key": activeCheckoutKey },
+                    });
+                    data = res.data;
+                    break;
+                } catch (error: any) {
+                    const errorCode = error.response?.data?.code;
+                    if (errorCode === "CHECKOUT_ATTEMPT_RELEASED" && attempt === 0) {
+                        activeCheckoutKey = window.crypto.randomUUID();
+                        window.localStorage.setItem(
+                            attemptStorageKey,
+                            JSON.stringify({
+                                key: activeCheckoutKey,
+                                fingerprint: attemptFingerprint,
+                            })
+                        );
+                        setCheckoutKey(activeCheckoutKey);
+                        continue;
+                    }
 
-                // Rotate only when the server explicitly confirms that the
-                // previous attempt was cancelled/released. Never rotate on a
-                // generic network/500 error or an active-key conflict because
-                // that could create a second reservation for the same cart.
-                if (errorCode === "CHECKOUT_ATTEMPT_RELEASED") {
-                    const nextKey = window.crypto.randomUUID();
-                    const attemptStorageKey = `hyperreal_checkout_attempt_v2:${session?.user?.id ?? "anonymous"}`;
-                    const rawAttempt = window.localStorage.getItem(attemptStorageKey);
-                    const previous = rawAttempt ? JSON.parse(rawAttempt) : {};
-                    window.localStorage.setItem(attemptStorageKey, JSON.stringify({
-                        ...previous,
-                        key: nextKey,
-                    }));
-                    setCheckoutKey(nextKey);
+                    const message = error.response?.data?.message || "Failed to create order";
+                    toast.error(message);
+                    setIsSubmitting(false);
+                    return;
                 }
+            }
 
-                toast.error(message);
+            if (!data) {
+                toast.error("We couldn't initialize checkout. Please try again.");
                 setIsSubmitting(false);
                 return;
             }
