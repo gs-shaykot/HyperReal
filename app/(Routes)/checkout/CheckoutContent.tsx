@@ -259,11 +259,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 data = res.data;
             } catch (error: any) {
                 const message = error.response?.data?.message || "Failed to create order";
+                const errorCode = error.response?.data?.code;
 
-                // Only rotate the key when the server confirms that the previous
-                // attempt is unusable; transient/network errors keep the key so
-                // a retry recovers the same order/payment attempt.
-                if (message.includes("no longer usable") || message.includes("reservation was released")) {
+                // Rotate only when the server explicitly confirms that the
+                // previous attempt was cancelled/released. Never rotate on a
+                // generic network/500 error or an active-key conflict because
+                // that could create a second reservation for the same cart.
+                if (errorCode === "CHECKOUT_ATTEMPT_RELEASED") {
                     const nextKey = window.crypto.randomUUID();
                     window.localStorage.setItem("hyperreal_checkout_attempt_key", nextKey);
                     setCheckoutKey(nextKey);
