@@ -137,6 +137,7 @@ export async function POST(req: Request) {
                 previousAttempt.checkoutFingerprint !== checkoutFingerprint
             ) {
                 const previousAttemptReleased =
+                    previousAttempt.userId === session.user.id &&
                     previousAttempt.status === "CANCELLED" &&
                     previousPayment?.status === "FAILED";
 
