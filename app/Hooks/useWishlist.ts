@@ -34,7 +34,6 @@ export const useWishlist = () => {
             return { previousWishlist };
         },
         onError: (error, __, context) => {
-            console.log("Error occurred while toggling wishlist: ", error);
 
             toast.error("Failed to update wishlist.");
 

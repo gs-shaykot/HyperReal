@@ -80,7 +80,6 @@ function errorResponse(error: unknown) {
         );
     }
 
-    console.error("Admin fulfillment API error:", error);
 
     return NextResponse.json(
         {

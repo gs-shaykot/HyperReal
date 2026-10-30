@@ -31,7 +31,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true, message: "Password changed successfully" }, { status: 200 });
     }
     catch (error) {
-        console.log(error);
         return NextResponse.json({ error: error instanceof Error ? error.message : "Something went wrong." }, { status: 500 })
     }
 }

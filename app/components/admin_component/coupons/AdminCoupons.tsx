@@ -72,7 +72,6 @@ export function AdminCoupons() {
             setOpen(false);
         },
         onErrorMessage: (message) => {
-            console.error(message);
         },
     });
 

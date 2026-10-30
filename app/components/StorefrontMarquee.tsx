@@ -34,7 +34,6 @@ export default function StorefrontMarquee() {
                     });
                 }
             } catch (error) {
-                console.error("Failed to load storefront marquee:", error);
             }
         }
 

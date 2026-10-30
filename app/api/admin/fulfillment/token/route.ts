@@ -74,7 +74,6 @@ export async function POST(request: Request) {
             );
         }
 
-        console.error("Parcel token rotation failed:", error);
 
         return NextResponse.json(
             {

@@ -177,7 +177,6 @@ export async function POST(req: Request) {
                 if (previousAttempt.status === "CANCELLED") {
                     if (["requires_payment_method", "requires_confirmation", "requires_action", "requires_capture"].includes(intent.status)) {
                         await stripe.paymentIntents.cancel(intent.id).catch((error) => {
-                            console.error("[Order API] Could not cancel intent for cancelled order:", error);
                         });
                     }
                     return NextResponse.json(
@@ -596,11 +595,6 @@ export async function POST(req: Request) {
                     });
 
                 } catch (error) {
-                    console.error(
-                        "[Order API] SSLCOMMERZ initialization failed:",
-                        error
-                    );
-
                     // If the request timed out or the connection failed, the gateway
                     // may still have created a session. Do not release inventory on
                     // an ambiguous outcome; reconcile it with the gateway first.
@@ -657,8 +651,6 @@ export async function POST(req: Request) {
                         clientSecret: paymentIntent.client_secret,
                     });
                 } catch (error) {
-                    console.error("[Order API] Stripe initialization failed:", error);
-
                     // If Stripe created an intent but the DB save failed, cancel it
                     // before releasing stock. If cancellation cannot be confirmed,
                     // retain the reservation for reconciliation rather than risking
@@ -671,7 +663,6 @@ export async function POST(req: Request) {
                             const cancelled = await stripe.paymentIntents.cancel(paymentIntent.id);
                             safeToRelease = cancelled.status === "canceled";
                         } catch (cancelError) {
-                            console.error("[Order API] Could not cancel orphaned PaymentIntent:", cancelError);
                         }
                     }
 
@@ -753,8 +744,6 @@ export async function POST(req: Request) {
                 );
             }
         }
-
-        console.error("Error creating order:", error);
 
         return NextResponse.json(
             {

@@ -207,7 +207,7 @@ export const Identity = () => {
                                         phone: profile.phone ?? "",
                                     });
                                 }
-                            }} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white light:hover:bg-[#0a0a0a]">
+                            }} className="btn btn-sm btn-outline rounded-none border border-zinc-700 light:border-zinc-500 hover:bg-white text-white light:text-zinc-900 hover:text-zinc-900 light:hover:text-white light:hover:bg-main">
                                 <SquarePen size={16} />
                                 Edit
                             </button>
@@ -234,7 +234,7 @@ export const Identity = () => {
 
                     {
                         isEditing && (
-                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name || "Your Name"} placeholder="Medium" className="input input-md w-full bg-dark light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
+                            <input type="text" onChange={(e) => setFormData({ ...formData, name: e.target.value })} value={formData.name} placeholder="Medium" className="input input-md w-full bg-dark light:bg-white border border-zinc-800 light:border-zinc-300 rounded-none light:text-zinc-900 text-white placeholder:text-zinc-500 light:placeholder:text-zinc-400 focus:border-second outline-0" />
                         )
                     }
                 </div>

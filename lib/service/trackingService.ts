@@ -263,7 +263,7 @@ export async function verifyShipmentItem(
                 409,
             );
         }
-        console.log("Shipment: ", shipment);
+        
         const itemCheck = shipment.itemChecks.find(
             (item) => item.orderItemId === orderItemId,
         );

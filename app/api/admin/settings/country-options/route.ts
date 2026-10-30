@@ -133,7 +133,6 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("Failed to load country options:", error);
 
     return NextResponse.json(
       { message: "Unable to load countries. Please try again later." },

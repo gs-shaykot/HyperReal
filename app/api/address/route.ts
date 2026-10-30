@@ -31,7 +31,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: "Address added successfully.", data: result }, { status: 200 });
     }
     catch (error) {
-        console.error("Error occurred while adding address: ", error);
         return NextResponse.json({ message: "Error occurred while adding address." }, { status: 500 });
     }
 }
@@ -60,7 +59,6 @@ export async function GET() {
         return NextResponse.json({ message: "Addresses fetched successfully.", data: res }, { status: 200 });
     }
     catch (error) {
-        console.error("Error occurred while fetching addresses: ", error);
         return NextResponse.json({ message: "Error occurred while fetching addresses." }, { status: 500 });
     }
 }
@@ -94,11 +92,9 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ message: "Address deleted successfully.", data: result }, { status: 200 });
     }
     catch (error) {
-        console.error("Error occurred while deleting address: ", error);
         return NextResponse.json({ message: "Error occurred while deleting address." }, { status: 500 });
     }
 }
-
 
 
 

@@ -123,7 +123,6 @@ export async function PATCH(
             message: "Your review has been updated.",
         });
     } catch (error) {
-        console.error("Update product review error:", error);
 
         return jsonError("Could not update your review.", 500);
     }
@@ -164,7 +163,6 @@ export async function DELETE(
             message: "Your review has been deleted.",
         });
     } catch (error) {
-        console.error("Delete product review error:", error);
 
         return jsonError("Could not delete your review.", 500);
     }

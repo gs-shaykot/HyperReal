@@ -45,7 +45,6 @@ export async function GET() {
             }
         );
     } catch (error) {
-        console.error("Get homepage marquee error:", error);
 
         return NextResponse.json(
             { message: "Failed to fetch marquee settings." },
@@ -128,7 +127,6 @@ export async function PUT(req: Request) {
             { status: 200 }
         );
     } catch (error) {
-        console.error("Update homepage marquee error:", error);
 
         return NextResponse.json(
             { message: "Failed to save marquee settings." },

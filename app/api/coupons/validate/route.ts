@@ -135,7 +135,6 @@ export async function POST(req: Request) {
             },
         });
     } catch (error) {
-        console.error("Coupon validation error:", error);
 
         return NextResponse.json(
             {

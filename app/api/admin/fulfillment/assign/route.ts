@@ -41,7 +41,6 @@ export async function GET() {
 
         return NextResponse.json({ success: true, data: couriers });
     } catch (error) {
-        console.error("Eligible courier lookup failed:", error);
         return NextResponse.json({ success: false, message: "Could not load eligible couriers." }, { status: 500 });
     }
 }
@@ -166,7 +165,6 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: "Courier assigned successfully.", data: updated });
     } catch (error) {
-        console.error("Courier assignment failed:", error);
         return NextResponse.json({ success: false, message: "Could not assign courier." }, { status: 500 });
     }
 }

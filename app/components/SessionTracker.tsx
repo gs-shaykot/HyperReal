@@ -22,12 +22,7 @@ export default function SessionTracker() {
         fetch("/api/account/sessions", {
             method: "POST",
             credentials: "include",
-        }).catch((error) => {
-            console.error(
-                "Failed to save session information:",
-                error
-            );
-        });
+        }).catch(() => undefined);
     }, [status]);
 
     return null;

@@ -80,7 +80,6 @@ export async function POST(req: Request) {
         );
 
     } catch (error) {
-        console.error("Image upload error:", error);
 
         return NextResponse.json(
             {

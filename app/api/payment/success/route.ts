@@ -49,18 +49,15 @@ export async function POST(req: Request) {
         }
 
         if (!["VALID", "VALIDATED"].includes(validationData.status)) {
-            console.warn("[SSLCOMMERZ] Validation was not successful; leaving reservation unchanged until verified reconciliation.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         if (validationData.tran_id !== order.orderCode) {
-            console.warn("[SSLCOMMERZ] Transaction/order mismatch; no payment state changed.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
         const validatedCurrency = validationData.currency ?? validationData.currency_type;
         if (validatedCurrency !== "BDT") {
-            console.warn("[SSLCOMMERZ] Currency mismatch; no payment state changed.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
@@ -78,7 +75,6 @@ export async function POST(req: Request) {
         const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
 
         if (validationAmount !== paidAmount) {
-            console.warn("[SSLCOMMERZ] Amount mismatch; no payment state changed.", order.id);
             return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
         }
 
@@ -87,7 +83,6 @@ export async function POST(req: Request) {
         return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
 
     } catch (error: unknown) {
-        console.error("[payment/success] Payment Validation Error:", error);
         return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
     }
 }

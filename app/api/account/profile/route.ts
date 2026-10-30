@@ -25,7 +25,6 @@ export async function GET() {
         return NextResponse.json({ success: true, profile: user }, { status: 200 });
     }
     catch (error) {
-        console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to fetch profile.' }, { status: 500 });
     }
 }
@@ -89,7 +88,6 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ success: true, message: 'Profile updated successfully.' }, { status: 200 });
     }
     catch (error) {
-        console.error(error);
         return NextResponse.json({ success: false, message: 'Profile update failed.' }, { status: 500 });
     }
 }

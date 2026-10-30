@@ -51,7 +51,6 @@ export async function getSslCommerzTransactionState(
         }
         return "UNKNOWN";
     } catch (error) {
-        console.error("[SSLCOMMERZ] Transaction status query failed:", error);
         return "UNKNOWN";
     }
 }

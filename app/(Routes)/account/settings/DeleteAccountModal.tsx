@@ -39,7 +39,6 @@ export const DeleteAccountModal = ({
             }
         }
         catch (error) {
-            console.error(error);
         }
         finally {
             setIsDeleting(false);

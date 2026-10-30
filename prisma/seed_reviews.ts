@@ -63,14 +63,6 @@ const REVIEW_CONTENT = [
 ] as const;
 
 async function main() {
-    console.log("Starting HyperReal review seeding...");
-    console.log("DATABASE_URL exists:", Boolean(process.env.DATABASE_URL));
-    console.log(
-        "DATABASE_URL type:",
-        typeof process.env.DATABASE_URL
-    );
-
-
     const demoUsers = await prisma.user.findMany({
         where: {
             email: {
@@ -104,20 +96,6 @@ async function main() {
     const existingProductIds = new Set(
         existingProducts.map((product) => product.id)
     );
-
-    const missingProducts = PRODUCTS.filter(
-        (product) => !existingProductIds.has(product.id)
-    );
-
-    if (missingProducts.length > 0) {
-        console.warn(
-            `Skipping ${missingProducts.length} product(s) whose IDs were not found in the database:`
-        );
-
-        for (const product of missingProducts) {
-            console.warn(`- ${product.name}: ${product.id}`);
-        }
-    }
 
     const reviews = [];
 
@@ -157,19 +135,10 @@ async function main() {
         skipDuplicates: true,
     });
 
-    console.log(`Products in JSON: ${PRODUCTS.length}`);
-    console.log(`Products found in database: ${existingProducts.length}`);
-    console.log(`Review records prepared: ${reviews.length}`);
-    console.log(`New reviews inserted: ${result.count}`);
-    console.log(
-        `Existing reviews skipped: ${reviews.length - result.count}`
-    );
-    console.log("Review seeding completed.");
 }
 
 main()
-    .catch((error) => {
-        console.error("Review seeding failed:", error);
+    .catch(() => {
         process.exitCode = 1;
     })
     .finally(async () => {

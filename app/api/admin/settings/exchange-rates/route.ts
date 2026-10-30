@@ -232,8 +232,6 @@ export async function POST() {
             rateDateRange: { from, to },
         });
     } catch (error) {
-        console.error("Update exchange rates error:", error);
-
         return NextResponse.json(
             {
                 message:

@@ -90,8 +90,6 @@ export async function GET(req: Request) {
         });
     }
     catch (error) {
-        console.error("GET /account/sessions:", error);
-
         return NextResponse.json(
             {
                 message: "Failed to fetch sessions",
@@ -174,11 +172,6 @@ export async function POST(req: Request) {
         });
 
     } catch (error) {
-        console.error(
-            "POST /account/sessions:",
-            error
-        );
-
         return NextResponse.json(
             {
                 success: false,

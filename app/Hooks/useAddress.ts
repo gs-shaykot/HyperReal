@@ -23,7 +23,6 @@ export const useAddress = () => {
             return { previousAddress };
         },
         onError: (error, __, context) => {
-            console.log("Error occurred while adding address: ", error);
             queryClient.setQueryData(
                 ['address'],
                 context?.previousAddress

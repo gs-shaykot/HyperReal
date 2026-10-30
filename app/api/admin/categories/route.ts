@@ -125,7 +125,6 @@ export async function POST(req: Request) {
             );
         }
 
-        console.error("Create admin category error:", error);
 
         return NextResponse.json(
             {
@@ -215,7 +214,6 @@ export async function DELETE(req: Request) {
             );
         }
 
-        console.error("Delete admin category error:", error);
 
         return NextResponse.json(
             {

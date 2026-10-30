@@ -33,7 +33,6 @@ export async function GET() {
             isCODDisabled: user.isCODDisabled,
         });
     } catch (error) {
-        console.error("COD availability check failed:", error);
 
         return NextResponse.json(
             { message: "Failed to check COD availability" },

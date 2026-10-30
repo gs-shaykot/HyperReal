@@ -322,11 +322,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         },
                     })
                     if (result.error) {
-                        console.error(
-                            "[Stripe] Payment confirmation failed:",
-                            result.error
-                        );
-
                         toast.error(
                             result.error.message ??
                             "Payment failed."
@@ -373,7 +368,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
         }
         catch (error: any) {
-            console.error("Payment submission error:", error);
             toast.error(error.response?.data?.message || "Payment processing failed. Please try again.");
             setIsSubmitting(false);
         }

@@ -26,7 +26,6 @@ export async function GET() {
         });
         return NextResponse.json({ success: true, data: zones });
     } catch (error) {
-        console.error("Delivery zones load failed:", error);
         return NextResponse.json({ success: false, message: "Could not load delivery zones." }, { status: 500 });
     }
 }
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
         if (typeof error === "object" && error !== null && "code" in error && error.code === "P2002") {
             return NextResponse.json({ success: false, message: "This zone already exists." }, { status: 409 });
         }
-        console.error("Delivery zone creation failed:", error);
         return NextResponse.json({ success: false, message: "Could not create delivery zone." }, { status: 500 });
     }
 }
@@ -78,7 +76,6 @@ export async function PATCH(request: Request) {
         });
         return NextResponse.json({ success: true, message: "Delivery zone updated.", data: zone });
     } catch (error) {
-        console.error("Delivery zone update failed:", error);
         return NextResponse.json({ success: false, message: "Could not update delivery zone." }, { status: 500 });
     }
 }

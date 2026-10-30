@@ -77,11 +77,6 @@ export const getCloudinaryPublicId = (
 
         return publicIdPath || null;
     } catch (error) {
-        console.error(
-            "Failed to extract Cloudinary public ID:",
-            error
-        );
-
         return null;
     }
 };
@@ -96,11 +91,6 @@ export const deleteCloudinaryImage = async (
         getCloudinaryPublicId(imageUrl);
 
     if (!publicId) {
-        console.warn(
-            "Skipping Cloudinary deletion. Invalid Cloudinary URL:",
-            imageUrl
-        );
-
         return {
             deleted: false,
             publicId: null,
@@ -127,14 +117,6 @@ export const deleteCloudinaryImage = async (
             result: result.result,
         };
     } catch (error) {
-        console.error(
-            "Cloudinary image deletion failed:",
-            {
-                publicId,
-                error,
-            }
-        );
-
         return {
             deleted: false,
             publicId,
@@ -169,12 +151,6 @@ export const deleteCloudinaryImages = async (
                 )
             )
         );
-
-    console.log(
-        `Cloudinary cleanup completed: ${results.filter(
-            (result) => result.deleted
-        ).length}/${uniqueUrls.length} deleted.`
-    );
 
     return results;
 };

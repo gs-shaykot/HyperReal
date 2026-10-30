@@ -62,7 +62,6 @@ export async function GET() {
             },
         });
     } catch (error) {
-        console.error("Admin courier directory failed:", error);
         return NextResponse.json({ success: false, message: "Could not load courier directory." }, { status: 500 });
     }
 }
@@ -150,7 +149,6 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: "Courier registered.", data: profile }, { status: 201 });
     } catch (error) {
-        console.error("Courier registration failed:", error);
         return NextResponse.json({ success: false, message: "Could not register this courier." }, { status: 500 });
     }
 }
@@ -189,7 +187,6 @@ export async function PATCH(request: Request) {
 
         return NextResponse.json({ success: true, message: "Courier updated.", data: profile });
     } catch (error) {
-        console.error("Courier update failed:", error);
         return NextResponse.json({ success: false, message: "Could not update courier." }, { status: 500 });
     }
 }

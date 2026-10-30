@@ -25,7 +25,6 @@ const addressSamples = [
 ];
 
 export async function seedCourierDemoData(prisma: PrismaClient) {
-    console.log("Seeding English courier and delivery-zone demo data...");
 
     for (const zone of zones) {
         await prisma.deliveryZone.upsert({
@@ -182,6 +181,4 @@ export async function seedCourierDemoData(prisma: PrismaClient) {
         shipmentCount++;
     }
 
-    console.log(`Courier demo data ready: ${zones.length} delivery zones, ${couriers.length} couriers, ${shipmentCount} new shipments.`);
-    console.log(`Demo courier password: ${DEMO_COURIER_PASSWORD}`);
 }

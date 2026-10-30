@@ -68,7 +68,6 @@ export async function GET(req: Request) {
             { status: 200 }
         );
     } catch (error) {
-        console.error("GET /api/admin/orders error:", error);
 
         return NextResponse.json(
             {
@@ -162,7 +161,6 @@ export async function PATCH(req: Request) {
             { status: 200 }
         );
     } catch (error) {
-        console.error("PATCH /api/admin/orders error:", error);
 
         return NextResponse.json(
             {

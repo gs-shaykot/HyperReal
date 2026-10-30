@@ -29,7 +29,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, data: wishlistItem }, { status: 201 });
     }
     catch (error) {
-        console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to create wishlist item.' }, { status: 500 });
     }
 }
@@ -64,7 +63,6 @@ export async function GET(req: Request) {
         return NextResponse.json({ success: true, data: wishlistItems }, { status: 200 });
     }
     catch (error) {
-        console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to fetch wishlist items.' }, { status: 500 });
     }
 }
@@ -102,7 +100,6 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ success: true, message: 'Wishlist item deleted successfully.' }, { status: 200 });
     }
     catch (error) {
-        console.error(error);
         return NextResponse.json({ success: false, message: 'Failed to delete wishlist item.' }, { status: 500 });
     }
 }

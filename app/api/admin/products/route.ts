@@ -80,11 +80,6 @@ export async function GET(req: Request) {
 
         return NextResponse.json({ success: true, data, }, { status: 200 });
     } catch (error) {
-        console.error(
-            "Admin products error:",
-            error
-        );
-
         return NextResponse.json(
             { success: false, message: "Failed to fetch products", }, { status: 500 }
         );
@@ -171,8 +166,6 @@ export async function POST(req: Request) {
             { success: true, message: "Product created successfully", data: product, }, { status: 201 }
         );
     } catch (error) {
-        console.error("Create product error:", error);
-
         if (
             error instanceof
             ProductValidationError
@@ -570,11 +563,6 @@ export async function PATCH(req: Request) {
             );
         }
 
-        console.error(
-            "PATCH /api/admin/products error:",
-            error
-        );
-
         return NextResponse.json(
             {
                 error: "Failed to update product",
@@ -714,11 +702,6 @@ export async function DELETE(req: Request) {
             { status: 200 }
         );
     } catch (error) {
-        console.error(
-            "Delete product error:",
-            error
-        );
-
         return NextResponse.json(
             {
                 success: false,

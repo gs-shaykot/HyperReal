@@ -32,7 +32,7 @@ export const uploadImage = async (file: File | null, onProgress?: (percent: numb
 
         return imageUrl;
     } catch (error) {
-        console.error("Image upload failed:", error);
+
         throw error;
     }
 };

@@ -7,9 +7,6 @@ import Stripe from "stripe";
 export async function POST(req: Request) {
     const signature = req.headers.get("stripe-signature"); 
     if (!signature) {
-        console.error(
-            "[Stripe Webhook] Missing stripe-signature header"
-        );
         return NextResponse.json({ success: false, message: "Missing Stripe signature" }, { status: 400 });
     }
 
@@ -24,7 +21,6 @@ export async function POST(req: Request) {
         );
     }
     catch (err) {
-        console.error("[Stripe Webhook] Error parsing webhook event:", err);
         return NextResponse.json({ success: false, message: "Error parsing webhook event" }, { status: 400 });
     }
 
@@ -60,7 +56,6 @@ export async function POST(req: Request) {
 
                 const orderId = paymentIntent.metadata.orderId;
                 if (!orderId) {
-                    console.error("[Stripe Webhook] Missing orderId in paymentIntent metadata");
                     return NextResponse.json({ success: false, message: "Missing orderId in paymentIntent metadata" }, { status: 400 });
                 }
  
@@ -95,7 +90,6 @@ export async function POST(req: Request) {
                 });
 
                 if (!order) {
-                    console.error("[Stripe Webhook] Order not found:", orderId);
                     return new NextResponse("Order not found", { status: 404 });
                 }
 
@@ -113,10 +107,6 @@ export async function POST(req: Request) {
                     paymentIntent.metadata.userId !== order.userId ||
                     paymentIntent.amount_received !== Math.round(savedPayment.paidAmountInUSD * 100)
                 ) {
-                    console.error("[Stripe Webhook] Payment/order association or amount mismatch.", {
-                        orderId,
-                        paymentIntentId: paymentIntent.id,
-                    });
                     return NextResponse.json(
                         { success: false, message: "Stripe payment does not match the saved order." },
                         { status: 400 }
@@ -203,12 +193,6 @@ export async function POST(req: Request) {
                 }
                 break;
             }
-            default: {
-                console.log(
-                    "[Stripe Webhook] Ignoring event:",
-                    event.type
-                );
-            }
         }
         // Store ignored event types too, so Stripe retries do not repeatedly
         // execute non-actionable event handling.
@@ -220,7 +204,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ received: true });
     }
     catch (err) {
-        console.error("[Stripe Webhook] Error handling webhook event:", err);
         return NextResponse.json({ success: false, message: "Error handling webhook event" }, { status: 500 });
     }
 }

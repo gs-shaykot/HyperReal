@@ -162,9 +162,7 @@ export async function POST(request: Request) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError
         ) {
-            console.error("Fulfillment parcel lookup failed:", error);
         } else {
-            console.error("Fulfillment parcel lookup failed:", error);
         }
 
         return NextResponse.json(

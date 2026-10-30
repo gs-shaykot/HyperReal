@@ -20,7 +20,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: true, message: "Notification settings updated successfully" }, { status: 200 });
     }
     catch (err: any) {
-        console.error("Error updating notification settings:", err);
         return NextResponse.json({ message: err.message }, { status: 500 })
     }
 }

@@ -93,7 +93,6 @@ export async function GET() {
 
         return NextResponse.json({ success: true, data: shipments });
     } catch (error) {
-        console.error("Courier deliveries load failed:", error);
         return NextResponse.json({ success: false, message: "Could not load assigned deliveries." }, { status: 500 });
     }
 }
@@ -247,7 +246,6 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: "Delivery updated." });
     } catch (error) {
-        console.error("Courier delivery update failed:", error);
         return NextResponse.json({ success: false, message: "Could not update this delivery." }, { status: 500 });
     }
 }

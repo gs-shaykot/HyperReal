@@ -109,12 +109,6 @@ export const POST = async (req: Request) => {
         return NextResponse.json({ success: true, message: 'OTP sent successfully. Please check your email.' }, { status: 200 });
     }
     catch (error) {
-        console.error("[sendOtp] failed at some stage:", error);
-        if (error instanceof Error) {
-            console.error("[sendOtp] error name:", error.name);
-            console.error("[sendOtp] error message:", error.message);
-            console.error("[sendOtp] error stack:", error.stack);
-        }
         return NextResponse.json({ success: false, message: 'Failed to send OTP.' }, { status: 500 });
     }
 };

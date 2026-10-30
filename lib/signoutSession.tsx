@@ -8,7 +8,6 @@ export const signoutSession = async (sessionId?: string) => {
         return res.data;
     }
     catch (error) {
-        console.error("Error occurred while signing out session: ", error);
         throw error;
     }
 }
@@ -19,7 +18,6 @@ export const signoutAllSessions = async () => {
         return res.data;
     }
     catch (error) {
-        console.error("Error occurred while signing out session: ", error);
         throw error;
     }
 }
@@ -33,7 +31,6 @@ export const getSessions = async () => {
         return res.data.sessions;
     }
     catch (error) {
-        console.error("Error occurred while fetching sessions: ", error);
         throw error;
     }
 }

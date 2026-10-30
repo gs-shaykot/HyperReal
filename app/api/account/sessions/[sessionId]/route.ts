@@ -42,7 +42,6 @@ export async function DELETE(_request: Request, { params, }: { params: Promise<{
         return NextResponse.json({ success: true, message: "Session logged out successfully." }, { status: 200 });
     }
     catch (error) {
-        console.error("DELETE /account/sessions/[sessionId]:", error);
         return NextResponse.json({ success: false, message: "Failed to remove session" }, { status: 500 });
     }
 }

@@ -39,11 +39,6 @@ export async function DELETE() {
             revokedCount: result.count,
         });
     } catch (error) {
-        console.error(
-            "DELETE /account/sessions/others:",
-            error
-        );
-
         return NextResponse.json(
             { message: "Failed to logout other sessions" },
             { status: 500 }

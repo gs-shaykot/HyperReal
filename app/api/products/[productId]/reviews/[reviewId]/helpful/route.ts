@@ -81,7 +81,6 @@ export async function POST(
             helpfulCount,
         });
     } catch (error) {
-        console.error("Toggle helpful review vote error:", error);
 
         return NextResponse.json(
             {

@@ -60,7 +60,6 @@ export async function POST(req: Request) {
             if (gatewayState === "FAILED") {
                 await releaseOrderStock(order.id);
             } else if (gatewayState === "UNKNOWN") {
-                console.warn("[SSLCOMMERZ] Callback status is unverified; reservation retained.", order.id);
             }
         }
 
@@ -69,7 +68,6 @@ export async function POST(req: Request) {
         );
 
     } catch (error) {
-        console.error("SSLCOMMERZ fail callback error:", error);
 
         return NextResponse.json(
             {

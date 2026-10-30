@@ -40,7 +40,6 @@ export async function GET() {
             }
         );
     } catch (error) {
-        console.error("Get upcoming release error:", error);
 
         return NextResponse.json(
             { message: "Failed to fetch upcoming release settings." },
@@ -141,7 +140,6 @@ export async function PUT(req: Request) {
             data: settings,
         });
     } catch (error) {
-        console.error("Update upcoming release error:", error);
 
         return NextResponse.json(
             { message: "Failed to save upcoming release settings." },

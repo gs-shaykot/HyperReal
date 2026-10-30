@@ -139,7 +139,6 @@ export const AllSettings = ({ userNotifications: { marketingNotifications, order
             }
         }
         catch (error) {
-            console.error('Error updating notification settings:', error);
         }
         finally {
             setNotifications((prev) => ({ ...prev, isSaving: false }));

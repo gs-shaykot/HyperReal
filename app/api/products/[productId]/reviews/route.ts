@@ -154,7 +154,6 @@ export async function GET(
             },
         });
     } catch (error) {
-        console.error("Fetch product reviews error:", error);
         return jsonError("Could not load product reviews.", 500);
     }
 }
@@ -292,7 +291,6 @@ export async function POST(
             );
         }
 
-        console.error("Create product review error:", error);
         return jsonError("Could not submit your review.", 500);
     }
 }

@@ -11,7 +11,6 @@ export const addAddress = async (address: AddressType) => {
         return res.data;
     }
     catch (error) {
-        console.error("Error occurred while adding address: ", error);
         throw error;
     }
 }
@@ -21,7 +20,6 @@ export const getAddresses = async () => {
         return res.data.data;
     }
     catch (error) {
-        console.error("Error occurred while fetching addresses: ", error);
         throw error;
     }
 }
@@ -32,7 +30,6 @@ export const makePrimaryAddress = async (id: string) => {
         return res.data;
     }
     catch (error) {
-        console.error("Error occurred while making address primary: ", error);
         throw error;
     }
 }

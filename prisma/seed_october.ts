@@ -1464,5 +1464,4 @@ export async function seedOctoberData() {
         });
     }
 
-    console.log("October 2026 dummy data seeded.");
 }

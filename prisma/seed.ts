@@ -932,7 +932,6 @@ const PRODUCTS = [
 
 
 async function main() {
-  console.log("🌱 Seeding started...");
 
   // ✅ STEP 1: Seed categories FIRST
   await prisma.category.createMany({
@@ -940,14 +939,12 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("✅ Categories seeded");
 
   await prisma.coupon.createMany({
     data: COUPONS,
     skipDuplicates: true,
   });
 
-  console.log("✅ Coupons seeded");
 
   for (const item of PRODUCTS) {
     const category = await prisma.category.findUnique({
@@ -1031,11 +1028,9 @@ async function main() {
   }
 
   await seedOctoberData();
-  console.log("✅ October data seeded");
 
   await seedCourierDemoData(prisma);
 
-  console.log("✅ Seeding completed");
 }
 
 main()
@@ -1044,7 +1039,6 @@ main()
     await pool.end();
   })
   .catch(async (e) => {
-    console.error(e);
     await prisma.$disconnect();
     await pool.end();
     process.exit(1);

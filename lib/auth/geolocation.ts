@@ -39,8 +39,6 @@ export async function getIpLocation(ipAddress: string | null): Promise<GeoLocati
         
         const res = await axios.get(`https://ipapi.co/${ipAddress}/json/`)
         if (!res.status || res.status !== 200) {
-            console.error(`IP geolocation failed with status ${res.status}`);
-
             return {
                 country: null,
                 region: null,
@@ -56,11 +54,6 @@ export async function getIpLocation(ipAddress: string | null): Promise<GeoLocati
             city: data.city ?? null,
         };
     } catch (error) {
-        console.error(
-            "Failed to resolve IP geolocation:",
-            error
-        );
-
         return {
             country: null,
             region: null,

@@ -50,7 +50,6 @@ export async function GET(request: Request) {
         const countries = [...new Set(shipments.map((item) => item.order.orderHistory?.country).filter((value): value is string => !!value))].sort();
         return NextResponse.json({ success: true, data: { shipments, countries } });
     } catch (error) {
-        console.error("International shipments lookup failed:", error);
         return NextResponse.json({ success: false, message: "Could not load international shipments." }, { status: 500 });
     }
 }
@@ -185,7 +184,6 @@ export async function PATCH(request: Request) {
         });
         return NextResponse.json({ success: true, message: "International shipping details saved and customer tracking updated.", data: updated });
     } catch (error) {
-        console.error("International shipment update failed:", error);
         return NextResponse.json({ success: false, message: "Could not update international shipping details." }, { status: 500 });
     }
 }

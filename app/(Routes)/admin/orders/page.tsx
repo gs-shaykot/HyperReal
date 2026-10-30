@@ -6,7 +6,7 @@ const OrderPage = async () => {
     const [ordersData] = await Promise.all([
         getAdminOrders({ page: 1, }),
     ]);
-    console.log("ordersData", ordersData)
+    
     return (
         <div className="bg-main light:bg-white min-h-screen p-4">
             <div>

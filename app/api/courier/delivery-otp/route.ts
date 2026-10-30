@@ -108,7 +108,6 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, message: "Verification code sent to the customer's email. It expires in 5 minutes." });
     } catch (error) {
-        console.error("Delivery OTP request failed:", error);
         return NextResponse.json({ success: false, message: "Could not send the delivery verification code." }, { status: 500 });
     }
 }

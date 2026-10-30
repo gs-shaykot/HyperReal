@@ -52,7 +52,6 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ message: "Address updated successfully." }, { status: 200 });
     }
     catch (error) {
-        console.error("Error occurred while updating address: ", error);
         return NextResponse.json({ message: "Error occurred while updating address." }, { status: 500 });
     }
 }

@@ -96,7 +96,6 @@ export async function GET() {
             { headers: { "Cache-Control": "no-store" } }
         );
     } catch (error) {
-        console.error("Get operational countries error:", error);
 
         return NextResponse.json(
             { message: "Failed to load countries." },
@@ -147,7 +146,6 @@ export async function POST(req: Request) {
             );
         }
 
-        console.error("Create operational country error:", error);
 
         return NextResponse.json(
             { message: "Failed to add country." },
@@ -211,7 +209,6 @@ export async function PUT(req: Request) {
             );
         }
 
-        console.error("Update operational country error:", error);
 
         return NextResponse.json(
             { message: "Failed to update country." },
@@ -264,7 +261,6 @@ export async function DELETE(req: Request) {
             );
         }
 
-        console.error("Delete operational country error:", error);
 
         return NextResponse.json(
             { message: "Failed to delete country." },
