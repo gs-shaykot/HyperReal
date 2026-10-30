@@ -68,7 +68,7 @@ export async function completePayment(
 
     const transactionId = await generatePaymentTrxId();
 
-    await prisma.$transaction(async (tx) => {
+    const completed = await prisma.$transaction(async (tx) => {
         // Claim the order first. All payment state transitions use the same
         // order -> payment lock order to reduce deadlock risk.
         const claimedOrder = await tx.order.updateMany({
@@ -82,7 +82,7 @@ export async function completePayment(
         });
 
         if (claimedOrder.count !== 1) {
-            return;
+            return false;
         }
 
         // A successful online payment can only complete an order whose
@@ -146,7 +146,11 @@ export async function completePayment(
                 isNewUser: false,
             },
         });
+
+        return true;
     });
+
+    return completed;
 }
 
 
