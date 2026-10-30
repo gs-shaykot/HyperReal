@@ -53,15 +53,12 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [checkoutKey, setCheckoutKey] = useState("");
 
+    // Checkout keys are scoped to the authenticated user and the exact
+    // checkout payload. The legacy global key caused unrelated Stripe/SSLC
+    // attempts to collide when a user changed payment method or address.
     useEffect(() => {
-        const storageKey = "hyperreal_checkout_attempt_key";
-        let key = window.localStorage.getItem(storageKey);
-        if (!key) {
-            key = window.crypto.randomUUID();
-            window.localStorage.setItem(storageKey, key);
-        }
-        setCheckoutKey(key);
-    }, []);
+        setCheckoutKey("");
+    }, [session?.user?.id]);
 
     const [selectedCountry, setSelectedCountry] = useState({
         name: 'Bangladesh',
@@ -245,12 +242,52 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             
             let data;
 
-            let activeCheckoutKey = checkoutKey;
-            if (!activeCheckoutKey) {
-                activeCheckoutKey = window.crypto.randomUUID();
-                window.localStorage.setItem("hyperreal_checkout_attempt_key", activeCheckoutKey);
-                setCheckoutKey(activeCheckoutKey);
+            const cartFingerprint = cart
+                .map((item: CartItemWithProductType) => ({
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                }))
+                .sort((a, b) => a.variantId.localeCompare(b.variantId));
+
+            const attemptFingerprint = JSON.stringify({
+                userId: session?.user?.id,
+                cart: cartFingerprint,
+                country: selectedCountry.value,
+                coupon: appliedCoupon?.code?.trim().toUpperCase() ?? null,
+                paymentMethod: selectedPaymentMethod,
+                address: paymentData.address,
+                saveAddress: Boolean(paymentData.saveAddress),
+                deliveryOption: paymentData.deliveryOption,
+            });
+
+            const attemptStorageKey = `hyperreal_checkout_attempt_v2:${session?.user?.id ?? "anonymous"}`;
+            let storedAttempt: { key: string; fingerprint: string } | null = null;
+            try {
+                const rawAttempt = window.localStorage.getItem(attemptStorageKey);
+                storedAttempt = rawAttempt ? JSON.parse(rawAttempt) : null;
+            } catch {
+                storedAttempt = null;
             }
+
+            // Keep the same key for an identical retry (including a page refresh),
+            // but generate a new key whenever the actual checkout payload changes.
+            let activeCheckoutKey =
+                storedAttempt?.fingerprint === attemptFingerprint
+                    ? storedAttempt.key
+                    : window.crypto.randomUUID();
+
+            if (!activeCheckoutKey || activeCheckoutKey.length < 16) {
+                activeCheckoutKey = window.crypto.randomUUID();
+            }
+
+            window.localStorage.setItem(
+                attemptStorageKey,
+                JSON.stringify({
+                    key: activeCheckoutKey,
+                    fingerprint: attemptFingerprint,
+                })
+            );
+            setCheckoutKey(activeCheckoutKey);
 
             try {
                 const res = await axios.post("/api/order", paymentData, {
@@ -267,7 +304,13 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 // that could create a second reservation for the same cart.
                 if (errorCode === "CHECKOUT_ATTEMPT_RELEASED") {
                     const nextKey = window.crypto.randomUUID();
-                    window.localStorage.setItem("hyperreal_checkout_attempt_key", nextKey);
+                    const attemptStorageKey = `hyperreal_checkout_attempt_v2:${session?.user?.id ?? "anonymous"}`;
+                    const rawAttempt = window.localStorage.getItem(attemptStorageKey);
+                    const previous = rawAttempt ? JSON.parse(rawAttempt) : {};
+                    window.localStorage.setItem(attemptStorageKey, JSON.stringify({
+                        ...previous,
+                        key: nextKey,
+                    }));
                     setCheckoutKey(nextKey);
                 }
 
