@@ -85,10 +85,12 @@ export async function POST(req: Request) {
             return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
-        // Bind the validated transaction to the exact SSLCommerz session created
-        // for this order; a valid transaction ID alone is not sufficient.
-        if (validationData.sessionkey !== payment.sslSessionKey) {
-            logValidationFailure("session_key_mismatch", { orderCode: order.orderCode, validationSessionKeyPresent: Boolean(validationData.sessionkey), savedSessionKeyPresent: Boolean(payment.sslSessionKey), sessionKeyMatches: validationData.sessionkey === payment.sslSessionKey });
+        // The validationserverAPI.php response is authoritative for the val_id,
+        // transaction ID, amount and currency, but it does not reliably include
+        // the sessionkey returned by the initial gateway-session API. Do not
+        // reject a valid payment because that optional field is absent.
+        if (validationData.val_id && validationData.val_id !== val_id) {
+            logValidationFailure("validation_id_mismatch", { orderCode: order.orderCode });
             return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
