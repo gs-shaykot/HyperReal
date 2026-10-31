@@ -64,7 +64,8 @@ export async function POST(req: Request) {
         }
 
         return NextResponse.redirect(
-            `${process.env.BASE_URL}/failed?orderId=${order.id}`
+            new URL(`/failed?orderId=${order.id}`, process.env.BASE_URL),
+            303
         );
 
     } catch (error) {
