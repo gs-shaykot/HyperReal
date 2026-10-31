@@ -3,6 +3,14 @@ import { completePayment } from "@/lib/service/paymentService";
 import axios from "axios";
 import { NextResponse } from "next/server";
 
+function redirectToPage(path: string) {
+    return NextResponse.redirect(new URL(path, process.env.BASE_URL), 303);
+}
+
+function logValidationFailure(reason: string, details: Record<string, unknown> = {}) {
+    console.error("[sslcommerz:success-validation]", { reason, ...details });
+}
+
 export async function POST(req: Request) {
     try {
 
@@ -11,7 +19,8 @@ export async function POST(req: Request) {
         const val_id = formData.get("val_id") as string;
 
         if (!tran_id || !val_id) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+            logValidationFailure("missing_callback_fields", { hasTranId: Boolean(tran_id), hasValId: Boolean(val_id) });
+            return redirectToPage("/failed");
         }
 
         const validatorBaseUrl = process.env.SSLCOMMERZ_VALIDATOR_BASE_URL || "https://sandbox.sslcommerz.com";
@@ -46,57 +55,65 @@ export async function POST(req: Request) {
         });
 
         if (!order) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+            logValidationFailure("order_not_found", { tran_id });
+            return redirectToPage("/failed");
         }
 
         if (
             validationData.APIConnect !== "DONE" ||
             !["VALID", "VALIDATED"].includes(validationData.status)
         ) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("gateway_validation_not_successful", { orderCode: order.orderCode, apiConnect: validationData.APIConnect, gatewayStatus: validationData.status });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         if (validationData.tran_id !== order.orderCode) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("transaction_id_mismatch", { orderCode: order.orderCode, validatedTranId: validationData.tran_id });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         const validatedCurrency = validationData.currency ?? validationData.currency_type;
         if (validatedCurrency !== "BDT") {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("currency_mismatch", { orderCode: order.orderCode, validatedCurrency, currency: validationData.currency, currencyType: validationData.currency_type });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         const payment = order.payments[0];
 
         if (!payment || payment.method !== "SSLC" || !payment.sslSessionKey) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("saved_payment_or_session_missing", { orderCode: order.orderCode, paymentFound: Boolean(payment), paymentMethod: payment?.method, savedSessionKeyPresent: Boolean(payment?.sslSessionKey) });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         // Bind the validated transaction to the exact SSLCommerz session created
         // for this order; a valid transaction ID alone is not sufficient.
         if (validationData.sessionkey !== payment.sslSessionKey) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("session_key_mismatch", { orderCode: order.orderCode, validationSessionKeyPresent: Boolean(validationData.sessionkey), savedSessionKeyPresent: Boolean(payment.sslSessionKey), sessionKeyMatches: validationData.sessionkey === payment.sslSessionKey });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         if (payment.status === "SUCCESS" && order.status === "PROCESSING") {
-            return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
+            return redirectToPage(`/success?orderId=${order.id}`);
         }
 
         // A late success callback must never resurrect a reservation already
         // released after a confirmed gateway failure/cancellation.
         if (payment.status !== "PENDING" || order.status !== "PENDING") {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("unexpected_persisted_state", { orderCode: order.orderCode, orderStatus: order.status, paymentStatus: payment.status });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         } 
 
         const validationAmount = Number(validationData.amount).toFixed(2);
         const paidAmount = Number(payment.paidAmountInBDT).toFixed(2);
 
         if (validationAmount !== paidAmount) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+            logValidationFailure("amount_mismatch", { orderCode: order.orderCode, validationAmount, paidAmount });
+            return redirectToPage(`/failed?orderId=${order.id}`);
         }
 
         const completed = await completePayment(order);
         if (completed) {
-            return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
+            return redirectToPage(`/success?orderId=${order.id}`);
         }
 
         // Another callback may have completed the order concurrently. Confirm
@@ -110,12 +127,14 @@ export async function POST(req: Request) {
         });
 
         if (latest?.status === "PROCESSING" && latest.payments[0]?.status === "SUCCESS") {
-            return NextResponse.redirect(`${process.env.BASE_URL}/success?orderId=${order.id}`);
+            return redirectToPage(`/success?orderId=${order.id}`);
         }
 
-        return NextResponse.redirect(`${process.env.BASE_URL}/failed?orderId=${order.id}`);
+        logValidationFailure("payment_transition_not_persisted", { orderId: order.id, orderCode: order.orderCode });
+        return redirectToPage(`/failed?orderId=${order.id}`);
 
     } catch (error: unknown) {
-        return NextResponse.redirect(`${process.env.BASE_URL}/failed`);
+        console.error("[sslcommerz:success-callback-error]", { errorName: error instanceof Error ? error.name : "UnknownError", errorMessage: error instanceof Error ? error.message : String(error) });
+        return redirectToPage("/failed");
     }
 }
