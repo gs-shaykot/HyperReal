@@ -339,8 +339,42 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             }
 
             if (data.alreadyCompleted && data.orderId) {
-                window.location.href = `/success?orderId=${encodeURIComponent(data.orderId)}`;
-                return;
+                // A completed order can be returned when an older browser tab
+                // retained its checkout key. This submit is a new customer
+                // purchase (the current cart is non-empty), so rotate the key
+                // and create a fresh order instead of showing the old receipt.
+                activeCheckoutKey = window.crypto.randomUUID();
+                window.localStorage.setItem(
+                    attemptStorageKey,
+                    JSON.stringify({
+                        key: activeCheckoutKey,
+                        fingerprint: attemptFingerprint,
+                    })
+                );
+                setCheckoutKey(activeCheckoutKey);
+
+                try {
+                    const freshResponse = await axios.post("/api/order", paymentData, {
+                        headers: { "Idempotency-Key": activeCheckoutKey },
+                    });
+                    data = freshResponse.data;
+                } catch (error: any) {
+                    toast.error(
+                        error.response?.data?.message ||
+                        "Your previous order is complete. Please verify your cart and try checkout again."
+                    );
+                    setIsSubmitting(false);
+                    return;
+                }
+
+                if (!data?.success || data.alreadyCompleted) {
+                    toast.error(
+                        data?.message ||
+                        "We couldn't start a new checkout. Please refresh your cart and try again."
+                    );
+                    setIsSubmitting(false);
+                    return;
+                }
             }
 
             if (selectedPaymentMethod === 'STRIPE') {
