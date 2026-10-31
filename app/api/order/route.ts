@@ -695,7 +695,7 @@ export async function POST(req: Request) {
                     cus_country: country.name.trim().slice(0, 50),
                     cus_phone: String(phone).trim().slice(0, 20),
                     shipping_method: "YES",
-                    num_of_item: num_of_item: sslItemCount,
+                    num_of_item: sslItemCount,
                     ship_name: fullName.trim().slice(0, 50),
                     ship_add1: sslCustomerAddressLine,
                     ship_city: city.trim().slice(0, 50),
