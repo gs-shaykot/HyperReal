@@ -492,6 +492,37 @@ export async function POST(req: Request) {
             }
         }
 
+        const sslCustomerEmail = session.user.email?.trim();
+        const sslCustomerAddressLine = [house, street]
+            .map((part) => String(part ?? "").trim())
+            .filter(Boolean)
+            .join(", ")
+            .slice(0, 50);
+        const sslItemCount = cartItems.reduce(
+            (total, item) => total + item.quantity,
+            0
+        );
+
+        // Validate required SSLCommerz customer data before reserving stock.
+        if (
+            paymentMethod === "SSLC" &&
+            (
+                !sslCustomerEmail ||
+                !fullName?.trim() ||
+                !sslCustomerAddressLine ||
+                !city?.trim() ||
+                !String(zipCode ?? "").trim() ||
+                !country?.name?.trim() ||
+                !String(phone ?? "").trim() ||
+                sslItemCount < 1
+            )
+        ) {
+            return NextResponse.json(
+                { success: false, message: "SSLCommerz requires customer email, name, address, city, postcode, country, phone, and item count. Please complete your profile and shipping address." },
+                { status: 400 }
+            );
+        }
+
         const order = await prisma.$transaction(async (tx) => {
 
             for (const item of cartItems) {
@@ -647,36 +678,6 @@ export async function POST(req: Request) {
                 const tran_id = order.orderCode;
                 const orderId = order.id;
 
-                const customerEmail = session.user.email?.trim();
-                const customerAddressLine = [house, street]
-                    .map((part) => String(part ?? "").trim())
-                    .filter(Boolean)
-                    .join(", ")
-                    .slice(0, 50);
-                const itemCount = cartItems.reduce(
-                    (total, item) => total + item.quantity,
-                    0
-                );
-
-                // SSLCommerz requires customer and shipment details during
-                // session initialization. Previously we created a gateway
-                // session without these mandatory fields, which can lead the
-                // hosted gateway to reject the transaction after OTP entry.
-                if (
-                    !customerEmail ||
-                    !fullName?.trim() ||
-                    !customerAddressLine ||
-                    !city?.trim() ||
-                    !String(zipCode ?? "").trim() ||
-                    !country?.name?.trim() ||
-                    !String(phone ?? "").trim() ||
-                    itemCount < 1
-                ) {
-                    throw new Error(
-                        "SSLCOMMERZ requires a valid customer email, name, address, city, postcode, country, phone, and item count."
-                    );
-                }
-
                 const sslData = {
                     store_id: process.env.SSLC_STORE_ID,
                     store_passwd: process.env.SSLC_STORE_PASSWORD,
@@ -687,16 +688,16 @@ export async function POST(req: Request) {
                     fail_url: `${process.env.BASE_URL}/api/payment/fail`,
                     cancel_url: `${process.env.BASE_URL}/api/payment/cancel`,
                     cus_name: fullName.trim().slice(0, 50),
-                    cus_email: customerEmail.slice(0, 50),
-                    cus_add1: customerAddressLine,
+                    cus_email: sslCustomerEmail.slice(0, 50),
+                    cus_add1: sslCustomerAddressLine,
                     cus_city: city.trim().slice(0, 50),
                     cus_postcode: String(zipCode).trim().slice(0, 30),
                     cus_country: country.name.trim().slice(0, 50),
                     cus_phone: String(phone).trim().slice(0, 20),
                     shipping_method: "YES",
-                    num_of_item: itemCount,
+                    num_of_item: num_of_item: sslItemCount,
                     ship_name: fullName.trim().slice(0, 50),
-                    ship_add1: customerAddressLine,
+                    ship_add1: sslCustomerAddressLine,
                     ship_city: city.trim().slice(0, 50),
                     ship_postcode: String(zipCode).trim().slice(0, 50),
                     ship_country: country.name.trim().slice(0, 50),
