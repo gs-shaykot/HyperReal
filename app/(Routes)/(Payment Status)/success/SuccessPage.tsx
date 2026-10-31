@@ -19,9 +19,16 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
     // Only clear the key when the server supplied an order that has actually
     // advanced to processing; visiting this URL manually must not reset it.
     if (order?.status === "PROCESSING" && order?.payments?.[0]) {
+      // A completed checkout must not leave its idempotency key available for
+      // the customer's next purchase. The v2 key is user-scoped and is the
+      // active key used by CheckoutContent; the legacy key is cleaned up too.
+      const userId = user?.id;
+      if (userId) {
+        window.localStorage.removeItem(`hyperreal_checkout_attempt_v2:${userId}`);
+      }
       window.localStorage.removeItem("hyperreal_checkout_attempt_key");
     }
-  }, [order?.status, order?.payments]);
+  }, [order?.status, order?.payments, user?.id]);
 
   const formattedDate = new Date(order?.createdAt).toLocaleDateString("en-GB");
 
