@@ -34,6 +34,50 @@ export async function POST(req: Request) {
         }
 
         switch (event.type) {
+            case "refund.updated": {
+                const providerRefund = event.data.object as Stripe.Refund;
+                const refundId = providerRefund.metadata?.refundId;
+                if (!refundId) {
+                    return NextResponse.json({ success: false, message: "Stripe refund event is missing its HyperReal refund reference." }, { status: 400 });
+                }
+                const current = await prisma.refund.findUnique({ where: { id: refundId }, select: { id: true, returnRequestId: true, status: true } });
+                if (!current) {
+                    return NextResponse.json({ success: false, message: "Refund record not found for Stripe event." }, { status: 404 });
+                }
+                const nextStatus = providerRefund.status === "succeeded"
+                    ? "SUCCEEDED"
+                    : providerRefund.status === "failed" || providerRefund.status === "canceled"
+                        ? "FAILED"
+                        : "PROCESSING";
+                await prisma.$transaction(async (tx) => {
+                    const changed = await tx.refund.updateMany({
+                        where: { id: current.id, status: { in: ["PENDING", "PROCESSING", "FAILED"] } },
+                        data: {
+                            providerRefundId: providerRefund.id,
+                            status: nextStatus,
+                            processedAt: nextStatus === "SUCCEEDED" ? new Date() : null,
+                            failureReason: providerRefund.failure_reason || null,
+                        },
+                    });
+                    if (changed.count === 1) {
+                        if (nextStatus === "SUCCEEDED") {
+                            await tx.returnRequest.updateMany({
+                                where: { id: current.returnRequestId, status: "REFUND_PROCESSING" },
+                                data: { status: "REFUNDED", closedAt: new Date() },
+                            });
+                        }
+                        await tx.returnEvent.create({
+                            data: {
+                                returnRequestId: current.returnRequestId,
+                                type: nextStatus === "SUCCEEDED" ? "REFUND_SUCCEEDED" : nextStatus === "FAILED" ? "REFUND_FAILED" : "REFUND_INITIATED",
+                                title: nextStatus === "SUCCEEDED" ? "Stripe refund confirmed" : nextStatus === "FAILED" ? "Stripe refund failed" : "Stripe refund processing",
+                                description: `Stripe refund ${providerRefund.id} status: ${providerRefund.status}.`,
+                            },
+                        });
+                    }
+                });
+                break;
+            }
             case "payment_intent.succeeded": {
                 const eventPaymentIntent = event.data.object as Stripe.PaymentIntent;
                 const paymentIntentWithCharge = await stripe.paymentIntents.retrieve(eventPaymentIntent.id, {
