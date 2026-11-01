@@ -209,6 +209,17 @@ export async function POST(request: Request) {
                     break;
                 }
 
+                case "CONFIRM_MANUAL_REFUND": {
+                    if (record.status !== ReturnStatus.REFUND_PROCESSING) throw new ReturnError("This return is not awaiting a manual refund.", 409);
+                    const refund = await tx.refund.findUnique({ where: { returnRequestId: record.id } });
+                    if (!refund || refund.method === RefundMethod.STRIPE || refund.status !== RefundStatus.REQUIRES_MANUAL_ACTION) throw new ReturnError("This refund is not eligible for manual confirmation.", 409);
+                    if (!note) throw new ReturnError("Enter the verified bank, mobile-wallet or cash refund reference before confirming.", 400);
+                    await tx.refund.update({ where: { id: refund.id }, data: { status: RefundStatus.SUCCEEDED, processedAt: new Date(), processedById: admin.id, failureReason: null } });
+                    await tx.returnRequest.update({ where: { id: record.id }, data: { status: ReturnStatus.REFUNDED, closedAt: new Date(), adminNote: note } });
+                    await event(ReturnEventType.REFUND_SUCCEEDED, "Manual refund confirmed", note);
+                    break;
+                }
+
                 case "CREATE_REFUND": {
                     if (record.status !== ReturnStatus.REFUND_APPROVED) throw new ReturnError("Complete inspection and approve the refund first.", 409);
                     const payment = record.order.payments[0];
