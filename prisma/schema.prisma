@@ -27,6 +27,7 @@ model User {
   authProvider AuthProvider        @default(EMAIL)
   cart         Cart?
   orders       Order[]
+  notifications Notification[]
   returnRequests ReturnRequest[]
   returnEvents ReturnEvent[] @relation("ReturnEventActor")
   reviewedReturns ReturnRequest[] @relation("ReturnReviewer")
@@ -42,6 +43,23 @@ model User {
   trackingEvents    OrderTrackingEvent[] @relation("TrackingEventActor")
 
   @@map("user")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  href      String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+  @@map("notification")
 }
 
 model Session {
