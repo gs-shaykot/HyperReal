@@ -30,6 +30,15 @@ export default function AdminReturnsPage() {
     catch(e){setError(e instanceof Error?e.message:"Could not load returns");} finally{setBusy(false);}
   },[]);
   useEffect(()=>{void load()},[load]);
+  const processStripeRefund = async () => {
+    if(!selected) return;
+    setBusy(true); setError("");
+    try {
+      const r=await fetch("/api/admin/returns/refund",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({returnId:selected.id})});
+      const j=await r.json(); if(!r.ok) throw new Error(j.message||"Could not process Stripe refund");
+      setSelected(null); await load();
+    } catch(e){setError(e instanceof Error?e.message:"Could not process Stripe refund");} finally{setBusy(false);}
+  };
   const act = async (action:string, items?:unknown[]) => {
     if(!selected) return;
     setBusy(true); setError("");
@@ -61,6 +70,7 @@ export default function AdminReturnsPage() {
           {(selected.status==="APPROVED"||selected.status==="IN_TRANSIT")&&actionButton("Mark received","MARK_RECEIVED",<PackageCheck size={14}/>)}
           {selected.status==="RECEIVED"&&actionButton("Start inspection","START_INSPECTION",<ClipboardCheck size={14}/>)}
           {selected.status==="REFUND_APPROVED"&&actionButton("Create refund","CREATE_REFUND",<Wallet size={14}/>)}
+          {selected.status==="REFUND_PROCESSING"&&selected.refund?.method==="STRIPE"&&selected.refund.status!=="SUCCEEDED"&&<button disabled={busy||selected.refund.status==="PROCESSING"} onClick={()=>void processStripeRefund()} className="inline-flex items-center gap-2 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-40"><Wallet size={14}/>{selected.refund.status==="PROCESSING"?"STRIPE PROCESSING":"PROCESS STRIPE REFUND"}</button>}
         </div>
         {selected.status==="INSPECTING"&&<InspectionForm items={selected.items} busy={busy} onSubmit={items=>void act("INSPECT",items)}/>}
       </section></div>}
