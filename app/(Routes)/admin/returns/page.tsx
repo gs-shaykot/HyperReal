@@ -67,7 +67,9 @@ export default function AdminReturnsPage() {
         <label className="mt-5 block text-xs font-bold uppercase tracking-widest">Internal note / rejection reason<textarea value={note} onChange={e=>setNote(e.target.value)} rows={2} className="mt-2 w-full border p-3 text-sm outline-none focus:border-lime-600" placeholder="Add an operational note..."/></label>
         <div className="mt-4 flex flex-wrap gap-2">
           {selected.status==="REQUESTED"&&<>{actionButton("Approve","APPROVE",<CheckCircle2 size={14}/>)}{actionButton("Reject","REJECT",<XCircle size={14}/>)}</>}
-          {(selected.status==="APPROVED"||selected.status==="IN_TRANSIT")&&actionButton("Mark received","MARK_RECEIVED",<PackageCheck size={14}/>)}
+          {selected.status==="APPROVED"&&actionButton("Mark in transit","MARK_IN_TRANSIT",<PackageCheck size={14}/>)}
+          {(selected.status==="APPROVED"||selected.status==="IN_TRANSIT")&&actionButton("Mark received","MARK_RECEIVED",<PackageCheck size={14}/>)} 
+          {selected.status==="REFUND_PROCESSING"&&selected.refund?.method!=="STRIPE"&&selected.refund?.status==="REQUIRES_MANUAL_ACTION"&&actionButton("Confirm verified manual refund","CONFIRM_MANUAL_REFUND",<Wallet size={14}/>)}
           {selected.status==="RECEIVED"&&actionButton("Start inspection","START_INSPECTION",<ClipboardCheck size={14}/>)}
           {selected.status==="REFUND_APPROVED"&&actionButton("Create refund","CREATE_REFUND",<Wallet size={14}/>)}
           {selected.status==="REFUND_PROCESSING"&&selected.refund?.method==="STRIPE"&&selected.refund.status!=="SUCCEEDED"&&<button disabled={busy||selected.refund.status==="PROCESSING"} onClick={()=>void processStripeRefund()} className="inline-flex items-center gap-2 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-40"><Wallet size={14}/>{selected.refund.status==="PROCESSING"?"STRIPE PROCESSING":"PROCESS STRIPE REFUND"}</button>}
