@@ -92,7 +92,7 @@ export async function POST(request: Request) {
                         select: {
                             id: true,
                             status: true,
-                            payments: { orderBy: { createdAt: "desc" }, take: 1, select: { method: true, status: true, paidAmountInUSD: true, paidAmountInBDT: true } },
+                            payments: { orderBy: { createdAt: "desc" }, take: 1, select: { method: true, status: true, paidAmountInUSD: true, paidAmountInBDT: true, discount: true } },
                         },
                     },
                 },
@@ -114,6 +114,12 @@ export async function POST(request: Request) {
                 case "APPROVE":
                     if (record.status !== ReturnStatus.REQUESTED) throw new ReturnError("Only new requests can be approved.", 409);
                     await updateStatus([ReturnStatus.REQUESTED], ReturnStatus.APPROVED);
+                    for (const item of record.items) {
+                        await tx.returnItem.update({
+                            where: { id: item.id },
+                            data: { approvedQuantity: item.requestedQuantity },
+                        });
+                    }
                     await event(ReturnEventType.APPROVED, "Return approved", note || "The return request was approved.");
                     break;
 
@@ -161,8 +167,24 @@ export async function POST(request: Request) {
                         if (input.restockQuantity > 0 && ![ReturnItemCondition.SEALED, ReturnItemCondition.GOOD].includes(input.condition)) throw new ReturnError("Only sealed or good-condition items can be restocked.");
                         const eligible = Math.min(item.approvedQuantity || item.requestedQuantity, input.receivedQuantity);
                         if (eligible > 0) allItemsRejected = false;
-                        const unitPrice = item.orderItem.priceAtPurchase;
-                        const refundAmount = eligible * unitPrice;
+                        const payment = record.order.payments[0];
+                        const allOrderItems = await tx.orderItem.findMany({
+                            where: { orderId: record.orderId },
+                            select: { quantity: true, priceAtPurchase: true },
+                        });
+                        const grossSubtotal = allOrderItems.reduce(
+                            (sum, current) => sum + current.priceAtPurchase * current.quantity,
+                            0,
+                        );
+                        const grossLineTotal = item.orderItem.priceAtPurchase * item.orderItem.quantity;
+                        const allocatedDiscount = grossSubtotal > 0 && payment
+                            ? Math.max(0, payment.discount) * (grossLineTotal / grossSubtotal)
+                            : 0;
+                        const netLineTotal = Math.max(0, grossLineTotal - allocatedDiscount);
+                        const netUnitPrice = item.orderItem.quantity > 0
+                            ? netLineTotal / item.orderItem.quantity
+                            : 0;
+                        const refundAmount = eligible * netUnitPrice;
                         await tx.returnItem.update({
                             where: { id: item.id },
                             data: {
@@ -190,11 +212,14 @@ export async function POST(request: Request) {
                     if (record.status !== ReturnStatus.REFUND_APPROVED) throw new ReturnError("Complete inspection and approve the refund first.", 409);
                     const payment = record.order.payments[0];
                     if (!payment || payment.status !== PaymentStatus.SUCCESS) throw new ReturnError("Only successfully paid orders can be refunded.", 409);
-                    const total = record.items.reduce((sum, item) => sum + Number(item.refundAmount), 0);
-                    if (!Number.isFinite(total) || total <= 0) throw new ReturnError("The inspected return has no refundable amount.");
+                    const refundInUSD = record.items.reduce((sum, item) => sum + Number(item.refundAmount), 0);
+                    if (!Number.isFinite(refundInUSD) || refundInUSD <= 0) throw new ReturnError("The inspected return has no refundable amount.");
                     const method = payment.method === PaymentMethod.STRIPE ? RefundMethod.STRIPE : payment.method === PaymentMethod.SSLC ? RefundMethod.SSLC : RefundMethod.COD_MANUAL;
-                    const currency = payment.method === PaymentMethod.STRIPE ? "USD" : payment.method === PaymentMethod.SSLC ? (payment.paidAmountInBDT > 0 ? "BDT" : "USD") : (payment.paidAmountInBDT > 0 ? "BDT" : "USD");
-                    const paid = currency === "BDT" ? payment.paidAmountInBDT : payment.paidAmountInUSD;
+                    const currency = payment.method === PaymentMethod.STRIPE ? "USD" : payment.paidAmountInBDT > 0 ? "BDT" : "USD";
+                    const paidUSD = payment.paidAmountInUSD;
+                    const conversionRate = currency === "BDT" && paidUSD > 0 ? payment.paidAmountInBDT / paidUSD : 1;
+                    const total = Number((refundInUSD * conversionRate).toFixed(2));
+                    const paid = currency === "BDT" ? payment.paidAmountInBDT : paidUSD;
                     if (total > paid + 0.0001) throw new ReturnError("Refund exceeds the original paid amount.", 409);
                     await tx.refund.create({
                         data: {
