@@ -101,7 +101,7 @@ export async function POST(request: Request) {
             if (!record) throw new ReturnError("Return request not found.", 404);
 
             const event = async (type: ReturnEventType, title: string, description?: string) => tx.returnEvent.create({
-                data: { returnRequestId: record.id, actorId: admin.id, type, title, description },
+                data: { returnRequestId: record.id, actorId: admin.id, type, title, description, metadata: { action: body.action, statusBefore: record.status } },
             });
             const updateStatus = async (expected: ReturnStatus[], next: ReturnStatus) => {
                 const changed = await tx.returnRequest.updateMany({
@@ -269,6 +269,21 @@ export async function POST(request: Request) {
                 default:
                     throw new ReturnError("Unknown return action.", 400);
             }
+
+            const notificationCopy: Record<string, { title: string; message: string }> = {
+                APPROVE: { title: "Return approved", message: `Your return ${record.returnCode} has been approved. Follow the return instructions in your account.` },
+                REJECT: { title: "Return request update", message: `Your return ${record.returnCode} was not approved. Open your return details to see the reason.` },
+                MARK_IN_TRANSIT: { title: "Return in transit", message: `Your return ${record.returnCode} has been marked as in transit.` },
+                MARK_RECEIVED: { title: "Return received", message: `We've received the parcel for return ${record.returnCode}.` },
+                START_INSPECTION: { title: "Inspection started", message: `Warehouse inspection has started for return ${record.returnCode}.` },
+                INSPECT: { title: "Inspection completed", message: `Inspection is complete for return ${record.returnCode}. Your refund is being prepared.` },
+                CREATE_REFUND: { title: "Refund initiated", message: `A refund has been initiated for return ${record.returnCode}. We'll update you when it is confirmed.` },
+                CONFIRM_MANUAL_REFUND: { title: "Refund completed", message: `Your refund for return ${record.returnCode} has been confirmed.` },
+            };
+            const notice = notificationCopy[String(body.action)];
+            if (notice) await tx.notification.create({
+                data: { userId: record.userId, type: "RETURN_UPDATE", title: notice.title, message: notice.message, href: "/account/returns", metadata: { returnId: record.id, returnCode: record.returnCode, action: body.action } },
+            });
 
             return tx.returnRequest.findUniqueOrThrow({
                 where: { id: record.id },
