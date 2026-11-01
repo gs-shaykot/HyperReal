@@ -63,7 +63,7 @@ export async function GET(request: Request) {
                         orderItem: { select: { quantity: true, priceAtPurchase: true, variant: { select: { size: true, color: true, product: { select: { name: true } } } } } },
                     },
                 },
-                events: { orderBy: { createdAt: "asc" } },
+                events: { orderBy: { createdAt: "asc" }, include: { actor: { select: { id: true, name: true, email: true } } } },
                 refund: true,
             },
         });
