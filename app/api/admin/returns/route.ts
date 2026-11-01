@@ -1,5 +1,6 @@
 import {
     PaymentMethod,
+    PaymentStatus,
     RefundMethod,
     RefundStatus,
     Prisma,
