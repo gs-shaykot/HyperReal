@@ -17,6 +17,7 @@ import {
     UserRoundCog,
     Globe2,
     MapPinned,
+    RotateCcw,
 } from "lucide-react"
 
 import {
@@ -53,6 +54,11 @@ const navigationItems = [
         title: "Fulfillment",
         href: "/admin/fulfillment",
         icon: Truck,
+    },
+    {
+        title: "Returns & Refunds",
+        href: "/admin/returns",
+        icon: RotateCcw,
     },
     {
         title: "Couriers",
