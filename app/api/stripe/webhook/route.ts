@@ -51,7 +51,7 @@ export async function POST(req: Request) {
                         : "PROCESSING";
                 await prisma.$transaction(async (tx) => {
                     const changed = await tx.refund.updateMany({
-                        where: { id: current.id, status: { in: ["PENDING", "PROCESSING", "FAILED"] } },
+                        where: { id: current.id, status: { in: ["PENDING", "PROCESSING"] } },
                         data: {
                             providerRefundId: providerRefund.id,
                             status: nextStatus,
