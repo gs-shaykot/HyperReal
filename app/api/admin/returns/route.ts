@@ -103,7 +103,7 @@ export async function POST(request: Request) {
             let auditEventId: string | null = null;
             const event = async (type: ReturnEventType, title: string, description?: string) => {
                 const created = await tx.returnEvent.create({
-                    data: { returnRequestId: record.id, actorId: admin.id, type, title, description, metadata: { action: body.action, statusBefore: record.status } },
+                    data: { returnRequestId: record.id, actorId: admin.id, type, title, description, metadata: { action: String(body.action), statusBefore: record.status } },
                     select: { id: true },
                 });
                 auditEventId = created.id;
@@ -280,7 +280,7 @@ export async function POST(request: Request) {
                 const after = await tx.returnRequest.findUnique({ where: { id: record.id }, select: { status: true } });
                 await tx.returnEvent.update({
                     where: { id: auditEventId },
-                    data: { metadata: { action: body.action, statusBefore: record.status, statusAfter: after?.status ?? record.status, adminId: admin.id, adminNote: note || null } },
+                    data: { metadata: { action: String(body.action), statusBefore: record.status, statusAfter: after?.status ?? record.status, adminId: admin.id, adminNote: note || null } },
                 });
             }
 
