@@ -2,6 +2,7 @@ import {
     PaymentMethod,
     RefundMethod,
     RefundStatus,
+    Prisma,
     ReturnEventType,
     ReturnItemCondition,
     ReturnStatus,
@@ -191,9 +192,6 @@ export async function POST(request: Request) {
                     if (!payment || payment.status !== PaymentStatus.SUCCESS) throw new ReturnError("Only successfully paid orders can be refunded.", 409);
                     const total = record.items.reduce((sum, item) => sum + Number(item.refundAmount), 0);
                     if (!Number.isFinite(total) || total <= 0) throw new ReturnError("The inspected return has no refundable amount.");
-                    if (record.items.some(item => item.refundAmount.lessThanOrEqualTo(0))) {
-                        // Items with zero refund are allowed when another item is refundable.
-                    }
                     const method = payment.method === PaymentMethod.STRIPE ? RefundMethod.STRIPE : payment.method === PaymentMethod.SSLC ? RefundMethod.SSLC : RefundMethod.COD_MANUAL;
                     const currency = payment.method === PaymentMethod.STRIPE ? "USD" : payment.method === PaymentMethod.SSLC ? (payment.paidAmountInBDT > 0 ? "BDT" : "USD") : (payment.paidAmountInBDT > 0 ? "BDT" : "USD");
                     const paid = currency === "BDT" ? payment.paidAmountInBDT : payment.paidAmountInUSD;
@@ -205,11 +203,11 @@ export async function POST(request: Request) {
                             amount: new Prisma.Decimal(total.toFixed(2)),
                             currency,
                             idempotencyKey: `return-refund:${record.id}`,
-                            status: method === RefundMethod.STRIPE ? RefundStatus.PENDING : RefundStatus.REQUIRES_MANUAL_ACTION,
+                            status: RefundStatus.REQUIRES_MANUAL_ACTION,
                         },
                     });
                     await tx.returnRequest.update({ where: { id: record.id }, data: { status: ReturnStatus.REFUND_PROCESSING } });
-                    await event(ReturnEventType.REFUND_INITIATED, "Refund initiated", method === RefundMethod.STRIPE ? "Stripe refund is queued for secure processing." : "Refund requires gateway or manual processing.");
+                    await event(ReturnEventType.REFUND_INITIATED, "Refund initiated", method === RefundMethod.STRIPE ? "Stripe refund requires provider processing; it has not been sent yet." : "Refund requires gateway or manual processing.");
                     break;
                 }
 
