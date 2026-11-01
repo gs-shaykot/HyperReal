@@ -100,9 +100,15 @@ export async function POST(request: Request) {
             });
             if (!record) throw new ReturnError("Return request not found.", 404);
 
-            const event = async (type: ReturnEventType, title: string, description?: string) => tx.returnEvent.create({
-                data: { returnRequestId: record.id, actorId: admin.id, type, title, description, metadata: { action: body.action, statusBefore: record.status } },
-            });
+            let auditEventId: string | null = null;
+            const event = async (type: ReturnEventType, title: string, description?: string) => {
+                const created = await tx.returnEvent.create({
+                    data: { returnRequestId: record.id, actorId: admin.id, type, title, description, metadata: { action: body.action, statusBefore: record.status } },
+                    select: { id: true },
+                });
+                auditEventId = created.id;
+                return created;
+            };
             const updateStatus = async (expected: ReturnStatus[], next: ReturnStatus) => {
                 const changed = await tx.returnRequest.updateMany({
                     where: { id: record.id, status: { in: expected } },
@@ -268,6 +274,14 @@ export async function POST(request: Request) {
 
                 default:
                     throw new ReturnError("Unknown return action.", 400);
+            }
+
+            if (auditEventId) {
+                const after = await tx.returnRequest.findUnique({ where: { id: record.id }, select: { status: true } });
+                await tx.returnEvent.update({
+                    where: { id: auditEventId },
+                    data: { metadata: { action: body.action, statusBefore: record.status, statusAfter: after?.status ?? record.status, adminId: admin.id, adminNote: note || null } },
+                });
             }
 
             const notificationCopy: Record<string, { title: string; message: string }> = {
