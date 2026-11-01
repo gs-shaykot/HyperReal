@@ -237,6 +237,8 @@ export async function POST(request: Request) {
                     const conversionRate = currency === "BDT" && paidUSD > 0 ? payment.paidAmountInBDT / paidUSD : 1;
                     const total = Number((refundInUSD * conversionRate).toFixed(2));
                     const paid = currency === "BDT" ? payment.paidAmountInBDT : paidUSD;
+                    // Serialize refund-cap checks per order so two partial returns cannot race past the cumulative paid-amount ceiling.
+                    await tx.$queryRaw`SELECT "id" FROM "Order" WHERE "id" = ${record.order.id} FOR UPDATE`;
                     const priorRefunds = await tx.refund.aggregate({
                         where: {
                             returnRequest: { orderId: record.order.id },
