@@ -160,6 +160,11 @@ export async function POST(request: Request) {
                             inspectionNote: typeof item.inspectionNote === "string" ? item.inspectionNote.slice(0, 1000) : undefined,
                         });
                     }
+                    const inspectionClaim = await tx.returnRequest.updateMany({
+                        where: { id: record.id, status: ReturnStatus.INSPECTING },
+                        data: { status: ReturnStatus.REFUND_APPROVED },
+                    });
+                    if (inspectionClaim.count !== 1) throw new ReturnError("Inspection was already submitted. Refresh the return before continuing.", 409);
                     let allItemsRejected = true;
                     for (const item of record.items) {
                         const input = submitted.get(item.id);
@@ -232,6 +237,16 @@ export async function POST(request: Request) {
                     const conversionRate = currency === "BDT" && paidUSD > 0 ? payment.paidAmountInBDT / paidUSD : 1;
                     const total = Number((refundInUSD * conversionRate).toFixed(2));
                     const paid = currency === "BDT" ? payment.paidAmountInBDT : paidUSD;
+                    const priorRefunds = await tx.refund.aggregate({
+                        where: {
+                            returnRequest: { orderId: record.order.id },
+                            status: { in: [RefundStatus.PENDING, RefundStatus.PROCESSING, RefundStatus.SUCCEEDED, RefundStatus.REQUIRES_MANUAL_ACTION] },
+                            currency,
+                        },
+                        _sum: { amount: true },
+                    });
+                    const alreadyRefunded = Number(priorRefunds._sum.amount ?? 0);
+                    if (alreadyRefunded + total > paid + 0.0001) throw new ReturnError("This refund plus previous refunds would exceed the amount paid for the order.", 409);
                     if (total > paid + 0.0001) throw new ReturnError("Refund exceeds the original paid amount.", 409);
                     await tx.refund.create({
                         data: {
