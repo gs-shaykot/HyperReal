@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const body=await request.json().catch(()=>null) as {returnId?:unknown}|null;
   if(!body||typeof body.returnId!=="string") return NextResponse.json({success:false,message:"Return ID is required."},{status:400});
 
-  const refund=await prisma.refund.findUnique({where:{returnRequestId:body.returnId},include:{returnRequest:{include:{order:{include:{payments:{orderBy:{createdAt:"desc"},take:1}}}}}}});
+  const refund=await prisma.refund.findUnique({where:{returnRequestId:body.returnId},include:{returnRequest:{include:{user:{select:{id:true}},order:{include:{payments:{orderBy:{createdAt:"desc"},take:1}}}}}}});
   if(!refund) return NextResponse.json({success:false,message:"Refund record not found."},{status:404});
   if(refund.method!=="STRIPE") return NextResponse.json({success:false,message:"This refund must be processed through its original payment method."},{status:409});
   if(refund.status===RefundStatus.SUCCEEDED) return NextResponse.json({success:true,message:"Refund is already confirmed.",data:refund});
@@ -44,6 +44,20 @@ export async function POST(request: Request) {
       if(changed.count===1){
         await tx.returnRequest.updateMany({where:{id:refund.returnRequestId,status:ReturnStatus.REFUND_PROCESSING},data:{status:status===RefundStatus.SUCCEEDED?ReturnStatus.REFUNDED:ReturnStatus.REFUND_PROCESSING,closedAt:status===RefundStatus.SUCCEEDED?new Date():null}});
         await tx.returnEvent.create({data:{returnRequestId:refund.returnRequestId,actorId:admin.id,type:status===RefundStatus.SUCCEEDED?ReturnEventType.REFUND_SUCCEEDED:status===RefundStatus.FAILED?ReturnEventType.REFUND_FAILED:ReturnEventType.REFUND_INITIATED,title:status===RefundStatus.SUCCEEDED?"Stripe refund confirmed":status===RefundStatus.FAILED?"Stripe refund failed":"Stripe refund processing",description:`Stripe refund ${providerRefund.id} status: ${providerRefund.status}.`}});
+        if (status === RefundStatus.SUCCEEDED || status === RefundStatus.FAILED) {
+          await tx.notification.create({
+            data: {
+              userId: refund.returnRequest.user.id,
+              type: "RETURN_UPDATE",
+              title: status === RefundStatus.SUCCEEDED ? "Refund completed" : "Refund needs attention",
+              message: status === RefundStatus.SUCCEEDED
+                ? `Your refund for return ${refund.returnRequest.returnCode} has been confirmed.`
+                : `Your refund for return ${refund.returnRequest.returnCode} could not be completed. Our team will review it.`,
+              href: "/account/returns",
+              metadata: { returnId: refund.returnRequestId, returnCode: refund.returnRequest.returnCode, stripeRefundId: providerRefund.id },
+            },
+          });
+        }
       }
       return tx.refund.findUniqueOrThrow({where:{id:refund.id}});
     });
