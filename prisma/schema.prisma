@@ -27,6 +27,10 @@ model User {
   authProvider AuthProvider        @default(EMAIL)
   cart         Cart?
   orders       Order[]
+  returnRequests ReturnRequest[]
+  returnEvents ReturnEvent[] @relation("ReturnEventActor")
+  reviewedReturns ReturnRequest[] @relation("ReturnReviewer")
+  processedRefunds Refund[] @relation("RefundProcessor")
   wishlist     Wishlist[]
   addresses    Address[]
   sessions     Session[]
@@ -175,6 +179,7 @@ model Order {
   payments       Payment[]
   shipment       Shipment?
   trackingEvents OrderTrackingEvent[]
+  returnRequests ReturnRequest[]
 }
 
 model OrderItem {
@@ -225,6 +230,96 @@ model Payment {
   sslSessionKey          String?
   stripeChargeId         String?  @unique
   order                  Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+
+model ReturnRequest {
+  id            String       @id @default(uuid())
+  returnCode    String       @unique
+  orderId       String
+  userId        String
+  status        ReturnStatus @default(REQUESTED)
+  reason        ReturnReason
+  customerNote  String?
+  adminNote     String?
+  reviewedById  String?
+  requestedAt   DateTime     @default(now())
+  reviewedAt    DateTime?
+  receivedAt    DateTime?
+  inspectedAt   DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  order       Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  reviewer    User?        @relation("ReturnReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  items       ReturnItem[]
+  events      ReturnEvent[]
+  refund      Refund?
+
+  @@index([userId, createdAt])
+  @@index([orderId, status])
+  @@index([status, createdAt])
+}
+
+model ReturnItem {
+  id                String               @id @default(uuid())
+  returnRequestId   String
+  orderItemId       String
+  requestedQuantity Int
+  approvedQuantity  Int                  @default(0)
+  receivedQuantity  Int                  @default(0)
+  restockQuantity   Int                  @default(0)
+  condition         ReturnItemCondition  @default(UNINSPECTED)
+  inspectionNote    String?
+  refundAmount      Decimal              @default(0) @db.Decimal(12, 2)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  orderItem     OrderItem     @relation(fields: [orderItemId], references: [id], onDelete: Restrict)
+
+  @@unique([returnRequestId, orderItemId])
+  @@index([orderItemId])
+}
+
+model ReturnEvent {
+  id              String          @id @default(uuid())
+  returnRequestId String
+  actorId         String?
+  type            ReturnEventType
+  title           String
+  description     String?
+  metadata        Json?
+  createdAt       DateTime        @default(now())
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Cascade)
+  actor         User?         @relation("ReturnEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([returnRequestId, createdAt])
+}
+
+model Refund {
+  id               String       @id @default(uuid())
+  returnRequestId  String       @unique
+  method           RefundMethod
+  status           RefundStatus @default(PENDING)
+  amount           Decimal      @db.Decimal(12, 2)
+  currency         String       @default("USD")
+  idempotencyKey   String       @unique
+  providerRefundId String?      @unique
+  failureReason    String?
+  processedById    String?
+  initiatedAt      DateTime     @default(now())
+  processedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  returnRequest ReturnRequest @relation(fields: [returnRequestId], references: [id], onDelete: Restrict)
+  processedBy  User?         @relation("RefundProcessor", fields: [processedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
 }
 
 model Wishlist {
@@ -497,6 +592,70 @@ enum TrackingEventType {
   NOTE_ADDED
 }
 
+
+
+enum ReturnStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  IN_TRANSIT
+  RECEIVED
+  INSPECTING
+  REFUND_APPROVED
+  REFUND_PROCESSING
+  REFUNDED
+  CLOSED
+  CANCELLED
+}
+
+enum ReturnReason {
+  WRONG_ITEM
+  DAMAGED
+  DEFECTIVE
+  SIZE_ISSUE
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+  OTHER
+}
+
+enum ReturnItemCondition {
+  UNINSPECTED
+  SEALED
+  GOOD
+  DAMAGED
+  DEFECTIVE
+  MISSING_PARTS
+}
+
+enum ReturnEventType {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELLED
+  MARKED_IN_TRANSIT
+  RECEIVED
+  INSPECTION_STARTED
+  INSPECTED
+  REFUND_APPROVED
+  REFUND_INITIATED
+  REFUND_SUCCEEDED
+  REFUND_FAILED
+  NOTE_ADDED
+}
+
+enum RefundMethod {
+  STRIPE
+  SSLC
+  COD_MANUAL
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REQUIRES_MANUAL_ACTION
+}
 
 model StripeWebhookEvent {
   id          String   @id
