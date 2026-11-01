@@ -72,7 +72,7 @@ export default function AdminReturnsPage() {
           {selected.status==="REFUND_PROCESSING"&&selected.refund?.method!=="STRIPE"&&selected.refund?.status==="REQUIRES_MANUAL_ACTION"&&actionButton("Confirm verified manual refund","CONFIRM_MANUAL_REFUND",<Wallet size={14}/>)}
           {selected.status==="RECEIVED"&&actionButton("Start inspection","START_INSPECTION",<ClipboardCheck size={14}/>)}
           {selected.status==="REFUND_APPROVED"&&actionButton("Create refund","CREATE_REFUND",<Wallet size={14}/>)}
-          {selected.status==="REFUND_PROCESSING"&&selected.refund?.method==="STRIPE"&&selected.refund.status!=="SUCCEEDED"&&<button disabled={busy||selected.refund.status==="PROCESSING"} onClick={()=>void processStripeRefund()} className="inline-flex items-center gap-2 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-40"><Wallet size={14}/>{selected.refund.status==="PROCESSING"?"STRIPE PROCESSING":"PROCESS STRIPE REFUND"}</button>}
+          {selected.status==="REFUND_PROCESSING"&&selected.refund?.method==="STRIPE"&&selected.refund.status!=="SUCCEEDED"&&<button disabled={busy} onClick={()=>void processStripeRefund()} className="inline-flex items-center gap-2 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-40"><Wallet size={14}/>{selected.refund.status==="PROCESSING"?"RECONCILE STRIPE REFUND":"PROCESS STRIPE REFUND"}</button>}
         </div>
         {selected.status==="INSPECTING"&&<InspectionForm items={selected.items} busy={busy} onSubmit={items=>void act("INSPECT",items)}/>}
       </section></div>}
