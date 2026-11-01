@@ -5,6 +5,7 @@ import { Sun, User, ShoppingBag, Moon, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import LogoutButton from "@/app/components/LogoutButton";
+import NotificationBell from "@/app/components/NotificationBell";
 import { useTheme } from "next-themes";
 import { useQuery } from "@tanstack/react-query";
 import { countCartItems } from "@/lib/order_helpers/cartAPIs";
@@ -97,6 +98,7 @@ export const Navbar = () => {
                     </div>
 
                     <div className="navbar-end gap-1">
+                        {session?.user && <NotificationBell />}
                         <button className="text-white light:text-zinc-900">
                             <label className="swap swap-rotate">
                                 <input
