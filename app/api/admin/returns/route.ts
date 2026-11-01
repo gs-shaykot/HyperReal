@@ -228,11 +228,11 @@ export async function POST(request: Request) {
                             amount: new Prisma.Decimal(total.toFixed(2)),
                             currency,
                             idempotencyKey: `return-refund:${record.id}`,
-                            status: RefundStatus.REQUIRES_MANUAL_ACTION,
+                            status: method === RefundMethod.STRIPE ? RefundStatus.PENDING : RefundStatus.REQUIRES_MANUAL_ACTION,
                         },
                     });
                     await tx.returnRequest.update({ where: { id: record.id }, data: { status: ReturnStatus.REFUND_PROCESSING } });
-                    await event(ReturnEventType.REFUND_INITIATED, "Refund initiated", method === RefundMethod.STRIPE ? "Stripe refund requires provider processing; it has not been sent yet." : "Refund requires gateway or manual processing.");
+                    await event(ReturnEventType.REFUND_INITIATED, "Refund initiated", method === RefundMethod.STRIPE ? "Stripe refund is queued for provider processing." : "Refund requires gateway or manual processing.");
                     break;
                 }
 
