@@ -1,5 +1,5 @@
 "use client"
-import { Heart, MapPin, Package, Settings, User, Truck } from "lucide-react";
+import { Heart, MapPin, Package, Settings, User, Truck, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +13,11 @@ const menus = [
     title: "Orders",
     href: "/account/orders",
     icon: Package,
+  },
+  {
+    title: "Returns & Refunds",
+    href: "/account/returns",
+    icon: RotateCcw,
   },
   {
     title: "Addresses",
