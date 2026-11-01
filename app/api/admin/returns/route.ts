@@ -164,7 +164,8 @@ export async function POST(request: Request) {
                     for (const item of record.items) {
                         const input = submitted.get(item.id);
                         if (!input || input.receivedQuantity < 0 || input.receivedQuantity > item.requestedQuantity || input.restockQuantity < 0 || input.restockQuantity > input.receivedQuantity) throw new ReturnError("Inspection quantities are outside the allowed range.");
-                        if (input.restockQuantity > 0 && ![ReturnItemCondition.SEALED, ReturnItemCondition.GOOD].includes(input.condition)) throw new ReturnError("Only sealed or good-condition items can be restocked.");
+                        const restockableConditions: ReturnItemCondition[] = [ReturnItemCondition.SEALED, ReturnItemCondition.GOOD];
+                        if (input.restockQuantity > 0 && !restockableConditions.includes(input.condition)) throw new ReturnError("Only sealed or good-condition items can be restocked.");
                         const eligible = Math.min(item.approvedQuantity || item.requestedQuantity, input.receivedQuantity);
                         if (eligible > 0) allItemsRejected = false;
                         const payment = record.order.payments[0];
