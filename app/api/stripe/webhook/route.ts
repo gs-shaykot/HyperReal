@@ -40,7 +40,7 @@ export async function POST(req: Request) {
                 if (!refundId) {
                     return NextResponse.json({ success: false, message: "Stripe refund event is missing its HyperReal refund reference." }, { status: 400 });
                 }
-                const current = await prisma.refund.findUnique({ where: { id: refundId }, select: { id: true, returnRequestId: true, status: true } });
+                const current = await prisma.refund.findUnique({ where: { id: refundId }, select: { id: true, returnRequestId: true, status: true, returnRequest: { select: { userId: true, returnCode: true } } } });
                 if (!current) {
                     return NextResponse.json({ success: false, message: "Refund record not found for Stripe event." }, { status: 404 });
                 }
@@ -74,6 +74,20 @@ export async function POST(req: Request) {
                                 description: `Stripe refund ${providerRefund.id} status: ${providerRefund.status}.`,
                             },
                         });
+                        if (nextStatus === "SUCCEEDED" || nextStatus === "FAILED") {
+                            await tx.notification.create({
+                                data: {
+                                    userId: current.returnRequest.userId,
+                                    type: "RETURN_UPDATE",
+                                    title: nextStatus === "SUCCEEDED" ? "Refund completed" : "Refund needs attention",
+                                    message: nextStatus === "SUCCEEDED"
+                                        ? `Your refund for return ${current.returnRequest.returnCode} has been confirmed.`
+                                        : `Your refund for return ${current.returnRequest.returnCode} could not be completed. Our team will review it.`,
+                                    href: "/account/returns",
+                                    metadata: { returnId: current.returnRequestId, returnCode: current.returnRequest.returnCode, stripeRefundId: providerRefund.id },
+                                },
+                            });
+                        }
                     }
                 });
                 break;
