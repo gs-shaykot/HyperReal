@@ -21,14 +21,18 @@ export async function POST(request: Request) {
   if(!payment?.paymentIntentId||payment.method!=="STRIPE") return NextResponse.json({success:false,message:"Original Stripe payment reference is missing."},{status:409});
   if(refund.currency!=="USD") return NextResponse.json({success:false,message:"Stripe refund currency does not match the supported USD settlement."},{status:409});
 
-  const claimed=await prisma.refund.updateMany({where:{id:refund.id,status:{in:[RefundStatus.PENDING,RefundStatus.FAILED]}},data:{status:RefundStatus.PROCESSING,failureReason:null}});
+  const claimed=await prisma.refund.updateMany({where:{id:refund.id,status:{in:[RefundStatus.PENDING,RefundStatus.FAILED,RefundStatus.PROCESSING]}},data:{status:RefundStatus.PROCESSING,failureReason:null}});
   if(claimed.count!==1) {
     const latest=await prisma.refund.findUnique({where:{id:refund.id}});
     return NextResponse.json({success:true,message:"Refund is already being processed or completed.",data:latest});
   }
 
   try {
-    const providerRefund=await stripe.refunds.create({
+    // Recover a previously accepted refund before attempting another create. This
+    // also protects retries after Stripe's idempotency-key retention period.
+    const existingRefunds = await stripe.refunds.list({ payment_intent: payment.paymentIntentId, limit: 100 });
+    const existingRefund = existingRefunds.data.find(item => item.metadata?.refundId === refund.id);
+    const providerRefund = existingRefund ?? await stripe.refunds.create({
       payment_intent:payment.paymentIntentId,
       amount:Math.round(Number(refund.amount)*100),
       reason:"requested_by_customer",
