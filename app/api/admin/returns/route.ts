@@ -149,7 +149,7 @@ export async function POST(request: Request) {
                     const submitted = new Map<string, { condition: ReturnItemCondition; receivedQuantity: number; restockQuantity: number; inspectionNote?: string }>();
                     for (const raw of body.items) {
                         const item = raw as Record<string, unknown>;
-                        if (typeof item.returnItemId !== "string" || typeof item.condition !== "string" || !Object.values(ReturnItemCondition).includes(item.condition as ReturnItemCondition) || !Number.isSafeInteger(item.receivedQuantity) || !Number.isSafeInteger(item.restockQuantity)) {
+                        if (typeof item.returnItemId !== "string" || typeof item.condition !== "string" || !Object.values(ReturnItemCondition).includes(item.condition as ReturnItemCondition) || typeof item.receivedQuantity !== "number" || !Number.isSafeInteger(item.receivedQuantity) || typeof item.restockQuantity !== "number" || !Number.isSafeInteger(item.restockQuantity)) {
                             throw new ReturnError("Invalid inspection item data.");
                         }
                         if (submitted.has(item.returnItemId)) throw new ReturnError("Duplicate inspection item.");
