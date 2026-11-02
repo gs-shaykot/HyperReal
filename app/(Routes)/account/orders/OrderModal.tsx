@@ -1,6 +1,6 @@
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect';
 import { Prisma } from '@prisma/client';
-import { CalendarDays, ClockArrowUp, Hourglass, OctagonX, PackageCheck, Truck, X, CheckCircle2, MapPin, Package, RefreshCw } from 'lucide-react';
+import { CalendarDays, ClockArrowUp, Hourglass, OctagonX, PackageCheck, Truck, X, CheckCircle2, MapPin, Package, RefreshCw, ChevronDown } from 'lucide-react';
 import { useState } from "react";
 
 export type OrderType = Prisma.OrderGetPayload<{
