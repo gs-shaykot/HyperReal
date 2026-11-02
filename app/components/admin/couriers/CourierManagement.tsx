@@ -103,7 +103,6 @@ export default function CourierManagement() {
                         <button disabled={savingCourier} className={buttonClass}><Plus size={14}/>{savingCourier ? "Saving..." : "Register courier"}</button>
                     </form>
 
-             </form>
                 </div>
 
                 <section className="mb-6 border border-zinc-800 bg-[#0d0d0d]">
