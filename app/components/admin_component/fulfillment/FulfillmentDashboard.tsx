@@ -12,7 +12,7 @@ import StatusBadge from "./components/StatusBadge";
 import ShippingBarcode from "./components/ShippingBarcode";
 import ShippingOrderQr from "./components/ShippingOrderQr";
 import CourierAssignment from "./components/CourierAssignment";
-import { AlertCircle, Barcode, Camera, Check, CheckCircle2, LoaderCircle, Package, PackageCheck, Printer, QrCode, ScanLine, Search, ShieldCheck, Truck, UserRound, X } from "lucide-react";
+import { AlertCircle, Barcode, Camera, Check, CheckCircle2, ChevronDown, LoaderCircle, Package, PackageCheck, Printer, QrCode, ScanLine, Search, ShieldCheck, Truck, UserRound, X } from "lucide-react";
 
 function Modal({
     title,
@@ -100,7 +100,7 @@ export default function FulfillmentDashboard() {
 
     const [modal, setModal] = useState<ModalName>(null);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-    const [detailTab, setDetailTab] = useState<DetailTab>("items");
+    const [detailTab, setDetailTab] = useState<DetailTab>("items");\n    const [trackingExpanded, setTrackingExpanded] = useState(false);
 
     const [scanInput, setScanInput] = useState("");
     const [scanResult, setScanResult] = useState<ScanResult | null>(null);
@@ -1546,34 +1546,22 @@ export default function FulfillmentDashboard() {
                             ) : (
                                 <div className="space-y-4">
                                     {!(selectedOrder.shipment?.events?.length ?? 0) ? (
-                                        <p className="border border-zinc-800 p-4 text-[10px] text-zinc-500">
-                                            No tracking events recorded yet.
-                                        </p>
+                                        <p className="border border-zinc-800 p-4 text-[10px] text-zinc-500">No tracking events recorded yet.</p>
                                     ) : (
-                                        selectedOrder.shipment!.events!.map((event) => (
-                                            <div
-                                                key={event.id}
-                                                className="flex gap-3 border-l border-zinc-700 pl-3"
-                                            >
-                                                <div className="mt-1 text-second">
-                                                    <CheckCircle2 size={14} />
-                                                </div>
-
-                                                <div className="flex-1">
-                                                    <p className="text-xs font-bold">{event.title}</p>
-
-                                                    {event.description && (
-                                                        <p className="mt-1 text-[10px] text-zinc-400">
-                                                            {event.description}
-                                                        </p>
-                                                    )}
-
-                                                    <p className="mt-1 text-[9px] text-zinc-600">
-                                                        {formatDateTime(event.createdAt)}
-                                                    </p>
-                                                </div>
+                                        <div className="border border-zinc-800">
+                                            <button type="button" onClick={() => setTrackingExpanded(v => !v)} className="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-[#0d0d0d]">
+                                                <span><span className="block text-xs font-bold">{selectedOrder.shipment!.events![selectedOrder.shipment!.events!.length-1].title}</span><span className="block text-[10px] text-zinc-500">{formatDateTime(selectedOrder.shipment!.events![selectedOrder.shipment!.events!.length-1].createdAt)} · {selectedOrder.shipment!.events!.length} events</span></span>
+                                                <ChevronDown size={15} className={trackingExpanded?"rotate-180 transition-transform":"transition-transform"}/>
+                                            </button>
+                                            {trackingExpanded&&<div className="space-y-4 border-t border-zinc-800 p-3">
+                                        {selectedOrder.shipment!.events!.map((event) => (
+                                            <div key={event.id} className="flex gap-3 border-l border-zinc-700 pl-3">
+                                                <div className="mt-1 text-second"><CheckCircle2 size={14} /></div>
+                                                <div className="flex-1"><p className="text-xs font-bold">{event.title}</p>{event.description&&<p className="mt-1 text-[10px] text-zinc-400">{event.description}</p>}<p className="mt-1 text-[9px] text-zinc-600">{formatDateTime(event.createdAt)}</p></div>
                                             </div>
-                                        ))
+                                        ))}
+                                            </div>}
+                                        </div>
                                     )}
                                 </div>
                             )}
