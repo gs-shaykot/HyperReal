@@ -20,6 +20,7 @@ export const OrderModal = ({
     onRefreshAction
 }: OrderModalProps) => {
     const [refreshing, setRefreshing] = useState(false);
+    const [trackingExpanded, setTrackingExpanded] = useState(false);
     const refreshOrder = async () => {
         setRefreshing(true);
         try { await onRefreshAction(); } finally { setRefreshing(false); }
@@ -261,28 +262,15 @@ export const OrderModal = ({
                             Tracking History
                         </h3>
                         {shipment.events.length > 0 ? (
-                            <div className="space-y-0">
+                            <div className="border border-zinc-800 light:border-zinc-200">
+                                <button type="button" onClick={() => setTrackingExpanded(v => !v)} className="flex w-full items-center justify-between gap-3 p-3 text-left hover:bg-dark light:hover:bg-zinc-50">
+                                    <span className="min-w-0"><span className="block text-xs font-bold">{shipment.events[shipment.events.length - 1].title}</span><span className="block text-[10px] text-zinc-500">{formatTrackingDate(shipment.events[shipment.events.length - 1].createdAt)} · {shipment.events.length} activities</span></span>
+                                    <ChevronDown size={16} className={trackingExpanded ? "rotate-180 transition-transform" : "transition-transform"} />
+                                </button>
+                                {trackingExpanded && <div className="border-t border-zinc-800 p-3 light:border-zinc-200"><div className="space-y-0">
                                 {shipment.events.map((event, index) => (
-                                    <div key={event.id} className="flex gap-3">
-                                        <div className="flex flex-col items-center">
-                                            <span className="mt-1 flex size-6 shrink-0 items-center justify-center border border-zinc-700 text-second">
-                                                {event.type === "DELIVERED" ? <CheckCircle2 size={13} /> : event.title.toLowerCase().includes("reassign") ? <RefreshCw size={13} /> : event.type === "DISPATCHED" || event.type === "OUT_FOR_DELIVERY" ? <Truck size={13} /> : index === 0 ? <CheckCircle2 size={13} /> : <Package size={13} />}
-                                            </span>
-                                            {index < shipment.events.length - 1 && (
-                                                <span className="my-1 min-h-6 w-px flex-1 bg-zinc-700" />
-                                            )}
-                                        </div>
-                                        <div className="min-w-0 flex-1 pb-4">
-                                            <p className="text-xs font-bold">{event.title}</p>
-                                            {event.description && (
-                                                <p className="mt-1 text-xs text-zinc-400 light:text-zinc-600">{event.description}</p>
-                                            )}
-                                            {event.location && <p className="mt-1 text-xs text-zinc-500">{event.location}</p>}
-                                            <p className="mt-1 text-[10px] text-zinc-500">{formatTrackingDate(event.createdAt)}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                    <div key={event.id} className="flex gap-3">                                ))}
+                            </div></div>}
                         ) : (
                             <p className="border border-zinc-800 p-3 text-xs text-zinc-500 light:border-zinc-200">
                                 No tracking events recorded yet.
