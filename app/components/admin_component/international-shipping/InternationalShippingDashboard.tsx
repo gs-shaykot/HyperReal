@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Globe2, RefreshCw, Search, Save, Truck, PackageCheck, Clock3, ShieldAlert } from "lucide-react";
+import { Globe2, RefreshCw, Search, Save, Truck, PackageCheck, Clock3, ShieldAlert, ChevronDown } from "lucide-react";
 
 type ShipmentRow = {
     id: string; trackingCode: string; status: string; fulfillmentStatus: string; shippingType: string; internationalStatus: string;
@@ -43,6 +43,7 @@ export default function InternationalShippingDashboard() {
     const [country, setCountry] = useState("ALL");
     const [status, setStatus] = useState("ALL");
     const [edits, setEdits] = useState<Record<string, EditState>>({});
+    const [expandedShipments, setExpandedShipments] = useState<Record<string, boolean>>({});
     const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
     const load = useCallback(async () => {
@@ -134,11 +135,11 @@ export default function InternationalShippingDashboard() {
             const edit = edits[row.id];
             if (!edit) return null;
             return <article key={row.id} className="border border-zinc-800 bg-zinc-950 light:border-zinc-200 light:bg-white">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3 light:border-zinc-200">
+                <button type="button" onClick={() => setExpandedShipments((current) => ({ ...current, [row.id]: !(current[row.id] ?? true) }))} className="flex w-full cursor-pointer flex-wrap items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3 text-left hover:bg-zinc-900/40 light:border-zinc-200">
                     <div><p className="text-xs font-black text-lime-300">{row.order.orderCode}</p><p className="mt-1 text-[10px] text-zinc-500">Tracking reference: {row.trackingCode}</p><p className="mt-1 text-xs font-bold">{address?.country ?? "Destination unavailable"} <span className="font-normal text-zinc-400">· {address?.city}</span></p></div>
-                    <div className="flex flex-wrap gap-2"><span className="border border-sky-500/40 px-2 py-1 text-[9px] font-bold text-sky-300">{(row.internationalStatus ?? "PREPARING").replaceAll("_"," ")}</span><span className="border border-zinc-700 px-2 py-1 text-[9px] font-bold">{row.status.replaceAll("_"," ")}</span><span className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-lime-400/50 text-lime-300" : "border-zinc-700 text-zinc-300"}`}>{edit.customsStatus.replaceAll("_"," ")}</span></div>
+                    <div className="flex flex-wrap gap-2"><span className="border border-sky-500/40 px-2 py-1 text-[9px] font-bold text-sky-300">{(row.internationalStatus ?? "PREPARING").replaceAll("_"," ")}</span><span className="border border-zinc-700 px-2 py-1 text-[9px] font-bold">{row.status.replaceAll("_"," ")}</span><span className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-lime-400/50 text-lime-300" : "border-zinc-700 text-zinc-300"}`}>{edit.customsStatus.replaceAll("_"," ")}</span><ChevronDown size={16} className={`transition-transform ${(expandedShipments[row.id] ?? true) ? "rotate-180" : ""}`}/></button>
                 </div>
-                <div className="grid gap-4 p-4 lg:grid-cols-[1fr_1fr]">
+                {(expandedShipments[row.id] ?? true) && <div className="grid gap-4 p-4 lg:grid-cols-[1fr_1fr]">
                     <div className="space-y-3">
                         <div><p className={labelClass}>Recipient</p><p className="text-xs font-bold">{address?.fullName ?? row.order.user.name}</p><p className="mt-1 text-xs text-zinc-400">{row.order.user.email}</p><p className="mt-1 text-xs text-zinc-400">{address?.street} {address?.house}, {address?.city}, {address?.zipCode}</p><p className="text-xs text-zinc-400">{address?.phone}</p></div>
                         <div className="grid grid-cols-2 gap-3"><div><p className={labelClass}>Order date</p><p className="text-xs">{new Date(row.order.createdAt).toLocaleDateString()}</p></div><div><p className={labelClass}>Payment</p><p className="text-xs">{row.order.payments[0]?.status ?? "Unknown"} · {row.order.payments[0]?.method ?? "—"}</p></div></div>
@@ -153,7 +154,7 @@ export default function InternationalShippingDashboard() {
                         <label className="sm:col-span-2"><span className={labelClass}>Shipping / customs notes</span><textarea rows={2} value={edit.internationalNotes} onChange={(e) => updateEdit(row.id,"internationalNotes",e.target.value)} placeholder="Invoice prepared, customs hold reason, carrier updates..." className={inputClass}/></label>
                         <div className="sm:col-span-2 flex justify-end"><button disabled={saving === row.id} onClick={() => void save(row)} className="inline-flex items-center gap-2 bg-lime-300 px-4 py-2 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"><Save size={14}/>{saving === row.id ? "Saving..." : "Save shipping details"}</button></div>
                     </div>
-                </div>
+                </div>}
             </article>;
         })}</div>}
     </section>;
