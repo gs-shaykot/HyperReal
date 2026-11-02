@@ -52,7 +52,7 @@ export default function AdminReturnsPage() {
   const filtered=rows.filter(x=>(status==="ALL"||x.status===status)&&[x.returnCode,x.order.orderCode,x.user.name,x.user.email].join(" ").toLowerCase().includes(search.toLowerCase()));
   const counts=rows.reduce<Record<string,number>>((a,x)=>(a[x.status]=(a[x.status]||0)+1,a),{});
   const actionButton=(label:string,action:string,icon:ReactNode)=> <button disabled={busy} onClick={()=>void act(action)} className="inline-flex items-center gap-2 border border-zinc-300 px-3 py-2 text-xs font-bold uppercase tracking-wider hover:bg-second hover:text-zinc-900 disabled:opacity-40">{icon}{label}</button>;
-  return <div className="min-h-screen bg-main p-4 text-white light:bg-white light:text-zinc-900 md:p-8">
+  return <div className="min-h-screen bg-main p-4 text-white light:bg-white light:text-zinc-900">
     <div className="mx-auto max-w-7xl space-y-6">
       <header className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-bold tracking-[.25em] text-lime-700">HYPERREAL / OPERATIONS</p><h1 className="mt-2 text-3xl font-black tracking-tight">Returns & Refunds</h1><p className="mt-1 text-sm text-zinc-400 light:text-zinc-500">Review requests, inspect returned items and reconcile refunds.</p></div><button onClick={()=>void load()} disabled={busy} className="flex items-center gap-2 border border-zinc-700 bg-dark px-4 py-2 text-sm font-semibold text-white hover:border-second light:border-gray-300 light:bg-white light:text-zinc-900"><RefreshCw size={15} className={busy?"animate-spin":""}/> Refresh</button></header>
       {error&&<div role="alert" className="border border-red-300 bg-red-50 p-3 text-sm text-red-700">{error}</div>}

@@ -775,7 +775,7 @@ export default function FulfillmentDashboard() {
                 }
             }
         `}</style>
-            <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
+            <main className="min-h-screen bg-[#080808] text-white">
                 <div className="mx-auto max-w-450 space-y-6">
                     {/* Page heading */}
                     <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
