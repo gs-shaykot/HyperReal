@@ -24,13 +24,9 @@ export default function CourierManagement() {
     const [email, setEmail] = useState("");
     const [zoneId, setZoneId] = useState("");
     const [vehicleType, setVehicleType] = useState("");
-    const [zoneName, setZoneName] = useState("");
-    const [city, setCity] = useState("");
-    const [country, setCountry] = useState("Bangladesh");
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [savingCourier, setSavingCourier] = useState(false);
-    const [savingZone, setSavingZone] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
 
@@ -82,11 +78,6 @@ export default function CourierManagement() {
         if (success) { setEmail(""); setVehicleType(""); }
     }
 
-    async function addZone(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        const success = await submit("/api/admin/delivery-zones", "POST", { name: zoneName, city, country }, "zone");
-        if (success) { setZoneName(""); setCity(""); }
-    }
 
     return (
         <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
@@ -95,14 +86,14 @@ export default function CourierManagement() {
                     <div>
                         <p className="mb-2 text-[10px] font-black tracking-[0.25em] text-lime-400">HYPERREAL / LOGISTICS</p>
                         <h1 className="text-2xl font-black sm:text-3xl">Courier <span className="text-lime-400">Management</span></h1>
-                        <p className="mt-2 text-sm text-zinc-500">Register trusted courier accounts and organize delivery zones.</p>
+                        <p className="mt-2 text-sm text-zinc-500">Register courier accounts and assign existing delivery zones.</p>
                     </div>
                     <button type="button" onClick={() => void loadData()} disabled={loading} className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold"><RefreshCw size={14} className={loading ? "animate-spin" : ""}/>Refresh</button>
                 </header>
 
                 {(error || notice) && <div className={`mb-5 border px-4 py-3 text-sm ${error ? "border-red-900 text-red-300" : "border-lime-900 text-lime-300"}`}>{error || notice}</div>}
 
-                <div className="mb-6 grid gap-4 lg:grid-cols-2">
+                <div className="mb-6">
                     <form onSubmit={addCourier} className="space-y-3 border border-zinc-800 bg-[#0d0d0d] p-4">
                         <h2 className="flex items-center gap-2 text-xs font-black tracking-widest"><UserRound size={15} className="text-lime-400"/>REGISTER COURIER</h2>
                         <p className="text-xs leading-5 text-zinc-500">Promote an existing active customer account into a courier account. The account must already exist and must not be an admin or manager.</p>
@@ -112,14 +103,7 @@ export default function CourierManagement() {
                         <button disabled={savingCourier} className={buttonClass}><Plus size={14}/>{savingCourier ? "Saving..." : "Register courier"}</button>
                     </form>
 
-                    <form onSubmit={addZone} className="space-y-3 border border-zinc-800 bg-[#0d0d0d] p-4">
-                        <h2 className="flex items-center gap-2 text-xs font-black tracking-widest"><MapPin size={15} className="text-lime-400"/>CREATE DELIVERY ZONE</h2>
-                        <p className="text-xs leading-5 text-zinc-500">Create service areas that couriers can be assigned to. Use consistent zone names so dispatchers can select the correct rider.</p>
-                        <label className="block space-y-1"><span className="text-[10px] text-zinc-500">ZONE NAME</span><input required value={zoneName} onChange={(event)=>setZoneName(event.target.value)} placeholder="Dhaka North" maxLength={80} className={inputClass}/></label>
-                        <label className="block space-y-1"><span className="text-[10px] text-zinc-500">CITY</span><input required value={city} onChange={(event)=>setCity(event.target.value)} placeholder="Dhaka" maxLength={80} className={inputClass}/></label>
-                        <label className="block space-y-1"><span className="text-[10px] text-zinc-500">COUNTRY</span><input required value={country} onChange={(event)=>setCountry(event.target.value)} maxLength={80} className={inputClass}/></label>
-                        <button disabled={savingZone} className={buttonClass}><Plus size={14}/>{savingZone ? "Saving..." : "Create zone"}</button>
-                    </form>
+             </form>
                 </div>
 
                 <section className="mb-6 border border-zinc-800 bg-[#0d0d0d]">
@@ -139,7 +123,7 @@ export default function CourierManagement() {
 
                 <section className="border border-zinc-800 bg-[#0d0d0d]">
                     <div className="border-b border-zinc-800 p-4"><h2 className="flex items-center gap-2 text-xs font-black tracking-widest"><MapPin size={15} className="text-lime-400"/>DELIVERY ZONES</h2></div>
-                    {zones.length === 0 ? <p className="p-6 text-sm text-zinc-500">Create your first zone above.</p> : <div className="divide-y divide-zinc-800">{zones.map((zone)=><div key={zone.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="text-sm font-bold">{zone.name}</p><p className="mt-1 text-xs text-zinc-500">{zone.city}, {zone.country}</p></div><div className="flex items-center gap-3"><span className={`text-[10px] font-bold ${zone.isActive ? "text-lime-300" : "text-zinc-500"}`}>{zone.isActive ? "ACTIVE" : "INACTIVE"}</span><button type="button" disabled={saving} onClick={()=>void submit("/api/admin/delivery-zones","PATCH",{id:zone.id,isActive:!zone.isActive})} className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-lime-400">{zone.isActive ? "Deactivate" : "Activate"}</button></div></div>)}</div>}
+                    {zones.length === 0 ? <p className="p-6 text-sm text-zinc-500">Create your first zone in Delivery Zones.</p> : <div className="divide-y divide-zinc-800">{zones.map((zone)=><div key={zone.id} className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="text-sm font-bold">{zone.name}</p><p className="mt-1 text-xs text-zinc-500">{zone.city}, {zone.country}</p></div><div className="flex items-center gap-3"><span className={`text-[10px] font-bold ${zone.isActive ? "text-lime-300" : "text-zinc-500"}`}>{zone.isActive ? "ACTIVE" : "INACTIVE"}</span><button type="button" disabled={saving} onClick={()=>void submit("/api/admin/delivery-zones","PATCH",{id:zone.id,isActive:!zone.isActive})} className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-lime-400">{zone.isActive ? "Deactivate" : "Activate"}</button></div></div>)}</div>}
                 </section>
             </div>
         </main>
