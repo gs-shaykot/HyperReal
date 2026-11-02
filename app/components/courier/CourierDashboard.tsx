@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AlertCircle, CheckCircle2, Clock3, MapPin, Package, Phone, RefreshCw, Search, Truck } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock3, ChevronDown, MapPin, Package, Phone, RefreshCw, Search, Truck } from "lucide-react";
 
 type Delivery = {
     id: string;
@@ -52,6 +52,7 @@ export default function CourierDashboard() {
     const [notice, setNotice] = useState("");
     const [notes, setNotes] = useState<Record<string, string>>({});
     const [otpCodes, setOtpCodes] = useState<Record<string, string>>({});
+    const [expandedDeliveries, setExpandedDeliveries] = useState<Record<string, boolean>>({});
 
     const loadDeliveries = useCallback(async () => {
         setLoading(true);
@@ -165,11 +166,11 @@ export default function CourierDashboard() {
                             const addressText = address ? [address.house, address.street, address.city, address.zipCode, address.country].filter(Boolean).join(", ") : "Address unavailable";
                             return (
                                 <article key={delivery.id} className="border border-zinc-800 bg-[#0d0d0d]">
-                                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800 p-4">
+                                    <button type="button" onClick={() => setExpandedDeliveries((current) => ({ ...current, [delivery.id]: !(current[delivery.id] ?? (delivery.status !== "DELIVERED")) }))} className="flex w-full cursor-pointer flex-wrap items-start justify-between gap-3 border-b border-zinc-800 p-4 text-left hover:bg-zinc-900/40">
                                         <div><p className="text-xs font-black text-lime-300">{delivery.order.orderCode}</p><p className="mt-1 text-[10px] text-zinc-500">{delivery.trackingCode}</p></div>
-                                        <span className={`border px-2 py-1 text-[10px] font-bold ${delivery.status === "DELIVERED" ? "border-lime-800 text-lime-300" : delivery.status === "FAILED" ? "border-red-900 text-red-300" : active ? "border-sky-900 text-sky-300" : "border-zinc-700 text-zinc-400"}`}>{statusLabel(delivery.status)}</span>
-                                    </div>
-                                    <div className="grid gap-4 p-4 md:grid-cols-[1fr_1fr]">
+                                        <span className={`border px-2 py-1 text-[10px] font-bold ${delivery.status === "DELIVERED" ? "border-lime-800 text-lime-300" : delivery.status === "FAILED" ? "border-red-900 text-red-300" : active ? "border-sky-900 text-sky-300" : "border-zinc-700 text-zinc-400"}`}>{statusLabel(delivery.status)}</span><ChevronDown size={16} className={`shrink-0 transition-transform ${(expandedDeliveries[delivery.id] ?? (delivery.status !== "DELIVERED")) ? "rotate-180" : ""}`} />
+                                    </button>
+                                    {(expandedDeliveries[delivery.id] ?? (delivery.status !== "DELIVERED")) && <div className="grid gap-4 p-4 md:grid-cols-[1fr_1fr]">
                                         <div className="space-y-3">
                                             <div><p className="text-[9px] font-bold tracking-widest text-zinc-500">CUSTOMER</p><p className="mt-1 font-bold">{address?.fullName || "Customer"}</p><p className="mt-1 flex items-start gap-2 text-sm text-zinc-400"><MapPin size={15} className="mt-0.5 shrink-0" />{addressText}</p>{address?.phone && <a href={`tel:${address.phone}`} className="mt-2 inline-flex items-center gap-2 text-sm text-lime-300"><Phone size={14} />{address.phone}</a>}</div>
                                             <div><p className="text-[9px] font-bold tracking-widest text-zinc-500">PARCEL ITEMS</p><ul className="mt-1 space-y-1 text-sm text-zinc-300">{delivery.order.orderItems.map((item,index)=><li key={index}>{item.quantity} × {item.variant.product.name} <span className="text-xs text-zinc-500">({item.variant.size || "—"} / {item.variant.color || "—"})</span></li>)}</ul></div>
@@ -187,7 +188,7 @@ export default function CourierDashboard() {
                                             </div>
                                             {delivery.deliveredAt && <p className="text-xs text-zinc-500"><Clock3 className="mr-1 inline" size={13}/>Delivered {new Date(delivery.deliveredAt).toLocaleString()}</p>}
                                         </div>
-                                    </div>
+                                    </div>}
                                 </article>
                             );
                         })}
