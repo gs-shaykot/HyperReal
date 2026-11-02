@@ -23,6 +23,7 @@ export default function AdminReturnsPage() {
   const [selected,setSelected] = useState<ReturnRow | null>(null);
   const [busy,setBusy] = useState(false);
   const [note,setNote] = useState("");
+  const [activityExpanded, setActivityExpanded] = useState(false);
   const [error,setError] = useState("");
   const load = useCallback(async () => {
     setBusy(true); setError("");
