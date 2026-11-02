@@ -11,6 +11,7 @@ export default function AccountReturnsPage(){
  const [orders,setOrders]=useState<Order[]>([]),[returns,setReturns]=useState<ReturnRow[]>([]);
  const [orderId,setOrderId]=useState(""),[reason,setReason]=useState("SIZE_ISSUE"),[note,setNote]=useState("");
  const [quantities,setQuantities]=useState<Record<string,number>>({});
+ const [expandedReturns,setExpandedReturns]=useState<Record<string,boolean>>({});
  const [busy,setBusy]=useState(false),[error,setError]=useState(""),[message,setMessage]=useState("");
  const load=async()=>{setBusy(true);setError("");try{const [o,r]=await Promise.all([fetch("/api/account/orders/return-eligible",{cache:"no-store"}),fetch("/api/account/returns",{cache:"no-store"})]);const oj=await o.json(),rj=await r.json();if(!o.ok)throw new Error(oj.message||"Could not load eligible orders");if(!r.ok)throw new Error(rj.message||"Could not load returns");setOrders(oj.data||[]);setReturns(rj.data||[]);}catch(e){setError(e instanceof Error?e.message:"Could not load returns");}finally{setBusy(false)}};
  useEffect(()=>{void load()},[]);
