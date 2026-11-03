@@ -1,5 +1,6 @@
 'use client';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import { Category } from '@/app/(Routes)/products/Category';
 import { ProductCard } from '@/app/(Routes)/products/ProductCard';
 import { ProductLayoutProps } from '@/app/types/Category';
@@ -9,14 +10,18 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const currentSort = searchParams.get('sort') ?? 'newest';
+    const urlSort = searchParams.get('sort') ?? 'newest';
+    const [optimisticSort, setOptimisticSort] = useState(urlSort);
+    const [isPending, startTransition] = useTransition();
+    const currentSort = optimisticSort;
 
     const updateSort = (sort: string) => {
         const params = new URLSearchParams(searchParams.toString());
 
         params.set('sort', sort);
 
-        router.push(`/products?${params.toString()}`);
+        setOptimisticSort(sort);
+        startTransition(() => router.push(`/products?${params.toString()}`));
     };
 
     return (
