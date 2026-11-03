@@ -37,7 +37,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const [mounted, setMounted] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
-  const [applyingCoupon, setApplyingCoupon] = useState<boolean>(false);
+  const [applyingCoupon, setApplyingCoupon] = useState<boolean>(false);\n  const [isInitiatingCheckout, setIsInitiatingCheckout] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -243,7 +243,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 (img) => img.color === item.variant?.color
               )?.imageUrl;
 
-            const safeImage = matchedImage || "/fallback.png";
+            const safeImage = matchedImage || item.variant?.product?.productImages?.[0]?.imageUrl || "/placeholder.png";\n            const rawPrice = Number(item.variant?.product?.price);\n            const unitPrice = Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : 0;\n            const lineTotal = unitPrice * (Number.isFinite(item.quantity) ? item.quantity : 0);
 
             return (
               <div
@@ -314,7 +314,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   />
 
                   <p className="text-second font-bold text-xl">
-                    ${(item.variant?.product?.price * item.quantity).toFixed(2)}
+                    ${lineTotal.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -511,8 +511,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             {/* BUTTON */}
 
-            <button onClick={() => router.push(`/checkout?${appliedCoupon?.code ? `coupon=${appliedCoupon?.code}` : ''}`)} className="w-full mt-6 bg-second text-zinc-900 light:text-white py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer">
-              Initiate Transfer
+            <button type="button" disabled={isInitiatingCheckout} onClick={() => { if (isInitiatingCheckout) return; setIsInitiatingCheckout(true); router.push(`/checkout${appliedCoupon?.code ? `?coupon=${encodeURIComponent(appliedCoupon.code)}` : ""}`); }} className="w-full mt-6 bg-second text-zinc-900 light:text-white py-3 font-bold uppercase tracking-wide hover:opacity-90 transition cursor-pointer disabled:cursor-wait disabled:opacity-70">
+              {isInitiatingCheckout ? "Initiating..." : "Initiate Transfer"}
             </button>
           </div>
 
