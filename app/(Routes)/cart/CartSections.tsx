@@ -37,7 +37,8 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const [mounted, setMounted] = useState(false);
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<couponType | null>(null);
-  const [applyingCoupon, setApplyingCoupon] = useState<boolean>(false);\n  const [isInitiatingCheckout, setIsInitiatingCheckout] = useState(false);
+  const [applyingCoupon, setApplyingCoupon] = useState<boolean>(false);
+  const [isInitiatingCheckout, setIsInitiatingCheckout] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -243,11 +244,14 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 (img) => img.color === item.variant?.color
               )?.imageUrl;
 
-            const safeImage = matchedImage || item.variant?.product?.productImages?.[0]?.imageUrl || "/placeholder.png";\n            const rawPrice = Number(item.variant?.product?.price);\n            const unitPrice = Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : 0;\n            const lineTotal = unitPrice * (Number.isFinite(item.quantity) ? item.quantity : 0);
+            const safeImage = matchedImage || item.variant?.product?.productImages?.[0]?.imageUrl || "/placeholder.png";
+            const rawPrice = Number(item.variant?.product?.price);
+            const unitPrice = Number.isFinite(rawPrice) && rawPrice >= 0 ? rawPrice : 0;
+            const lineTotal = unitPrice * (Number.isFinite(item.quantity) ? item.quantity : 0);
 
             return (
               <div
-                key={item.id ?? `cart-${Math.random()}`}
+                key={item.id ?? `${item.variantId}-${item.size}`}
                 className="relative z-20 flex justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
