@@ -14,13 +14,13 @@ export const ProductCard = ({ products }: ProductProps) => {
             {products?.map((product, index) => (
                 <Link key={product.id} href={`/products/${product.id}`}>
                     <motion.div
-                        initial={{ opacity: 0, y: 40 }}
+                        initial={{ opacity: 0, y: 16 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: false, amount: 0.3 }}
+                        viewport={{ once: true, amount: 0.15 }}
                         transition={{
                             duration: 0.3,
                             ease: easeOut,
-                            delay: index * 0.08,
+                            delay: Math.min(index * 0.025, 0.15),
                         }}
                         whileHover={{
                             y: -6,
