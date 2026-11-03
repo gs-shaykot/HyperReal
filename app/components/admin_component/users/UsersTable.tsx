@@ -185,7 +185,7 @@ export const UsersTable = ({
                                         >
                                             <span
                                                 aria-hidden="true"
-                                                className="inline-block size-3.5 bg-current [mask-image:url(/hand-coins-off.svg)] [mask-repeat:no-repeat] [mask-position:center] [mask-size:contain]"
+                                                className="inline-block size-3.5 bg-current mask-[url(/hand-coins-off.svg)] mask-no-repeat mask-center mask-contain"
                                             />
                                         </button>
                                     </div>

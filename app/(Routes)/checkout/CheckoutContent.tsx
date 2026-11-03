@@ -481,7 +481,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     <h2 className={`${hudson.className} text-5xl light:text-zinc-900`} style={{ wordSpacing: '10px' }}>
                         SECURE <span className="text-second">TRANSFER</span>
                     </h2>
-                    <div className='text-xs flex items-center py-3 text-zinc-400 mt-1' style={{ wordSpacing: '5px' }}>
+                    <div className='text-xs flex items-center py-3 text-zinc-600 mt-1' style={{ wordSpacing: '5px' }}>
                         <Lock size={16} className='mr-1' />
                         <h3>Encrypted Payment Protocol // 256-BIT</h3>
                     </div>
@@ -787,7 +787,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
                                 {/* Phone Number */}
                                 <div>
-                                    <label className="label label-text text-xs text-gray-400 uppercase">
+                                    <label className="label label-text text-xs text-gray-400 light:text-gray-700 uppercase">
                                         Phone Number <span className="text-[10px] tracking-wider">(without country code)</span>
                                     </label>
 
@@ -872,7 +872,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 {
                                     DeliveryOptions.map((option, index) => (
                                         <button key={index} type={'button'}
-                                            className={`btn flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 light:bg-second/30 border-second' : 'bg-main light:bg-white hover:bg-second/10 hover:border-second border-zinc-600'}`}
+                                            className={`btn border-2 flex justify-between items-center px-5 py-10 bg-main rounded-none shadow-none text-start ${selectedDeliveryOption.label === option.label ? 'bg-second/15 light:bg-second/30 border-second' : 'bg-main light:bg-white hover:bg-second/10 hover:border-second border-zinc-600'}`}
                                             onClick={() => setSelectedDeliveryOption(option)}
                                         >
                                             <div>

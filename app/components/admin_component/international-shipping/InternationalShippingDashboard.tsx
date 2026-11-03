@@ -223,7 +223,7 @@ export default function InternationalShippingDashboard() {
   ).length;
 
   return (
-    <section className="mx-auto max-w-[1500px] space-y-5 text-white light:text-zinc-900">
+    <section className="mx-auto max-w-375 space-y-5 text-white light:text-zinc-900">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800 pb-5 light:border-zinc-200">
         <div className="flex items-start gap-3">
           <div className="border border-second/40 bg-second/10 p-3 text-second">
@@ -281,7 +281,7 @@ export default function InternationalShippingDashboard() {
       </div>
 
       <div className="flex flex-wrap gap-2 border border-zinc-800 bg-zinc-950 p-3 light:border-zinc-200 light:bg-zinc-50">
-        <div className="relative min-w-[220px] flex-1">
+        <div className="relative min-w-55 flex-1">
           <Search
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500"

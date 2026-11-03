@@ -20,7 +20,7 @@ export const ProductLayout = ({ categories, categoryId, products }: ProductLayou
     };
 
     return (
-        <main className={`light:bg-white/90 bg-main/80`}>
+        <main className={`theme-aware-route light:bg-white/90 bg-main/80`}>
             <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5'>
                 <div className=" -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-5  mb-10">
                     <h1 className={`light:text-zinc-900 text-white text-4xl font-bold uppercase tracking-wide`}>

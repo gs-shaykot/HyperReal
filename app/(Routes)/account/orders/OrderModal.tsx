@@ -115,7 +115,7 @@ export const OrderModal = ({
                             Order Transmission
                         </h2>
                         <div className="flex items-center gap-2">
-                            <button type="button" onClick={() => void refreshOrder()} disabled={refreshing} title="Refresh order details" aria-label="Refresh order details" className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold text-zinc-300 transition hover:border-second hover:text-second disabled:opacity-50">
+                            <button type="button" onClick={() => void refreshOrder()} disabled={refreshing} title="Refresh order details" aria-label="Refresh order details" className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold text-zinc-300 transition hover:border-second hover:text-second disabled:opacity-50 light:text-zinc-700">
                                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
                                 {refreshing ? "Refreshing..." : "Refresh"}
                             </button>

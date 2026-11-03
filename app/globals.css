@@ -110,15 +110,22 @@ body {
 }
 
 .theme-aware-route .text-white,
-.theme-aware-route .text-zinc-100 {
+.theme-aware-route.text-white,
+.theme-aware-route .text-zinc-100,
+.theme-aware-route.text-zinc-100 {
   color: var(--route-text) !important;
 }
 
 .theme-aware-route .text-zinc-200,
+.theme-aware-route.text-zinc-200,
 .theme-aware-route .text-zinc-300,
+.theme-aware-route.text-zinc-300,
 .theme-aware-route .text-zinc-400,
+.theme-aware-route.text-zinc-400,
 .theme-aware-route .text-zinc-500,
-.theme-aware-route .text-zinc-600 {
+.theme-aware-route.text-zinc-500,
+.theme-aware-route .text-zinc-600,
+.theme-aware-route.text-zinc-600 {
   color: var(--route-muted) !important;
 }
 

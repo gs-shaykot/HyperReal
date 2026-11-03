@@ -112,7 +112,7 @@ export const OrderDetailsSidebar = ({
                             Order Details
                         </h2>
 
-                        <p className="mt-1 font-mono text-[10px] text-zinc-300">
+                        <p className="mt-1 font-mono text-[10px] text-zinc-300 light:text-zinc-700">
                             {order.orderCode}
                         </p>
                     </div>
@@ -132,7 +132,7 @@ export const OrderDetailsSidebar = ({
                     {/* Receipt heading */}
                     <section className="flex items-start justify-between gap-4 border-b border-dashed border-zinc-800 pb-5 light:border-zinc-200">
                         <div>
-                            <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-300">
+                            <p className="font-mono text-[9px] uppercase tracking-widest text-zinc-300 light:text-zinc-700">
                                 Cargo Receipt
                             </p>
 
@@ -140,7 +140,7 @@ export const OrderDetailsSidebar = ({
                                 HYPER<span className="text-second">REAL</span>
                             </h3>
 
-                            <p className="mt-1 font-mono text-[9px] uppercase text-zinc-300">
+                            <p className="mt-1 font-mono text-[9px] uppercase text-zinc-300 light:text-zinc-700">
                                 // Techwear Division
                             </p>
                         </div>
@@ -152,7 +152,7 @@ export const OrderDetailsSidebar = ({
                                 {order.status}
                             </span>
 
-                            <p className="mt-3 flex items-center justify-end gap-1 font-mono text-[10px] text-zinc-300">
+                            <p className="mt-3 flex items-center justify-end gap-1 font-mono text-[10px] text-zinc-300 light:text-zinc-700">
                                 <CalendarDays className="size-3" />
                                 {formatDate(order.createdAt)}
                             </p>
@@ -211,7 +211,7 @@ export const OrderDetailsSidebar = ({
                             </p>
 
                             {order.orderHistory ? (
-                                <div className="mt-2 font-mono text-[10px] leading-relaxed text-zinc-300">
+                                <div className="mt-2 font-mono text-[10px] leading-relaxed text-zinc-300 light:text-zinc-700">
                                     <p>
                                         {order.orderHistory.house},{" "}
                                         {order.orderHistory.street}
@@ -225,7 +225,7 @@ export const OrderDetailsSidebar = ({
                                 </div>
                             ) :
                                 (
-                                    <p className="mt-3 font-mono text-[10px] text-zinc-300">
+                                    <p className="mt-3 font-mono text-[10px] text-zinc-300 light:text-zinc-700">
                                         No shipping address available.
                                     </p>
                                 )}
@@ -250,11 +250,11 @@ export const OrderDetailsSidebar = ({
                                             {item.variant.product.name}
                                         </p>
 
-                                        <p className="mt-1 font-mono text-[10px] text-zinc-200">
+                                        <p className="mt-1 font-mono text-[10px] text-zinc-200 light:text-zinc-800">
                                             [{item.variant.size}] × {item.quantity}
                                         </p>
 
-                                        <p className="mt-1 font-mono text-[9px] uppercase text-zinc-200">
+                                        <p className="mt-1 font-mono text-[9px] uppercase text-zinc-200 light:text-zinc-800">
                                             {item.variant.color}
                                         </p>
                                     </div>
@@ -273,17 +273,17 @@ export const OrderDetailsSidebar = ({
                     <section className="mt-2 space-y-3 border-t border-dashed border-zinc-800 pt-2 font-mono text-[10px] light:border-zinc-200">
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Subtotal</span>
-                            <span className="text-zinc-200">{formatUSD(subtotal)}</span>
+                            <span className="text-zinc-200 light:text-zinc-800">{formatUSD(subtotal)}</span>
                         </div>
 
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Shipping</span>
-                            <span className="text-zinc-200">{formatUSD(shipping)}</span>
+                            <span className="text-zinc-200 light:text-zinc-800">{formatUSD(shipping)}</span>
                         </div>
 
                         <div className="flex justify-between gap-3 text-zinc-400">
                             <span>Discount</span>
-                            <span className="text-zinc-200">-{formatUSD(discount)}</span>
+                            <span className="text-zinc-200 light:text-zinc-800">-{formatUSD(discount)}</span>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between gap-3 border-b border-dashed border-zinc-800 pb-5 pt-2 light:border-zinc-200">
@@ -297,7 +297,7 @@ export const OrderDetailsSidebar = ({
                         </div>
 
                         {payment && (
-                            <div className="flex justify-between gap-3 pt-1 text-zinc-300">
+                            <div className="flex justify-between gap-3 pt-1 text-zinc-300 light:text-zinc-700">
                                 <span>Payment status</span>
                                 <span className="font-bold uppercase">
                                     {payment.status}
