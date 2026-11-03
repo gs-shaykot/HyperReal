@@ -148,6 +148,34 @@ body {
   color: var(--route-muted);
 }
 
+/* Light-mode contrast fixes for theme-aware routes. */
+[data-theme="light"] .theme-aware-route { color: #18181b; }
+
+[data-theme="light"] .theme-aware-route .text-white,
+[data-theme="light"] .theme-aware-route.text-white,
+[data-theme="light"] .theme-aware-route .text-zinc-100,
+[data-theme="light"] .theme-aware-route .text-zinc-200,
+[data-theme="light"] .theme-aware-route .text-zinc-300 {
+  color: #18181b !important;
+}
+
+[data-theme="light"] .theme-aware-route .text-zinc-400,
+[data-theme="light"] .theme-aware-route .text-zinc-500,
+[data-theme="light"] .theme-aware-route .text-zinc-600 {
+  color: #52525b !important;
+}
+
+[data-theme="light"] .theme-aware-route input,
+[data-theme="light"] .theme-aware-route textarea,
+[data-theme="light"] .theme-aware-route select {
+  color: #18181b !important;
+}
+
+[data-theme="light"] .theme-aware-route input::placeholder,
+[data-theme="light"] .theme-aware-route textarea::placeholder {
+  color: #71717a !important;
+}
+
 .scrollbar-hidden {
   -ms-overflow-style: none;
   scrollbar-width: none;
