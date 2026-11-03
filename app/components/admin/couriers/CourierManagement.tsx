@@ -27,6 +27,7 @@ export default function CourierManagement() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [savingCourier, setSavingCourier] = useState(false);
+    const [savingZone, setSavingZone] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
 
