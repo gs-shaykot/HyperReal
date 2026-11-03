@@ -252,7 +252,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             return (
               <div
                 key={item.id ?? item.variantId}
-                className="relative z-20 flex justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
+                className="relative z-20 flex items-start gap-3 justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-3 sm:p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -262,7 +262,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </span>
 
                 {/* IMAGE */}
-                <div className="w-24 h-24 relative bg-black overflow-hidden border border-zinc-900">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 relative bg-black overflow-hidden border border-zinc-900">
                   <span className='absolute top-1 left-1 w-3 h-3 z-10 border-l border-t border-second'></span>
                   <span className='absolute top-1 right-1 w-3 h-3 z-10 border-r border-t border-second'></span>
                   <span className='absolute bottom-1 left-1 w-3 h-3 z-10 border-l border-b border-second'></span>
@@ -279,7 +279,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 <div className="flex-1 px-6">
                   <Link
                     href={`/products/${item.variant?.product?.id}`}
-                    className="text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900">
+                    className="text-sm sm:text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900 break-words">
                     {item.variant?.product?.name}
                   </Link>
 
@@ -317,7 +317,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                     onClick={() => handleDeleteItem(item.id!)}
                   />
 
-                  <p className="text-second font-bold text-xl">
+                  <p className="text-second font-bold text-sm sm:text-xl whitespace-nowrap">
                     ${lineTotal.toFixed(2)}
                   </p>
                 </div>
@@ -341,12 +341,12 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   <span className='w-0.5 h-4 bottom-4 right-0 transform translate-x-[1.9px] bg-second absolute' />
                 </div>
 
-                <div className='p-2 w-full h-full flex  items-start gap-2'>
+                <div className='p-2 w-full h-full flex items-start gap-2 sm:gap-3'>
                   <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color={accentColor} />
                   {/* INFO */}
                   <div className='w-full'>
                     {/* HEADER */}
-                    <div className='flex justify-between w-full mb-3'>
+                    <div className='flex flex-col sm:flex-row sm:justify-between gap-2 w-full mb-3'>
                       <div>
                         <h3 className={`text-sm text-second font-medium`}>UNLOCK MORE. SAVE MORE</h3>
                         <p className='text-sm text-white light:text-zinc-900'>Add <span className="text-second">${nextBestCoupon?.updatedCoupons[0].remaining}</span> more to save {" "}
@@ -356,7 +356,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                               <span className="text-second">${nextBestCoupon?.updatedCoupons[0].value}</span>
                           }</p>
                       </div>
-                      <div className='flex items-center justify-center gap-3 border-b border-dashed border-second/30 light:text-zinc-900'>
+                      <div className='flex items-center justify-between sm:justify-center gap-2 border-b border-dashed border-second/30 light:text-zinc-900 text-xs sm:text-sm'>
                         <p>
                           ${subtotal} / ${nextBestCoupon?.updatedCoupons[0].minSpend}
                         </p>
@@ -520,12 +520,12 @@ export const CartSections = ({ coupons }: CouponProps) => {
             </button>
           </div>
 
-          <div className='flex justify-between mx-4 border-t border-zinc-600 light:border-second border-dashed py-4'>
+          <div className='grid grid-cols-3 mx-2 sm:mx-4 border-t border-zinc-600 light:border-second border-dashed py-4'>
 
-            <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
+            <div className='border-r border-zinc-500 light:border-second border-dashed min-w-0 flex flex-col items-center justify-center gap-1 py-1 px-1 text-center'>
               <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
-              <h3 className='text-sm text-zinc-400'>SECURE CHECKOUT</h3>
-              <p className='text-xs text-zinc-400'>Your data is protected</p>
+              <h3 className='text-[10px] sm:text-sm text-zinc-400 text-center leading-tight'>SECURE CHECKOUT</h3>
+              <p className='text-[9px] sm:text-xs text-zinc-400 text-center leading-tight break-words'>Your data is protected</p>
             </div>
 
             <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
@@ -534,7 +534,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
               <p className='text-xs text-zinc-400'>Delivered to you</p>
             </div>
 
-            <div className='w-full flex flex-col items-center justify-center gap-1 py-1'>
+            <div className='min-w-0 flex flex-col items-center justify-center gap-1 py-1 px-1 text-center'>
               <Octagon icon={<Undo2 size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-sm text-zinc-400'>EASY RETURNS</h3>
               <p className='text-xs text-zinc-400'>30-days returns</p>
