@@ -87,7 +87,7 @@ export default function FulfillmentTable({
             orders.map((order) => {
               const payment = getPayment(order);
               return (
-                <tr key={order.id} className="transition hover:bg-[#111]">
+                <tr key={order.id} className="transition hover:bg-[#111] light:hover:bg-zinc-50">
                   <td className="px-3 py-3">
                     <p className="text-xs font-black text-white">
                       {order.orderCode}

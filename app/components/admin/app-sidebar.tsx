@@ -170,7 +170,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                             render={<Link href="/" />}
                             tooltip="View Store"
-                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-400 transition-colors hover:bg-second hover:text-zinc-900"
+                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-800 transition-colors hover:bg-second hover:text-zinc-900"
                         >
                             <Eye className="size-3.75" />
                             <span>VIEW STORE</span>
@@ -181,7 +181,7 @@ export function AppSidebar() {
                         <SidebarMenuButton
                             tooltip="Logout"
                             onClick={() => signOut({ callbackUrl: "/login" })}
-                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-400 transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                            className="h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] text-zinc-800 transition-colors hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
                         >
                             <LogOut className="size-3.75" />
                             <span>LOGOUT</span>
