@@ -251,7 +251,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             return (
               <div
-                key={item.id ?? `${item.variantId}-${item.size}`}
+                key={item.id ?? item.variantId}
                 className="relative z-20 flex justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-4 overflow-hidden"
               >
                 {/* CORNER */}
