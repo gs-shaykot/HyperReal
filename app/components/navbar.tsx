@@ -125,20 +125,18 @@ export const Navbar = () => {
                             </label>
                         </button>
 
-                        <div
-                            tabIndex={0}
-                            role="button"
+                        <Link
+                            href="/cart"
+                            aria-label="Open cart"
                             className="text-white light:text-zinc-900 btn btn-ghost btn-circle bg-transparent! border-none! shadow-none!"
                         >
-                            <div className="indicator">
-                                <Link href="/cart">
-                                    <ShoppingBag size={18} strokeWidth={1.2} />
-                                    <span className="badge badge-xs p-1 indicator-item border border-gray-500/85">
-                                        {cartCount}
-                                    </span>
-                                </Link>
-                            </div>
-                        </div>
+                            <span className="indicator">
+                                <ShoppingBag size={18} strokeWidth={1.2} />
+                                <span className="badge badge-xs p-1 indicator-item border border-gray-500/85">
+                                    {cartCount}
+                                </span>
+                            </span>
+                        </Link>
 
                         <div className="dropdown dropdown-end flex items-center gap-2 justify-center">
                             {session?.user ? (
