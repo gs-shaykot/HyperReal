@@ -110,7 +110,7 @@ export default function CourierAssignment({
             </h3>
 
             {assignedCourier && (
-                <p className="flex items-center gap-2 text-xs text-lime-300">
+                <p className="flex items-center gap-2 text-xs text-second">
                     <UserRoundCheck size={14} />
                     Currently assigned to {assignedCourier.name || assignedCourier.email}
                 </p>
@@ -151,7 +151,7 @@ export default function CourierAssignment({
             )}
 
             {error && <p className="text-xs text-red-400">{error}</p>}
-            {success && <p className="text-xs text-lime-300">{success}</p>}
+            {success && <p className="text-xs text-second">{success}</p>}
             <p className="text-[10px] text-zinc-500">Only active courier accounts registered for the selected zone can be assigned.</p>
         </section>
     );

@@ -31,7 +31,10 @@ export default function Marquee() {
         useState<MarqueeSettings>(DEFAULT_SETTINGS);
 
     useEffect(() => {
-        if (data) setSettings(data);
+        if (!data) return;
+
+        const frame = requestAnimationFrame(() => setSettings(data));
+        return () => cancelAnimationFrame(frame);
     }, [data]);
 
     const updateSettings = (changes: Partial<MarqueeSettings>) => {
@@ -97,7 +100,7 @@ export default function Marquee() {
                 <button
                     type="button"
                     onClick={() => refetch()}
-                    className="mt-3 border border-zinc-700 px-4 py-2 text-xs text-white hover:border-[#c8ff00]"
+                    className="mt-3 border border-zinc-700 px-4 py-2 text-xs text-white hover:border-second"
                 >
                     Retry
                 </button>
@@ -118,7 +121,7 @@ export default function Marquee() {
                     disabled={saveMutation.isPending}
                     title="Reset changes"
                     aria-label="Reset marquee changes"
-                    className="text-zinc-500 transition hover:text-[#c8ff00] disabled:opacity-50"
+                    className="text-zinc-500 transition hover:text-second disabled:opacity-50"
                 >
                     <RotateCcw size={14} />
                 </button>
@@ -140,14 +143,12 @@ export default function Marquee() {
                     onClick={() =>
                         updateSettings({ isEnabled: !settings.isEnabled })
                     }
-                    className={`relative h-4.5 w-8 border border-[#c8ff00] rounded-full cursor-pointer transition ${
-                        settings.isEnabled ? "bg-[#c8ff00]" : "bg-transparent"
-                    }`}
+                    className={`relative h-4.5 w-8 cursor-pointer rounded-full border border-second transition ${settings.isEnabled ? "bg-second" : "bg-transparent"
+                        }`}
                 >
                     <span
-                        className={`absolute top-0.5 h-3 w-3 bg-black transition-all rounded-full! {
-                            settings.isEnabled ? "left-3.75" : "left-0.5"
-                        }`}
+                        className={`absolute top-0.5 h-3 w-3 rounded-full! bg-black transition-all ${settings.isEnabled ? "left-3.75" : "left-0.5"
+                            }`}
                     />
                 </button>
             </div>
@@ -167,7 +168,7 @@ export default function Marquee() {
                             }
                             aria-label={`Marquee message ${index + 1}`}
                             placeholder="Enter announcement"
-                            className="h-9.5 min-w-0 flex-1 border border-[#292929] bg-transparent px-3 font-mono text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                            className="h-9.5 min-w-0 flex-1 border border-[#292929] bg-transparent px-3 font-mono text-xs text-white outline-none placeholder:text-zinc-600 focus:border-second"
                         />
 
                         <button
@@ -186,7 +187,7 @@ export default function Marquee() {
                 type="button"
                 onClick={addMessage}
                 disabled={settings.messages.length >= 10}
-                className="mt-2 cursor-pointer flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00] hover:text-white disabled:opacity-40"
+                className="mt-2 cursor-pointer flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-second hover:text-white disabled:opacity-40"
             >
                 <Plus size={13} />
                 Add Message
@@ -208,11 +209,11 @@ export default function Marquee() {
                     })
                 }
                 aria-label="Marquee scroll speed"
-                className="mb-5 h-1 w-full cursor-pointer accent-[#c8ff00]"
+                className="mb-5 h-1 w-full cursor-pointer accent-second"
             />
 
             <div className="mb-4 overflow-hidden border border-[#292929]">
-                <div className="overflow-hidden bg-[#c8ff00] py-2.25 text-black">
+                <div className="overflow-hidden bg-second py-2.25 text-black">
                     {settings.isEnabled && settings.messages.length > 0 ? (
                         <div
                             className="flex w-max whitespace-nowrap"
@@ -257,7 +258,7 @@ export default function Marquee() {
                 type="button"
                 onClick={saveChanges}
                 disabled={saveMutation.isPending}
-                className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <Save size={13} />
                 {saveMutation.isPending ? "Saving..." : "Save Marquee"}

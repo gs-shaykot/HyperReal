@@ -43,7 +43,7 @@ const emptyForm: CountryInput = {
 };
 
 const inputClass =
-    "h-10 w-full border border-[#303030] bg-[#101010] px-3 text-sm text-white outline-none focus:border-[#c8ff00]";
+    "h-10 w-full border border-[#303030] bg-[#101010] px-3 text-sm text-white outline-none focus:border-second";
 
 const labelClass =
     "mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-zinc-400";
@@ -87,17 +87,17 @@ export default function CountryModal({
         setForm(
             country
                 ? {
-                      id: country.id,
-                      name: country.name,
-                      code: country.code,
-                      phoneCode: country.phoneCode,
-                      currencyCode: country.currencyCode,
-                      currencySymbol: country.currencySymbol,
-                      shippingFeeUSD: country.shippingFeeUSD,
-                      freeShippingThresholdUSD:
-                          country.freeShippingThresholdUSD,
-                      isActive: country.isActive,
-                  }
+                    id: country.id,
+                    name: country.name,
+                    code: country.code,
+                    phoneCode: country.phoneCode,
+                    currencyCode: country.currencyCode,
+                    currencySymbol: country.currencySymbol,
+                    shippingFeeUSD: country.shippingFeeUSD,
+                    freeShippingThresholdUSD:
+                        country.freeShippingThresholdUSD,
+                    isActive: country.isActive,
+                }
                 : { ...emptyForm }
         );
 
@@ -116,9 +116,9 @@ export default function CountryModal({
     // Prefer an exact name match over similarly named countries or territories.
     const exactCountryMatch = normalizedSearch
         ? countryOptions.find(
-              (option) =>
-                  option.name.trim().toLowerCase() === normalizedSearch
-          )
+            (option) =>
+                option.name.trim().toLowerCase() === normalizedSearch
+        )
         : undefined;
 
     const isAlreadyConfigured = (option: CountryOption) =>
@@ -245,9 +245,8 @@ export default function CountryModal({
                             }}
                             disabled={Boolean(country)}
                             aria-expanded={showOptions}
-                            className={`${inputClass} flex items-center justify-between text-left ${
-                                showOptions ? "border-[#c8ff00]" : ""
-                            }`}
+                            className={`${inputClass} flex items-center justify-between text-left ${showOptions ? "border-second" : ""
+                                }`}
                         >
                             <span className="flex min-w-0 items-center gap-2">
                                 {form.code && (
@@ -264,9 +263,8 @@ export default function CountryModal({
 
                             <ChevronDown
                                 size={15}
-                                className={`shrink-0 transition-transform ${
-                                    showOptions ? "rotate-180" : ""
-                                }`}
+                                className={`shrink-0 transition-transform ${showOptions ? "rotate-180" : ""
+                                    }`}
                             />
                         </button>
 
@@ -287,7 +285,7 @@ export default function CountryModal({
                                             }
                                             placeholder="Search country..."
                                             autoComplete="off"
-                                            className="h-9 w-full border border-[#303030] bg-[#101010] pl-9 pr-3 text-sm outline-none focus:border-[#c8ff00]"
+                                            className="h-9 w-full border border-[#303030] bg-[#101010] pl-9 pr-3 text-sm outline-none focus:border-second"
                                             autoFocus
                                         />
                                     </div>
@@ -309,13 +307,13 @@ export default function CountryModal({
                                                 onClick={() =>
                                                     void refetchCountries()
                                                 }
-                                                className="text-xs font-bold text-[#c8ff00] hover:underline"
+                                                className="text-xs font-bold text-second hover:underline"
                                             >
                                                 Try again
                                             </button>
                                         </div>
                                     ) : exactMatchAlreadyConfigured &&
-                                      exactCountryMatch ? (
+                                        exactCountryMatch ? (
                                         <p className="flex items-center gap-2 px-3 py-4 text-xs text-zinc-400">
                                             <CountryFlag
                                                 code={exactCountryMatch.code}
@@ -337,7 +335,7 @@ export default function CountryModal({
                                                 onClick={() =>
                                                     chooseCountry(option)
                                                 }
-                                                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-[#c8ff00] hover:text-black"
+                                                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm hover:bg-second hover:text-black"
                                             >
                                                 <CountryFlag
                                                     code={option.code}
@@ -359,7 +357,7 @@ export default function CountryModal({
                                             </button>
                                         ))
                                     ) : alreadyConfiguredCountries.length >
-                                      0 ? (
+                                        0 ? (
                                         <div className="space-y-1 px-3 py-4">
                                             {alreadyConfiguredCountries.map(
                                                 (option) => (
@@ -522,11 +520,10 @@ export default function CountryModal({
                                 })
                             }
                             aria-pressed={Boolean(form.isActive)}
-                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${
-                                form.isActive
-                                    ? "border-[#c8ff00] bg-[#c8ff00]/10 text-[#c8ff00]"
+                            className={`h-7 min-w-17 border px-3 font-mono text-[10px] font-bold uppercase tracking-wider ${form.isActive
+                                    ? "border-second bg-second/10 text-second"
                                     : "border-[#303030] text-zinc-500"
-                            }`}
+                                }`}
                         >
                             {form.isActive ? "Active" : "Inactive"}
                         </button>
@@ -563,15 +560,15 @@ export default function CountryModal({
                                     form.code.toUpperCase()
                             ) &&
                                 form.code.toUpperCase() !==
-                                    country?.code.toUpperCase())
+                                country?.code.toUpperCase())
                         }
-                        className="flex h-11 flex-1 items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-11 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isSaving
                             ? "Saving..."
                             : country
-                              ? "Save Changes"
-                              : "Add Country"}
+                                ? "Save Changes"
+                                : "Add Country"}
                     </button>
                 </div>
             </form>

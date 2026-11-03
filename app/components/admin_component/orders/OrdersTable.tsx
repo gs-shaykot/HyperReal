@@ -34,8 +34,8 @@ function getOrderTotal(order: OrderProduct) {
     return payment.paidAmountInUSD > 0
         ? payment.paidAmountInUSD
         : payment.totalProductPriceInUSD -
-              payment.discount +
-              payment.shippingCost;
+        payment.discount +
+        payment.shippingCost;
 }
 
 function statusClass(status: OrderStatus) {
@@ -50,7 +50,7 @@ function statusClass(status: OrderStatus) {
             return "border-blue-700/60 bg-blue-500/10 text-blue-400";
 
         case "DELIVERED":
-            return "border-lime-700/60 bg-lime-500/10 text-lime-400";
+            return "border-lime-700/60 bg-lime-500/10 text-second";
 
         case "CANCELLED":
             return "border-red-700/60 bg-red-500/10 text-red-400";
@@ -82,11 +82,10 @@ export const OrdersTable = ({ orders }: Props) => {
                             ].map((heading) => (
                                 <th
                                     key={heading}
-                                    className={`px-3 py-4 text-left text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500 ${
-                                        heading === "Actions"
+                                    className={`px-3 py-4 text-left text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500 ${heading === "Actions"
                                             ? "text-right"
                                             : ""
-                                    }`}
+                                        }`}
                                 >
                                     {heading}
                                 </th>
@@ -155,7 +154,7 @@ export const OrdersTable = ({ orders }: Props) => {
                                             {(() => {
                                                 const paymentStatus = order.payments[0]?.status;
                                                 const className = paymentStatus === "SUCCESS"
-                                                    ? "border-lime-700/60 bg-lime-500/10 text-lime-400"
+                                                    ? "border-lime-700/60 bg-lime-500/10 text-second"
                                                     : paymentStatus === "FAILED"
                                                         ? "border-red-700/60 bg-red-500/10 text-red-400"
                                                         : paymentStatus === "PENDING"

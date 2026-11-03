@@ -39,7 +39,7 @@ type Props = {
     productId: string;
 };
 
-const LIME = "#c8ff00";
+const LIME = "#8fb300";
 
 function Stars({
     value,
@@ -61,9 +61,8 @@ function Stars({
                     disabled={!interactive}
                     onClick={() => onChange?.(star)}
                     aria-label={`${star} star${star === 1 ? "" : "s"}`}
-                    className={`leading-none ${
-                        interactive ? "cursor-pointer" : "cursor-default"
-                    }`}
+                    className={`leading-none ${interactive ? "cursor-pointer" : "cursor-default text-second"
+                        }`}
                 >
                     <span
                         style={{
@@ -236,19 +235,19 @@ export default function ReviewsSection({ productId }: Props) {
 
             const response = editingReviewId
                 ? await axios.patch(
-                      `/api/products/${productId}/reviews/${editingReviewId}`,
-                      payload
-                  )
+                    `/api/products/${productId}/reviews/${editingReviewId}`,
+                    payload
+                )
                 : await axios.post(
-                      `/api/products/${productId}/reviews`,
-                      payload
-                  );
+                    `/api/products/${productId}/reviews`,
+                    payload
+                );
 
             toast.success(
                 response.data.message ||
-                    (editingReviewId
-                        ? "Review updated."
-                        : "Review submitted.")
+                (editingReviewId
+                    ? "Review updated."
+                    : "Review submitted.")
             );
 
             resetForm();
@@ -260,9 +259,9 @@ export default function ReviewsSection({ productId }: Props) {
 
             toast.error(
                 message ||
-                    (editingReviewId
-                        ? "Could not update your review."
-                        : "Could not submit your review.")
+                (editingReviewId
+                    ? "Could not update your review."
+                    : "Could not submit your review.")
             );
         } finally {
             setSubmitting(false);
@@ -340,14 +339,14 @@ export default function ReviewsSection({ productId }: Props) {
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-lg font-bold italic tracking-wide text-white">
                     RATINGS &amp;{" "}
-                    <span style={{ color: LIME }}>REVIEWS</span>
+                    <span className="text-second">REVIEWS</span>
                 </h2>
 
                 {!formOpen ? (
                     <button
                         type="button"
                         onClick={openReviewForm}
-                        className="bg-[#c8ff00] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wide text-black hover:brightness-95"
+                        className="bg-second px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-wide text-black hover:brightness-95"
                     >
                         ↗ WRITE A REVIEW
                     </button>
@@ -372,7 +371,7 @@ export default function ReviewsSection({ productId }: Props) {
                     <button
                         type="button"
                         onClick={() => void loadReviews()}
-                        className="mt-3 border border-zinc-700 px-3 py-2 font-mono text-[10px] text-white hover:border-[#c8ff00]"
+                        className="mt-3 border border-zinc-700 px-3 py-2 font-mono text-[10px] text-white hover:border-second"
                     >
                         TRY AGAIN
                     </button>
@@ -382,8 +381,7 @@ export default function ReviewsSection({ productId }: Props) {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-[140px_1fr]">
                         <div className="flex min-h-28 flex-col items-center justify-center border border-zinc-800 bg-[#101010] p-4">
                             <strong
-                                className="font-mono text-4xl leading-none"
-                                style={{ color: LIME }}
+                                className="font-mono text-4xl leading-none text-second"
                             >
                                 {loading
                                     ? "—"
@@ -426,11 +424,10 @@ export default function ReviewsSection({ productId }: Props) {
                                             )
                                         }
                                         aria-label={`Filter ${stars} star reviews`}
-                                        className={`mb-1 flex w-full items-center gap-2 text-left last:mb-0 ${
-                                            ratingFilter === stars
-                                                ? "opacity-100"
-                                                : "opacity-80 hover:opacity-100"
-                                        }`}
+                                        className={`mb-1 flex w-full items-center gap-2 text-left last:mb-0 ${ratingFilter === stars
+                                            ? "opacity-100"
+                                            : "opacity-80 hover:opacity-100"
+                                            }`}
                                     >
                                         <span className="w-5 font-mono text-[9px] text-zinc-400">
                                             {stars}★
@@ -438,10 +435,9 @@ export default function ReviewsSection({ productId }: Props) {
 
                                         <span className="h-1.5 flex-1 overflow-hidden bg-[#292929]">
                                             <span
-                                                className="block h-full"
+                                                className="block h-full bg-second"
                                                 style={{
-                                                    width: `${percentage}%`,
-                                                    backgroundColor: LIME,
+                                                    width: `${percentage}%`, 
                                                 }}
                                             />
                                         </span>
@@ -466,7 +462,7 @@ export default function ReviewsSection({ productId }: Props) {
                             className="mt-4 border border-[#364000] bg-[#111403] p-4 sm:p-5"
                         >
                             <div className="mb-3 flex items-center justify-between gap-3">
-                                <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#c8ff00]">
+                                <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-second">
                                     {editingReviewId
                                         ? "EDIT YOUR REVIEW"
                                         : "WRITE YOUR REVIEW"}
@@ -503,7 +499,7 @@ export default function ReviewsSection({ productId }: Props) {
                                         maxLength={100}
                                         required
                                         placeholder="BUILT LIKE A BUNKER"
-                                        className="h-9 w-full border border-zinc-800 bg-[#090909] px-3 font-mono text-[10px] text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                                        className="h-9 w-full border border-zinc-800 bg-[#090909] px-3 font-mono text-[10px] text-white outline-none placeholder:text-zinc-600 focus:border-second"
                                     />
                                 </label>
 
@@ -519,7 +515,7 @@ export default function ReviewsSection({ productId }: Props) {
                                         maxLength={40}
                                         required
                                         placeholder="YOUR NAME"
-                                        className="h-9 w-full border border-zinc-800 bg-[#090909] px-3 font-mono text-[10px] text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                                        className="h-9 w-full border border-zinc-800 bg-[#090909] px-3 font-mono text-[10px] text-white outline-none placeholder:text-zinc-600 focus:border-second"
                                     />
                                 </label>
                             </div>
@@ -539,7 +535,7 @@ export default function ReviewsSection({ productId }: Props) {
                                     required
                                     rows={4}
                                     placeholder="Fit, material, durability..."
-                                    className="w-full resize-y border border-zinc-800 bg-[#090909] p-3 font-mono text-[10px] leading-relaxed text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                                    className="w-full resize-y border border-zinc-800 bg-[#090909] p-3 font-mono text-[10px] leading-relaxed text-white outline-none placeholder:text-zinc-600 focus:border-second"
                                 />
 
                                 <span className="mt-1 block text-right font-mono text-[9px] text-zinc-600">
@@ -551,13 +547,13 @@ export default function ReviewsSection({ productId }: Props) {
                                 <button
                                     type="submit"
                                     disabled={submitting}
-                                    className="bg-[#c8ff00] px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="bg-second px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {submitting
                                         ? "SAVING..."
                                         : editingReviewId
-                                          ? "SAVE CHANGES"
-                                          : "SUBMIT REVIEW"}
+                                            ? "SAVE CHANGES"
+                                            : "SUBMIT REVIEW"}
                                 </button>
 
                                 <button
@@ -591,11 +587,10 @@ export default function ReviewsSection({ productId }: Props) {
                                 type="button"
                                 key={value}
                                 onClick={() => setSort(value)}
-                                className={`border px-2.5 py-1.5 font-mono text-[8px] font-bold tracking-wide transition-colors ${
-                                    sort === value
-                                        ? "border-[#c8ff00] bg-[#c8ff00]/10 text-[#c8ff00]"
-                                        : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
-                                }`}
+                                className={`border px-2.5 py-1.5 font-mono text-[8px] font-bold tracking-wide transition-colors ${sort === value
+                                    ? "border-second bg-second/10 text-second"
+                                    : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
+                                    }`}
                             >
                                 {label}
                             </button>
@@ -642,14 +637,14 @@ export default function ReviewsSection({ productId }: Props) {
                                         </span>
 
                                         {review.verifiedPurchase && (
-                                            <span className="inline-flex items-center gap-1 border border-[#526600] px-1.5 py-0.5 text-[#c8ff00]">
+                                            <span className="inline-flex items-center gap-1 border border-[#526600] px-1.5 py-0.5 text-second">
                                                 <CheckCircle2 size={9} />
                                                 VERIFIED
                                             </span>
                                         )}
 
                                         {review.isOwnReview && (
-                                            <span className="text-[#c8ff00]">
+                                            <span className="text-second">
                                                 YOUR REVIEW
                                             </span>
                                         )}
@@ -669,11 +664,10 @@ export default function ReviewsSection({ productId }: Props) {
                                                 votingId === review.id ||
                                                 review.isOwnReview
                                             }
-                                            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[8px] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                                                review.isHelpful
-                                                    ? "border-[#526600] text-[#c8ff00]"
-                                                    : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 cursor-pointer"
-                                            }`}
+                                            className={`inline-flex items-center gap-1.5 border px-2.5 py-1.5 font-mono text-[8px] uppercase transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${review.isHelpful
+                                                ? "border-[#526600] text-second"
+                                                : "border-zinc-800 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300 cursor-pointer"
+                                                }`}
                                         >
                                             <ThumbsUp size={10} />
                                             {review.isHelpful
@@ -693,7 +687,7 @@ export default function ReviewsSection({ productId }: Props) {
                                                         submitting ||
                                                         deletingId === review.id
                                                     }
-                                                    className="inline-flex items-center gap-1.5 border border-zinc-800 px-2.5 py-1.5 font-mono text-[8px] uppercase text-zinc-400 transition-colors hover:border-[#c8ff00] hover:text-[#c8ff00] disabled:opacity-40 cursor-pointer"
+                                                    className="inline-flex items-center gap-1.5 border border-zinc-800 px-2.5 py-1.5 font-mono text-[8px] uppercase text-zinc-400 transition-colors hover:border-second hover:text-second disabled:opacity-40 cursor-pointer"
                                                 >
                                                     <Pencil size={10} />
                                                     EDIT
@@ -732,7 +726,7 @@ export default function ReviewsSection({ productId }: Props) {
                                     <button
                                         type="button"
                                         onClick={() => setRatingFilter(null)}
-                                        className="mt-3 font-mono text-[9px] uppercase text-[#c8ff00] underline"
+                                        className="mt-3 font-mono text-[9px] uppercase text-second underline"
                                     >
                                         Clear filter
                                     </button>

@@ -149,7 +149,7 @@ export default function CountrySettings() {
                 <button
                     type="button"
                     onClick={() => refetch()}
-                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-sm text-white hover:border-[#c8ff00]"
+                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-sm text-white hover:border-second"
                 >
                     Retry
                 </button>
@@ -182,7 +182,7 @@ export default function CountrySettings() {
                             onClick={() => refreshRatesMutation.mutate()}
                             disabled={refreshRatesMutation.isPending}
                             title="Fetch the latest available reference rates"
-                            className="flex h-9 items-center justify-center gap-2 border border-[#383838] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-200 hover:border-[#c8ff00] hover:text-[#c8ff00] disabled:cursor-wait disabled:opacity-60"
+                            className="flex h-9 items-center justify-center gap-2 border border-[#383838] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-zinc-200 hover:border-second hover:text-second disabled:cursor-wait disabled:opacity-60"
                         >
                             <RefreshCw
                                 size={13}
@@ -200,7 +200,7 @@ export default function CountrySettings() {
                         <button
                             type="button"
                             onClick={openAddModal}
-                            className="flex h-9 items-center justify-center gap-2 bg-[#c8ff00] px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
+                            className="flex h-9 items-center justify-center gap-2 bg-second px-4 font-mono text-[10px] font-bold uppercase tracking-wider text-black hover:bg-[#b4e900]"
                         >
                             <Plus size={14} />
                             Add Country
@@ -219,7 +219,7 @@ export default function CountrySettings() {
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Search country or currency..."
                             aria-label="Search countries"
-                            className="h-9 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-600 focus:border-[#c8ff00]"
+                            className="h-9 w-full border border-[#292929] bg-transparent pl-9 pr-3 text-xs text-white outline-none placeholder:text-zinc-600 focus:border-second"
                         />
                     </div>
 
@@ -230,11 +230,10 @@ export default function CountrySettings() {
                                     type="button"
                                     key={item}
                                     onClick={() => setFilter(item)}
-                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${
-                                        filter === item
-                                            ? "bg-[#c8ff00] text-black"
+                                    className={`px-3 py-2 font-mono text-[9px] font-bold tracking-wider transition ${filter === item
+                                            ? "bg-second text-black"
                                             : "text-zinc-400 hover:text-white"
-                                    }`}
+                                        }`}
                                 >
                                     {item}
                                 </button>
@@ -307,19 +306,18 @@ export default function CountrySettings() {
 
                                             {change !== null && (
                                                 <div
-                                                    className={`mt-1 font-mono text-[10px] ${
-                                                        change > 0
+                                                    className={`mt-1 font-mono text-[10px] ${change > 0
                                                             ? "text-emerald-400"
                                                             : change < 0
-                                                              ? "text-red-400"
-                                                              : "text-zinc-500"
-                                                    }`}
+                                                                ? "text-red-400"
+                                                                : "text-zinc-500"
+                                                        }`}
                                                 >
                                                     {change > 0
                                                         ? "↑ +"
                                                         : change < 0
-                                                          ? "↓ "
-                                                          : ""}
+                                                            ? "↓ "
+                                                            : ""}
                                                     {change.toFixed(2)}%
                                                 </div>
                                             )}
@@ -348,29 +346,26 @@ export default function CountrySettings() {
                                                     type="button"
                                                     role="switch"
                                                     aria-checked={country.isActive}
-                                                    aria-label={`Set ${country.name} ${
-                                                        country.isActive
+                                                    aria-label={`Set ${country.name} ${country.isActive
                                                             ? "inactive"
                                                             : "active"
-                                                    }`}
+                                                        }`}
                                                     onClick={() =>
                                                         toggleCountry(country)
                                                     }
                                                     disabled={
                                                         toggleMutation.isPending
                                                     }
-                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-[#c8ff00] transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${
-                                                        country.isActive
-                                                            ? "bg-[#c8ff00]"
+                                                    className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-second transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 ${country.isActive
+                                                            ? "bg-second"
                                                             : "bg-[#2a2d30]"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <span
-                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${
-                                                            country.isActive
+                                                        className={`pointer-events-none absolute left-0.5 h-3.5 w-3.5 rounded-full transition-transform duration-200 ${country.isActive
                                                                 ? "translate-x-4 bg-black"
                                                                 : "translate-x-0 bg-[#8b939e]"
-                                                        }`}
+                                                            }`}
                                                     />
                                                 </button>
                                             </div>
@@ -385,7 +380,7 @@ export default function CountrySettings() {
                                                     }
                                                     aria-label={`Edit ${country.name}`}
                                                     title="Edit country"
-                                                    className="flex h-7 w-7 items-center justify-center border border-[#292929] text-zinc-400 hover:border-[#c8ff00] hover:text-[#c8ff00]"
+                                                    className="flex h-7 w-7 items-center justify-center border border-[#292929] text-zinc-400 hover:border-second hover:text-second"
                                                 >
                                                     <Pencil size={13} />
                                                 </button>
@@ -424,7 +419,7 @@ export default function CountrySettings() {
                     </table>
                 </div>
 
-                <div className="mt-3 flex items-start gap-2 border border-[#292929] bg-[#111111] p-3">
+                <div className="mt-3 flex items-start gap-2 border border-[#292929] light:bg-zinc-50  p-3">
                     <span className="text-zinc-400">ⓘ</span>
                     <p className="text-[11px] leading-relaxed text-zinc-500">
                         Exchange rates are reference rates for 1 USD and may

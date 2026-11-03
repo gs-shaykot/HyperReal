@@ -2,7 +2,7 @@ import FulfillmentDashboard from "@/app/components/admin_component/fulfillment/F
 
 export default function FulfillmentPage() {
     return (
-        <div className="min-h-screen bg-main p-4 light:bg-white">
+        <div className="theme-aware-route min-h-screen bg-main p-4 light:bg-white">
             <FulfillmentDashboard />
         </div>
     );

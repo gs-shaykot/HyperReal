@@ -12,7 +12,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react"; 
+import { useEffect, useMemo, useRef } from "react";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   useEffect(() => {
@@ -42,7 +42,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   }, [discount, shippingCost, totalInUSD]);
 
   const receiptRef = useRef<HTMLDivElement>(null);
-  
+
   const handlePrint = async () => {
     if (!receiptRef.current) return;
 
@@ -342,7 +342,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
             Print Slip
           </button>
 
-          <button className="cursor-pointer h-14 bg-second text-black hover:bg-lime-300 transition-all uppercase tracking-wide text-sm light:text-zinc-900 font-black flex items-center justify-center gap-3">
+          <button className="cursor-pointer h-14 bg-second text-black hover:bg-second transition-all uppercase tracking-wide text-sm light:text-zinc-900 font-black flex items-center justify-center gap-3">
             View Orders
             <ArrowRight className="w-4 h-4" />
           </button>

@@ -239,7 +239,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 saveAddress: addNewAddress.isChecked,
                 deliveryOption: selectedDeliveryOption.label,
             };
-            
+
             let data;
 
             const cartFingerprint = cart
@@ -1103,7 +1103,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 </div>
 
 
-                                <div className="flex justify-between text-lime-300 light:text-lime-600">
+                                <div className="flex justify-between text-second light:text-lime-600">
                                     <span>Discount</span>
                                     <span>-${discount.toFixed(2)}</span>
                                 </div>

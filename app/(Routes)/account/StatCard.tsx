@@ -14,7 +14,7 @@ export default function StatCard({
     return (
         <div className="border border-neutral-700 p-3 bg-dark light:bg-white">
 
-            {icon ? <div className="mb-2 text-lime-400">{icon}</div> : null}
+            {icon ? <div className="mb-2 text-second">{icon}</div> : null}
 
             <h2 className="text-4xl text-white light:text-zinc-900 font-bold">
                 {value}

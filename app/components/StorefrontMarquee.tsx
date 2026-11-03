@@ -55,7 +55,7 @@ export default function StorefrontMarquee() {
 
     return (
         <div
-            className="w-full overflow-hidden border-b border-black/10 bg-[#c8ff00] py-2 text-black"
+            className="w-full overflow-hidden border-b border-black/10 bg-second py-2 text-black"
             aria-label="Store announcements"
         >
             <div

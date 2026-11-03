@@ -66,6 +66,81 @@ body {
   font-family: var(--font-space-mono), monospace;
 }
 
+.theme-aware-route {
+  --route-page: var(--color-main);
+  --route-panel: #0d0d0d;
+  --route-panel-strong: #101010;
+  --route-panel-header: #151515;
+  --route-border: #27272a;
+  --route-text: #ffffff;
+  --route-muted: #a1a1aa;
+}
+
+[data-theme="light"] .theme-aware-route {
+  --route-page: #ffffff;
+  --route-panel: #f8fafc;
+  --route-panel-strong: #ffffff;
+  --route-panel-header: #f1f5f9;
+  --route-border: #d4d4d8;
+  --route-text: #18181b;
+  --route-muted: #52525b;
+}
+
+.theme-aware-route .bg-\[\#080808\],
+.theme-aware-route .bg-\[\#090909\],
+.theme-aware-route .bg-\[\#0b0b0b\],
+.theme-aware-route .bg-\[\#0d0d0d\],
+.theme-aware-route .bg-\[\#101010\],
+.theme-aware-route .bg-\[\#111\],
+.theme-aware-route .bg-\[\#111403\],
+.theme-aware-route .bg-\[\#151515\] {
+  background-color: var(--route-panel) !important;
+}
+
+.theme-aware-route .bg-\[\#151515\] {
+  background-color: var(--route-panel-header) !important;
+}
+
+.theme-aware-route .bg-black {
+  background-color: var(--route-panel-strong) !important;
+}
+
+.theme-aware-route .bg-\[\#292929\] {
+  background-color: var(--route-border) !important;
+}
+
+.theme-aware-route .text-white,
+.theme-aware-route .text-zinc-100 {
+  color: var(--route-text) !important;
+}
+
+.theme-aware-route .text-zinc-200,
+.theme-aware-route .text-zinc-300,
+.theme-aware-route .text-zinc-400,
+.theme-aware-route .text-zinc-500,
+.theme-aware-route .text-zinc-600 {
+  color: var(--route-muted) !important;
+}
+
+.theme-aware-route .border-zinc-700,
+.theme-aware-route .border-zinc-800,
+.theme-aware-route .border-\[\#292929\],
+.theme-aware-route .border-\[\#303030\],
+.theme-aware-route .border-\[\#383838\] {
+  border-color: var(--route-border) !important;
+}
+
+.theme-aware-route input,
+.theme-aware-route textarea,
+.theme-aware-route select {
+  color: var(--route-text);
+}
+
+.theme-aware-route input::placeholder,
+.theme-aware-route textarea::placeholder {
+  color: var(--route-muted);
+}
+
 .scrollbar-hidden {
   -ms-overflow-style: none;
   scrollbar-width: none;

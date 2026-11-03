@@ -23,7 +23,7 @@ export default function AdminLayout({
     >
       <AppSidebar />
 
-      <SidebarInset className="min-w-0 bg-white">
+      <SidebarInset className="theme-aware-route min-w-0 bg-main light:bg-white">
         <AdminHeader />
 
         <main className="min-w-0">

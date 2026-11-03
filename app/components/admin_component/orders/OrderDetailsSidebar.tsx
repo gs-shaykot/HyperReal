@@ -44,7 +44,7 @@ function statusClass(status: OrderStatus) {
             return "border-blue-700/60 bg-blue-500/10 text-blue-400";
 
         case "DELIVERED":
-            return "border-lime-700/60 bg-lime-500/10 text-lime-400";
+            return "border-lime-700/60 bg-lime-500/10 text-second";
 
         case "CANCELLED":
             return "border-red-700/60 bg-red-500/10 text-red-400";

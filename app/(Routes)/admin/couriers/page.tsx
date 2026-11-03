@@ -16,5 +16,9 @@ export default async function AdminCouriersPage() {
 
     if (!user || user.role !== "ADMIN" || user.isBlocked) redirect("/");
 
-    return <CourierManagement />;
+    return (
+        <div className="bg-main light:bg-white min-h-screen p-4">
+            <CourierManagement />
+        </div>
+    )
 }

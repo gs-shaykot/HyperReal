@@ -56,9 +56,9 @@ type Delivery = {
 };
 
 const button =
-  "inline-flex items-center justify-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold transition hover:border-lime-400 hover:text-lime-300 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex items-center justify-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold transition hover:border-second hover:text-second disabled:cursor-not-allowed disabled:opacity-40";
 const limeButton =
-  "inline-flex items-center justify-center gap-2 bg-lime-400 px-3 py-2 text-xs font-black text-black transition hover:bg-lime-300 disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex items-center justify-center gap-2 bg-second px-3 py-2 text-xs font-black text-black transition hover:bg-second disabled:cursor-not-allowed disabled:opacity-40";
 
 function money(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -190,15 +190,15 @@ export default function CourierDashboard() {
   ).length;
 
   return (
-    <main className="min-h-screen bg-[#080808] px-4 py-6 text-zinc-100 sm:px-6 lg:px-8">
+    <main className="theme-aware-route min-h-screen bg-main text-zinc-100 light:bg-white px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-zinc-800 pb-5">
           <div>
-            <p className="mb-2 text-[10px] font-black tracking-[0.25em] text-lime-400">
+            <p className="mb-2 text-[10px] font-black tracking-[0.25em] text-second">
               HYPERREAL / LOGISTICS
             </p>
             <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-              Courier <span className="text-lime-400">Dashboard</span>
+              Courier <span className="text-second">Dashboard</span>
             </h1>
             <p className="mt-2 text-sm text-zinc-500">
               Manage your assigned parcels and delivery outcomes.
@@ -229,7 +229,7 @@ export default function CourierDashboard() {
               >
                 <div className="flex items-center justify-between text-[10px] font-bold tracking-widest text-zinc-500">
                   <span>{stat.label}</span>
-                  <Icon size={16} className="text-lime-400" />
+                  <Icon size={16} className="text-second" />
                 </div>
                 <p className="mt-3 text-3xl font-black">{stat.value}</p>
               </div>
@@ -239,7 +239,7 @@ export default function CourierDashboard() {
 
         {(error || notice) && (
           <div
-            className={`mb-4 border px-4 py-3 text-sm ${error ? "border-red-900 bg-red-950/30 text-red-300" : "border-lime-900 bg-lime-950/20 text-lime-300"}`}
+            className={`mb-4 border px-4 py-3 text-sm ${error ? "border-red-900 bg-red-950/30 text-red-300" : "border-lime-900 bg-lime-950/20 text-second"}`}
           >
             {error || notice}
           </div>
@@ -255,7 +255,7 @@ export default function CourierDashboard() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search order, tracking code, customer, city"
-              className="w-full border border-zinc-800 bg-[#0d0d0d] py-2 pl-9 pr-3 text-sm outline-none focus:border-lime-400"
+              className="w-full border border-zinc-800 bg-[#0d0d0d] py-2 pl-9 pr-3 text-sm outline-none focus:border-second"
             />
           </label>
           <select
@@ -297,14 +297,14 @@ export default function CourierDashboard() {
                 ["PENDING", "FAILED"].includes(delivery.status);
               const addressText = address
                 ? [
-                    address.house,
-                    address.street,
-                    address.city,
-                    address.zipCode,
-                    address.country,
-                  ]
-                    .filter(Boolean)
-                    .join(", ")
+                  address.house,
+                  address.street,
+                  address.city,
+                  address.zipCode,
+                  address.country,
+                ]
+                  .filter(Boolean)
+                  .join(", ")
                 : "Address unavailable";
               return (
                 <article
@@ -325,7 +325,7 @@ export default function CourierDashboard() {
                     className="flex w-full cursor-pointer flex-wrap items-start justify-between gap-3 border-b border-zinc-800 p-4 text-left hover:bg-zinc-900/40"
                   >
                     <div>
-                      <p className="text-xs font-black text-lime-300">
+                      <p className="text-xs font-black text-second">
                         {delivery.order.orderCode}
                       </p>
                       <p className="mt-1 text-[10px] text-zinc-500">
@@ -333,7 +333,7 @@ export default function CourierDashboard() {
                       </p>
                     </div>
                     <span
-                      className={`border px-2 py-1 text-[10px] font-bold ${delivery.status === "DELIVERED" ? "border-lime-800 text-lime-300" : delivery.status === "FAILED" ? "border-red-900 text-red-300" : active ? "border-sky-900 text-sky-300" : "border-zinc-700 text-zinc-400"}`}
+                      className={`border px-2 py-1 text-[10px] font-bold ${delivery.status === "DELIVERED" ? "border-lime-800 text-second" : delivery.status === "FAILED" ? "border-red-900 text-red-300" : active ? "border-sky-900 text-sky-300" : "border-zinc-700 text-zinc-400"}`}
                     >
                       {statusLabel(delivery.status)}
                     </span>
@@ -344,198 +344,198 @@ export default function CourierDashboard() {
                   </button>
                   {(expandedDeliveries[delivery.id] ??
                     delivery.status !== "DELIVERED") && (
-                    <div className="grid gap-4 p-4 md:grid-cols-[1fr_1fr]">
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-[9px] font-bold tracking-widest text-zinc-500">
-                            CUSTOMER
-                          </p>
-                          <p className="mt-1 font-bold">
-                            {address?.fullName || "Customer"}
-                          </p>
-                          <p className="mt-1 flex items-start gap-2 text-sm text-zinc-400">
-                            <MapPin size={15} className="mt-0.5 shrink-0" />
-                            {addressText}
-                          </p>
-                          {address?.phone && (
-                            <a
-                              href={`tel:${address.phone}`}
-                              className="mt-2 inline-flex items-center gap-2 text-sm text-lime-300"
-                            >
-                              <Phone size={14} />
-                              {address.phone}
-                            </a>
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-[9px] font-bold tracking-widest text-zinc-500">
-                            PARCEL ITEMS
-                          </p>
-                          <ul className="mt-1 space-y-1 text-sm text-zinc-300">
-                            {delivery.order.orderItems.map((item, index) => (
-                              <li key={index}>
-                                {item.quantity} × {item.variant.product.name}{" "}
-                                <span className="text-xs text-zinc-500">
-                                  ({item.variant.size || "—"} /{" "}
-                                  {item.variant.color || "—"})
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                      <div className="space-y-3 border-t border-zinc-800 pt-4 md:border-l md:border-t-0 md:pl-4 md:pt-0">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-zinc-500">Payment</span>
-                          <span>
-                            {payment?.method || "—"} · {payment?.status || "—"}
-                          </span>
-                        </div>
-                        {payment?.method === "COD" && (
-                          <div className="flex items-center justify-between border border-zinc-800 p-3 text-sm">
-                            <span>Cash to collect</span>
-                            <strong>
-                              {money(
-                                Number(payment.totalProductPriceInUSD) +
-                                  Number(payment.shippingCost),
-                              )}
-                            </strong>
-                          </div>
-                        )}
-                        {delivery.failureReason && (
-                          <p className="border border-red-900/60 bg-red-950/20 p-3 text-xs text-red-300">
-                            Last attempt: {delivery.failureReason}
-                          </p>
-                        )}
-                        {delivery.status !== "DELIVERED" && (
-                          <textarea
-                            value={notes[delivery.id] || ""}
-                            onChange={(event) =>
-                              setNotes((current) => ({
-                                ...current,
-                                [delivery.id]: event.target.value,
-                              }))
-                            }
-                            rows={2}
-                            placeholder="Delivery note or failed attempt reason..."
-                            className="w-full resize-y border border-zinc-800 bg-black p-3 text-sm outline-none focus:border-lime-400"
-                          />
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                          {canStart && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                void updateDelivery(delivery, "START_DELIVERY")
-                              }
-                              disabled={busy}
-                              className={limeButton}
-                            >
-                              <Truck size={14} />
-                              {busy ? "Updating..." : "Start delivery"}
-                            </button>
-                          )}
-                          {active &&
-                            payment?.method === "COD" &&
-                            !delivery.codCollected && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  void updateDelivery(delivery, "COLLECT_COD")
-                                }
-                                disabled={busy}
-                                className={button}
+                      <div className="grid gap-4 p-4 md:grid-cols-[1fr_1fr]">
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-[9px] font-bold tracking-widest text-zinc-500">
+                              CUSTOMER
+                            </p>
+                            <p className="mt-1 font-bold">
+                              {address?.fullName || "Customer"}
+                            </p>
+                            <p className="mt-1 flex items-start gap-2 text-sm text-zinc-400">
+                              <MapPin size={15} className="mt-0.5 shrink-0" />
+                              {addressText}
+                            </p>
+                            {address?.phone && (
+                              <a
+                                href={`tel:${address.phone}`}
+                                className="mt-2 inline-flex items-center gap-2 text-sm text-second"
                               >
-                                <CheckCircle2 size={14} />
-                                Confirm cash collected
-                              </button>
+                                <Phone size={14} />
+                                {address.phone}
+                              </a>
                             )}
-                          {active && (
-                            <div className="w-full space-y-2 border border-zinc-800 bg-black/40 p-3">
-                              <p className="text-[10px] font-bold tracking-widest text-zinc-400">
-                                CUSTOMER VERIFICATION
-                              </p>
-                              <p className="text-xs text-zinc-500">
-                                Send a one-time code to the customer email. Only
-                                confirm delivery after handing over the parcel
-                                and receiving the code.
-                              </p>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  void requestDeliveryOtp(delivery)
-                                }
-                                disabled={busy}
-                                className={button}
-                              >
-                                <RefreshCw size={13} />
-                                {busy ? "Sending..." : "Send email code"}
-                              </button>
-                              <label className="block text-xs text-zinc-400">
-                                6-digit customer code
-                                <input
-                                  inputMode="numeric"
-                                  maxLength={6}
-                                  value={otpCodes[delivery.id] || ""}
-                                  onChange={(event) =>
-                                    setOtpCodes((current) => ({
-                                      ...current,
-                                      [delivery.id]: event.target.value
-                                        .replace(/[^0-9]/g, "")
-                                        .slice(0, 6),
-                                    }))
-                                  }
-                                  placeholder="000000"
-                                  className="mt-1 w-full border border-zinc-700 bg-[#0d0d0d] px-3 py-2 text-sm tracking-[0.3em] outline-none focus:border-lime-400"
-                                />
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  void updateDelivery(
-                                    delivery,
-                                    "MARK_DELIVERED",
-                                  )
-                                }
-                                disabled={
-                                  busy ||
-                                  (payment?.method === "COD" &&
-                                    !delivery.codCollected) ||
-                                  (otpCodes[delivery.id] || "").length !== 6
-                                }
-                                className={limeButton}
-                              >
-                                <CheckCircle2 size={14} />
-                                Verify &amp; mark delivered
-                              </button>
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-bold tracking-widest text-zinc-500">
+                              PARCEL ITEMS
+                            </p>
+                            <ul className="mt-1 space-y-1 text-sm text-zinc-300">
+                              {delivery.order.orderItems.map((item, index) => (
+                                <li key={index}>
+                                  {item.quantity} × {item.variant.product.name}{" "}
+                                  <span className="text-xs text-zinc-500">
+                                    ({item.variant.size || "—"} /{" "}
+                                    {item.variant.color || "—"})
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                        <div className="space-y-3 border-t border-zinc-800 pt-4 md:border-l md:border-t-0 md:pl-4 md:pt-0">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-zinc-500">Payment</span>
+                            <span>
+                              {payment?.method || "—"} · {payment?.status || "—"}
+                            </span>
+                          </div>
+                          {payment?.method === "COD" && (
+                            <div className="flex items-center justify-between border border-zinc-800 p-3 text-sm">
+                              <span>Cash to collect</span>
+                              <strong>
+                                {money(
+                                  Number(payment.totalProductPriceInUSD) +
+                                  Number(payment.shippingCost),
+                                )}
+                              </strong>
                             </div>
                           )}
-                          {active && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                void updateDelivery(delivery, "MARK_FAILED")
+                          {delivery.failureReason && (
+                            <p className="border border-red-900/60 bg-red-950/20 p-3 text-xs text-red-300">
+                              Last attempt: {delivery.failureReason}
+                            </p>
+                          )}
+                          {delivery.status !== "DELIVERED" && (
+                            <textarea
+                              value={notes[delivery.id] || ""}
+                              onChange={(event) =>
+                                setNotes((current) => ({
+                                  ...current,
+                                  [delivery.id]: event.target.value,
+                                }))
                               }
-                              disabled={
-                                busy || !(notes[delivery.id] || "").trim()
-                              }
-                              className={button}
-                            >
-                              <AlertCircle size={14} />
-                              Delivery failed
-                            </button>
+                              rows={2}
+                              placeholder="Delivery note or failed attempt reason..."
+                              className="w-full resize-y border border-zinc-800 bg-black p-3 text-sm outline-none focus:border-second"
+                            />
+                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {canStart && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void updateDelivery(delivery, "START_DELIVERY")
+                                }
+                                disabled={busy}
+                                className={limeButton}
+                              >
+                                <Truck size={14} />
+                                {busy ? "Updating..." : "Start delivery"}
+                              </button>
+                            )}
+                            {active &&
+                              payment?.method === "COD" &&
+                              !delivery.codCollected && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void updateDelivery(delivery, "COLLECT_COD")
+                                  }
+                                  disabled={busy}
+                                  className={button}
+                                >
+                                  <CheckCircle2 size={14} />
+                                  Confirm cash collected
+                                </button>
+                              )}
+                            {active && (
+                              <div className="w-full space-y-2 border border-zinc-800 bg-black/40 p-3">
+                                <p className="text-[10px] font-bold tracking-widest text-zinc-400">
+                                  CUSTOMER VERIFICATION
+                                </p>
+                                <p className="text-xs text-zinc-500">
+                                  Send a one-time code to the customer email. Only
+                                  confirm delivery after handing over the parcel
+                                  and receiving the code.
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void requestDeliveryOtp(delivery)
+                                  }
+                                  disabled={busy}
+                                  className={button}
+                                >
+                                  <RefreshCw size={13} />
+                                  {busy ? "Sending..." : "Send email code"}
+                                </button>
+                                <label className="block text-xs text-zinc-400">
+                                  6-digit customer code
+                                  <input
+                                    inputMode="numeric"
+                                    maxLength={6}
+                                    value={otpCodes[delivery.id] || ""}
+                                    onChange={(event) =>
+                                      setOtpCodes((current) => ({
+                                        ...current,
+                                        [delivery.id]: event.target.value
+                                          .replace(/[^0-9]/g, "")
+                                          .slice(0, 6),
+                                      }))
+                                    }
+                                    placeholder="000000"
+                                    className="mt-1 w-full border border-zinc-700 bg-[#0d0d0d] px-3 py-2 text-sm tracking-[0.3em] outline-none focus:border-second"
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    void updateDelivery(
+                                      delivery,
+                                      "MARK_DELIVERED",
+                                    )
+                                  }
+                                  disabled={
+                                    busy ||
+                                    (payment?.method === "COD" &&
+                                      !delivery.codCollected) ||
+                                    (otpCodes[delivery.id] || "").length !== 6
+                                  }
+                                  className={limeButton}
+                                >
+                                  <CheckCircle2 size={14} />
+                                  Verify &amp; mark delivered
+                                </button>
+                              </div>
+                            )}
+                            {active && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  void updateDelivery(delivery, "MARK_FAILED")
+                                }
+                                disabled={
+                                  busy || !(notes[delivery.id] || "").trim()
+                                }
+                                className={button}
+                              >
+                                <AlertCircle size={14} />
+                                Delivery failed
+                              </button>
+                            )}
+                          </div>
+                          {delivery.deliveredAt && (
+                            <p className="text-xs text-zinc-500">
+                              <Clock3 className="mr-1 inline" size={13} />
+                              Delivered{" "}
+                              {new Date(delivery.deliveredAt).toLocaleString()}
+                            </p>
                           )}
                         </div>
-                        {delivery.deliveredAt && (
-                          <p className="text-xs text-zinc-500">
-                            <Clock3 className="mr-1 inline" size={13} />
-                            Delivered{" "}
-                            {new Date(delivery.deliveredAt).toLocaleString()}
-                          </p>
-                        )}
                       </div>
-                    </div>
-                  )}
+                    )}
                 </article>
               );
             })}

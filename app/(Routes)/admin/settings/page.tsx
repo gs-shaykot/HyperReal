@@ -2,7 +2,7 @@ import AdminSettings from "@/app/components/admin_component/settings/AdminSettin
 
 export default function SettingPage() {
     return (
-        <main className="min-h-screen bg-main p-4 ">
+        <main className="theme-aware-route min-h-screen bg-main p-4 light:bg-white">
             <AdminSettings />
         </main>
     );

@@ -144,7 +144,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                             />
                         </div>
                     </div>
- 
+
                     <div>
                         <label className="mb-2 block font-mono text-[10px] tracking-widest text-zinc-400">
                             DISCOUNT TYPE
@@ -157,8 +157,8 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                                     setForm((prev) => ({ ...prev, type: "percent" }))
                                 }
                                 className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all cursor-pointer ${form.type === "percent"
-                                        ? "border-second bg-second text-black"
-                                        : "border-zinc-800 text-zinc-400"
+                                    ? "border-second bg-second text-black"
+                                    : "border-zinc-800 text-zinc-400"
                                     }`}
                             >
                                 % PERCENT
@@ -170,14 +170,14 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                                     setForm((prev) => ({ ...prev, type: "flat" }))
                                 }
                                 className={`h-9 border font-mono text-[10px] font-bold tracking-widest transition-all cursor-pointer ${form.type === "flat"
-                                        ? "border-second bg-second text-black"
-                                        : "border-zinc-800 text-zinc-400"
+                                    ? "border-second bg-second text-black"
+                                    : "border-zinc-800 text-zinc-400"
                                     }`}
                             >
                                 $ FIXED
                             </button>
                         </div>
-                    </div> 
+                    </div>
 
                     <label className="flex items-center gap-2 font-mono text-[10px] text-zinc-400">
                         <input type="checkbox"
@@ -185,7 +185,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                             onChange={(event) =>
                                 setForm({ ...form, newUserOnly: event.target.checked })
                             }
-                            className="accent-lime-400" />
+                            className="accent-second" />
                         NEW USERS ONLY
                     </label>
 

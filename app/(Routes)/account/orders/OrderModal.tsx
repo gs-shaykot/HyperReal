@@ -119,15 +119,15 @@ export const OrderModal = ({
                                 <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} />
                                 {refreshing ? "Refreshing..." : "Refresh"}
                             </button>
-                        {currentStatus && StatusIcon && (
-                            <span
-                                className={` flex items-center text-xs border ${currentStatus.classname} p-1 rounded-full shrink-0 `}
-                            >
-                                <StatusIcon className="h-4 w-4 inline-block mr-1" />
+                            {currentStatus && StatusIcon && (
+                                <span
+                                    className={` flex items-center text-xs border ${currentStatus.classname} p-1 rounded-full shrink-0 `}
+                                >
+                                    <StatusIcon className="h-4 w-4 inline-block mr-1" />
 
-                                {currentStatus.status}
-                            </span>
-                        )}
+                                    {currentStatus.status}
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -158,7 +158,7 @@ export const OrderModal = ({
 
                     <div className="w-full h-2 bg-zinc-800 light:bg-zinc-200 overflow-hidden mb-2">
                         <div
-                            className={` h-full transition-all duration-500 ${order.status === "CANCELLED" ? "bg-red-500" : "bg-second" } `}
+                            className={` h-full transition-all duration-500 ${order.status === "CANCELLED" ? "bg-red-500" : "bg-second"} `}
                             style={{
                                 width: `${currentStatus?.percentage ?? 0}%`
                             }}
@@ -202,7 +202,7 @@ export const OrderModal = ({
                                         </h4>
                                         <div className="mb-3 border border-sky-500/30 px-3 py-2">
                                             <p className="text-[9px] uppercase tracking-wider text-zinc-500">International delivery progress</p>
-                                            <p className={"mt-1 text-xs font-black uppercase " + (shipment.internationalStatus === "DELIVERED" ? "text-lime-400" : shipment.internationalStatus === "EXCEPTION" || shipment.internationalStatus === "RETURNING" ? "text-red-400" : "text-sky-300")}>
+                                            <p className={"mt-1 text-xs font-black uppercase " + (shipment.internationalStatus === "DELIVERED" ? "text-second" : shipment.internationalStatus === "EXCEPTION" || shipment.internationalStatus === "RETURNING" ? "text-red-400" : "text-sky-300")}>
                                                 {(shipment.internationalStatus || "PREPARING").replaceAll("_", " ")}
                                             </p>
                                         </div>
@@ -217,7 +217,7 @@ export const OrderModal = ({
                                             </div>
                                             <div>
                                                 <p className="text-[9px] uppercase tracking-wider text-zinc-500">Customs status</p>
-                                                <p className={`mt-1 text-xs font-bold ${shipment.customsStatus === "ON_HOLD" ? "text-red-400" : shipment.customsStatus === "CLEARED" ? "text-lime-400" : "text-sky-300"}`}>
+                                                <p className={`mt-1 text-xs font-bold ${shipment.customsStatus === "ON_HOLD" ? "text-red-400" : shipment.customsStatus === "CLEARED" ? "text-second" : "text-sky-300"}`}>
                                                     {(shipment.customsStatus || "NOT_REQUIRED").replaceAll("_", " ")}
                                                 </p>
                                             </div>

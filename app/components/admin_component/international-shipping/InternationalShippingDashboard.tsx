@@ -76,7 +76,7 @@ const INTERNATIONAL = [
 ];
 
 const inputClass =
-  "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-lime-400 light:bg-white light:text-zinc-900 light:border-zinc-300";
+  "w-full border border-zinc-700 bg-black px-3 py-2 text-xs text-white outline-none focus:border-second light:bg-white light:text-zinc-900 light:border-zinc-300";
 const labelClass =
   "mb-1 block text-[10px] font-bold uppercase tracking-wider text-zinc-400";
 
@@ -226,11 +226,11 @@ export default function InternationalShippingDashboard() {
     <section className="mx-auto max-w-[1500px] space-y-5 text-white light:text-zinc-900">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800 pb-5 light:border-zinc-200">
         <div className="flex items-start gap-3">
-          <div className="border border-lime-400/40 bg-lime-400/10 p-3 text-lime-300">
+          <div className="border border-second/40 bg-second/10 p-3 text-second">
             <Globe2 size={22} />
           </div>
           <div>
-            <p className="text-[10px] font-bold tracking-[0.24em] text-lime-300">
+            <p className="text-[10px] font-bold tracking-[0.24em] text-second">
               GLOBAL LOGISTICS / 01
             </p>
             <h1 className="mt-1 text-2xl font-black uppercase tracking-tight">
@@ -244,7 +244,7 @@ export default function InternationalShippingDashboard() {
         </div>
         <button
           onClick={() => void load()}
-          className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-lime-400"
+          className="inline-flex items-center gap-2 border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-second"
         >
           <RefreshCw size={14} /> Refresh
         </button>
@@ -253,7 +253,7 @@ export default function InternationalShippingDashboard() {
       {notice && (
         <div
           role="status"
-          className={`border px-3 py-2 text-xs ${notice.ok ? "border-lime-400/40 text-lime-300" : "border-red-400/40 text-red-300"}`}
+          className={`border px-3 py-2 text-xs ${notice.ok ? "border-second/40 text-second" : "border-red-400/40 text-red-300"}`}
         >
           {notice.text}
         </div>
@@ -352,10 +352,10 @@ export default function InternationalShippingDashboard() {
                       [row.id]: !(current[row.id] ?? true),
                     }))
                   }
-                  className="flex w-full cursor-pointer flex-wrap items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3 text-left hover:bg-zinc-900/40 light:border-zinc-200"
+                  className="flex w-full cursor-pointer flex-wrap items-start justify-between gap-3 border-b border-zinc-800 px-4 py-3 text-left hover:bg-zinc-900/40 light:hover:bg-zinc-50 light:border-zinc-200"
                 >
                   <div>
-                    <p className="text-xs font-black text-lime-300">
+                    <p className="text-xs font-black text-second">
                       {row.order.orderCode}
                     </p>
                     <p className="mt-1 text-[10px] text-zinc-500">
@@ -379,7 +379,7 @@ export default function InternationalShippingDashboard() {
                       {row.status.replaceAll("_", " ")}
                     </span>
                     <span
-                      className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-lime-400/50 text-lime-300" : "border-zinc-700 text-zinc-300"}`}
+                      className={`border px-2 py-1 text-[9px] font-bold ${edit.customsStatus === "ON_HOLD" ? "border-red-400/50 text-red-300" : edit.customsStatus === "CLEARED" ? "border-second/50 text-second" : "border-zinc-700 text-zinc-300"}`}
                     >
                       {edit.customsStatus.replaceAll("_", " ")}
                     </span>
@@ -534,7 +534,7 @@ export default function InternationalShippingDashboard() {
                         <button
                           disabled={saving === row.id}
                           onClick={() => void save(row)}
-                          className="inline-flex items-center gap-2 bg-lime-300 px-4 py-2 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"
+                          className="inline-flex items-center gap-2 bg-second px-4 py-2 text-xs font-black uppercase tracking-wider text-black disabled:opacity-50"
                         >
                           <Save size={14} />
                           {saving === row.id

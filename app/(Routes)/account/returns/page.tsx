@@ -192,7 +192,7 @@ export default function AccountReturnsPage() {
         </p>
       )}
       {message && (
-        <p className="border border-lime-500/40 bg-lime-500/10 p-3 text-sm text-lime-300">
+        <p className="border border-lime-500/40 bg-lime-500/10 p-3 text-sm text-second">
           {message}
         </p>
       )}
@@ -227,8 +227,8 @@ export default function AccountReturnsPage() {
                     {order.orderCode} · delivered{" "}
                     {order.shipment?.deliveredAt
                       ? new Date(
-                          order.shipment.deliveredAt,
-                        ).toLocaleDateString()
+                        order.shipment.deliveredAt,
+                      ).toLocaleDateString()
                       : ""}
                   </option>
                 ))}
@@ -414,7 +414,7 @@ export default function AccountReturnsPage() {
                             <span className="block text-[11px] text-zinc-500">
                               {returnRow.events.length
                                 ? returnRow.events[returnRow.events.length - 1]
-                                    .title
+                                  .title
                                 : "No activity"}{" "}
                               · {returnRow.events.length} events
                             </span>

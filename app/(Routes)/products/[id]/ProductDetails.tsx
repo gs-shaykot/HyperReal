@@ -200,7 +200,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                 type="button"
                                 onClick={scrollToReviews}
                                 aria-label={`Rated ${averageRating.toFixed(1)} out of 5 from ${totalReviews} reviews. Jump to reviews.`}
-                                className="inline-flex min-h-8 items-center gap-2 border border-zinc-800 bg-[#101010] px-2.5 py-1 font-mono transition-colors hover:border-[#c8ff00] focus-visible:outline focus-visible:outline-[#c8ff00] cursor-pointer"
+                                className="inline-flex min-h-8 items-center gap-2 border border-zinc-800 bg-[#101010] px-2.5 py-1 font-mono transition-colors hover:border-second focus-visible:outline focus-visible:outline-second cursor-pointer"
                             >
                                 <span className="inline-flex items-center gap-0.5">
                                     {[1, 2, 3, 4, 5].map((star) => (
@@ -210,12 +210,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                             strokeWidth={1.5}
                                             fill={
                                                 star <= Math.round(averageRating)
-                                                    ? "#c8ff00"
+                                                    ? "#8fb300"
                                                     : "transparent"
                                             }
                                             color={
                                                 star <= Math.round(averageRating)
-                                                    ? "#c8ff00"
+                                                    ? "#8fb300"
                                                     : "#555555"
                                             }
                                         />
@@ -224,11 +224,10 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                                 <span className="text-[11px] text-zinc-400">
                                     {totalReviews > 0
-                                        ? `${averageRating.toFixed(1)} · ${totalReviews} ${
-                                              totalReviews === 1
-                                                  ? "REVIEW"
-                                                  : "REVIEWS"
-                                          }`
+                                        ? `${averageRating.toFixed(1)} · ${totalReviews} ${totalReviews === 1
+                                            ? "REVIEW"
+                                            : "REVIEWS"
+                                        }`
                                         : "NO REVIEWS"}
                                 </span>
                             </button>
@@ -294,25 +293,23 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                                 setSelectedColor(color.name);
                                                 setSelectedSize(null);
                                             }}
-                                            className={`w-8 h-8 rounded-full border ${
-                                                selectedColor === color.name
+                                            className={`w-8 h-8 rounded-full border ${selectedColor === color.name
                                                     ? "border-second"
                                                     : "border-gray-600"
-                                            } ${
-                                                !color.hex &&
-                                                color.name.toLowerCase() ===
+                                                } ${!color.hex &&
+                                                    color.name.toLowerCase() ===
                                                     "neon breach"
                                                     ? "bg-second"
                                                     : !color.hex
-                                                      ? "bg-[#1d2122]"
-                                                      : ""
-                                            }`}
+                                                        ? "bg-[#1d2122]"
+                                                        : ""
+                                                }`}
                                             style={
                                                 color.hex
                                                     ? {
-                                                          backgroundColor:
-                                                              color.hex,
-                                                      }
+                                                        backgroundColor:
+                                                            color.hex,
+                                                    }
                                                     : undefined
                                             }
                                             title={color.name}
@@ -321,13 +318,12 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
                                         {selectedColor === color.name && (
                                             <Check
-                                                className={`${
-                                                    !color.hex &&
-                                                    color.name.toLowerCase() ===
+                                                className={`${!color.hex &&
+                                                        color.name.toLowerCase() ===
                                                         "neon breach"
                                                         ? "text-black"
                                                         : "text-white"
-                                                } absolute font-bold pointer-events-none`}
+                                                    } absolute font-bold pointer-events-none`}
                                                 size={18}
                                                 strokeWidth={3}
                                             />
@@ -351,11 +347,10 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         onClick={() =>
                                             setSelectedSize(variant.size)
                                         }
-                                        className={`border border-zinc-500 px-3 py-1.5 mr-2 ${
-                                            selectedSize === variant.size
+                                        className={`border border-zinc-500 px-3 py-1.5 mr-2 ${selectedSize === variant.size
                                                 ? "bg-second light:text-white text-black"
                                                 : "light:text-black text-white"
-                                        }`}
+                                            }`}
                                     >
                                         {variant.size || "One Size"}
                                     </button>
@@ -443,11 +438,10 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                         });
                                     }}
                                     whileTap={{ scale: 0.98 }}
-                                    className={`border py-1.5 px-3 cursor-pointer transition hover:scale-105 ${
-                                        isWishlisted
+                                    className={`border py-1.5 px-3 cursor-pointer transition hover:scale-105 ${isWishlisted
                                             ? "bg-second/30 border-second text-second"
                                             : "border-zinc-600"
-                                    }`}
+                                        }`}
                                 >
                                     <HeartPlus />
                                 </motion.button>

@@ -37,9 +37,9 @@ type Courier = {
 };
 
 const inputClass =
-  "w-full border border-zinc-800 bg-[#080808] px-3 py-2.5 text-sm text-white outline-none focus:border-lime-400";
+  "w-full border border-zinc-800 bg-[#080808] px-3 py-2.5 text-sm text-white outline-none focus:border-second";
 const buttonClass =
-  "inline-flex items-center justify-center gap-2 bg-lime-400 px-4 py-2.5 text-xs font-black text-black transition hover:bg-lime-300 disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 bg-second px-4 py-2.5 text-xs font-black text-black transition hover:bg-second disabled:opacity-50";
 
 export default function CourierManagement() {
   const [couriers, setCouriers] = useState<Courier[]>([]);
@@ -131,15 +131,15 @@ export default function CourierManagement() {
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] px-4 py-6 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+    <main className="theme-aware-route min-h-screen bg-main text-white light:bg-white">
+      <div className="">
         <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-zinc-800 pb-5">
           <div>
-            <p className="mb-2 text-[10px] font-black tracking-[0.25em] text-lime-400">
+            <p className="mb-2 text-[10px] font-black tracking-[0.25em] text-second">
               HYPERREAL / LOGISTICS
             </p>
             <h1 className="text-2xl font-black sm:text-3xl">
-              Courier <span className="text-lime-400">Management</span>
+              Courier <span className="text-second">Management</span>
             </h1>
             <p className="mt-2 text-sm text-zinc-500">
               Register courier accounts and assign existing delivery zones.
@@ -158,7 +158,7 @@ export default function CourierManagement() {
 
         {(error || notice) && (
           <div
-            className={`mb-5 border px-4 py-3 text-sm ${error ? "border-red-900 text-red-300" : "border-lime-900 text-lime-300"}`}
+            className={`mb-5 border px-4 py-3 text-sm ${error ? "border-red-900 text-red-300" : "border-lime-900 text-second"}`}
           >
             {error || notice}
           </div>
@@ -170,7 +170,7 @@ export default function CourierManagement() {
             className="space-y-3 border border-zinc-800 bg-[#0d0d0d] p-4"
           >
             <h2 className="flex items-center gap-2 text-xs font-black tracking-widest">
-              <UserRound size={15} className="text-lime-400" />
+              <UserRound size={15} className="text-second" />
               REGISTER COURIER
             </h2>
             <p className="text-xs leading-5 text-zinc-500">
@@ -232,7 +232,7 @@ export default function CourierManagement() {
         <section className="mb-6 border border-zinc-800 bg-[#0d0d0d]">
           <div className="flex items-center justify-between border-b border-zinc-800 p-4">
             <h2 className="flex items-center gap-2 text-xs font-black tracking-widest">
-              <Truck size={15} className="text-lime-400" />
+              <Truck size={15} className="text-second" />
               COURIER DIRECTORY
             </h2>
             <span className="text-xs text-zinc-500">
@@ -260,11 +260,11 @@ export default function CourierManagement() {
                       <span className="font-bold">
                         {courier.user.name || courier.user.email}
                       </span>
-                      <span className="border border-zinc-700 px-2 py-0.5 text-[9px] text-lime-300">
+                      <span className="border border-zinc-700 px-2 py-0.5 text-[9px] text-second">
                         {courier.courierCode}
                       </span>
                       <span
-                        className={`border px-2 py-0.5 text-[9px] ${courier.isActive && !courier.user.isBlocked ? "border-lime-900 text-lime-300" : "border-red-900 text-red-300"}`}
+                        className={`border px-2 py-0.5 text-[9px] ${courier.isActive && !courier.user.isBlocked ? "border-lime-900 text-second" : "border-red-900 text-red-300"}`}
                       >
                         {courier.isActive && !courier.user.isBlocked
                           ? "ACTIVE"
@@ -314,7 +314,7 @@ export default function CourierManagement() {
                         isActive: !courier.isActive,
                       })
                     }
-                    className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-lime-400 disabled:opacity-40"
+                    className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-second disabled:opacity-40"
                   >
                     {courier.isActive
                       ? "Deactivate courier"
@@ -329,7 +329,7 @@ export default function CourierManagement() {
         <section className="border border-zinc-800 bg-[#0d0d0d]">
           <div className="border-b border-zinc-800 p-4">
             <h2 className="flex items-center gap-2 text-xs font-black tracking-widest">
-              <MapPin size={15} className="text-lime-400" />
+              <MapPin size={15} className="text-second" />
               DELIVERY ZONES
             </h2>
           </div>
@@ -352,7 +352,7 @@ export default function CourierManagement() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span
-                      className={`text-[10px] font-bold ${zone.isActive ? "text-lime-300" : "text-zinc-500"}`}
+                      className={`text-[10px] font-bold ${zone.isActive ? "text-second" : "text-zinc-500"}`}
                     >
                       {zone.isActive ? "ACTIVE" : "INACTIVE"}
                     </span>
@@ -365,7 +365,7 @@ export default function CourierManagement() {
                           isActive: !zone.isActive,
                         })
                       }
-                      className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-lime-400"
+                      className="border border-zinc-700 px-3 py-2 text-xs font-bold hover:border-second"
                     >
                       {zone.isActive ? "Deactivate" : "Activate"}
                     </button>

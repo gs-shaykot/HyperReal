@@ -34,7 +34,7 @@ function toLocalISOString(value: string) {
 }
 
 const inputClass =
-    "h-[38px] w-full min-w-0 border border-[#292929] bg-transparent px-3 font-mono text-xs text-white outline-none focus:border-[#c8ff00]";
+    "h-[38px] w-full min-w-0 border border-[#292929] bg-transparent px-3 font-mono text-xs text-white outline-none focus:border-second";
 
 const labelClass =
     "mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-zinc-400";
@@ -115,7 +115,7 @@ export default function UpcomingRelease() {
                 <button
                     type="button"
                     onClick={() => refetch()}
-                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-xs text-white hover:border-[#c8ff00]"
+                    className="mt-3 border border-zinc-700 px-4 py-2 font-mono text-xs text-white hover:border-second"
                 >
                     Retry
                 </button>
@@ -136,7 +136,7 @@ export default function UpcomingRelease() {
                     disabled={saveMutation.isPending}
                     title="Reset changes"
                     aria-label="Reset release changes"
-                    className="text-zinc-500 transition hover:text-[#c8ff00] disabled:opacity-50"
+                    className="text-zinc-500 transition hover:text-second disabled:opacity-50"
                 >
                     <RotateCcw size={14} />
                 </button>
@@ -160,16 +160,14 @@ export default function UpcomingRelease() {
                             isEnabled: !settings.isEnabled,
                         })
                     }
-                    className={`relative h-4.5 w-8 border rounded-full! border-[#c8ff00] transition ${
-                        settings.isEnabled
-                            ? "bg-[#c8ff00]"
+                    className={`relative h-4.5 w-8 border rounded-full! border-second transition ${settings.isEnabled
+                            ? "bg-second"
                             : "bg-transparent"
-                    }`}
+                        }`}
                 >
                     <span
-                        className={`absolute top-0.5 h-3 w-3 rounded-full! bg-black transition-all ${
-                            settings.isEnabled ? "left-3.75" : "left-0.5"
-                        }`}
+                        className={`absolute top-0.5 h-3 w-3 rounded-full! bg-black transition-all ${settings.isEnabled ? "left-3.75" : "left-0.5"
+                            }`}
                     />
                 </button>
             </div>
@@ -233,7 +231,7 @@ export default function UpcomingRelease() {
                     onChange={(event) =>
                         updateSettings({ description: event.target.value })
                     }
-                    className="h-16.5 w-full min-h-16.5 resize-y border border-[#292929] bg-transparent px-3 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-[#c8ff00]"
+                    className="h-16.5 w-full min-h-16.5 resize-y border border-[#292929] bg-transparent px-3 py-3 font-mono text-xs leading-5 text-white outline-none focus:border-second"
                 />
             </div>
 
@@ -273,7 +271,7 @@ export default function UpcomingRelease() {
                 type="button"
                 onClick={saveChanges}
                 disabled={saveMutation.isPending}
-                className="mt-4 flex h-10 w-full items-center justify-center gap-2 bg-[#c8ff00] font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-4 flex h-10 w-full items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold uppercase tracking-wider text-black transition hover:bg-[#b4e900] disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <Save size={13} />
                 {saveMutation.isPending ? "Saving..." : "Save Release"}

@@ -20,7 +20,7 @@ function roleClass(role: Role) {
         case "MANAGER":
             return "border-blue-700/60 bg-blue-500/10 text-blue-400";
         default:
-            return "border-zinc-700 bg-zinc-800/70 text-zinc-400";
+            return "light:border-zinc-800 border-zinc-700 light:bg-zinc-50 bg-zinc-800/70 text-zinc-400";
     }
 }
 
@@ -120,7 +120,7 @@ export const UsersTable = ({
                                     <span
                                         className={`inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${user.isBlocked
                                             ? "border-red-700/60 bg-red-500/10 text-red-400"
-                                            : "border-lime-700/60 bg-lime-500/10 text-lime-400"
+                                            : "border-lime-700/60 bg-lime-500/10 text-second"
                                             }`}
                                     >
                                         {user.isBlocked ? "BLOCKED" : "ACTIVE"}

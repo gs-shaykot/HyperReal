@@ -93,8 +93,8 @@ export const UserDetailsSidebar = ({
                             </p>
                             <span
                                 className={`mt-3 inline-flex border px-2 py-1 text-[9px] font-bold uppercase ${user.isBlocked
-                                        ? "border-red-700/60 bg-red-500/10 text-red-400"
-                                        : "border-lime-700/60 bg-lime-500/10 text-lime-400"
+                                    ? "border-red-700/60 bg-red-500/10 text-red-400"
+                                    : "border-lime-700/60 bg-lime-500/10 text-second"
                                     }`}
                             >
                                 {user.isBlocked ? "Blocked" : "Active"}
@@ -185,8 +185,8 @@ export const UserDetailsSidebar = ({
                                 })
                             }
                             className={`mt-4 flex h-10 w-full items-center justify-center gap-2 border font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer ${user.isBlocked
-                                    ? "border-lime-700/60 text-lime-400 hover:bg-lime-500/10"
-                                    : "border-red-700/60 text-red-400 hover:bg-red-500/10"
+                                ? "border-lime-700/60 text-second hover:bg-lime-500/10"
+                                : "border-red-700/60 text-red-400 hover:bg-red-500/10"
                                 }`}
                         >
                             <Shield className="size-3.5" />
@@ -203,8 +203,8 @@ export const UserDetailsSidebar = ({
                                 })
                             }
                             className={`mt-3 flex h-10 w-full items-center justify-center gap-2 border font-mono text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50 cursor-pointer ${user.isCODDisabled
-                                    ? "border-lime-700/60 text-lime-400 hover:bg-lime-500/10"
-                                    : "border-amber-700/60 text-amber-400 hover:bg-amber-500/10"
+                                ? "border-lime-700/60 text-second hover:bg-lime-500/10"
+                                : "border-amber-700/60 text-amber-400 hover:bg-amber-500/10"
                                 }`}
                         >
                             <HandCoins className="size-3.5" />
