@@ -14,7 +14,8 @@ export async function GET() {
   const [orders, users, fulfillment, international, notifications] = await Promise.all([
     prisma.notification.count({ where: { userId, type: "ADMIN_NEW_ORDER", readAt: null } }),
     prisma.notification.count({ where: { userId, type: "ADMIN_NEW_USER", readAt: null } }),
-    prisma.notification.count({ where: { userId, type: "ADMIN_NEW_FULFILLMENT", readAt: null } }),\n    prisma.notification.count({ where: { userId, type: "ADMIN_NEW_INTERNATIONAL_SHIPMENT", readAt: null } }),
+    prisma.notification.count({ where: { userId, type: "ADMIN_NEW_FULFILLMENT", readAt: null } }),
+    prisma.notification.count({ where: { userId, type: "ADMIN_NEW_INTERNATIONAL_SHIPMENT", readAt: null } }),
     prisma.notification.findMany({ where: { userId, type: { in: ["ADMIN_NEW_ORDER", "ADMIN_NEW_USER", "ADMIN_NEW_FULFILLMENT", "ADMIN_NEW_INTERNATIONAL_SHIPMENT"] } }, orderBy: { createdAt: "desc" }, take: 20, select: { id: true, type: true, title: true, message: true, href: true, readAt: true, createdAt: true } }),
   ]);
   return NextResponse.json({ success: true, data: { counts: { orders, users, fulfillment, international, total: orders + users + fulfillment + international }, notifications } });
