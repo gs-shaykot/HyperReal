@@ -9,6 +9,7 @@ import { cartItemsSelect } from "@/lib/prisma/cartItemsSelect";
 import { calculateOrder } from "@/lib/service/orderService";
 import { completePayment, releaseOrderStock } from "@/lib/service/paymentService";
 import { stripe } from "@/lib/stripe";
+import { notifyAdmins } from "@/lib/notifications/notifyAdmins";
 import axios from "axios";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -671,6 +672,18 @@ export async function POST(req: Request) {
 
             return createdOrder;
         });
+
+        try {
+            await notifyAdmins({
+                type: "ADMIN_NEW_ORDER",
+                title: "New order received",
+                message: "Order " + order.orderCode + " was placed.",
+                href: "/admin/orders",
+                metadata: { orderId: order.id, orderCode: order.orderCode },
+            });
+        } catch (notificationError) {
+            console.error("[admin-notification:new-order]", notificationError);
+        }
  
 
         switch (paymentMethod) {
