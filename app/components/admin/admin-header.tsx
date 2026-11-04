@@ -1,5 +1,6 @@
 "use client"
 import { usePathname } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
 import { Bell, ChevronDown, Moon, Sun } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar"
@@ -33,6 +34,19 @@ export function AdminHeader() {
   const { theme, setTheme } = useTheme();
   const pathname = usePathname()
   const { data: session } = useSession();
+  type AdminNotice = { id: string; type: string; title: string; message: string; href: string | null; readAt: string | null; createdAt: string }
+  const [noticeOpen, setNoticeOpen] = useState(false)
+  const [notices, setNotices] = useState<AdminNotice[]>([])
+  const [unreadTotal, setUnreadTotal] = useState(0)
+  const loadNotices = useCallback(async () => {
+    const response = await fetch("/api/admin/notifications", { cache: "no-store" }).catch(() => null)
+    if (!response?.ok) return
+    const result = await response.json()
+    if (result.success) { setNotices(result.data.notifications ?? []); setUnreadTotal(result.data.counts.total ?? 0) }
+  }, [])
+  useEffect(() => { void loadNotices(); const timer = window.setInterval(loadNotices, 30000); return () => window.clearInterval(timer) }, [loadNotices])
+  const markNoticeRead = async (id: string) => { await fetch("/api/admin/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ notificationId: id }) }); await loadNotices() }
+  const markAllRead = async () => { await fetch("/api/admin/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ markAll: true }) }); await loadNotices() }
 
   const pageTitle =
     pageTitles[pathname] ??
@@ -88,17 +102,24 @@ export function AdminHeader() {
           </label>
         </button>
 
-        {/* Notification */}
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative flex size-9 items-center justify-center light:text-zinc-600 text-white transition-colors light:hover:text-zinc-800 cursor-pointer"
-        >
-          <Bell className="size-4" />
-
-          <span className="absolute right-2 top-2 size-1 rounded-full bg-lime-500" />
-        </button>
-
+        {/* Admin notifications dropdown */}
+        <div className="relative">
+          <button type="button" aria-label="Notifications" aria-expanded={noticeOpen} onClick={() => { setNoticeOpen(value => !value); void loadNotices() }} className="relative flex size-9 items-center justify-center light:text-zinc-600 text-white transition-colors hover:text-second cursor-pointer">
+            <Bell className="size-4" />
+            {unreadTotal > 0 && <span className="absolute -right-0.5 -top-0.5 min-w-4 rounded-full bg-red-500 px-1 text-center text-[9px] font-bold leading-4 text-white">{unreadTotal > 99 ? "99+" : unreadTotal}</span>}
+          </button>
+          {noticeOpen && <div className="absolute right-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-1rem)] border border-zinc-200 bg-white text-zinc-900 shadow-xl dark:border-zinc-700 dark:bg-zinc-950 dark:text-white">
+            <div className="flex items-center justify-between border-b border-zinc-200 px-3 py-2 dark:border-zinc-800"><span className="text-xs font-bold">Notifications</span><button onClick={() => void markAllRead()} className="text-[10px] text-second hover:underline">Mark all read</button></div>
+            <div className="max-h-80 overflow-y-auto">
+              {notices.length === 0 ? <p className="p-5 text-center text-xs text-zinc-500">You're all caught up.</p> : notices.map(notice => <div key={notice.id} className={"border-b border-zinc-100 dark:border-zinc-800 " + (notice.readAt ? "opacity-60" : "bg-lime-50/60 dark:bg-lime-950/20") + "}>
+                <Link href={notice.href ?? "/admin"} onClick={() => { setNoticeOpen(false); if (!notice.readAt) void markNoticeRead(notice.id) }} className="block px-3 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-900">
+                  <div className="flex items-start gap-2"><span className={"mt-1 size-1.5 shrink-0 rounded-full " + (notice.readAt ? "bg-zinc-300" : "bg-lime-500")} /><div><p className="text-xs font-semibold">{notice.title}</p><p className="mt-0.5 text-[11px] text-zinc-500">{notice.message}</p><p className="mt-1 text-[9px] text-zinc-400">{new Date(notice.createdAt).toLocaleString()}</p></div></div>
+                </Link>
+              </div>)}
+            </div>
+            <div className="border-t border-zinc-200 p-2 text-center dark:border-zinc-800"><button onClick={() => setNoticeOpen(false)} className="text-[10px] text-zinc-500 hover:text-second">Close</button></div>
+          </div>}
+        </div>
         <div className="mx-3 h-5 w-px bg-border" />
 
         {/* Admin account */}
