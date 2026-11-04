@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { notifyAdmins } from "@/lib/notifications/notifyAdmins";
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -78,7 +79,7 @@ export const authOptions: AuthOptions = {
                     return false;
                 }
                 if (!isUserExis) {
-                    await prisma.user.create({
+                    const createdUser = await prisma.user.create({
                         data: {
                             email: user.email?.toLowerCase() as string,
                             name: user.name as string,
@@ -88,8 +89,20 @@ export const authOptions: AuthOptions = {
                             isVerified: true,
                             isNewUser: true,
                             authProvider: "GOOGLE",
-                        }
-                    })
+                        },
+                        select: { id: true, name: true, email: true },
+                    });
+                    try {
+                        await notifyAdmins({
+                            type: "ADMIN_NEW_USER",
+                            title: "New user registered",
+                            message: createdUser.name + " (" + createdUser.email + ") registered via Google.",
+                            href: "/admin/users",
+                            metadata: { userId: createdUser.id },
+                        });
+                    } catch (notificationError) {
+                        console.error("[admin-notification:new-user]", notificationError);
+                    }
                 }
             }
 
