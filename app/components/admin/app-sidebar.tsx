@@ -1,4 +1,5 @@
 "use client"
+import { useCallback, useEffect, useState } from "react"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -99,6 +100,20 @@ const navigationItems = [
 
 export function AppSidebar() {
     const pathname = usePathname()
+    const [counts, setCounts] = useState({ orders: 0, fulfillment: 0, users: 0 })
+    const refreshCounts = useCallback(async () => {
+        const response = await fetch("/api/admin/notifications", { cache: "no-store" }).catch(() => null)
+        if (!response?.ok) return
+        const result = await response.json()
+        if (result.success && result.data?.counts) setCounts(result.data.counts)
+    }, [])
+    useEffect(() => { void refreshCounts(); const timer = window.setInterval(refreshCounts, 30000); return () => window.clearInterval(timer) }, [refreshCounts])
+    const markRead = async (href: string) => {
+        const category = href === "/admin/orders" ? "orders" : href === "/admin/fulfillment" ? "fulfillment" : href === "/admin/users" ? "users" : null
+        if (!category) return
+        setCounts(current => ({ ...current, [category]: 0 }))
+        await fetch("/api/admin/notifications", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ category }) })
+    }
     const { state } = useSidebar()
 
     return (
@@ -150,12 +165,14 @@ export function AppSidebar() {
                         return (
                             <SidebarMenuItem key={item.href}>
                                 <SidebarMenuButton
+                                    onClick={() => void markRead(item.href)}
                                     render={<Link href={item.href} />}
                                     isActive={isActive}
                                     tooltip={item.title}
                                     className=" h-9 rounded-none text-[11px] font-semibold tracking-[0.12em] transition-none   hover:bg-second hover:text-zinc-900">
                                     <Icon className="size-3.75" />
                                     <span>{item.title}</span>
+                                    {(item.href === "/admin/orders" && counts.orders > 0 || item.href === "/admin/fulfillment" && counts.fulfillment > 0 || item.href === "/admin/users" && counts.users > 0) && <span className="ml-auto rounded-sm bg-red-500 px-1 text-[9px] font-bold text-white">{item.href === "/admin/orders" ? counts.orders : item.href === "/admin/fulfillment" ? counts.fulfillment : counts.users}</span>}
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         )
