@@ -1,4 +1,6 @@
 export default function Loading() {
+    const sidebarWidths = [72, 84, 66, 78, 60, 88, 74];
+
     return (
         <main className="light:bg-white bg-main/80">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
@@ -14,11 +16,11 @@ export default function Loading() {
                             <div className="h-5 w-28 light:bg-zinc-200 bg-zinc-700 animate-pulse rounded" />
                         </div>
                         <div className="flex flex-col gap-3 mt-4">
-                            {Array.from({ length: 7 }).map((_, i) => (
+                            {sidebarWidths.map((width, i) => (
                                 <div
                                     key={i}
                                     className="h-4 light:bg-zinc-300 bg-zinc-800 animate-pulse rounded"
-                                    style={{ width: `${60 + Math.random() * 30}%` }}
+                                    style={{ width: `${width}%` }}
                                 />
                             ))}
                         </div>

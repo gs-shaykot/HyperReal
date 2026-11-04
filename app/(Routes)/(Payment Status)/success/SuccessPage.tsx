@@ -14,7 +14,54 @@ import {
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
+type SuccessOrder = {
+  status: string;
+  orderCode: string;
+  createdAt: Date;
+  orderHistory: {
+    fullName: string;
+    street: string;
+    city: string;
+    house: string;
+    zipCode: string;
+    country: string;
+    phone: string;
+  } | null;
+  orderItems: Array<{
+    quantity: number;
+    priceAtPurchase: number;
+    variant: {
+      size: string;
+      product: {
+        name: string;
+      };
+    };
+  }>;
+  payments: Array<{
+    method: string;
+    transactionId: string | null;
+    totalProductPriceInUSD: number;
+    discount: number;
+    paidAmountInBDT: number;
+    shippingCost: number;
+    country: string;
+    shippingMethod: string;
+  }>;
+};
+
+type SuccessUser = {
+  id: string;
+  name: string | null;
+  email: string | null;
+} | null;
+
+export const SuccessPage = ({
+  order,
+  user,
+}: {
+  order: SuccessOrder;
+  user: SuccessUser;
+}) => {
   useEffect(() => {
     // Only clear the key when the server supplied an order that has actually
     // advanced to processing; visiting this URL manually must not reset it.
@@ -45,10 +92,13 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   const [orderTrackingUrl, setOrderTrackingUrl] = useState("");
 
   useEffect(() => {
-    if (typeof window === "undefined" || !order?.orderCode) return;
-    const url = new URL("/account/orders", window.location.origin);
-    url.searchParams.set("order", order.orderCode);
-    setOrderTrackingUrl(url.toString());
+    const timer = window.setTimeout(() => {
+      const url = new URL("/account/orders", window.location.origin);
+      url.searchParams.set("order", order.orderCode);
+      setOrderTrackingUrl(url.toString());
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [order?.orderCode]);
 
   const handlePrint = async () => {
@@ -148,7 +198,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
           </h1>
 
           <p className="mt-4 text-[10px] uppercase tracking-[5px] text-zinc-400 light:text-zinc-600">
-            Authorized // {order.payments[0]?.method} // {order.payments[0]?.transactionId || "TXN-PREVIEW-MPDWWHHQ"}
+            Authorized {"//"} {order.payments[0]?.method} {"//"} {order.payments[0]?.transactionId || "TXN-PREVIEW-MPDWWHHQ"}
           </p>
         </div>
 
@@ -167,7 +217,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
               </h2>
 
               <p className="mt-1 text-[10px] uppercase tracking-[3px] text-zinc-500 light:text-zinc-800">
-                // Techwear Division
+                {"//"} Techwear Division
               </p>
             </div>
 
@@ -228,7 +278,10 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
 
               <p className="text-zinc-400 light:text-zinc-600">{user?.email}</p>
 
-              <p className="text-zinc-400 light:text-zinc-600">{order?.address}</p>
+              <p className="text-zinc-400 light:text-zinc-600">
+                {order.orderHistory?.street}, {order.orderHistory?.city},{" "}
+                {order.orderHistory?.country}
+              </p>
             </div>
           </div>
 
@@ -239,7 +292,7 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
             </p>
 
             {
-              order.orderItems.map((item: any, index: number) => (
+              order.orderItems.map((item, index) => (
                 <div key={index} className={`flex items-start justify-between gap-6 text-sm ${index === order.orderItems.length - 1 ? "mb-0" : "mb-3"}`}>
                   <div>
                     <h4 className="font-medium uppercase tracking-wide light:text-zinc-700">
@@ -350,10 +403,13 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
             Print Slip
           </button>
 
-          <button className="cursor-pointer h-14 bg-second text-black hover:bg-second transition-all uppercase tracking-wide text-sm light:text-zinc-900 font-black flex items-center justify-center gap-3">
+          <Link
+            href="/account/orders"
+            className="cursor-pointer h-14 bg-second text-black hover:bg-second transition-all uppercase tracking-wide text-sm light:text-zinc-900 font-black flex items-center justify-center gap-3"
+          >
             View Orders
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {/* Continue Shopping */}

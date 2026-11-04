@@ -4,7 +4,7 @@ import { couponType } from '@/app/types/couponType';
 import { deleteCartItemApi, fetchCartApi, updateCartItemApi } from '@/lib/order_helpers/cartAPIs'
 import { getBestCoupon, getDiscount, getNextBestCoupon } from '@/lib/order_helpers/Discount_Calculation_funcs';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
+import { ChevronRight, Lock, Package, ShieldCheck, Tags, Trash2, Undo2, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
@@ -28,7 +28,7 @@ const hudson = localFont({
 })
 
 export const CartSections = ({ coupons }: CouponProps) => {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
 
   const { resolvedTheme } = useTheme();
   const router = useRouter();
@@ -118,7 +118,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
   const isNewUser = session?.user?.isNewUser ?? false;
 
   const subtotal = useMemo(() => {
-    return cart.reduce((acc: number, item: any) => {
+    return cart.reduce((acc: number, item: CartItemWithProductType) => {
       const price = item.variant?.product?.price || 0;
       return acc + item.quantity * price;
     }, 0);
@@ -445,7 +445,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
                   <div className='min-w-0 flex-1'>
                     <h2 className='text-sm sm:text-base text-second font-bold'>BEST OFFER FOR YOU</h2>
-                    <p className='text-[10px] sm:text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
+                    <p className='text-[10px] sm:text-xs light:text-zinc-600'>Apply <span className='font-medium'>&quot;{bestCoupon?.code.toUpperCase()}&quot;</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
                   </div>
 
                   <button className='btn shrink-0 px-2 text-xs sm:text-sm border-second bg-transparent hover:bg-second hover:text-zinc-900 light:hover:text-white text-second' onClick={handleLoadBestCoupon}>

@@ -46,18 +46,15 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
 
     const stripe = useStripe();
     const elements = useElements();
-    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     const [cardHolderName, setCardHolderName] = useState("");
 
 
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [checkoutKey, setCheckoutKey] = useState("");
 
     // Checkout keys are scoped to the authenticated user and the exact
     // checkout payload. The legacy global key caused unrelated Stripe/SSLC
     // attempts to collide when a user changed payment method or address.
     useEffect(() => {
-        setCheckoutKey("");
     }, [session?.user?.id]);
 
     const [selectedCountry, setSelectedCountry] = useState({
@@ -83,7 +80,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         estimatedDelivery: selectedCountry.value === 'bdt' ? "3-5" : "10-15",
     });
 
-    const { data: rates = {}, isLoading: isRatesLoading } = useQuery({
+    const { data: rates = {} } = useQuery({
         queryKey: ["exchangeRates"],
         queryFn: async () => {
             const res = await fetch("https://open.er-api.com/v6/latest/USD");
@@ -93,7 +90,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
         staleTime: 1000 * 60 * 60,
     });
 
-    const { data: cart = [], isPending: isCartPending } = useQuery({
+    const { data: cart = [] } = useQuery({
         queryKey: ["cartItems"],
         queryFn: fetchCartApi,
         enabled: status === 'authenticated',
@@ -174,7 +171,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                 setSelectedPaymentMethod('STRIPE')
             }
         }
-    }, [selectedCountry.value])
+    }, [selectedCountry.value, selectedPaymentMethod])
 
     useEffect(() => {
         if (
@@ -211,7 +208,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             const formData = new FormData(e.currentTarget);
 
             const fullName = formData.get("fullName") as string;
-            const emailInput = formData.get("email") as string;
             const street = formData.get("street") as string;
             const house = formData.get("house") as string;
             const city = formData.get("city") as string;
@@ -292,7 +288,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     fingerprint: attemptFingerprint,
                 })
             );
-            setCheckoutKey(activeCheckoutKey);
 
             // A released attempt is safe to replace. Retry exactly once with a
             // fresh key so the customer does not need to submit the form twice.
@@ -304,8 +299,11 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     });
                     data = res.data;
                     break;
-                } catch (error: any) {
-                    const errorCode = error.response?.data?.code;
+                } catch (error) {
+                    const errorData = axios.isAxiosError(error)
+                        ? error.response?.data as { code?: string; message?: string } | undefined
+                        : undefined;
+                    const errorCode = errorData?.code;
                     if (errorCode === "CHECKOUT_ATTEMPT_RELEASED" && attempt === 0) {
                         activeCheckoutKey = window.crypto.randomUUID();
                         window.localStorage.setItem(
@@ -315,11 +313,10 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                 fingerprint: attemptFingerprint,
                             })
                         );
-                        setCheckoutKey(activeCheckoutKey);
                         continue;
                     }
 
-                    const message = error.response?.data?.message || "Failed to create order";
+                    const message = errorData?.message || "Failed to create order";
                     toast.error(message);
                     setIsSubmitting(false);
                     return;
@@ -351,16 +348,18 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                         fingerprint: attemptFingerprint,
                     })
                 );
-                setCheckoutKey(activeCheckoutKey);
 
                 try {
                     const freshResponse = await axios.post("/api/order", paymentData, {
                         headers: { "Idempotency-Key": activeCheckoutKey },
                     });
                     data = freshResponse.data;
-                } catch (error: any) {
+                } catch (error) {
+                    const errorData = axios.isAxiosError(error)
+                        ? error.response?.data as { message?: string } | undefined
+                        : undefined;
                     toast.error(
-                        error.response?.data?.message ||
+                        errorData?.message ||
                         "Your previous order is complete. Please verify your cart and try checkout again."
                     );
                     setIsSubmitting(false);
@@ -403,7 +402,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     setIsSubmitting(false);
                     return;
                 }
-                setIsProcessingPayment(true);
 
                 try {
                     const result = await stripe.confirmCardPayment(data.clientSecret, {
@@ -442,7 +440,6 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                     // A declined/failed card leaves the order reservation and
                     // PaymentIntent reusable. Re-enable checkout so the customer
                     // can submit another card attempt without refreshing.
-                    setIsProcessingPayment(false);
                     setIsSubmitting(false);
                 }
             }
@@ -464,8 +461,11 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
             }
 
         }
-        catch (error: any) {
-            toast.error(error.response?.data?.message || "Payment processing failed. Please try again.");
+        catch (error) {
+            const errorData = axios.isAxiosError(error)
+                ? error.response?.data as { message?: string } | undefined
+                : undefined;
+            toast.error(errorData?.message || "Payment processing failed. Please try again.");
             setIsSubmitting(false);
         }
     }
@@ -504,7 +504,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                             {/* Saved Addresses */}
                             <div>
                                 <h3 className="mb-2 text-sm text-zinc-500 light:text-zinc-700">
-                                    // Use Saved Address
+                                    {"//"} Use Saved Address
                                 </h3>
 
                                 {/* No saved addresses */}
@@ -581,7 +581,7 @@ export const CheckoutContent = ({ couponCode, addressesCount }: { couponCode: st
                                                             {address.isDefault && (
                                                                 <span className="text-xs text-second">
                                                                     {/* PRIMARY */}
-                                                                    // PRIMARY
+                                                                    {"//"} PRIMARY
                                                                 </span>
                                                             )}
                                                         </div>

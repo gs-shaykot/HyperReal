@@ -54,11 +54,15 @@ export const Category = ({ categories, categoryId }: CategoryProps) => {
     });
 
     useEffect(() => {
-        setInputState({
-            searchInput: search,
-            minPriceInput: minPrice,
-            maxPriceInput: maxPrice,
-        });
+        const timeout = setTimeout(() => {
+            setInputState({
+                searchInput: search,
+                minPriceInput: minPrice,
+                maxPriceInput: maxPrice,
+            });
+        }, 0);
+
+        return () => clearTimeout(timeout);
     }, [search, minPrice, maxPrice]);
 
     useEffect(() => {

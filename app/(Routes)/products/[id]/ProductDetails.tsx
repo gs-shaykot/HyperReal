@@ -12,6 +12,7 @@ import { useWishlist } from "@/app/Hooks/useWishlist";
 import { useQuery } from "@tanstack/react-query";
 import { Getwishlist } from "@/lib/account_helpers/wishlistAPI";
 import axios from "axios";
+import { wishlistWithProduct } from "@/app/types/Product";
 
 type ReviewSummary = {
     averageRating: number;
@@ -47,7 +48,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
 
     const isWishlisted = useMemo(() => {
         return wishlistItems?.some(
-            (item: any) => item?.product?.id === product.id
+            (item: wishlistWithProduct) => item.product?.id === product.id
         );
     }, [wishlistItems, product.id]);
 
@@ -183,7 +184,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                         <h1 className="text-xl text-second font-bold uppercase tracking-wide">
                             {product.category.name}{" "}
                             <span className="text-sm">
-                                // {product.category.slug}
+                                {"//"} {product.category.slug}
                             </span>
                         </h1>
 
@@ -256,7 +257,7 @@ export const ProductDetails = ({ product }: ProductDetailsProps) => {
                                             </p>
                                         </div>
                                         <p className="text-zinc-500 text-sm mt-1">
-                                            // This unit is depleted. Restock
+                                            {"//"} This unit is depleted. Restock
                                             unscheduled — join the transmission
                                             list to get notified.
                                         </p>
