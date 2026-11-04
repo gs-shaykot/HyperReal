@@ -685,6 +685,21 @@ export async function POST(req: Request) {
             console.error("[admin-notification:new-order]", notificationError);
         }
  
+        try {
+            const destination = await prisma.orderHistory.findUnique({ where: { orderId: order.id }, select: { country: true } });
+            if (destination?.country && destination.country.trim().toLowerCase() !== "bangladesh") {
+                await notifyAdmins({
+                    type: "ADMIN_NEW_INTERNATIONAL_SHIPMENT",
+                    title: "New international shipment",
+                    message: "Order " + order.orderCode + " has an international destination (" + destination.country + ").",
+                    href: "/admin/international-shipping",
+                    metadata: { orderId: order.id, orderCode: order.orderCode, country: destination.country },
+                });
+            }
+        } catch (notificationError) {
+            console.error("[admin-notification:international-shipment]", notificationError);
+        }
+ 
 
         switch (paymentMethod) {
             case "SSLC": {
