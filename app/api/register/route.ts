@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import { notifyAdmins } from '@/lib/notifications/notifyAdmins';
 import { otpVerifyLimiter } from '@/lib/upstash';
 import argon2 from 'argon2';
 import { NextResponse } from "next/server";
@@ -45,6 +46,18 @@ export async function POST(req: Request) {
                 isVerified: true
             }
         });
+
+        try {
+            await notifyAdmins({
+                type: "ADMIN_NEW_USER",
+                title: "New user registered",
+                message: newUser.name + " (" + newUser.email + ") registered.",
+                href: "/admin/users",
+                metadata: { userId: newUser.id, email: newUser.email },
+            });
+        } catch (notificationError) {
+            console.error("[admin-notification:new-user]", notificationError);
+        }
 
         return NextResponse.json({ success: true, message: 'User registered successfully.' }, { status: 201 });
 
