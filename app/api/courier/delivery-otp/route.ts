@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         if (claimed.count !== 1) {
             return NextResponse.json({ success: false, message: "A code was just requested. Please wait 60 seconds before trying again." }, { status: 429 });
         }
-
+        console.log('otp: ',otp)
         try {
             await sender.sendMail({
                 from: `"HyperReal Delivery" <${emailUser}>`,

@@ -279,7 +279,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 <div className="min-w-0 flex-1 px-0 sm:px-6">
                   <Link
                     href={`/products/${item.variant?.product?.id}`}
-                    className="text-xs sm:text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900 break-words">
+                    className="text-xs sm:text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900 wrap-break-word">
                     {item.variant?.product?.name}
                   </Link>
 
@@ -529,7 +529,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             <div className='border-r border-zinc-500 light:border-second border-dashed min-w-0 flex flex-col items-center justify-center gap-1 py-1 px-1 text-center'>
               <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
               <h3 className='text-[10px] sm:text-sm text-zinc-400 text-center leading-tight'>SECURE CHECKOUT</h3>
-              <p className='text-[9px] sm:text-xs text-zinc-400 text-center leading-tight break-words'>Your data is protected</p>
+              <p className='text-[9px] sm:text-xs text-zinc-400 text-center leading-tight wrap-break-word'>Your data is protected</p>
             </div>
 
             <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
