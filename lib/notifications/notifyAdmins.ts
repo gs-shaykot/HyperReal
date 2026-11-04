@@ -5,7 +5,7 @@ import prisma from "@/lib/prisma";
  * Notifications are persisted per admin so each admin has independent read state.
  */
 export async function notifyAdmins(input: {
-  type: "ADMIN_NEW_USER" | "ADMIN_NEW_ORDER" | "ADMIN_NEW_FULFILLMENT";
+  type: "ADMIN_NEW_USER" | "ADMIN_NEW_ORDER" | "ADMIN_NEW_FULFILLMENT" | "ADMIN_NEW_INTERNATIONAL_SHIPMENT";
   title: string;
   message: string;
   href: string;
