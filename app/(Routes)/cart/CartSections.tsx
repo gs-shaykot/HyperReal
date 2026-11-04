@@ -228,9 +228,9 @@ export const CartSections = ({ coupons }: CouponProps) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 text-white pb-20 ">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 text-white pb-20 ">
       {/* HEADER */}
-      <h2 className={`${hudson.className} text-5xl font-bold italic py-6 tracking-wide light:text-zinc-900`}>
+      <h2 className={`${hudson.className} text-4xl sm:text-5xl font-bold italic py-6 tracking-wide light:text-zinc-900`}>
         CARGO <span className="text-second">HOLD</span>
       </h2>
 
@@ -252,7 +252,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
             return (
               <div
                 key={item.id ?? item.variantId}
-                className="relative z-20 flex items-start gap-3 justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-3 sm:p-4 overflow-hidden"
+                className="relative z-20 flex items-start gap-2 sm:gap-3 justify-between light:bg-white light:shadow-lg bg-[#1a1a1a] light:border-zinc-200 border border-zinc-800 p-2 sm:p-4 overflow-hidden"
               >
                 {/* CORNER */}
                 <span className="absolute top-0 left-0 w-16 h-16 pointer-events-none">
@@ -262,7 +262,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </span>
 
                 {/* IMAGE */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 relative bg-black overflow-hidden border border-zinc-900">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 shrink-0 relative bg-black overflow-hidden border border-zinc-900">
                   <span className='absolute top-1 left-1 w-3 h-3 z-10 border-l border-t border-second'></span>
                   <span className='absolute top-1 right-1 w-3 h-3 z-10 border-r border-t border-second'></span>
                   <span className='absolute bottom-1 left-1 w-3 h-3 z-10 border-l border-b border-second'></span>
@@ -276,10 +276,10 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
 
                 {/* DETAILS */}
-                <div className="flex-1 px-6">
+                <div className="min-w-0 flex-1 px-0 sm:px-6">
                   <Link
                     href={`/products/${item.variant?.product?.id}`}
-                    className="text-sm sm:text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900 break-words">
+                    className="text-xs sm:text-lg font-semibold uppercase hover:text-second tracking-wide text-white light:text-zinc-900 break-words">
                     {item.variant?.product?.name}
                   </Link>
 
@@ -290,18 +290,18 @@ export const CartSections = ({ coupons }: CouponProps) => {
                   {/* QUANTITY CONTROL */}
                   <div className="flex items-center mt-3">
                     <button
-                      className="px-3 py-1 border border-zinc-600 border-r-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
+                      className="px-2 sm:px-3 py-1 border border-zinc-600 border-r-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
                       onClick={() => handleUpdateQuantity(item.id!, item.quantity - 1)}
                     >
                       -
                     </button>
 
-                    <span className="border border-zinc-600 px-4 py-1 light:text-zinc-900 text-white">
+                    <span className="border border-zinc-600 px-3 sm:px-4 py-1 light:text-zinc-900 text-white">
                       {item.quantity}
                     </span>
 
                     <button
-                      className="px-3 py-1 border border-zinc-600 border-l-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
+                      className="px-2 sm:px-3 py-1 border border-zinc-600 border-l-0 text-zinc-300 light:text-zinc-500 light:hover:text-zinc-800 hover:text-white cursor-pointer"
                       onClick={() => handleUpdateQuantity(item.id!, item.quantity + 1)}
                     >
                       +
@@ -310,7 +310,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
 
                 {/* PRICE */}
-                <div className="flex flex-col gap-3 items-center justify-between text-right">
+                <div className="shrink-0 flex flex-col gap-2 sm:gap-3 items-center justify-between text-right">
                   <Trash2
                     size={22}
                     className="text-zinc-500 hover:text-red-500 transition-colors cursor-pointer"
@@ -342,9 +342,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
                 </div>
 
                 <div className='p-2 w-full h-full flex items-start gap-2 sm:gap-3'>
-                  <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color={accentColor} />
+                  <div className="shrink-0 scale-75 origin-top-left -mr-3 -mb-3 sm:scale-100 sm:mr-0 sm:mb-0">
+                    <Octagon icon={<Tags className='scale-x-[-1]' />} opacity='opacity-100' strokeWidth={1.5} color={accentColor} />
+                  </div>
                   {/* INFO */}
-                  <div className='w-full'>
+                  <div className='min-w-0 w-full'>
                     {/* HEADER */}
                     <div className='flex flex-col sm:flex-row sm:justify-between gap-2 w-full mb-3'>
                       <div>
@@ -393,11 +395,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
                                 </div>
 
                                 {/* LABELS */}
-                                <h4 className='text-xs text-zinc-400 light:text-zinc-500 mt-1'>
+                                <h4 className='text-[9px] sm:text-xs text-zinc-400 light:text-zinc-500 mt-1'>
                                   SPEND ${coupon.minSpend} & GET
                                 </h4>
 
-                                <h5 className='text-xs font-bold text-zinc-400 light:text-zinc-500'>
+                                <h5 className='text-[9px] sm:text-xs font-bold text-zinc-400 light:text-zinc-500'>
                                   UP TO {coupon.type === 'percent'
                                     ? `${coupon.value}%`
                                     : `$${coupon.value}`} OFF
@@ -437,14 +439,16 @@ export const CartSections = ({ coupons }: CouponProps) => {
               bestCoupon && !appliedCoupon && (
                 <div className="cornerStyle w-full bg-second/5 border-2 border-second/40 p-3 my-5 flex items-center justify-between gap-4">
 
-                  <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-60" strokeWidth="3" />
-
-                  <div className='flex-1'>
-                    <h2 className='text-base text-second font-bold'>BEST OFFER FOR YOU</h2>
-                    <p className='text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
+                  <div className="shrink-0 scale-75 origin-left -mr-3 sm:scale-100 sm:mr-0">
+                    <Octagon icon={<ShieldCheck size={30} strokeWidth={2.2} />} color='#84cc16 ' glow={true} opacity="opacity-60" strokeWidth="3" />
                   </div>
 
-                  <button className='btn border-second bg-transparent hover:bg-second hover:text-zinc-900 light:hover:text-white text-second' onClick={handleLoadBestCoupon}>
+                  <div className='min-w-0 flex-1'>
+                    <h2 className='text-sm sm:text-base text-second font-bold'>BEST OFFER FOR YOU</h2>
+                    <p className='text-[10px] sm:text-xs light:text-zinc-600'>Apply <span className='font-medium'>"{bestCoupon?.code.toUpperCase()}"</span> and get {bestCoupon.type === 'percent' ? `${bestCoupon.value}%` : `$${bestCoupon.value}`} off</p>
+                  </div>
+
+                  <button className='btn shrink-0 px-2 text-xs sm:text-sm border-second bg-transparent hover:bg-second hover:text-zinc-900 light:hover:text-white text-second' onClick={handleLoadBestCoupon}>
                     Apply <ChevronRight className=' ' />
                   </button>
 
@@ -494,7 +498,7 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
               <div className="flex justify-between text-zinc-400 light:text-zinc-600">
                 <span>{'//'} Shipping</span>
-                <span className='text-sm text-zinc-600 italic'>CALCULATE IN CHECKOUT</span>
+                <span className='max-w-[55%] text-right text-[10px] sm:text-sm text-zinc-600 italic'>CALCULATE IN CHECKOUT</span>
               </div>
 
 
@@ -530,14 +534,14 @@ export const CartSections = ({ coupons }: CouponProps) => {
 
             <div className='border-r border-zinc-500 light:border-second border-dashed w-full flex flex-col items-center justify-center gap-1 py-1'>
               <Octagon icon={<Package size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
-              <h3 className='text-sm text-zinc-400'>FAST SHIPPING</h3>
-              <p className='text-xs text-zinc-400'>Delivered to you</p>
+              <h3 className='text-[10px] sm:text-sm text-zinc-400 text-center leading-tight'>FAST SHIPPING</h3>
+              <p className='text-[9px] sm:text-xs text-zinc-400 text-center leading-tight'>Delivered to you</p>
             </div>
 
             <div className='min-w-0 flex flex-col items-center justify-center gap-1 py-1 px-1 text-center'>
               <Octagon icon={<Undo2 size={30} strokeWidth={2.2} />} color="#52525c" glow={false} opacity='opacity-100' strokeWidth="1" />
-              <h3 className='text-sm text-zinc-400'>EASY RETURNS</h3>
-              <p className='text-xs text-zinc-400'>30-days returns</p>
+              <h3 className='text-[10px] sm:text-sm text-zinc-400 text-center leading-tight'>EASY RETURNS</h3>
+              <p className='text-[9px] sm:text-xs text-zinc-400 text-center leading-tight'>30-days returns</p>
             </div>
           </div>
         </div>

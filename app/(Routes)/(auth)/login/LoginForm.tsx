@@ -185,7 +185,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                 type="email"
                                 name="email"
                                 placeholder="Enter your identity"
-                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 placeholder:text-zinc-700`}
+                                className={`light:bg-white light:outline-0 bg-black focus-within:outline-second input w-full border ${state.errors?.email ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 light:text-zinc-800 placeholder:text-zinc-700`}
                                 disabled={isPending}
                             />
                             {state.errors?.email && (
@@ -211,7 +211,7 @@ export default function LoginForm({ callbackUrl, sessionRevoked }: LoginProps) {
                                     type={ShowPassword ? "text" : "password"}
                                     name="password"
                                     placeholder="Enter passcode"
-                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 placeholder:text-zinc-700`}
+                                    className={`light:bg-white light:outline-0 input w-full bg-black border focus-within:outline-second ${state.errors?.password ? 'border-red-500 focus:border-red-500' : 'border-zinc-700 '} text-gray-400 light:text-zinc-800 placeholder:text-zinc-700`}
                                     disabled={isPending}
                                 />
                                 {
