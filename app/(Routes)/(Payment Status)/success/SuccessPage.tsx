@@ -12,7 +12,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   useEffect(() => {
@@ -42,6 +42,14 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
   }, [discount, shippingCost, totalInUSD]);
 
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [orderTrackingUrl, setOrderTrackingUrl] = useState("");
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !order?.orderCode) return;
+    const url = new URL("/account/orders", window.location.origin);
+    url.searchParams.set("order", order.orderCode);
+    setOrderTrackingUrl(url.toString());
+  }, [order?.orderCode]);
 
   const handlePrint = async () => {
     if (!receiptRef.current) return;
@@ -292,8 +300,8 @@ export const SuccessPage = ({ order, user }: { order: any; user: any }) => {
             <div className="flex flex-col items-center">
               <div className="border border-zinc-700 p-3 bg-black light:bg-white">
                 <img
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=hyperreal-order"
-                  alt="qr"
+                  src={orderTrackingUrl ? "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=" + encodeURIComponent(orderTrackingUrl) : ""}
+                  alt={`QR code to view order ${order.orderCode}`}
                   className="w-35 h-35"
                 />
               </div>
