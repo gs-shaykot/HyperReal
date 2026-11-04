@@ -6,6 +6,7 @@ import {
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { notifyAdmins } from "@/lib/notifications/notifyAdmins";
 import {
     dispatchShipment,
     ensureShipmentForOrder,
@@ -184,6 +185,19 @@ export async function POST(request: Request) {
                 const shipment = await ensureShipmentForOrder(
                     body.orderId.trim(),
                 );
+
+                try {
+                    const orderInfo = await prisma.order.findUnique({ where: { id: body.orderId.trim() }, select: { orderCode: true } });
+                    await notifyAdmins({
+                        type: "ADMIN_NEW_FULFILLMENT",
+                        title: "Fulfillment created",
+                        message: "Shipment created for order " + (orderInfo?.orderCode ?? body.orderId.trim()) + ".",
+                        href: "/admin/fulfillment",
+                        metadata: { shipmentId: shipment.id, orderId: body.orderId.trim() },
+                    });
+                } catch (notificationError) {
+                    console.error("[admin-notification:fulfillment]", notificationError);
+                }
 
                 // Do not expose or rotate an existing token during a normal
                 // refresh or repeat create-shipment request.
