@@ -117,8 +117,6 @@ export async function PATCH(request: Request) {
   const typeByCategory = {
     orders: "ADMIN_NEW_ORDER",
     users: "ADMIN_NEW_USER",
-    fulfillment: "ADMIN_NEW_FULFILLMENT",
-    international: "ADMIN_NEW_INTERNATIONAL_SHIPMENT",
   } as const;
 
   const where =
