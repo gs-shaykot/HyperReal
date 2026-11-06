@@ -19,7 +19,7 @@ export default function FailedPage() {
   ];
 
   return (
-    <main className="theme-aware-route min-h-[calc(100vh-4rem)] bg-[var(--route-page)] px-4 py-16 text-[var(--route-text)] transition-colors duration-300">
+    <main className="theme-aware-route min-h-[calc(100vh-4rem)] bg-(--route-page) px-4 py-16 text-(--route-text) transition-colors duration-300">
       <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
         <div className="mb-5 flex h-16 w-16 items-center justify-center border border-red-500/50 bg-red-500/5 text-red-500 shadow-[0_0_28px_rgba(239,68,68,0.10)]">
           <CircleX size={30} strokeWidth={1.8} />
@@ -28,7 +28,7 @@ export default function FailedPage() {
         <h1 className="text-center text-3xl font-black italic uppercase tracking-tight sm:text-5xl">
           Transfer <span className="text-red-500">Rejected</span>
         </h1>
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.35em] text-[var(--route-muted)] sm:text-xs">
+        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.35em] text-(--route-muted) sm:text-xs">
           Stripe // Returned error
         </p>
 
@@ -36,13 +36,13 @@ export default function FailedPage() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 shrink-0 text-red-500" size={18} />
             <div className="min-w-0">
-              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-[var(--route-muted)]">
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-(--route-muted)">
                 Error detail
               </p>
-              <p className="mt-2 text-sm leading-6 text-[var(--route-text)]">
+              <p className="mt-2 text-sm leading-6 text-(--route-text)">
                 Your payment could not be completed. The payment provider returned an error.
               </p>
-              <p className="mt-3 break-words font-mono text-[10px] leading-5 text-[var(--route-muted)]">
+              <p className="mt-3 wrap-break-word font-mono text-[10px] leading-5 text-(--route-muted)">
                 CODE: <span className="text-red-500">PAYMENT_FAILED</span>
                 <span className="ml-4">REF: CHECKOUT_ATTEMPT</span>
               </p>
@@ -50,11 +50,11 @@ export default function FailedPage() {
           </div>
         </section>
 
-        <section className="mt-4 w-full border border-[var(--route-border)] bg-[var(--route-panel)] p-5 sm:p-6">
+        <section className="mt-4 w-full border border-(--route-border) bg-(--route-panel) p-5 sm:p-6">
           <h2 className="font-mono text-xs font-bold uppercase tracking-[0.25em] text-second">
             <span className="mr-2">◉</span>Possible causes
           </h2>
-          <ul className="mt-4 space-y-2.5 font-mono text-xs leading-5 text-[var(--route-muted)]">
+          <ul className="mt-4 space-y-2.5 font-mono text-xs leading-5 text-(--route-muted)">
             {possibleCauses.map((cause) => (
               <li key={cause} className="flex gap-2">
                 <span className="text-second">›</span>
@@ -62,7 +62,7 @@ export default function FailedPage() {
               </li>
             ))}
           </ul>
-          <div className="mt-5 border-t border-dashed border-[var(--route-border)] pt-4 font-mono text-[9px] uppercase leading-5 tracking-[0.16em] text-[var(--route-muted)]">
+          <div className="mt-5 border-t border-dashed border-(--route-border) pt-4 font-mono text-[9px] uppercase leading-5 tracking-[0.16em] text-(--route-muted)">
             No payment confirmation was received. Check your bank statement before retrying.
           </div>
         </section>
@@ -77,7 +77,7 @@ export default function FailedPage() {
           </Link>
           <Link
             href="/cart"
-            className="inline-flex min-h-12 items-center justify-center gap-2 border border-[var(--route-border)] px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--route-text)] transition hover:border-second hover:text-second"
+            className="inline-flex min-h-12 items-center justify-center gap-2 border border-(--route-border) px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-(--route-text) transition hover:border-second hover:text-second"
           >
             <ArrowLeft size={14} />
             Back to cart
@@ -86,7 +86,7 @@ export default function FailedPage() {
 
         <Link
           href="/products"
-          className="mt-7 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--route-muted)] transition hover:text-second"
+          className="mt-7 inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.25em] text-(--route-muted) transition hover:text-second"
         >
           Continue shopping <ArrowRight size={12} />
         </Link>

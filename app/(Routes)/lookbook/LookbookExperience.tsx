@@ -139,7 +139,7 @@ export default function LookbookExperience({
                 }`}
               >
                 {/* Look image and interactive product hotspots */}
-                <div className="group relative aspect-[4/5] overflow-hidden bg-[#050505]">
+                <div className="group relative aspect-4/5 overflow-hidden bg-[#050505]">
                   <Image
                     src={look.image}
                     alt={look.title}
@@ -293,7 +293,7 @@ export default function LookbookExperience({
       {/* Product hotspot detail modal */}
       {selected && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
           onClick={() => setActiveHotspot(null)}
         >
           <div
