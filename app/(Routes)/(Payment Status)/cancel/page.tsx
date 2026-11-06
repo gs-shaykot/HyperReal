@@ -5,14 +5,12 @@ import { ArrowLeft, ArrowRight, Ban, Clock3 } from "lucide-react";
 
 export default function CancelPage() {
   return (
-    <main className="min-h-[calc(100vh-4rem)] bg-[#080808] px-4 py-16 text-white">
+    <main className="theme-aware-route min-h-[calc(100vh-4rem)] bg-[var(--route-page)] px-4 py-16 text-[var(--route-text)]">
       <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
-        {/* Status mark */}
         <div className="mb-4 flex h-16 w-16 items-center justify-center border border-zinc-700 bg-zinc-900/50 text-zinc-400">
           <Ban size={30} strokeWidth={1.7} />
         </div>
 
-        {/* Heading */}
         <h1 className="text-center text-3xl font-black italic uppercase tracking-tight sm:text-4xl">
           Transfer <span className="text-zinc-400">Aborted</span>
         </h1>
@@ -20,7 +18,6 @@ export default function CancelPage() {
           Stripe // Session cancelled by user
         </p>
 
-        {/* Cancellation details */}
         <section className="mt-8 w-full border border-zinc-800 bg-[#0d0d0d] p-5 sm:p-6">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
@@ -49,7 +46,6 @@ export default function CancelPage() {
           </div>
         </section>
 
-        {/* Actions */}
         <div className="mt-5 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           <Link
             href="/checkout"
@@ -59,7 +55,7 @@ export default function CancelPage() {
           </Link>
           <Link
             href="/cart"
-            className="inline-flex min-h-12 items-center justify-center gap-2 border border-zinc-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-white transition hover:border-white"
+            className="inline-flex min-h-12 items-center justify-center gap-2 border border-zinc-600 px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider text-[var(--route-text)] transition hover:border-current"
           >
             <ArrowLeft size={14} />
             Review cart
