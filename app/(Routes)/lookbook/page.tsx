@@ -7,9 +7,7 @@ export const metadata = {
 };
 
 export default async function LookbookPage() {
-  // Fetch the full image set per product: hotspot matching must not depend on
-  // whichever image happens to be first in the product gallery.
-  const products = await prisma.product.findMany({
+  const rows = await prisma.product.findMany({
     where: { isAvailable: true },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -19,5 +17,7 @@ export default async function LookbookPage() {
       productImages: { select: { imageUrl: true } },
     },
   });
+  // Convert Prisma Decimal to a plain number before crossing the Server/Client boundary.
+  const products = rows.map(product => ({ ...product, price: Number(product.price) }));
   return <LookbookExperience products={products} />;
 }
