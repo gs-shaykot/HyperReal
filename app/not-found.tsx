@@ -9,7 +9,7 @@ export default function NotFound() {
     const router = useRouter();
 
     return (
-        <main className="theme-aware-route signal-404 relative min-h-[calc(100svh-4rem)] overflow-hidden bg-[var(--route-page)] text-[var(--route-text)]">
+        <main className="theme-aware-route signal-404 relative min-h-[calc(100svh-4rem)] overflow-hidden bg-(--route-page text-(--route-text)">
             <div aria-hidden="true" className="signal-404__grid" />
             <div aria-hidden="true" className="signal-404__radial" />
             <div aria-hidden="true" className="signal-404__scanner">
@@ -21,7 +21,7 @@ export default function NotFound() {
                     // ERR_SIGNAL_LOST
                 </p>
 
-                <div className="signal-404__number relative select-none font-sans text-[clamp(8rem,25vw,18rem)] font-black leading-[0.8] tracking-[-0.09em]">
+                <div className="signal-404__number relative select-none font-sans text-[150px] font-black leading-[0.8] tracking-[-0.09em]">
                     <span>404</span>
                     <span aria-hidden="true" className="signal-404__number-ghost">404</span>
                 </div>
@@ -29,17 +29,17 @@ export default function NotFound() {
                 <div className="signal-404__terminal mt-12 w-full max-w-md text-left">
                     <div className="signal-404__corner signal-404__corner--tl" />
                     <div className="signal-404__corner signal-404__corner--br" />
-                    <p className="font-mono text-xs text-[var(--route-muted)]">
+                    <p className="font-mono text-xs text-(--route-muted)">
                         <span className="mr-2 text-second">&gt;</span>requested_path:
                     </p>
                     <p className="mt-2 break-all font-mono text-sm font-semibold">{pathname || "/unknown"}</p>
-                    <p className="mt-4 font-mono text-xs text-[var(--route-muted)]">
+                    <p className="mt-4 font-mono text-xs text-(--route-muted)">
                         <span className="mr-2 text-second">&gt;</span>status:
                         <span className="ml-2 text-red-500">NOT_FOUND</span>
                     </p>
         </div>
 
-                <p className="mt-7 max-w-sm font-mono text-sm leading-6 text-[var(--route-muted)]">
+                <p className="mt-7 max-w-sm font-mono text-sm leading-6 text-(--route-muted)">
                     This sector of the grid has gone dark. The page you&apos;re hunting doesn&apos;t exist — or was never coded.
                 </p>
 
@@ -55,7 +55,7 @@ export default function NotFound() {
                     </button>
                 </div>
 
-                <Link href="/products" className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] text-[var(--route-muted)] transition-colors hover:text-second">
+                <Link href="/products" className="mt-8 inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] text-(--route-muted) transition-colors hover:text-second">
                     BROWSE INVENTORY <ArrowRight size={12} />
                 </Link>
             </section>
