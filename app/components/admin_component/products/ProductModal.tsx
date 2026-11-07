@@ -1,5 +1,5 @@
 "use client";
-import { X, Check, Plus, Trash2, Upload } from "lucide-react";
+import { X, Check, Plus, Trash2, Upload, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { uploadImage } from "@/utils/uploadImage";
@@ -30,6 +30,7 @@ export type ProductModalData = {
     category?: Category;
     price?: number;
     description?: string;
+    searchKeywords?: string[];
     badge?: string;
 
     sizes?: string[];
@@ -86,6 +87,9 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
     const [price, setPrice] = useState("");
 
     const [description, setDescription] = useState("");
+    const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
+    const [keywordDraft, setKeywordDraft] = useState("");
+    const [isGeneratingKeywords, setIsGeneratingKeywords] = useState(false);
 
     const [badge, setBadge] = useState("");
 
@@ -119,6 +123,8 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             setDescription(
                 product.description ?? ""
             );
+            setSearchKeywords(product.searchKeywords ?? []);
+            setKeywordDraft("");
 
             setBadge(
                 product.badge ?? ""
@@ -177,6 +183,8 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         setCategory("");
         setPrice("");
         setDescription("");
+        setSearchKeywords([]);
+        setKeywordDraft("");
         setBadge("");
         setSizes([]);
         setSameStockForEverySize(true);
@@ -370,6 +378,41 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
         }
     };
 
+    const addKeyword = (value: string) => {
+        const keyword = value.trim().toLowerCase();
+        if (!keyword) return;
+        setSearchKeywords((current) => Array.from(new Set([...current, keyword])));
+        setKeywordDraft("");
+    };
+
+    const removeKeyword = (keyword: string) => {
+        setSearchKeywords((current) => current.filter((item) => item !== keyword));
+    };
+
+    const generateKeywords = async () => {
+        if (!name.trim()) {
+            toast.error("Enter a product name first");
+            return;
+        }
+        setIsGeneratingKeywords(true);
+        try {
+            const response = await fetch("/api/admin/products/search-keywords", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, description, category: categories.find((item) => item.id === category)?.name }),
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message ?? "Keyword generation failed");
+            const generated = Array.isArray(result.keywords) ? result.keywords : [];
+            setSearchKeywords((current) => Array.from(new Set([...current, ...generated.map((item: string) => item.trim().toLowerCase()).filter(Boolean)])));
+            toast.success(`${generated.length} keyword suggestions added`);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Could not generate keywords");
+        } finally {
+            setIsGeneratingKeywords(false);
+        }
+    };
+
     const hasUploadingColor = colors.some(
         (color) => color.uploading
     );
@@ -434,6 +477,7 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
             categoryName: selectedCategory.name,
             price: Number(price),
             description: description.trim(),
+            searchKeywords,
             sizes,
             stockBySize: finalStockBySize,
 
@@ -594,6 +638,32 @@ export const ProductModal = ({ open, onCloseAction, product, categories }: Produ
                             rows={4}
                             className="w-full resize-none rounded-none border border-zinc-800 bg-dark px-4 py-3 font-mono text-sm leading-relaxed text-white outline-none focus:border-zinc-500 light:border-zinc-300 light:bg-white light:text-zinc-900"
                         />
+                    </div>
+
+                    {/* Search Keywords */}
+                    <div className="mt-6">
+                        <label className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-400 light:text-zinc-700">Search Keywords</label>
+                        <div className="border border-zinc-800 p-3 light:border-zinc-300">
+                            <div className="flex flex-wrap gap-2">
+                                {searchKeywords.map((keyword) => (
+                                    <span key={keyword} className="inline-flex items-center gap-1 border border-second/40 bg-second/10 px-2 py-1 font-mono text-[10px] text-second">
+                                        {keyword}
+                                        <button type="button" aria-label={`Remove ${keyword}`} onClick={() => removeKeyword(keyword)} className="ml-1 hover:text-red-500">×</button>
+                                    </span>
+                                ))}
+                                {searchKeywords.length === 0 && <span className="font-mono text-[10px] text-zinc-500">// Add synonyms customers may search for</span>}
+                            </div>
+                            <div className="mt-3 flex gap-2">
+                                <input value={keywordDraft} onChange={(event) => setKeywordDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addKeyword(keywordDraft); } }} placeholder="e.g. pants, trousers, bottoms" className="h-10 min-w-0 flex-1 border border-zinc-800 bg-dark px-3 font-mono text-xs text-white outline-none focus:border-second light:border-zinc-300 light:bg-white light:text-zinc-900" />
+                                <button type="button" onClick={() => addKeyword(keywordDraft)} className="border border-zinc-700 px-3 font-mono text-xs hover:border-second">ADD</button>
+                            </div>
+                            <div className="mt-3 flex justify-start">
+                                <button type="button" onClick={generateKeywords} disabled={isGeneratingKeywords} className="inline-flex items-center gap-2 border border-second/50 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-wider text-second transition-colors hover:bg-second hover:text-black disabled:opacity-50">
+                                    <Sparkles className="size-3.5" /> {isGeneratingKeywords ? "GENERATING..." : "AI GENERATE KEYWORDS"}
+                                </button>
+                            </div>
+                        </div>
+                        <p className="mt-1 font-mono text-[9px] text-zinc-500">AI suggestions are editable. Press Enter or ADD to add keywords manually.</p>
                     </div>
 
                     {/* Badge */}
