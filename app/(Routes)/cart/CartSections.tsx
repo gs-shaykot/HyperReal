@@ -123,11 +123,12 @@ export const CartSections = ({ coupons }: CouponProps) => {
       return acc + item.quantity * price;
     }, 0);
   }, [cart]);
+  console.log("Needed :", coupons, subtotal, isNewUser);
 
   const bestCoupon = useMemo(() => {
     return getBestCoupon(coupons, subtotal, isNewUser);
   }, [coupons, subtotal, isNewUser]);
-
+  console.log("Best Coupon :", bestCoupon);
   const nextBestCoupon = useMemo(() => {
     return getNextBestCoupon(coupons, subtotal, isNewUser);
   }, [subtotal, coupons, isNewUser]);
