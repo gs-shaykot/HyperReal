@@ -21,6 +21,7 @@ export const Navbar = () => {
     });
 
     const isAdmin = session?.user?.role === "ADMIN";
+    const isCourier = session?.user?.role === "COURIER";
 
     const navLinks = (
         <>
@@ -31,11 +32,6 @@ export const Navbar = () => {
                 >
                     Shop All
                 </Link>
-            </li>
-            <li>
-                <a className="light:text-zinc-900 text-white font-bold hover:text-second bg-transparent!">
-                    New Arrivals
-                </a>
             </li>
             <li>
                 <Link
@@ -174,6 +170,20 @@ export const Navbar = () => {
                                                 Profile
                                             </Link>
                                         </li>
+
+                                        {
+                                            isCourier && (
+                                                <li>
+                                                    <Link
+                                                        href="/courier"
+                                                        className="text-second font-semibold"
+                                                    >
+                                                        <ShieldCheck size={15} />
+                                                        Courier Dashboard
+                                                    </Link>
+                                                </li>
+                                            )
+                                        }
 
                                         {isAdmin && (
                                             <li>
