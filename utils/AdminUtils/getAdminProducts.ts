@@ -64,6 +64,7 @@ export async function getAdminProducts({
                 name: true,
                 price: true,
                 description: true,
+                searchKeywords: true,
                 isAvailable: true,
                 totalSold: true,
                 totalLikes: true,
