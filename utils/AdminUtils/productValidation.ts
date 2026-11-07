@@ -12,6 +12,7 @@ export type ValidatedProductInput = {
     sizes: string[];
     stockBySize: Record<string, number>;
     colors: ProductColorInput[];
+    searchKeywords: string[];
 };
 
 export class ProductValidationError extends Error {
@@ -49,6 +50,7 @@ export function validateProductInput(
         sizes,
         stockBySize,
         colors,
+        searchKeywords,
     } = body as Record<string, unknown>;
 
     // --------------------------------------------------
@@ -273,6 +275,17 @@ export function validateProductInput(
         );
     }
 
+    if (searchKeywords !== undefined && !Array.isArray(searchKeywords)) {
+        throw new ProductValidationError("Search keywords must be an array");
+    }
+
+    const cleanedSearchKeywords = Array.from(new Set(
+        (searchKeywords as unknown[] | undefined ?? [])
+            .filter((keyword): keyword is string => typeof keyword === "string")
+            .map((keyword) => keyword.trim().toLowerCase())
+            .filter(Boolean)
+    ));
+
     return {
         name: name.trim(),
         category: category.trim(),
@@ -281,5 +294,6 @@ export function validateProductInput(
         sizes: cleanedSizes,
         stockBySize: cleanedStockBySize,
         colors: cleanedColors,
+        searchKeywords: cleanedSearchKeywords,
     };
 }
