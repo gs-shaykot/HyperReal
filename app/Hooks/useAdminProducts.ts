@@ -119,6 +119,8 @@ export function useCreateProduct() {
                 description:
                     newProduct.description,
 
+                searchKeywords: [],
+
                 price: newProduct.price,
 
                 isAvailable: true,
