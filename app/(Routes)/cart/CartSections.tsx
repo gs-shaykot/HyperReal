@@ -122,13 +122,11 @@ export const CartSections = ({ coupons }: CouponProps) => {
       const price = item.variant?.product?.price || 0;
       return acc + item.quantity * price;
     }, 0);
-  }, [cart]);
-  console.log("Needed :", coupons, subtotal, isNewUser);
+  }, [cart]); 
 
   const bestCoupon = useMemo(() => {
     return getBestCoupon(coupons, subtotal, isNewUser);
-  }, [coupons, subtotal, isNewUser]);
-  console.log("Best Coupon :", bestCoupon);
+  }, [coupons, subtotal, isNewUser]); 
   const nextBestCoupon = useMemo(() => {
     return getNextBestCoupon(coupons, subtotal, isNewUser);
   }, [subtotal, coupons, isNewUser]);
