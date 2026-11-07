@@ -184,6 +184,7 @@ export const ProductRow = ({ product, categories }: ProductRowProps) => {
                     category: product.category,
                     price: product.price,
                     description: product.description,
+                    searchKeywords: product.searchKeywords,
                     sizes,
                     stockBySize,
                     colors,
