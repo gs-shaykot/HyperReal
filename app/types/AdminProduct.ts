@@ -3,6 +3,7 @@ export type AdminProduct = {
 
     name: string;
     description: string;
+    searchKeywords: string[];
     price: number;
 
     isAvailable: boolean;
