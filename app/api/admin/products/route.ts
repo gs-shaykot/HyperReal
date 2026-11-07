@@ -99,7 +99,7 @@ export async function POST(req: Request) {
 
         const body = await req.json();
 
-        const { name, category, price, description, sizes, stockBySize, colors, } = validateProductInput(body);
+        const { name, category, price, description, sizes, stockBySize, colors, searchKeywords } = validateProductInput(body);
 
         // ----------------------------------------------
         // VERIFY CATEGORY
@@ -130,6 +130,7 @@ export async function POST(req: Request) {
                 data: {
                     name,
                     description,
+                    searchKeywords,
                     price,
                     categoryId: category,
 
@@ -267,6 +268,7 @@ export async function PATCH(req: Request) {
             sizes,
             stockBySize,
             colors,
+            searchKeywords,
         } = validateProductInput(body);
 
         // --------------------------------------------------
@@ -478,6 +480,7 @@ export async function PATCH(req: Request) {
                     data: {
                         name,
                         description,
+                        searchKeywords,
                         price,
                         categoryId: category,
                     },
