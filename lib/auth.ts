@@ -117,6 +117,7 @@ export const authOptions: AuthOptions = {
                     },
                     select: {
                         isBlocked: true,
+                        isNewUser: true,
                     },
                 });
 
@@ -124,6 +125,10 @@ export const authOptions: AuthOptions = {
                     token.sessionRevoked = true;
                     return token;
                 }
+
+                // Keep eligibility flags synchronized with the database on every
+                // JWT refresh; coupon UI must not rely on stale sign-in claims.
+                token.isNewUser = dbUser.isNewUser;
             }
 
             if (user?.email) {
