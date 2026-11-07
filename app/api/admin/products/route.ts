@@ -14,6 +14,7 @@ const productSelect = {
     id: true,
     name: true,
     description: true,
+    searchKeywords: true,
     price: true,
     isAvailable: true,
     totalSold: true,
