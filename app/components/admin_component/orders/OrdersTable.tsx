@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, ChevronDown } from "lucide-react";
+import { Eye, ChevronDown, LoaderCircle } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
 import type { OrderProduct } from "@/app/types/OrderProduct";
 import { useUpdateOrderStatus } from "@/app/Hooks/useAdminOrders";
@@ -10,6 +10,7 @@ import { OrderDetailsSidebar } from "./OrderDetailsSidebar";
 
 type Props = {
     orders: OrderProduct[];
+    isLoading?: boolean;
 };
 
 const statuses: OrderStatus[] = [
@@ -57,7 +58,7 @@ function statusClass(status: OrderStatus) {
     }
 }
 
-export const OrdersTable = ({ orders }: Props) => {
+export const OrdersTable = ({ orders, isLoading = false }: Props) => {
     const [selectedOrder, setSelectedOrder] =
         useState<OrderProduct | null>(null);
 
