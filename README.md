@@ -355,8 +355,7 @@ function isEligible(coupon, user, subtotal) {
 </td>
 </tr>
 </table>
-
-<details>
+ 
 <summary><b>▸ Payment processing sequence (Mermaid)</b></summary>
 
 ```mermaid
@@ -381,10 +380,7 @@ sequenceDiagram
     S->>D: Update Payment & Order
     S-->>W: Payment Status
 ```
-
-</details>
-
-<details>
+  
 <summary><b>▸ Fulfillment & shipping workflow (Mermaid)</b></summary>
 
 ```mermaid
@@ -396,10 +392,7 @@ flowchart LR
     E --> F[Shipment Tracking]
     F --> G[In Transit]
     G --> H[Delivered]
-```
-
-</details>
-
+``` 
 <img src="docs/readme/divider.svg" width="100%" alt="" />
 
 ## `06` // INTERFACE SHOWCASE
@@ -411,8 +404,7 @@ flowchart LR
 </div>
 
 <br/>
-
-<details>
+ 
 <summary><b>▸ Full storefront feature list</b></summary>
 
 <table>
@@ -461,9 +453,7 @@ flowchart LR
 </td>
 </tr>
 </table>
-
-</details>
-
+ 
 <img src="docs/readme/divider.svg" width="100%" alt="" />
 
 ## `07` // ADMIN CONTROL ROOM
