@@ -3,7 +3,7 @@ import { OrderModal } from '@/app/(Routes)/account/orders/OrderModal'
 import { orderDetailsSelect } from '@/lib/prisma/orderSelect'
 import { OrderFilters } from '@/app/(Routes)/account/orders/OrderFilters'
 import { Prisma } from '@prisma/client'
-import { CalendarDays, ClockArrowUp, Eye, Hourglass, OctagonX, Package, PackageCheck, Plus, Truck } from 'lucide-react'
+import { CalendarDays, ChevronLeft, ChevronRight, ClockArrowUp, Eye, Hourglass, OctagonX, Package, PackageCheck, Plus, Truck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
@@ -21,6 +21,8 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
     const [status, setStatus] = useState("ALL");
     const [payment, setPayment] = useState("ALL");
     const [date, setDate] = useState("");
+    const [page, setPage] = useState(1);
+    const pageSize = 5;
 
     useEffect(() => {
         const orderCode = new URLSearchParams(window.location.search).get("order");
@@ -83,6 +85,11 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
         });
     }, [orders, search, status, payment, date]);
 
+    useEffect(() => { setPage(1); }, [search, status, payment, date]);
+
+    const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
+    const paginatedOrders = filteredOrders.slice((page - 1) * pageSize, page * pageSize);
+
     const clearFilters = () => {
         setSearch("");
         setStatus("ALL");
@@ -141,7 +148,7 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                     (
                         <div>
                             {
-                                filteredOrders.map((order) => (
+                                paginatedOrders.map((order) => (
                                     <div key={order.id} className='flex flex-col md:flex-row md:justify-between items-start md:items-center p-4 border hover:border-second border-zinc-700 mb-3 transition-all duration-150'>
 
                                         <div className='flex flex-col space-y-2 md:space-y-2'>
@@ -206,6 +213,16 @@ export const AllOrder = ({ orders }: { orders: OrderType[] }) => {
                                 ))
                             }
                         </div>
+                        {filteredOrders.length > pageSize && (
+                            <div className="flex flex-wrap items-center justify-between gap-3 border border-zinc-800 px-3 py-3 text-xs light:border-zinc-200">
+                                <span className="font-mono text-[10px] text-zinc-500">PAGE {page} / {totalPages} · {filteredOrders.length} ORDERS</span>
+                                <div className="flex items-center gap-1">
+                                    <button type="button" disabled={page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="flex items-center gap-1 border border-zinc-700 px-3 py-2 font-mono text-[10px] uppercase text-zinc-400 hover:border-second disabled:opacity-30 light:border-zinc-300"><ChevronLeft className="size-3"/> Prev</button>
+                                    <span className="border border-second bg-second px-3 py-2 font-mono text-[10px] text-black">{page}</span>
+                                    <button type="button" disabled={page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="flex items-center gap-1 border border-zinc-700 px-3 py-2 font-mono text-[10px] uppercase text-zinc-400 hover:border-second disabled:opacity-30 light:border-zinc-300">Next <ChevronRight className="size-3"/></button>
+                                </div>
+                            </div>
+                        )}
                     ) :
                     (
                         <div className='p-4 border border-dashed border-zinc-700 h-52 flex justify-center items-center flex-col gap-4'>
