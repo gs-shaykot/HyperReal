@@ -376,6 +376,7 @@ export function AdminCoupons() {
                                     </div>
                                 </div>
 
+                                <button type="button" title="Edit coupon" onClick={() => { setEditingCoupon(coupon); setOpen(true); }} className="p-2 text-zinc-500 hover:text-second cursor-pointer"><Tag className="size-4" /></button>
                                 <button
                                     type="button"
                                     title="Delete coupon"
@@ -391,11 +392,31 @@ export function AdminCoupons() {
                 })}
             </div>
 
-            {/* CREATE COUPON MODAL UI — STATIC */}
+            {filteredCoupons.length > pageSize && (
+                <div className="mt-3 flex items-center justify-between border border-zinc-800 px-3 py-3 light:border-zinc-200">
+                    <span className="font-mono text-[10px] text-zinc-500">PAGE {page} / {totalPages}</span>
+                    <div className="flex gap-1">
+                        <button type="button" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} className="border border-zinc-700 px-3 py-2 font-mono text-[10px] uppercase text-zinc-400 disabled:opacity-30 light:border-zinc-300">PREV</button>
+                        <span className="border border-second bg-second px-3 py-2 font-mono text-[10px] text-black">{page}</span>
+                        <button type="button" disabled={page >= totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))} className="border border-zinc-700 px-3 py-2 font-mono text-[10px] uppercase text-zinc-400 disabled:opacity-30 light:border-zinc-300">NEXT</button>
+                    </div>
+                </div>
+            )}
             <AddCouponModal
                 open={open}
-                onCloseAction={() => setOpen(false)}
-                onCreate={(form) => createMutation.mutate(form)}
+                coupon={editingCoupon}
+                onCloseAction={() => { setOpen(false); setEditingCoupon(null); }}
+                onCreate={(form) => {
+                    if (!editingCoupon) { createMutation.mutate(form); return; }
+                    axios.patch("/api/admin/coupons?id=" + editingCoupon.id, form)
+                        .then(() => {
+                            toast.success("Coupon updated successfully");
+                            queryClient.invalidateQueries({ queryKey: ["admin-coupons"] });
+                            queryClient.invalidateQueries({ queryKey: ["coupons"] });
+                            setOpen(false); setEditingCoupon(null);
+                        })
+                        .catch((error) => toast.error(error?.response?.data?.message || "Failed to update coupon"));
+                }}
                 isPending={createMutation.isPending} />
         </div>
     );
