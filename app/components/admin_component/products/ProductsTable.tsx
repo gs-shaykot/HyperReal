@@ -1,14 +1,16 @@
 "use client";
 import { AdminProduct } from "@/app/types/AdminProduct";
 import { ProductRow } from "./ProductRow";
+import { LoaderCircle } from "lucide-react";
 import { Category } from "@/app/components/admin_component/products/ProductsToolbar";
 
 type ProductsTableProps = {
     products: AdminProduct[];
     categories: Category[];
+    isLoading?: boolean;
 };
 
-export const ProductsTable = ({ products, categories }: ProductsTableProps) => {
+export const ProductsTable = ({ products, categories, isLoading = false }: ProductsTableProps) => {
 
     return (
         <div className="overflow-x-auto border border-zinc-800 light:border-zinc-200">
@@ -36,7 +38,7 @@ export const ProductsTable = ({ products, categories }: ProductsTableProps) => {
                         </th>
 
                         <th className="px-3 py-3 text-right text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-500">
-                            Actions
+                            {isLoading ? <LoaderCircle className="ml-auto size-3 animate-spin" aria-label="Loading products" /> : "Actions"}
                         </th>
                     </tr>
                 </thead>
