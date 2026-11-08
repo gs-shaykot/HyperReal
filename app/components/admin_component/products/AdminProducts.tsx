@@ -105,14 +105,6 @@ export const AdminProducts = ({
             />
 
             <div className="relative">
-                {isFetching && (
-                    <div className="absolute right-0 top-2 z-20">
-                        <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
-                            Updating...
-                        </span>
-                    </div>
-                )}
-
                 <ProductsTable
                     categories={categories}
                     products={products}
