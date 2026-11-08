@@ -59,8 +59,7 @@ The centerpiece: every order travels the same server-authoritative route — fro
 <div align="center">
 <img src="docs/readme/pipeline.svg" width="100%" alt="Pipeline: User → Authentication → Product Discovery → Cart → Coupon → Checkout → Stripe → Order → Fulfillment → Shipment → Delivery, with a retry loop from Stripe back to Checkout" />
 </div>
-
-<details>
+ 
 <summary><b>▸ View as Mermaid flowchart</b></summary>
 
 ```mermaid
@@ -84,8 +83,6 @@ flowchart TD
     O --> P[Delivery Tracking]
     P --> Q[Delivered]
 ```
-
-</details>
 
 <img src="docs/readme/divider.svg" width="100%" alt="" />
 
