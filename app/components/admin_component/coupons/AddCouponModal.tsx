@@ -27,13 +27,17 @@ const initialForm: CouponForm = {
 
 type AddressModalProps = {
     open: boolean;
+    coupon?: { id: string; code: string; type: string; value: number; minSpend: number; maxDiscount: number | null; limit: number | null; expiryDate: string | null; newUserOnly: boolean | null } | null;
     onCloseAction: () => void;
     onCreate: (form: CouponForm) => void;
     isPending: boolean;
 };
 
-export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: AddressModalProps) => {
+export const AddCouponModal = ({ open, coupon, onCloseAction, onCreate, isPending }: AddressModalProps) => {
     const [form, setForm] = useState<CouponForm>(initialForm);
+    React.useEffect(() => {
+        if (open) setForm(coupon ? { code: coupon.code, value: String(coupon.value), minSpend: String(coupon.minSpend), limit: coupon.limit == null ? "" : String(coupon.limit), expiryDate: coupon.expiryDate ? new Date(coupon.expiryDate).toISOString().slice(0, 10) : "", type: coupon.type as CouponForm["type"], maxDiscount: coupon.maxDiscount == null ? "" : String(coupon.maxDiscount), newUserOnly: Boolean(coupon.newUserOnly) } : initialForm);
+    }, [open, coupon]);
 
     const handleSubmit = (event: React.SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -47,7 +51,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
             <div className="modal-box rounded-none bg-main mt-8 border border-zinc-800 p-5 light:border-zinc-200">
                 <div className="mb-5 flex items-center justify-between">
                     <h2 className="font-mono text-xs font-bold tracking-widest text-white light:text-zinc-900">
-                        CREATE COUPON — FORM UI
+                        {coupon ? "EDIT COUPON" : "CREATE COUPON"}
                     </h2>
 
                     <X onClick={onCloseAction} className="size-4 text-zinc-400 cursor-pointer" />
@@ -196,7 +200,7 @@ export const AddCouponModal = ({ open, onCloseAction, onCreate, isPending }: Add
                             className="inline-flex h-9 flex-1 items-center justify-center gap-2 bg-second font-mono text-[10px] font-bold tracking-widest text-black disabled:opacity-50 cursor-pointer"
                         >
                             <Check className="size-4" />
-                            {isPending ? "CREATING..." : "CREATE COUPON"}
+                            {isPending ? "SAVING..." : coupon ? "SAVE CHANGES" : "CREATE COUPON"}
                         </button>
 
                         <button
