@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" role="img" aria-labelledby="t d">
+  <title id="t">HyperReal architecture</title>
+  <desc id="d">Frontend (Next.js 16, React, Tailwind, DaisyUI) talks to the Next.js App Router backend (route handlers, server actions, Auth.js, validation, rate limiting, IP restrictions), which uses Prisma ORM over PostgreSQL. Stripe handles payments and Cloudinary handles images. Deployed on Vercel from GitHub.</desc>
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#c6ff00" stroke-opacity=".05"/>
+    </pattern>
+    <filter id="glow" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <style>
+      text{font-family:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+      .box{fill:#0b0b0b;stroke:#c6ff00;stroke-opacity:.45;stroke-width:1.5}
+      .ext{fill:#0b0b0b;stroke:#8a8a8a;stroke-opacity:.6;stroke-width:1.5}
+      .h{fill:#c6ff00;font-size:16px;font-weight:700;letter-spacing:2px}
+      .s{fill:#bdbdbd;font-size:11px;letter-spacing:1px}
+      .k{fill:#c6ff00;font-size:10px;letter-spacing:2px;opacity:.7}
+      .chip{fill:#121212;stroke:#c6ff00;stroke-opacity:.25}
+      .ct{fill:#e6e6e6;font-size:10.5px;letter-spacing:1px;text-anchor:middle}
+      .link{fill:none;stroke:#c6ff00;stroke-width:2;stroke-dasharray:5 8;animation:d 1s linear infinite}
+      .link2{fill:none;stroke:#8a8a8a;stroke-width:1.5;stroke-dasharray:4 7;animation:d 1.4s linear infinite}
+      @keyframes d{to{stroke-dashoffset:-13}}
+      .db{animation:db 3s ease-in-out infinite}
+      @keyframes db{0%,100%{stroke-opacity:.4}50%{stroke-opacity:1}}
+      @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+    </style>
+  </defs>
+
+  <rect width="1200" height="640" rx="16" fill="#050505"/>
+  <rect width="1200" height="640" rx="16" fill="url(#grid)"/>
+
+  <!-- deployment frame -->
+  <rect x="20" y="20" width="1160" height="600" rx="14" fill="none" stroke="#c6ff00" stroke-opacity=".3" stroke-dasharray="2 6"/>
+  <text x="44" y="50" fill="#c6ff00" font-size="13" letter-spacing="3">// VERCEL · PRODUCTION DEPLOYMENT</text>
+  <text x="1156" y="50" fill="#8a8a8a" font-size="12" letter-spacing="2" text-anchor="end">GITHUB main → BUILD → PRISMA GENERATE → DEPLOY</text>
+
+  <!-- connectors -->
+  <path class="link" d="M600 150V200"/>
+  <path class="link" d="M600 380V420"/>
+  <path class="link" d="M600 476V510"/>
+  <path class="link2" d="M840 290H930"/>
+  <path class="link2" d="M360 290H270"/>
+
+  <!-- packets -->
+  <g filter="url(#glow)" fill="#c6ff00">
+    <circle r="4"><animateMotion dur="2.4s" repeatCount="indefinite" path="M600 150V200"/></circle>
+    <circle r="4"><animateMotion dur="2.4s" begin="1.2s" repeatCount="indefinite" path="M600 380V420"/></circle>
+    <circle r="4"><animateMotion dur="2.4s" begin=".6s" repeatCount="indefinite" path="M600 476V510"/></circle>
+    <circle r="3" fill="#bdbdbd"><animateMotion dur="3s" repeatCount="indefinite" path="M840 290H930"/></circle>
+    <circle r="3" fill="#bdbdbd"><animateMotion dur="3s" begin="1.5s" repeatCount="indefinite" path="M360 290H270"/></circle>
+  </g>
+
+  <!-- frontend -->
+  <rect class="box" x="360" y="76" width="480" height="74" rx="10"/>
+  <text x="380" y="98" class="k">LAYER 01 · CLIENT</text>
+  <text x="380" y="122" class="h">FRONTEND</text>
+  <text x="380" y="140" class="s">Next.js 16 · React · TypeScript · Tailwind · DaisyUI</text>
+
+  <!-- backend -->
+  <rect class="box" x="360" y="200" width="480" height="180" rx="10"/>
+  <text x="380" y="222" class="k">LAYER 02 · SERVER</text>
+  <text x="380" y="246" class="h">NEXT.JS APP ROUTER</text>
+  <g transform="translate(380 262)">
+    <rect class="chip" width="140" height="30" rx="5"/><text class="ct" x="70" y="19">ROUTE HANDLERS</text>
+    <rect class="chip" x="150" width="140" height="30" rx="5"/><text class="ct" x="220" y="19">SERVER ACTIONS</text>
+    <rect class="chip" x="300" width="140" height="30" rx="5"/><text class="ct" x="370" y="19">AUTH.JS · RBAC</text>
+    <rect class="chip" y="40" width="140" height="30" rx="5"/><text class="ct" x="70" y="59">INPUT VALIDATION</text>
+    <rect class="chip" x="150" y="40" width="140" height="30" rx="5"/><text class="ct" x="220" y="59">RATE LIMITING</text>
+    <rect class="chip" x="300" y="40" width="140" height="30" rx="5"/><text class="ct" x="370" y="59">IP RESTRICTIONS</text>
+    <rect class="chip" y="80" width="215" height="30" rx="5"/><text class="ct" x="107" y="99">COUPON + PRICING ENGINE</text>
+    <rect class="chip" x="225" y="80" width="215" height="30" rx="5"/><text class="ct" x="332" y="99">IDEMPOTENCY GUARD</text>
+  </g>
+
+  <!-- prisma -->
+  <rect class="box" x="420" y="420" width="360" height="56" rx="10"/>
+  <text x="440" y="442" class="k">LAYER 03 · DATA ACCESS</text>
+  <text x="440" y="464" class="h">PRISMA ORM</text>
+  <text x="760" y="464" class="s" text-anchor="end">TRANSACTIONS</text>
+
+  <!-- postgres cylinder -->
+  <g transform="translate(470 510)">
+    <path class="box db" d="M0 14C0 -4 260 -4 260 14V76C260 94 0 94 0 76Z"/>
+    <ellipse cx="130" cy="14" rx="130" ry="14" fill="#0b0b0b" stroke="#c6ff00" stroke-opacity=".6" stroke-width="1.5"/>
+    <text x="130" y="56" class="h" text-anchor="middle">POSTGRESQL</text>
+    <text x="130" y="74" class="s" text-anchor="middle">RELATIONAL · FK CONSTRAINTS</text>
+  </g>
+
+  <!-- stripe -->
+  <rect class="ext" x="930" y="250" width="220" height="80" rx="10"/>
+  <text x="950" y="272" class="k" style="fill:#bdbdbd">EXTERNAL · PAYMENTS</text>
+  <text x="950" y="296" class="h" style="fill:#f2f2f2">STRIPE</text>
+  <text x="950" y="316" class="s">Payment Intent / Checkout</text>
+
+  <!-- cloudinary -->
+  <rect class="ext" x="50" y="250" width="220" height="80" rx="10"/>
+  <text x="70" y="272" class="k" style="fill:#bdbdbd">EXTERNAL · MEDIA</text>
+  <text x="70" y="296" class="h" style="fill:#f2f2f2">CLOUDINARY</text>
+  <text x="70" y="316" class="s">Product imagery</text>
+
+  <!-- side notes -->
+  <text x="1150" y="400" class="s" text-anchor="end">Server-side verification</text>
+  <text x="1150" y="416" class="s" text-anchor="end">of payment results</text>
+  <text x="50" y="400" class="s">Env-based configuration</text>
+  <text x="50" y="416" class="s">per environment</text>
+</svg>

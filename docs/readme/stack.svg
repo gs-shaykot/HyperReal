@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" width="1200" height="120" role="img" aria-labelledby="t">
+  <title id="t">Technology stack: Next.js 16, React, TypeScript, Tailwind CSS, DaisyUI, Prisma, PostgreSQL, Auth.js, Argon2, Stripe, Cloudinary, Vercel</title>
+  <defs>
+    <style>
+      text{font-family:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:14px;letter-spacing:1.5px;fill:#c6ff00;text-anchor:middle}
+      .chip rect{fill:#0a0a0a;stroke:#c6ff00;stroke-opacity:.35}
+      .chip{animation:pulse 6s ease-in-out infinite}
+      @keyframes pulse{0%,100%{opacity:.55}8%{opacity:1}20%{opacity:.55}}
+      .chip rect{animation:edge 6s ease-in-out infinite;animation-delay:inherit}
+      @keyframes edge{0%,100%{stroke-opacity:.3}8%{stroke-opacity:1}20%{stroke-opacity:.3}}
+      @media (prefers-reduced-motion:reduce){*{animation:none!important;opacity:1}}
+    </style>
+  </defs>
+  <rect width="1200" height="120" rx="14" fill="#050505"/>
+  <g transform="translate(20 18)">
+    <g class="chip" style="animation-delay:0s"><rect x="0" width="180" height="36" rx="6"/><text x="90" y="23">NEXT.JS 16</text></g>
+    <g class="chip" style="animation-delay:.5s"><rect x="195" width="180" height="36" rx="6"/><text x="285" y="23">REACT</text></g>
+    <g class="chip" style="animation-delay:1s"><rect x="390" width="180" height="36" rx="6"/><text x="480" y="23">TYPESCRIPT</text></g>
+    <g class="chip" style="animation-delay:1.5s"><rect x="585" width="180" height="36" rx="6"/><text x="675" y="23">TAILWIND CSS</text></g>
+    <g class="chip" style="animation-delay:2s"><rect x="780" width="180" height="36" rx="6"/><text x="870" y="23">DAISYUI</text></g>
+    <g class="chip" style="animation-delay:2.5s"><rect x="975" width="185" height="36" rx="6"/><text x="1067" y="23">PRISMA ORM</text></g>
+  </g>
+  <g transform="translate(20 66)">
+    <g class="chip" style="animation-delay:3s"><rect x="0" width="180" height="36" rx="6"/><text x="90" y="23">POSTGRESQL</text></g>
+    <g class="chip" style="animation-delay:3.5s"><rect x="195" width="180" height="36" rx="6"/><text x="285" y="23">AUTH.JS</text></g>
+    <g class="chip" style="animation-delay:4s"><rect x="390" width="180" height="36" rx="6"/><text x="480" y="23">ARGON2</text></g>
+    <g class="chip" style="animation-delay:4.5s"><rect x="585" width="180" height="36" rx="6"/><text x="675" y="23">STRIPE</text></g>
+    <g class="chip" style="animation-delay:5s"><rect x="780" width="180" height="36" rx="6"/><text x="870" y="23">CLOUDINARY</text></g>
+    <g class="chip" style="animation-delay:5.5s"><rect x="975" width="185" height="36" rx="6"/><text x="1067" y="23">VERCEL</text></g>
+  </g>
+</svg>
