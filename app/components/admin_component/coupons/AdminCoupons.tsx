@@ -2,8 +2,9 @@
 "use client";
 import { AddCouponModal } from "@/app/components/admin_component/coupons/AddCouponModal";
 import { useCreateCoupon, useDeleteCoupon } from "@/app/Hooks/useCreateCoupon";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import toast from "react-hot-toast";
 import {
     LoaderCircle,
     Plus,
@@ -56,6 +57,10 @@ export function AdminCoupons() {
     });
 
     const [open, setOpen] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null);
+    const [page, setPage] = useState(1);
+    const pageSize = 5;
+    const queryClient = useQueryClient();
 
     const { data: AllCoupons, isLoading, isError } = useQuery<Coupon[]>({
         queryKey: ["admin-coupons"],
@@ -115,6 +120,9 @@ export function AdminCoupons() {
             }
         })
 
+    const totalPages = Math.max(1, Math.ceil(filteredCoupons.length / pageSize));
+    const pageCoupons = filteredCoupons.slice((page - 1) * pageSize, page * pageSize);
+
     const activeCoupons = coupons.filter((coupon) => isActive(coupon)).length;
     const expiredCoupons = coupons.filter(coupon => isExepired(coupon)).length;
     const totalUsed = coupons.reduce((total, coupon) => total + coupon.usedCount, 0);
@@ -136,7 +144,7 @@ export function AdminCoupons() {
                     </h1>
 
                     <p className="mt-1 font-mono text-xs text-zinc-500">
-                        5 shown · 4 active coupons
+                        {filteredCoupons.length} coupons · {activeCoupons} active
                     </p>
                 </div>
 
@@ -295,7 +303,7 @@ export function AdminCoupons() {
                         </p>
                     </div>
                 )}
-                {filteredCoupons.map((coupon, index) => {
+                {pageCoupons.map((coupon) => {
                     const expired = isExepired(coupon);
                     const exhausted = HaveLimit(coupon)
                     
