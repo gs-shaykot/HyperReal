@@ -73,7 +73,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 {
                     success: false,
