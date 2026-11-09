@@ -1,7 +1,5 @@
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 const DEFAULT_MESSAGES = [
@@ -17,10 +15,8 @@ const DEFAULT_SETTINGS = {
     scrollSpeed: 45,
 };
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    return session?.user?.role === "ADMIN";
-}
+import { getAdminUser } from "@/lib/auth/getAdminUser";
+
 
 async function getOrCreateMarquee() {
     return prisma.homepageMarquee.upsert({
@@ -56,7 +52,7 @@ export async function GET() {
 // Admin-only: only administrators can modify the settings.
 export async function PUT(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
