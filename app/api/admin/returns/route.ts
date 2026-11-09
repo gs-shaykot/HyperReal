@@ -1,3 +1,4 @@
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import {
     PaymentMethod,
     PaymentStatus,
@@ -8,21 +9,11 @@ import {
     ReturnItemCondition,
     ReturnStatus,
 } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { ReturnError } from "@/lib/service/returnService";
 
-async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.sessionRevoked) return null;
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { id: true, role: true, isBlocked: true },
-    });
-    return user && user.role === "ADMIN" && !user.isBlocked ? user : null;
-}
+async function adminAccess() { return getAdminUser(); }
 
 type Body = {
     returnId?: unknown;
@@ -41,7 +32,7 @@ function responseError(error: unknown) {
 
 export async function GET(request: Request) {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const { searchParams } = new URL(request.url);
         const status = searchParams.get("status");
         const validStatus = status && Object.values(ReturnStatus).includes(status as ReturnStatus) ? status as ReturnStatus : undefined;
