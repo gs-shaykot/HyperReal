@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 import prisma from "@/lib/prisma";
 
-async function adminAccess() { return getAdminUser(); }
 
 export async function GET() {
     try {
