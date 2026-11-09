@@ -1,23 +1,15 @@
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { getAdminOrders } from "@/utils/AdminUtils/getAdminOrders";
 import { OrderStatus } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 
-    return (
-        !!session?.user?.id &&
-        session.user.role === "ADMIN"
-    );
-}
 
 export async function GET(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 {
                     success: false,
