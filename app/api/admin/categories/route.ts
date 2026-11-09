@@ -134,7 +134,7 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized" },
                 { status: 401 }
