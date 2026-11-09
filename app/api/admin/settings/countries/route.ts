@@ -1,13 +1,9 @@
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    return session?.user?.role === "ADMIN";
-}
+import { getAdminUser } from "@/lib/auth/getAdminUser";
+
 
 function validateCountry(body: Record<string, unknown>) {
     const requiredText = [
@@ -106,7 +102,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
