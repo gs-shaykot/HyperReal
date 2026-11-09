@@ -13,7 +13,6 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { ReturnError } from "@/lib/service/returnService";
 
-async function adminAccess() { return getAdminUser(); }
 
 type Body = {
     returnId?: unknown;
