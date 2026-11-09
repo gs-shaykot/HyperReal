@@ -1,13 +1,12 @@
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { RefundStatus, ReturnEventType, ReturnStatus } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import prisma from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
-  const session=await getServerSession(authOptions);
-  if(!session?.user?.id||session.sessionRevoked) return NextResponse.json({success:false,message:"Unauthorized."},{status:401});
+  const admin = await getAdminUser();
+  if (!admin) return NextResponse.json({success:false,message:"Unauthorized."},{status:401});
   const admin=await prisma.user.findUnique({where:{id:session.user.id},select:{id:true,role:true,isBlocked:true}});
   if(!admin||admin.role!=="ADMIN"||admin.isBlocked) return NextResponse.json({success:false,message:"Unauthorized."},{status:401});
   const body=await request.json().catch(()=>null) as {returnId?:unknown}|null;
