@@ -1,26 +1,13 @@
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { CouponType } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) return false;
-
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { role: true, isBlocked: true },
-    });
-
-    return user?.role === "ADMIN" && !user.isBlocked;
-}
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 
 export async function GET() {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized" },
                 { status: 401 }
