@@ -1,22 +1,13 @@
-import { getServerSession } from "next-auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import { NextResponse } from "next/server";
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.sessionRevoked) return null;
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { role: true, isBlocked: true },
-    });
-    return user && user.role === "ADMIN" && !user.isBlocked;
-}
+async function adminAccess() { return getAdminUser(); }
 
 export async function GET() {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const zones = await prisma.deliveryZone.findMany({
             orderBy: [{ country: "asc" }, { city: "asc" }, { name: "asc" }],
             select: {
