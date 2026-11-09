@@ -7,8 +7,6 @@ import { stripe } from "@/lib/stripe";
 export async function POST(request: Request) {
   const admin = await getAdminUser();
   if (!admin) return NextResponse.json({success:false,message:"Unauthorized."},{status:401});
-  const admin=await prisma.user.findUnique({where:{id:session.user.id},select:{id:true,role:true,isBlocked:true}});
-  if(!admin||admin.role!=="ADMIN"||admin.isBlocked) return NextResponse.json({success:false,message:"Unauthorized."},{status:401});
   const body=await request.json().catch(()=>null) as {returnId?:unknown}|null;
   if(!body||typeof body.returnId!=="string") return NextResponse.json({success:false,message:"Return ID is required."},{status:400});
 
