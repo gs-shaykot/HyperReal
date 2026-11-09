@@ -1,7 +1,6 @@
 
-import { authOptions } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 const DEFAULT_SETTINGS = {
@@ -14,11 +13,6 @@ const DEFAULT_SETTINGS = {
     countdownEnds: null,
     buttonLabel: "Set Reminder",
 };
-
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    return session?.user?.role === "ADMIN";
-}
 
 async function getOrCreateRelease() {
     return prisma.upcomingRelease.upsert({
@@ -50,7 +44,7 @@ export async function GET() {
 
 export async function PUT(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
