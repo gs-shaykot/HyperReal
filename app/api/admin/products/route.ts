@@ -1,7 +1,6 @@
-import { authOptions } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import prisma from "@/lib/prisma";
 import { getAdminProducts } from "@/utils/AdminUtils/getAdminProducts";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import {
     ProductValidationError,
@@ -56,14 +55,7 @@ const productSelect = {
 
 export async function GET(req: Request) {
     try {
-        const session =
-            await getServerSession(authOptions);
-
-        if (!session?.user || session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized", }, { status: 401 }
-            );
-        }
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
         const { searchParams } = new URL(req.url);
 
@@ -89,14 +81,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
     try {
-        const session =
-            await getServerSession(authOptions);
-
-        if (!session?.user || session.user.role !== "ADMIN") {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized", }, { status: 401 }
-            );
-        }
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
         const body = await req.json();
 
