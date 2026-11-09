@@ -1,24 +1,15 @@
-import { getServerSession } from "next-auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 const CUSTOMS_STATUSES = new Set(["NOT_REQUIRED", "DOCUMENTS_PENDING", "DOCUMENTS_READY", "UNDER_REVIEW", "CLEARED", "ON_HOLD"]);
 const INTERNATIONAL_STATUSES = new Set(["PREPARING", "HANDED_TO_CARRIER", "IN_TRANSIT", "CUSTOMS_CLEARANCE", "OUT_FOR_DELIVERY", "DELIVERED", "EXCEPTION", "RETURNING"]);
 
-async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.sessionRevoked) return false;
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { role: true, isBlocked: true },
-    });
-    return !!user && user.role === "ADMIN" && !user.isBlocked;
-}
+async function adminAccess() { return getAdminUser(); }
 
 export async function GET(request: Request) {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const { searchParams } = new URL(request.url);
         const country = searchParams.get("country")?.trim();
         const status = searchParams.get("status")?.trim();
