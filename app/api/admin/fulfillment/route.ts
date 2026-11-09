@@ -4,8 +4,8 @@ import {
     Prisma,
 } from "@prisma/client";
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import { notifyAdmins } from "@/lib/notifications/notifyAdmins";
 import {
     dispatchShipment,
@@ -21,13 +21,9 @@ import {
     type FulfillmentFilter,
 } from "@/utils/AdminUtils/getAdminFulfillment";
 
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-type AdminSessionUser = {
-    id: string;
-    role: string;
-};
+type AdminSessionUser = { id: string; role: "ADMIN" };
 
 type ActionBody = {
     action?: unknown;
@@ -42,20 +38,7 @@ const allowedFilters = new Set<string>([
     "DISPATCHED",
 ]);
 
-async function getAdmin(): Promise<AdminSessionUser | null> {
-    const session = await getServerSession(authOptions); 
-    if (
-        !session?.user?.id ||
-        session.user.role !== "ADMIN"
-    ) {
-        return null;
-    }
-
-    return {
-        id: session.user.id,
-        role: session.user.role,
-    };
-}
+async function getAdmin(): Promise<AdminSessionUser | null> { return getAdminUser(); }
 
 function errorResponse(error: unknown) {
     if (error instanceof TrackingError) {
