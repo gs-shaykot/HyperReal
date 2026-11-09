@@ -1,16 +1,8 @@
-import { authOptions } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function adminId() {
-  const session = await getServerSession(authOptions);
-  return session?.user?.id &&
-    session.user.role === "ADMIN" &&
-    !session.sessionRevoked
-    ? session.user.id
-    : null;
-}
+async function adminId() { return (await getAdminUser())?.id ?? null;
 
 export async function GET() {
   const userId = await adminId();
