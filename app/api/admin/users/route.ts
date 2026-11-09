@@ -1,42 +1,12 @@
 
-import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import { AdminUserSort, AdminUserStatus, getAdminUsers } from "@/utils/AdminUtils/getAdminUsers";
 import { Role } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-
-async function getAdmin() {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-        return null;
-    }
-
-    // Check the database role rather than trusting the JWT alone.
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-            id: true,
-            role: true,
-            isBlocked: true,
-        },
-    });
-
-    if (
-        !user ||
-        user.role !== "ADMIN" ||
-        user.isBlocked
-    ) {
-        return null;
-    }
-
-    return user;
-}
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 
 export async function GET(req: Request) {
     try {
-        const admin = await getAdmin();
+        const admin = await getAdminUser();
 
         if (!admin) {
             return NextResponse.json(
@@ -138,7 +108,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
-        const admin = await getAdmin();
+        const admin = await getAdminUser();
 
         if (!admin) {
             return NextResponse.json(

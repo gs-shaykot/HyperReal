@@ -35,7 +35,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const admin = await requireAdmin();
+        const admin = await getAdminUser();
         if (!admin) {
             return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }

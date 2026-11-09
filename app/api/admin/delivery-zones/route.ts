@@ -22,7 +22,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const body = await request.json().catch(() => null) as { name?: unknown; city?: unknown; country?: unknown } | null;
         const name = typeof body?.name === "string" ? body.name.trim() : "";
         const city = typeof body?.city === "string" ? body.city.trim() : "";
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const body = await request.json().catch(() => null) as { id?: unknown; isActive?: unknown; name?: unknown; city?: unknown; country?: unknown } | null;
         const id = typeof body?.id === "string" ? body.id.trim() : "";
         if (!id) return NextResponse.json({ success: false, message: "Zone ID is required." }, { status: 400 });

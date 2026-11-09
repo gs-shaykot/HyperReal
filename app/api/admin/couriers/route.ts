@@ -56,7 +56,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
     try {
-        const admin = await requireAdmin();
+        const admin = await getAdminUser();
         if (!admin) {
             return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
     try {
-        if (!(await requireAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }
 

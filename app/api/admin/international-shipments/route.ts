@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
     try {
-        if (!(await requireAdmin())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const body = await request.json().catch(() => null) as {
             shipmentId?: unknown; carrierName?: unknown; carrierTrackingNumber?: unknown;
             estimatedDeliveryAt?: unknown; customsStatus?: unknown; internationalNotes?: unknown; internationalStatus?: unknown;

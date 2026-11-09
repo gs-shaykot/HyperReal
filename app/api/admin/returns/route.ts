@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
-        const admin = await requireAdmin();
+        const admin = await getAdminUser();
         if (!admin) return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         const body = await request.json().catch(() => null) as Body | null;
         if (!body || typeof body.returnId !== "string" || typeof body.action !== "string") {
