@@ -1,24 +1,15 @@
 
 import { Prisma } from "@prisma/client";
 
-import { authOptions } from "@/lib/auth";
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import { rotateParcelToken, TrackingError } from "@/lib/service/trackingService";
 
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     try {
-        const session = await getServerSession(authOptions);
-
-        if (
-            !session?.user?.id ||
-            session.user.role !== "ADMIN"
-        ) {
-            return NextResponse.json(
-                { success: false, message: "Unauthorized." },
-                { status: 401 },
-            );
+        if (!(await getAdminUser())) {
+            return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }
 
         let body: { shipmentId?: unknown };
