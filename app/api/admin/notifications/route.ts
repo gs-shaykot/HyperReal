@@ -2,7 +2,7 @@ import { getAdminUser } from "@/lib/auth/getAdminUser";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-async function adminId() { return (await getAdminUser())?.id ?? null;
+async function adminId() { return (await getAdminUser())?.id ?? null; }
 
 export async function GET() {
   const userId = await adminId();
