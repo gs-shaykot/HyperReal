@@ -1,25 +1,17 @@
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 
 import { Prisma } from "@prisma/client";
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { hashParcelToken } from "@/lib/service/trackingService";
 
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-async function isAdmin(): Promise<boolean> {
-    const session = await getServerSession(authOptions);
-
-    return Boolean(
-        session?.user?.id &&
-        session.user.role === "ADMIN",
-    );
-}
+async function isAdmin() { return Boolean(await getAdminUser());
 
 export async function POST(request: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(Boolean(await getAdminUser()))) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized." },
                 { status: 401 },
