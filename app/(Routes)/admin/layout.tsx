@@ -1,4 +1,6 @@
 import type { CSSProperties, ReactNode } from "react"
+import { redirect } from "next/navigation"
+import { getAdminUser } from "@/lib/auth/getAdminUser"
 
 import { AppSidebar } from "@/app/components/admin/app-sidebar"
 import { AdminHeader } from "@/app/components/admin/admin-header"
@@ -12,6 +14,9 @@ export default function AdminLayout({
 }: {
   children: ReactNode
 }) {
+  const admin = await getAdminUser()
+  if (!admin) redirect("/login?callbackUrl=%2Fadmin")
+
   return (
     <SidebarProvider
       style={
