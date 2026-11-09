@@ -1,7 +1,5 @@
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,10 +23,8 @@ type RateResult = {
     rateDate: string;
 };
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    return session?.user?.role === "ADMIN";
-}
+import { getAdminUser } from "@/lib/auth/getAdminUser";
+
 
 function dateString(date: Date) {
     return date.toISOString().slice(0, 10);
@@ -109,7 +105,7 @@ async function fetchCurrencyHistory(
 
 export async function POST() {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized. Admin access is required." },
                 { status: 401 }
