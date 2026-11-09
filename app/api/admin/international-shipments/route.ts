@@ -5,7 +5,6 @@ import prisma from "@/lib/prisma";
 const CUSTOMS_STATUSES = new Set(["NOT_REQUIRED", "DOCUMENTS_PENDING", "DOCUMENTS_READY", "UNDER_REVIEW", "CLEARED", "ON_HOLD"]);
 const INTERNATIONAL_STATUSES = new Set(["PREPARING", "HANDED_TO_CARRIER", "IN_TRANSIT", "CUSTOMS_CLEARANCE", "OUT_FOR_DELIVERY", "DELIVERED", "EXCEPTION", "RETURNING"]);
 
-async function adminAccess() { return getAdminUser(); }
 
 export async function GET(request: Request) {
     try {
