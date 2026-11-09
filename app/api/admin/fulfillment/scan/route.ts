@@ -7,7 +7,6 @@ import { hashParcelToken } from "@/lib/service/trackingService";
 
 import { NextResponse } from "next/server";
 
-async function isAdmin() { return Boolean(await getAdminUser());
 
 export async function POST(request: Request) {
     try {
