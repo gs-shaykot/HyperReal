@@ -152,7 +152,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
@@ -215,7 +215,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { message: "Unauthorized" },
                 { status: 401 }
