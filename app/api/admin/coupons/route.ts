@@ -29,7 +29,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized" },
                 { status: 401 }
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
     try {
-        if (!(await isAdmin())) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+        if (!(await getAdminUser())) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         const id = new URL(req.url).searchParams.get("id");
         if (!id) return NextResponse.json({ success: false, message: "Coupon ID is required." }, { status: 400 });
         const body = await req.json();
@@ -183,7 +183,7 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
     try {
-        if (!(await isAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json(
                 { success: false, message: "Unauthorized" },
                 { status: 401 }
