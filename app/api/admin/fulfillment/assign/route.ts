@@ -1,25 +1,14 @@
+import { getAdminUser } from "@/lib/auth/getAdminUser";
 import { Role, ShipmentStatus, TrackingEventType } from "@prisma/client";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-async function requireAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.sessionRevoked) return null;
-
-    const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { id: true, role: true, isBlocked: true },
-    });
-
-    return user && user.role === Role.ADMIN && !user.isBlocked ? user : null;
-}
+async function adminAccess() { return getAdminUser(); }
 
 export async function GET() {
     try {
-        if (!(await requireAdmin())) {
+        if (!(await getAdminUser())) {
             return NextResponse.json({ success: false, message: "Unauthorized." }, { status: 401 });
         }
 
