@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 
 import { AdminUserSort, AdminUserStatus, getAdminUsers } from "@/utils/AdminUtils/getAdminUsers";
 import { Role } from "@prisma/client";
